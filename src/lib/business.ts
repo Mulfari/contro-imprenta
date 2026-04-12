@@ -98,7 +98,7 @@ export async function listOrders() {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, client_id, title, description, quantity, material, size, due_date, status, total_amount, created_at, created_by, client:clients(id, name)",
+      "id, client_id, title, description, quantity, material, size, due_date, status, total_amount, created_at, created_by",
     )
     .order("created_at", { ascending: false });
 
@@ -106,11 +106,32 @@ export async function listOrders() {
     throw error;
   }
 
-  return ((data ?? []) as Array<
-    Order & { client: Array<{ id: string; name: string }> | null }
-  >).map((order) => ({
+  const orders = (data ?? []) as Order[];
+  const clientIds = [...new Set(orders.map((order) => order.client_id).filter(Boolean))];
+
+  if (clientIds.length === 0) {
+    return orders.map((order) => ({
+      ...order,
+      client: null,
+    }));
+  }
+
+  const { data: clients, error: clientsError } = await supabase
+    .from("clients")
+    .select("id, name")
+    .in("id", clientIds);
+
+  if (clientsError) {
+    throw clientsError;
+  }
+
+  const clientsById = new Map(
+    (clients ?? []).map((client) => [client.id as string, client as { id: string; name: string }]),
+  );
+
+  return orders.map((order) => ({
     ...order,
-    client: Array.isArray(order.client) ? (order.client[0] ?? null) : order.client,
+    client: clientsById.get(order.client_id) ?? null,
   }));
 }
 
