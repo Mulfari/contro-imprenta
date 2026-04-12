@@ -16,7 +16,11 @@ import {
   type OrderStatus,
   updateOrderStatus,
 } from "@/lib/business";
-import { listSecurityAlerts } from "@/lib/security-alerts";
+import {
+  listActivePasswordRecoveryRequests,
+  type PasswordRecoveryRequest,
+} from "@/lib/password-recovery";
+import { listSecurityAlerts, type SecurityAlert } from "@/lib/security-alerts";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
 import { createUser, listUsers } from "@/lib/users";
 
@@ -319,13 +323,17 @@ export default async function DashboardPage({
   }
 
   const users = await listUsers();
-  const securityAlerts =
-    session.role === "admin" ? await listSecurityAlerts(10) : [];
+  let securityAlerts: SecurityAlert[] = [];
+  let recoveryRequests: PasswordRecoveryRequest[] = [];
   let clients: Client[] = [];
   let orders: OrderWithClient[] = [];
   let schemaMessage = "";
 
   try {
+    securityAlerts =
+      session.role === "admin" ? await listSecurityAlerts(10) : [];
+    recoveryRequests =
+      session.role === "admin" ? await listActivePasswordRecoveryRequests(10) : [];
     clients = await listClients();
     orders = await listOrders();
   } catch {
@@ -514,47 +522,96 @@ export default async function DashboardPage({
             </div>
 
             {session.role === "admin" ? (
-              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold">Alertas de administracion</h3>
-                    <p className="mt-2 text-sm text-slate-500">
-                      Notificaciones de intentos sensibles dentro del panel.
-                    </p>
+              <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+                <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold">Codigos de recuperacion</h3>
+                      <p className="mt-2 text-sm text-slate-500">
+                        Comparte estos codigos temporales con el usuario correcto. Vencen en 15 minutos.
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+                      {recoveryRequests.length} activos
+                    </span>
                   </div>
-                  <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                    {securityAlerts.length} alertas
-                  </span>
-                </div>
-                <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
-                  <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                    <thead className="bg-slate-50 text-slate-500">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Usuario</th>
-                        <th className="px-4 py-3 font-medium">Fecha</th>
-                        <th className="px-4 py-3 font-medium">Detalle</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
-                      {securityAlerts.length === 0 ? (
+                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                      <thead className="bg-slate-50 text-slate-500">
                         <tr>
-                          <td className="px-4 py-4 text-slate-500" colSpan={3}>
-                            No hay alertas registradas.
-                          </td>
+                          <th className="px-4 py-3 font-medium">Usuario</th>
+                          <th className="px-4 py-3 font-medium">Codigo</th>
+                          <th className="px-4 py-3 font-medium">Vence</th>
                         </tr>
-                      ) : (
-                        securityAlerts.map((alert) => (
-                          <tr key={alert.id}>
-                            <td className="px-4 py-3">{alert.username}</td>
-                            <td className="px-4 py-3">{formatDateTime(alert.created_at)}</td>
-                            <td className="px-4 py-3">{alert.detail}</td>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
+                        {recoveryRequests.length === 0 ? (
+                          <tr>
+                            <td className="px-4 py-4 text-slate-500" colSpan={3}>
+                              No hay codigos de recuperacion pendientes.
+                            </td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </article>
+                        ) : (
+                          recoveryRequests.map((request) => (
+                            <tr key={request.id}>
+                              <td className="px-4 py-3">
+                                <div className="font-medium">{request.display_name}</div>
+                                <div className="text-xs text-slate-400">@{request.username}</div>
+                              </td>
+                              <td className="px-4 py-3 text-base font-semibold tracking-[0.2em]">
+                                {request.recovery_code}
+                              </td>
+                              <td className="px-4 py-3">{formatDateTime(request.expires_at)}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+
+                <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold">Alertas de administracion</h3>
+                      <p className="mt-2 text-sm text-slate-500">
+                        Notificaciones de intentos sensibles dentro del panel.
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+                      {securityAlerts.length} alertas
+                    </span>
+                  </div>
+                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                      <thead className="bg-slate-50 text-slate-500">
+                        <tr>
+                          <th className="px-4 py-3 font-medium">Usuario</th>
+                          <th className="px-4 py-3 font-medium">Fecha</th>
+                          <th className="px-4 py-3 font-medium">Detalle</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
+                        {securityAlerts.length === 0 ? (
+                          <tr>
+                            <td className="px-4 py-4 text-slate-500" colSpan={3}>
+                              No hay alertas registradas.
+                            </td>
+                          </tr>
+                        ) : (
+                          securityAlerts.map((alert) => (
+                            <tr key={alert.id}>
+                              <td className="px-4 py-3">{alert.username}</td>
+                              <td className="px-4 py-3">{formatDateTime(alert.created_at)}</td>
+                              <td className="px-4 py-3">{alert.detail}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              </div>
             ) : null}
           </section>
           ) : null}

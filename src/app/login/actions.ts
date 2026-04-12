@@ -10,6 +10,7 @@ import {
   startPendingLogin,
   startSession,
 } from "@/lib/auth/session";
+import { createPasswordRecoveryRequest, resetPasswordWithRecovery } from "@/lib/password-recovery";
 import { createSecurityAlert } from "@/lib/security-alerts";
 import {
   authenticateUser,
@@ -87,6 +88,86 @@ export async function verifyIdentifierAction(formData: FormData) {
 
   revalidatePath("/login");
   redirect("/login?step=code");
+}
+
+export async function requestPasswordRecoveryAction(formData: FormData) {
+  if (!hasPanelAuthConfig()) {
+    redirect(
+      `/login?mode=recovery&message=${encodeMessage(
+        "Configura Supabase y APP_SESSION_SECRET antes de usar la recuperacion.",
+      )}`,
+    );
+  }
+
+  const identifier = getIdentifier(formData);
+
+  try {
+    const request = await createPasswordRecoveryRequest(identifier);
+
+    if (!request) {
+      redirect(
+        `/login?mode=recovery&message=${encodeMessage(
+          "Usuario o Cedula incorrecto.",
+        )}`,
+      );
+    }
+
+    await createSecurityAlert({
+      userId: request.user_id,
+      username: request.username,
+      detail: `Solicitud de recuperacion. Codigo temporal ${request.recovery_code}.`,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No se pudo solicitar la recuperacion.";
+
+    redirect(`/login?mode=recovery&message=${encodeMessage(message)}`);
+  }
+
+  redirect(
+    `/login?mode=recovery&message=${encodeMessage(
+      "Se genero un codigo para administracion. Solicitalo y luego restablece tu acceso.",
+    )}`,
+  );
+}
+
+export async function completePasswordRecoveryAction(formData: FormData) {
+  if (!hasPanelAuthConfig()) {
+    redirect(
+      `/login?mode=recovery&message=${encodeMessage(
+        "Configura Supabase y APP_SESSION_SECRET antes de usar la recuperacion.",
+      )}`,
+    );
+  }
+
+  const identifier = getIdentifier(formData);
+  const recoveryCode = String(formData.get("recoveryCode") ?? "").trim();
+  const nextPassword = String(formData.get("nextPassword") ?? "").trim();
+
+  try {
+    await resetPasswordWithRecovery({
+      identifier,
+      recoveryCode,
+      nextPassword,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No se pudo restablecer el acceso.";
+
+    redirect(`/login?mode=recovery&message=${encodeMessage(message)}`);
+  }
+
+  await clearPendingLogin();
+
+  redirect(
+    `/login?message=${encodeMessage(
+      "Codigo restablecido. Ya puedes iniciar sesion.",
+    )}`,
+  );
 }
 
 export async function verifyCodeStateAction(
