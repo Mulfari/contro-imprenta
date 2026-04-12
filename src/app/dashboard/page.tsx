@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { signOutAction } from "@/app/login/actions";
+import { FloatingToast } from "@/components/floating-toast";
 import { getCurrentSession } from "@/lib/auth/session";
 import {
   type Client,
@@ -363,6 +364,7 @@ export default async function DashboardPage({
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
+      <FloatingToast message={message || schemaMessage} />
       <div className="min-h-screen lg:pl-[290px]">
         <aside className="w-full border border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(248,250,252,0.88))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[290px] lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7">
           <div className="border-b border-slate-200 pb-5">
@@ -479,12 +481,6 @@ export default async function DashboardPage({
               </div>
             </div>
           </header>
-
-          {message || schemaMessage ? (
-            <div className="rounded-[1.5rem] border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-slate-700">
-              {message || schemaMessage}
-            </div>
-          ) : null}
 
           {activeView === "resumen" ? (
           <section className="grid gap-6">
