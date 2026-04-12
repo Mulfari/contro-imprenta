@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 
 import {
+  completePasswordRecoveryStateAction,
   resetPendingLoginAction,
+  requestPasswordRecoveryStateAction,
+  type RecoveryCodeState,
   verifyCodeStateAction,
   type VerifyCodeState,
 } from "@/app/login/actions";
@@ -21,11 +24,19 @@ const initialState: VerifyCodeState = {
   message: "",
 };
 
+const initialRecoveryState: RecoveryCodeState = {
+  status: "idle",
+  message: "",
+};
+
 export function CodeModal({
   displayName,
   username,
 }: CodeModalProps) {
   const [code, setCode] = useState("");
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [nextPassword, setNextPassword] = useState("");
+  const [mode, setMode] = useState<"login" | "recovery">("login");
   const router = useRouter();
   const submitRef = useRef<HTMLFormElement>(null);
   const lastSubmittedCodeRef = useRef("");
@@ -34,8 +45,16 @@ export function CodeModal({
     verifyCodeStateAction,
     initialState,
   );
+  const [requestRecoveryState, requestRecoveryAction, requestingRecovery] =
+    useActionState(requestPasswordRecoveryStateAction, initialRecoveryState);
+  const [completeRecoveryState, completeRecoveryAction, completingRecovery] =
+    useActionState(completePasswordRecoveryStateAction, initialRecoveryState);
 
   const visualStatus = pending ? "loading" : state.status;
+  const activeToastMessage =
+    completeRecoveryState.message ||
+    requestRecoveryState.message ||
+    state.message;
 
   useEffect(() => {
     if (code.length < 4) {
@@ -45,6 +64,7 @@ export function CodeModal({
 
   useEffect(() => {
     if (
+      mode === "login" &&
       code.length === 4 &&
       !pending &&
       state.status !== "success" &&
@@ -53,7 +73,7 @@ export function CodeModal({
       lastSubmittedCodeRef.current = code;
       submitRef.current?.requestSubmit();
     }
-  }, [code, pending, state.status]);
+  }, [code, mode, pending, state.status]);
 
   useEffect(() => {
     if (state.status === "success") {
@@ -64,6 +84,16 @@ export function CodeModal({
       return () => window.clearTimeout(timeout);
     }
   }, [router, state.status]);
+
+  useEffect(() => {
+    if (completeRecoveryState.status === "success") {
+      const timeout = window.setTimeout(() => {
+        router.push("/dashboard");
+      }, 550);
+
+      return () => window.clearTimeout(timeout);
+    }
+  }, [completeRecoveryState.status, router]);
 
   const inputClasses =
     visualStatus === "loading"
@@ -85,11 +115,13 @@ export function CodeModal({
     });
   };
 
+  const isRecoveryBusy = requestingRecovery || completingRecovery;
+
   const modal = (
     <div className="fixed inset-0 z-[60]">
       <div className="absolute inset-0 bg-white/18 backdrop-blur-xl" />
       <div className="relative flex min-h-screen items-center justify-center p-4">
-        <FloatingToast message={state.message} />
+        <FloatingToast message={activeToastMessage} />
         <div className="w-full max-w-sm rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.18)]">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -116,41 +148,145 @@ export function CodeModal({
             </button>
           </div>
 
-          <form ref={submitRef} action={formAction} className="mt-6 space-y-4" noValidate>
-            <div>
-              <label
-                htmlFor="modal-password"
-                className="mb-2 block text-sm font-medium text-slate-700"
+          {mode === "login" ? (
+            <>
+              <form ref={submitRef} action={formAction} className="mt-6 space-y-4" noValidate>
+                <div>
+                  <label
+                    htmlFor="modal-password"
+                    className="mb-2 block text-sm font-medium text-slate-700"
+                  >
+                    Codigo de 4 digitos
+                  </label>
+                  <input
+                    id="modal-password"
+                    name="password"
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={code}
+                    onChange={(event) =>
+                      setCode(event.target.value.replace(/\D/g, "").slice(0, 4))
+                    }
+                    className={`w-full rounded-2xl px-4 py-3.5 text-center text-2xl tracking-[0.45em] text-slate-950 outline-none transition ${inputClasses}`}
+                    autoFocus
+                    disabled={visualStatus === "loading" || visualStatus === "success"}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  disabled={visualStatus === "loading" || visualStatus === "success"}
+                >
+                  {visualStatus === "loading"
+                    ? "Validando..."
+                    : visualStatus === "success"
+                      ? "Correcto"
+                      : "Entrar al panel"}
+                </button>
+              </form>
+
+              <button
+                type="button"
+                onClick={() => setMode("recovery")}
+                className="mt-4 w-full text-sm font-medium text-slate-500 transition hover:text-slate-900"
               >
-                Codigo de 4 digitos
-              </label>
-              <input
-                id="modal-password"
-                name="password"
-                type="password"
-                inputMode="numeric"
-                maxLength={4}
-                value={code}
-                onChange={(event) =>
-                  setCode(event.target.value.replace(/\D/g, "").slice(0, 4))
-                }
-                className={`w-full rounded-2xl px-4 py-3.5 text-center text-2xl tracking-[0.45em] text-slate-950 outline-none transition ${inputClasses}`}
-                autoFocus
-                disabled={visualStatus === "loading" || visualStatus === "success"}
-              />
+                Recuperar codigo de acceso
+              </button>
+            </>
+          ) : (
+            <div className="mt-6 space-y-4">
+              <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50/70 p-4">
+                <p className="text-sm font-medium text-slate-800">
+                  Solicita un codigo a administracion
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  El codigo temporal llegara al panel de los administradores para @{username}.
+                </p>
+                <form action={requestRecoveryAction} className="mt-4" noValidate>
+                  <button
+                    type="submit"
+                    className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isRecoveryBusy}
+                  >
+                    {requestingRecovery ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+                        Solicitando codigo...
+                      </>
+                    ) : (
+                      "Solicitar codigo a administracion"
+                    )}
+                  </button>
+                </form>
+              </div>
+
+              <form action={completeRecoveryAction} className="space-y-4" noValidate>
+                <div>
+                  <label
+                    htmlFor="recoveryCode"
+                    className="mb-2 block text-sm font-medium text-slate-700"
+                  >
+                    Codigo de administracion
+                  </label>
+                  <input
+                    id="recoveryCode"
+                    name="recoveryCode"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={recoveryCode}
+                    onChange={(event) =>
+                      setRecoveryCode(event.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-xl tracking-[0.35em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="nextPassword"
+                    className="mb-2 block text-sm font-medium text-slate-700"
+                  >
+                    Nuevo codigo de 4 digitos
+                  </label>
+                  <input
+                    id="nextPassword"
+                    name="nextPassword"
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={nextPassword}
+                    onChange={(event) =>
+                      setNextPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
+                    }
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  disabled={isRecoveryBusy}
+                >
+                  {completingRecovery ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Restableciendo acceso...
+                    </>
+                  ) : (
+                    "Restablecer codigo"
+                  )}
+                </button>
+              </form>
+
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className="w-full text-sm font-medium text-slate-500 transition hover:text-slate-900"
+              >
+                Volver a ingresar codigo
+              </button>
             </div>
-            <button
-              type="submit"
-              className="w-full rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-              disabled={visualStatus === "loading" || visualStatus === "success"}
-            >
-              {visualStatus === "loading"
-                ? "Validando..."
-                : visualStatus === "success"
-                  ? "Correcto"
-                  : "Entrar al panel"}
-            </button>
-          </form>
+          )}
         </div>
       </div>
     </div>

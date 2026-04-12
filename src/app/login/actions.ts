@@ -25,6 +25,11 @@ export type VerifyCodeState = {
   message: string;
 };
 
+export type RecoveryCodeState = {
+  status: "idle" | "error" | "success";
+  message: string;
+};
+
 function encodeMessage(message: string) {
   return encodeURIComponent(message);
 }
@@ -90,84 +95,109 @@ export async function verifyIdentifierAction(formData: FormData) {
   redirect("/login?step=code");
 }
 
-export async function requestPasswordRecoveryAction(formData: FormData) {
+export async function requestPasswordRecoveryStateAction(
+  previousState: RecoveryCodeState,
+  formData: FormData,
+): Promise<RecoveryCodeState> {
+  void previousState;
+  void formData;
+
   if (!hasPanelAuthConfig()) {
-    redirect(
-      `/login?mode=recovery&message=${encodeMessage(
-        "Configura Supabase y APP_SESSION_SECRET antes de usar la recuperacion.",
-      )}`,
-    );
+    return {
+      status: "error",
+      message: "Configura Supabase y APP_SESSION_SECRET antes de usar la recuperacion.",
+    };
   }
 
-  const identifier = getIdentifier(formData);
+  const pendingLogin = await getPendingLogin();
+
+  if (!pendingLogin) {
+    return {
+      status: "error",
+      message: "Primero verifica tu usuario o cedula.",
+    };
+  }
 
   try {
-    const request = await createPasswordRecoveryRequest(identifier);
+    const request = await createPasswordRecoveryRequest(pendingLogin.identifier);
 
     if (!request) {
-      redirect(
-        `/login?mode=recovery&message=${encodeMessage(
-          "Usuario o Cedula incorrecto.",
-        )}`,
-      );
+      return {
+        status: "error",
+        message: "Usuario o Cedula incorrecto.",
+      };
     }
 
     await createSecurityAlert({
       userId: request.user_id,
       username: request.username,
-      detail: `Solicitud de recuperacion. Codigo temporal ${request.recovery_code}.`,
+      detail: "Solicitud de recuperacion de acceso.",
     });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "No se pudo solicitar la recuperacion.";
-
-    redirect(`/login?mode=recovery&message=${encodeMessage(message)}`);
+    return {
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "No se pudo solicitar la recuperacion.",
+    };
   }
 
-  redirect(
-    `/login?mode=recovery&message=${encodeMessage(
-      "Se genero un codigo para administracion. Solicitalo y luego restablece tu acceso.",
-    )}`,
-  );
+  return {
+    status: "success",
+    message: "Codigo solicitado. Pidelo a administracion.",
+  };
 }
 
-export async function completePasswordRecoveryAction(formData: FormData) {
+export async function completePasswordRecoveryStateAction(
+  _previousState: RecoveryCodeState,
+  formData: FormData,
+): Promise<RecoveryCodeState> {
   if (!hasPanelAuthConfig()) {
-    redirect(
-      `/login?mode=recovery&message=${encodeMessage(
-        "Configura Supabase y APP_SESSION_SECRET antes de usar la recuperacion.",
-      )}`,
-    );
+    return {
+      status: "error",
+      message: "Configura Supabase y APP_SESSION_SECRET antes de usar la recuperacion.",
+    };
   }
 
-  const identifier = getIdentifier(formData);
+  const pendingLogin = await getPendingLogin();
+
+  if (!pendingLogin) {
+    return {
+      status: "error",
+      message: "Primero verifica tu usuario o cedula.",
+    };
+  }
+
   const recoveryCode = String(formData.get("recoveryCode") ?? "").trim();
   const nextPassword = String(formData.get("nextPassword") ?? "").trim();
 
+  let user;
+
   try {
-    await resetPasswordWithRecovery({
-      identifier,
+    user = await resetPasswordWithRecovery({
+      identifier: pendingLogin.identifier,
       recoveryCode,
       nextPassword,
     });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "No se pudo restablecer el acceso.";
-
-    redirect(`/login?mode=recovery&message=${encodeMessage(message)}`);
+    return {
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "No se pudo restablecer el acceso.",
+    };
   }
 
   await clearPendingLogin();
+  await startSession(toSessionUser(user));
+  revalidatePath("/", "layout");
 
-  redirect(
-    `/login?message=${encodeMessage(
-      "Codigo restablecido. Ya puedes iniciar sesion.",
-    )}`,
-  );
+  return {
+    status: "success",
+    message: "Acceso restablecido.",
+  };
 }
 
 export async function verifyCodeStateAction(
