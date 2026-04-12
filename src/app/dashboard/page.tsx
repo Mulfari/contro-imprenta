@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { revalidatePath } from "next/cache";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 import { signOutAction } from "@/app/login/actions";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -32,10 +31,6 @@ async function createUserAction(formData: FormData) {
       createdBy: session.userId,
     });
   } catch (error) {
-    if (isRedirectError(error)) {
-      throw error;
-    }
-
     const message =
       error instanceof Error
         ? error.message

@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
 import { endSession, startSession } from "@/lib/auth/session";
@@ -38,33 +37,31 @@ export async function signInAction(formData: FormData) {
 
   const { username, password } = getCredentials(formData);
 
+  if (!(await hasAnyUsers())) {
+    redirect("/setup?message=Primero%20crea%20tu%20admin%20inicial");
+  }
+
+  let user;
+
   try {
-    if (!(await hasAnyUsers())) {
-      redirect("/setup?message=Primero%20crea%20tu%20admin%20inicial");
-    }
-
-    const user = await authenticateUser(username, password);
-
-    if (!user) {
-      redirect(
-        `/login?message=${encodeMessage(
-          "Credenciales invalidas. Revisa tu usuario y tu contrasena.",
-        )}`,
-      );
-    }
-
-    await startSession(toSessionUser(user));
+    user = await authenticateUser(username, password);
   } catch (error) {
-    if (isRedirectError(error)) {
-      throw error;
-    }
-
     const message =
       error instanceof Error
         ? error.message
         : "No se pudo iniciar sesion con este usuario.";
     redirect(`/login?message=${encodeMessage(message)}`);
   }
+
+  if (!user) {
+    redirect(
+      `/login?message=${encodeMessage(
+        "Credenciales invalidas. Revisa tu usuario y tu contrasena.",
+      )}`,
+    );
+  }
+
+  await startSession(toSessionUser(user));
 
   revalidatePath("/", "layout");
   redirect("/dashboard");
