@@ -83,9 +83,13 @@ export function CodeModal({
 
   return (
     <div className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-slate-950/28 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.18)]">
+      <div className="relative w-full max-w-sm overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.18)]">
+        <div className="absolute inset-x-0 top-0 h-20 bg-[linear-gradient(180deg,rgba(239,246,255,0.95),rgba(239,246,255,0))]" />
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="relative">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,23,42,0.18)]">
+              02
+            </div>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
               Verificacion
             </p>
@@ -101,7 +105,7 @@ export function CodeModal({
           <form action={resetPendingLoginAction}>
             <button
               type="submit"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-lg font-medium text-slate-500 transition hover:bg-slate-100"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-lg font-medium text-slate-500 transition hover:bg-slate-100"
               aria-label="Cerrar modal"
             >
               X
@@ -125,6 +129,30 @@ export function CodeModal({
             >
               Codigo de 4 digitos
             </label>
+            <div className="mb-3 grid grid-cols-4 gap-2">
+              {Array.from({ length: 4 }).map((_, index) => {
+                const hasValue = Boolean(code[index]);
+
+                return (
+                  <div
+                    key={index}
+                    className={`flex h-12 items-center justify-center rounded-2xl border text-lg font-semibold transition ${
+                      visualStatus === "loading"
+                        ? "border-blue-200 bg-blue-50 text-blue-600"
+                        : visualStatus === "error"
+                          ? "border-rose-200 bg-rose-50 text-rose-600"
+                          : visualStatus === "success"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                            : hasValue
+                              ? "border-slate-300 bg-slate-100 text-slate-900"
+                              : "border-slate-200 bg-slate-50 text-slate-300"
+                    }`}
+                  >
+                    {hasValue ? "•" : ""}
+                  </div>
+                );
+              })}
+            </div>
             <input
               id="modal-password"
               name="password"
