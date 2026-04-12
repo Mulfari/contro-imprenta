@@ -8,6 +8,7 @@ import {
   verifyCodeStateAction,
   type VerifyCodeState,
 } from "@/app/login/actions";
+import { FloatingToast } from "@/components/floating-toast";
 
 type CodeModalProps = {
   displayName: string;
@@ -19,30 +20,6 @@ const initialState: VerifyCodeState = {
   status: "idle",
   message: "",
 };
-
-function detectVariant(message: string) {
-  const normalized = message.toLowerCase();
-
-  if (
-    normalized.includes("incorrecto") ||
-    normalized.includes("error") ||
-    normalized.includes("falta") ||
-    normalized.includes("no se pudo")
-  ) {
-    return "error";
-  }
-
-  if (
-    normalized.includes("creado") ||
-    normalized.includes("actualizado") ||
-    normalized.includes("cerrada") ||
-    normalized.includes("correcto")
-  ) {
-    return "success";
-  }
-
-  return "info";
-}
 
 export function CodeModal({
   displayName,
@@ -60,7 +37,6 @@ export function CodeModal({
 
   const visualStatus = pending ? "loading" : state.status;
   const feedbackMessage = state.message || message;
-  const feedbackVariant = feedbackMessage ? detectVariant(feedbackMessage) : "info";
 
   useEffect(() => {
     if (code.length < 4) {
@@ -99,15 +75,9 @@ export function CodeModal({
           ? "border-emerald-300 bg-emerald-50 ring-2 ring-emerald-100"
           : "border-slate-200 bg-slate-50 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100";
 
-  const messageClasses =
-    feedbackVariant === "error"
-      ? "border-rose-200/80 bg-rose-50/92 text-rose-700 shadow-[0_18px_40px_rgba(190,24,93,0.12)]"
-      : feedbackVariant === "success"
-        ? "border-emerald-200/80 bg-emerald-50/92 text-emerald-700 shadow-[0_18px_40px_rgba(5,150,105,0.12)]"
-        : "border-blue-200/80 bg-blue-50/92 text-slate-700 shadow-[0_18px_40px_rgba(59,130,246,0.1)]";
-
   return (
-    <div className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-slate-950/28 p-4 backdrop-blur-sm">
+    <div className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-slate-950/48 p-4 backdrop-blur-md">
+      <FloatingToast message={feedbackMessage} />
       <div className="w-full max-w-sm rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.18)]">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -133,14 +103,6 @@ export function CodeModal({
             </button>
           </form>
         </div>
-
-        {feedbackMessage ? (
-          <div
-            className={`mt-5 rounded-[1.2rem] border px-4 py-3 text-sm font-medium leading-6 backdrop-blur-xl ${messageClasses}`}
-          >
-            {feedbackMessage}
-          </div>
-        ) : null}
 
         <form ref={submitRef} action={formAction} className="mt-6 space-y-4" noValidate>
           <div>
