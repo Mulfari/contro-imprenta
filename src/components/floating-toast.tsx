@@ -11,11 +11,36 @@ type AnimatedToastProps = {
   message: string;
 };
 
+function detectVariant(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("incorrecto") ||
+    normalized.includes("error") ||
+    normalized.includes("falta") ||
+    normalized.includes("no se pudo")
+  ) {
+    return "error";
+  }
+
+  if (
+    normalized.includes("creado") ||
+    normalized.includes("actualizado") ||
+    normalized.includes("cerrada") ||
+    normalized.includes("correcto")
+  ) {
+    return "success";
+  }
+
+  return "info";
+}
+
 function AnimatedToast({ message }: AnimatedToastProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [phase, setPhase] = useState<"enter" | "leave">("enter");
+  const variant = detectVariant(message);
 
   useEffect(() => {
     const leaveTimer = window.setTimeout(() => {
@@ -35,10 +60,19 @@ function AnimatedToast({ message }: AnimatedToastProps) {
     };
   }, [message, pathname, router, searchParams]);
 
+  const toneClasses =
+    variant === "error"
+      ? "border-rose-200/80 bg-rose-50/92 text-rose-700 shadow-[0_24px_60px_rgba(190,24,93,0.18)]"
+      : variant === "success"
+        ? "border-emerald-200/80 bg-emerald-50/92 text-emerald-700 shadow-[0_24px_60px_rgba(5,150,105,0.16)]"
+        : "border-blue-200/80 bg-blue-50/90 text-slate-700 shadow-[0_24px_60px_rgba(59,130,246,0.14)]";
+
   return (
     <div className="pointer-events-none fixed inset-x-0 top-5 z-50 flex justify-center px-4">
       <div
-        className={`pointer-events-auto w-full max-w-md rounded-[1.35rem] border border-white/70 bg-white/90 px-5 py-4 text-center text-sm font-medium text-slate-700 shadow-[0_24px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl ${
+        className={`pointer-events-auto w-full max-w-md rounded-[1.35rem] border px-5 py-4 text-center text-sm font-medium backdrop-blur-xl ${
+          toneClasses
+        } ${
           phase === "enter" ? "toast-enter" : "toast-leave"
         }`}
       >
