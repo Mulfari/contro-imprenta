@@ -48,9 +48,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.94)_42%,_rgba(232,236,241,0.96)_100%)] px-6 py-8 sm:px-10">
-      <FloatingToast message={!isCodeStep ? message : ""} />
+      <FloatingToast message={message} />
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl items-center justify-center">
-        <section className="relative w-full max-w-md rounded-[2rem] border border-slate-200 bg-white/92 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur">
+        <section
+          className={`relative w-full max-w-md rounded-[2rem] border border-slate-200 bg-white/92 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur transition ${
+            isCodeStep ? "shadow-[0_40px_120px_rgba(15,23,42,0.2)]" : ""
+          }`}
+        >
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
@@ -110,7 +114,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <CodeModal
               displayName={pendingDisplayName}
               username={pendingLogin?.username ?? ""}
-              message={message}
             />
           ) : null}
         </section>
