@@ -77,12 +77,19 @@ async function getUserRecordByNationalId(nationalId: string) {
   return data;
 }
 
-export async function authenticateUser(identifier: string, password: string) {
+async function getUserRecordByIdentifier(identifier: string) {
   const normalizedIdentifier = identifier.trim().toLowerCase();
   const nationalIdCandidate = normalizeNationalId(identifier);
-  const user =
-    (nationalIdCandidate ? await getUserRecordByNationalId(nationalIdCandidate) : null) ??
-    (await getUserRecordByUsername(normalizedIdentifier));
+
+  return (
+    (nationalIdCandidate
+      ? await getUserRecordByNationalId(nationalIdCandidate)
+      : null) ?? (await getUserRecordByUsername(normalizedIdentifier))
+  );
+}
+
+export async function authenticateUser(identifier: string, password: string) {
+  const user = await getUserRecordByIdentifier(identifier);
 
   if (!user || !user.is_active) {
     return null;
@@ -91,6 +98,16 @@ export async function authenticateUser(identifier: string, password: string) {
   const isValid = await compare(password, user.password_hash);
 
   if (!isValid) {
+    return null;
+  }
+
+  return sanitizeUser(user);
+}
+
+export async function findUserForLogin(identifier: string) {
+  const user = await getUserRecordByIdentifier(identifier);
+
+  if (!user || !user.is_active) {
     return null;
   }
 

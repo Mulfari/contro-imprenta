@@ -33,6 +33,24 @@ create unique index if not exists app_users_national_id_idx
 create unique index if not exists app_users_username_idx
   on public.app_users (username);
 
+create table if not exists public.security_alerts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid null references public.app_users(id) on delete set null,
+  username text not null,
+  detail text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists security_alerts_created_at_idx
+  on public.security_alerts (created_at desc);
+
+alter table public.security_alerts enable row level security;
+
+alter table public.security_alerts add column if not exists user_id uuid null;
+alter table public.security_alerts add column if not exists username text;
+alter table public.security_alerts add column if not exists detail text;
+alter table public.security_alerts add column if not exists created_at timestamptz default now();
+
 create table if not exists public.clients (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -119,5 +137,14 @@ begin
     alter table public.orders
       add constraint orders_created_by_fkey
       foreign key (created_by) references public.app_users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'security_alerts_user_id_fkey'
+  ) then
+    alter table public.security_alerts
+      add constraint security_alerts_user_id_fkey
+      foreign key (user_id) references public.app_users(id) on delete set null;
   end if;
 end $$;

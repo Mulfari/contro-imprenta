@@ -15,6 +15,7 @@ import {
   type OrderStatus,
   updateOrderStatus,
 } from "@/lib/business";
+import { listSecurityAlerts } from "@/lib/security-alerts";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
 import { createUser, listUsers } from "@/lib/users";
 
@@ -253,6 +254,22 @@ function formatDueDate(value: string | null) {
   }).format(parsed);
 }
 
+function formatDateTime(value: string) {
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("es-VE", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(parsed);
+}
+
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
@@ -301,6 +318,8 @@ export default async function DashboardPage({
   }
 
   const users = await listUsers();
+  const securityAlerts =
+    session.role === "admin" ? await listSecurityAlerts(10) : [];
   let clients: Client[] = [];
   let orders: OrderWithClient[] = [];
   let schemaMessage = "";
@@ -468,33 +487,79 @@ export default async function DashboardPage({
           ) : null}
 
           {activeView === "resumen" ? (
-          <section id="resumen" className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              label: "Pedidos activos",
-              value: String(activeOrders.length),
-              detail: `${orders.filter((order) => order.status === "imprimiendo").length} en impresion`,
-            },
-            {
-              label: "Entregas cercanas",
-              value: String(deliveriesSoon.length),
-              detail: "Proximas 48h",
-            },
-            {
-              label: "Clientes registrados",
-              value: String(clients.length),
-              detail: `${users.length} usuarios del panel`,
-            },
-          ].map((card) => (
-            <article
-              key={card.label}
-              className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.05)]"
-            >
-              <p className="text-sm text-slate-500">{card.label}</p>
-              <p className="mt-3 text-4xl font-semibold">{card.value}</p>
-              <p className="mt-2 text-sm text-slate-600">{card.detail}</p>
-            </article>
-          ))}
+          <section className="grid gap-6">
+            <div id="resumen" className="grid gap-4 md:grid-cols-3">
+              {[
+                {
+                  label: "Pedidos activos",
+                  value: String(activeOrders.length),
+                  detail: `${orders.filter((order) => order.status === "imprimiendo").length} en impresion`,
+                },
+                {
+                  label: "Entregas cercanas",
+                  value: String(deliveriesSoon.length),
+                  detail: "Proximas 48h",
+                },
+                {
+                  label: "Clientes registrados",
+                  value: String(clients.length),
+                  detail: `${users.length} usuarios del panel`,
+                },
+              ].map((card) => (
+                <article
+                  key={card.label}
+                  className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.05)]"
+                >
+                  <p className="text-sm text-slate-500">{card.label}</p>
+                  <p className="mt-3 text-4xl font-semibold">{card.value}</p>
+                  <p className="mt-2 text-sm text-slate-600">{card.detail}</p>
+                </article>
+              ))}
+            </div>
+
+            {session.role === "admin" ? (
+              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-semibold">Alertas de administracion</h3>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Notificaciones de intentos sensibles dentro del panel.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+                    {securityAlerts.length} alertas
+                  </span>
+                </div>
+                <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+                  <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                    <thead className="bg-slate-50 text-slate-500">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Usuario</th>
+                        <th className="px-4 py-3 font-medium">Fecha</th>
+                        <th className="px-4 py-3 font-medium">Detalle</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
+                      {securityAlerts.length === 0 ? (
+                        <tr>
+                          <td className="px-4 py-4 text-slate-500" colSpan={3}>
+                            No hay alertas registradas.
+                          </td>
+                        </tr>
+                      ) : (
+                        securityAlerts.map((alert) => (
+                          <tr key={alert.id}>
+                            <td className="px-4 py-3">{alert.username}</td>
+                            <td className="px-4 py-3">{formatDateTime(alert.created_at)}</td>
+                            <td className="px-4 py-3">{alert.detail}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            ) : null}
           </section>
           ) : null}
 
