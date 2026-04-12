@@ -13,6 +13,7 @@ import {
   listOrders,
   type OrderWithClient,
   type OrderStatus,
+  updateOrderStatus,
 } from "@/lib/business";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
 import { createUser, listUsers } from "@/lib/users";
@@ -34,6 +35,14 @@ const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Pedidos", view: "pedidos" },
   { label: "Equipo", view: "equipo" },
 ];
+
+const orderStatusLabels: Record<OrderStatus, string> = {
+  recibido: "Recibido",
+  disenando: "Disenando",
+  imprimiendo: "Imprimiendo",
+  listo: "Listo",
+  entregado: "Entregado",
+};
 
 async function createUserAction(formData: FormData) {
   "use server";
@@ -130,6 +139,39 @@ async function createOrderAction(formData: FormData) {
   redirect(buildDashboardUrl("pedidos", "Pedido creado"));
 }
 
+async function updateOrderStatusAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  const orderId = String(formData.get("orderId") ?? "");
+  const status = String(formData.get("status") ?? "recibido") as OrderStatus;
+  const activeStatus = String(formData.get("activeStatus") ?? "todos");
+
+  try {
+    await updateOrderStatus({
+      orderId,
+      status,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No se pudo actualizar el estado del pedido.";
+
+    redirect(buildDashboardUrl("pedidos", message) + `&status=${activeStatus}`);
+  }
+
+  revalidatePath("/dashboard");
+  redirect(
+    buildDashboardUrl("pedidos", "Estado actualizado") + `&status=${activeStatus}`,
+  );
+}
+
 type DashboardPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -160,6 +202,36 @@ function resolveView(value: string, isAdmin: boolean): DashboardView {
   return dashboardViews.includes(value as DashboardView)
     ? (value as DashboardView)
     : "resumen";
+}
+
+function formatCurrency(value: number | null) {
+  if (value === null) {
+    return "Sin monto";
+  }
+
+  return new Intl.NumberFormat("es-VE", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatDueDate(value: string | null) {
+  if (!value) {
+    return "Sin fecha";
+  }
+
+  const parsed = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("es-VE", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(parsed);
 }
 
 export default async function DashboardPage({
@@ -202,6 +274,7 @@ export default async function DashboardPage({
   const session = await getCurrentSession();
   const params = await searchParams;
   const message = resolveValue(params.message);
+  const activeStatus = resolveValue(params.status) || "todos";
 
   if (!session) {
     redirect("/login?message=Inicia%20sesion%20para%20entrar%20al%20tablero");
@@ -238,6 +311,16 @@ export default async function DashboardPage({
   const sideItems = sideNavItems.filter((item) =>
     item.view === "equipo" ? session.role === "admin" : true,
   );
+  const filteredOrders =
+    activeStatus === "todos"
+      ? orders
+      : orders.filter((order) => order.status === activeStatus);
+  const orderSummary = {
+    total: orders.length,
+    active: orders.filter((order) => order.status !== "entregado").length,
+    ready: orders.filter((order) => order.status === "listo").length,
+    delivered: orders.filter((order) => order.status === "entregado").length,
+  };
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
@@ -463,7 +546,40 @@ export default async function DashboardPage({
               id="pedidos"
               className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
             >
-            <h2 className="text-xl font-semibold">Crear pedido</h2>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Crear pedido</h2>
+                <p className="mt-2 text-sm text-slate-500">
+                  Registra un trabajo con su cliente, fecha y monto.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                    Total
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">{orderSummary.total}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                    Activos
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">{orderSummary.active}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                    Listos
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">{orderSummary.ready}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                    Entregados
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">{orderSummary.delivered}</p>
+                </div>
+              </div>
+            </div>
             <form action={createOrderAction} className="mt-5 space-y-4">
               <div>
                 <label className="mb-2 block text-sm text-slate-600" htmlFor="clientId">
@@ -566,45 +682,123 @@ export default async function DashboardPage({
           <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
             {activeView === "pedidos" ? (
             <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-            <h2 className="text-xl font-semibold">Pedidos recientes</h2>
-            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
-              <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                <thead className="bg-slate-50 text-slate-500">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">Trabajo</th>
-                    <th className="px-4 py-3 font-medium">Cliente</th>
-                    <th className="px-4 py-3 font-medium">Estado</th>
-                    <th className="px-4 py-3 font-medium">Entrega</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
-                  {orders.length === 0 ? (
-                    <tr>
-                      <td className="px-4 py-4 text-slate-500" colSpan={4}>
-                        Aun no hay pedidos creados.
-                      </td>
-                    </tr>
-                  ) : (
-                    orders.map((order) => (
-                      <tr key={order.id}>
-                        <td className="px-4 py-3">
-                          <div className="font-medium">{order.title}</div>
-                          <div className="text-xs text-slate-400">
-                            Cantidad: {order.quantity}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Lista de pedidos</h2>
+                <p className="mt-2 text-sm text-slate-500">
+                  Filtra por estado y actualiza el avance sin salir del panel.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {["todos", ...orderStatuses].map((status) => {
+                  const isActive = activeStatus === status;
+                  const label =
+                    status === "todos"
+                      ? "Todos"
+                      : orderStatusLabels[status as OrderStatus];
+
+                  return (
+                    <Link
+                      key={status}
+                      href={`/dashboard?view=pedidos&status=${status}`}
+                      className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                        isActive
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="mt-5 space-y-4">
+              {filteredOrders.length === 0 ? (
+                <div className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500">
+                  No hay pedidos para este estado.
+                </div>
+              ) : (
+                filteredOrders.map((order) => (
+                  <article
+                    key={order.id}
+                    className="rounded-[1.5rem] border border-slate-200 bg-white px-5 py-5"
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {order.title}
+                          </p>
+                          <p className="mt-1 text-sm text-slate-500">
+                            {order.client?.name ?? "Sin cliente"} · Cantidad {order.quantity}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                          <span className="rounded-full bg-slate-100 px-3 py-1">
+                            {orderStatusLabels[order.status]}
+                          </span>
+                          <span className="rounded-full bg-slate-100 px-3 py-1">
+                            Entrega {formatDueDate(order.due_date)}
+                          </span>
+                          <span className="rounded-full bg-slate-100 px-3 py-1">
+                            {formatCurrency(order.total_amount)}
+                          </span>
+                        </div>
+                        <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                              Material
+                            </p>
+                            <p className="mt-1">{order.material ?? "Sin definir"}</p>
                           </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          {order.client?.name ?? "Sin cliente"}
-                        </td>
-                        <td className="px-4 py-3">{order.status}</td>
-                        <td className="px-4 py-3">
-                          {order.due_date ?? "Sin fecha"}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                              Tamano
+                            </p>
+                            <p className="mt-1">{order.size ?? "Sin definir"}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                              Descripcion
+                            </p>
+                            <p className="mt-1">{order.description ?? "Sin detalles"}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <form action={updateOrderStatusAction} className="flex min-w-[220px] flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <input type="hidden" name="orderId" value={order.id} />
+                        <input
+                          type="hidden"
+                          name="activeStatus"
+                          value={activeStatus}
+                        />
+                        <label className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+                          Estado rapido
+                        </label>
+                        <select
+                          name="status"
+                          defaultValue={order.status}
+                          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        >
+                          {orderStatuses.map((status) => (
+                            <option key={status} value={status}>
+                              {orderStatusLabels[status]}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="submit"
+                          className="rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                        >
+                          Actualizar
+                        </button>
+                      </form>
+                    </div>
+                  </article>
+                ))
+              )}
             </div>
             </article>
             ) : null}

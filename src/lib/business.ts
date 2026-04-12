@@ -187,3 +187,29 @@ export async function createOrder(input: {
 
   return data;
 }
+
+export async function updateOrderStatus(input: {
+  orderId: string;
+  status: OrderStatus;
+}) {
+  const supabase = createSupabaseAdminClient();
+
+  if (!input.orderId) {
+    throw new Error("No se encontro el pedido.");
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .update({
+      status: input.status,
+    })
+    .eq("id", input.orderId)
+    .select("*")
+    .single<Order>();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
