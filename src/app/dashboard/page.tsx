@@ -1028,6 +1028,7 @@ export default async function DashboardPage({
                         name="nationalId"
                         type="text"
                         inputMode="numeric"
+                        maxLength={8}
                         className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                         placeholder="12345678"
                         required
@@ -1041,6 +1042,7 @@ export default async function DashboardPage({
                         id="username"
                         name="username"
                         type="text"
+                        maxLength={8}
                         className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                         placeholder="juan"
                         required

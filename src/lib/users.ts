@@ -155,7 +155,7 @@ export async function createUser(input: {
 }) {
   const supabase = createSupabaseAdminClient();
   const normalizedNationalId = normalizeNationalId(input.nationalId);
-  const normalizedUsername = normalizeUsername(input.username);
+  const normalizedUsername = normalizeUsername(input.username).slice(0, 8);
   const displayName = input.displayName.trim();
   const email = normalizeEmail(input.email);
   const phone = normalizePhone(input.phone);
@@ -164,8 +164,16 @@ export async function createUser(input: {
     throw new Error("El usuario debe tener al menos 3 caracteres.");
   }
 
+  if (normalizedUsername.length > 8) {
+    throw new Error("El usuario no puede tener mas de 8 caracteres.");
+  }
+
   if (normalizedNationalId.length < 6) {
     throw new Error("La cedula debe tener al menos 6 digitos.");
+  }
+
+  if (normalizedNationalId.length > 8) {
+    throw new Error("La cedula no puede tener mas de 8 digitos.");
   }
 
   if (!/^\d{4}$/.test(input.password)) {

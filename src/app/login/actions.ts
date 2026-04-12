@@ -29,7 +29,7 @@ function encodeMessage(message: string) {
 }
 
 function getIdentifier(formData: FormData) {
-  const identifier = String(formData.get("identifier") ?? "").trim();
+  const identifier = String(formData.get("identifier") ?? "").trim().slice(0, 8);
 
   if (!identifier) {
     redirect(
