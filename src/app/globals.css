@@ -47,3 +47,40 @@ a:hover {
   background: #c7d2fe;
   color: #111827;
 }
+
+@keyframes toast-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.96);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translateY(8px) scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-leave {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.98);
+  }
+}
+
+.toast-enter {
+  animation: toast-enter 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.toast-leave {
+  animation: toast-leave 320ms ease forwards;
+}
