@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import {
-  resetPendingLoginAction,
-  verifyCodeAction,
-  verifyIdentifierAction,
-} from "@/app/login/actions";
+import { verifyIdentifierAction } from "@/app/login/actions";
+import { CodeModal } from "@/app/login/code-modal";
 import { getCurrentSession, getPendingLogin } from "@/lib/auth/session";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
 
@@ -21,6 +18,16 @@ function resolveMessage(message: string | string[] | undefined) {
   return message ?? "";
 }
 
+function capitalizeFirstLetter(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return "";
+  }
+
+  return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;
+}
+
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const message = resolveMessage(params.message);
@@ -29,6 +36,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await getCurrentSession();
   const pendingLogin = await getPendingLogin();
   const canUsePanel = hasPanelAuthConfig();
+  const isCodeStep = Boolean(pendingLogin && step === "code");
+  const pendingDisplayName = pendingLogin
+    ? capitalizeFirstLetter(pendingLogin.displayName)
+    : "";
 
   if (session) {
     redirect("/dashboard");
@@ -55,7 +66,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </Link>
           </div>
 
-          {message ? (
+          {message && !isCodeStep ? (
             <div className="mt-6 rounded-[1.2rem] border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-slate-700">
               {message}
             </div>
@@ -96,61 +107,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </button>
           </form>
 
-          {pendingLogin && step === "code" ? (
-            <div className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-slate-950/28 p-4 backdrop-blur-sm">
-              <div className="w-full max-w-sm rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.18)]">
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Verificacion
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold text-slate-950">
-                  Ingresa tu codigo
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Usuario verificado: {pendingLogin.displayName}
-                </p>
-                <p className="text-sm leading-6 text-slate-500">
-                  @{pendingLogin.username}
-                </p>
-
-                <form className="mt-6 space-y-4">
-                  <div>
-                    <label
-                      htmlFor="modal-password"
-                      className="mb-2 block text-sm font-medium text-slate-700"
-                    >
-                      Codigo de 4 digitos
-                    </label>
-                    <input
-                      id="modal-password"
-                      name="password"
-                      type="password"
-                      placeholder="1234"
-                      inputMode="numeric"
-                      pattern="[0-9]{4}"
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-xl tracking-[0.5em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    formAction={verifyCodeAction}
-                    className="w-full rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700"
-                  >
-                    Entrar al panel
-                  </button>
-                </form>
-
-                <form className="mt-3">
-                  <button
-                    type="submit"
-                    formAction={resetPendingLoginAction}
-                    className="w-full rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                  >
-                    Cambiar usuario
-                  </button>
-                </form>
-              </div>
-            </div>
+          {isCodeStep ? (
+            <CodeModal
+              displayName={pendingDisplayName}
+              username={pendingLogin?.username ?? ""}
+              message={message}
+            />
           ) : null}
         </section>
       </div>

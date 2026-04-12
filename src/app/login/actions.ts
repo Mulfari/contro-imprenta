@@ -143,9 +143,7 @@ export async function verifyCodeAction(formData: FormData) {
       attempts: shouldAlert ? 0 : nextAttempts,
     });
 
-    const failedMessage = shouldAlert
-      ? "Codigo incorrecto. Se notifico a administracion."
-      : `Codigo incorrecto. Intento ${nextAttempts} de 3.`;
+    const failedMessage = "Codigo incorrecto.";
 
     redirect(`/login?message=${encodeMessage(failedMessage)}&step=code`);
   }
