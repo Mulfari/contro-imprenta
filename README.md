@@ -7,6 +7,8 @@ Base inicial para una tienda de imprenta construida con Next.js 16, Supabase y d
 - Portada comercial para presentar el sistema.
 - Login con nombre de usuario y contrasena.
 - Dashboard protegido y modulo base para crear mas usuarios.
+- Registro de clientes desde el panel.
+- Registro y seguimiento inicial de pedidos.
 - Middleware para mantener la sesion activa en App Router.
 - Archivos listos para publicar en GitHub y desplegar en Vercel.
 
@@ -32,7 +34,8 @@ SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
 APP_SESSION_SECRET=una-clave-larga-y-segura
 ```
 
-5. Crea la tabla de usuarios ejecutando el SQL de [supabase/setup.sql](/C:/Users/joses/OneDrive/Documentos/control-imprenta/supabase/setup.sql) en el SQL Editor de Supabase.
+5. Ejecuta el SQL de [supabase/setup.sql](/C:/Users/joses/OneDrive/Documentos/control-imprenta/supabase/setup.sql) en el SQL Editor de Supabase.
+   Si ya lo habias ejecutado antes, vuelve a correrlo para crear las tablas `clients` y `orders`.
 6. Instala dependencias y levanta el proyecto:
 
 ```bash

@@ -5,8 +5,23 @@ import { revalidatePath } from "next/cache";
 
 import { signOutAction } from "@/app/login/actions";
 import { getCurrentSession } from "@/lib/auth/session";
+import {
+  createClient,
+  createOrder,
+  listClients,
+  listOrders,
+  type OrderStatus,
+} from "@/lib/business";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
 import { createUser, listUsers } from "@/lib/users";
+
+const orderStatuses: OrderStatus[] = [
+  "recibido",
+  "disenando",
+  "imprimiendo",
+  "listo",
+  "entregado",
+];
 
 async function createUserAction(formData: FormData) {
   "use server";
@@ -41,6 +56,66 @@ async function createUserAction(formData: FormData) {
 
   revalidatePath("/dashboard");
   redirect("/dashboard?message=Usuario%20creado");
+}
+
+async function createClientAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    await createClient({
+      name: String(formData.get("name") ?? ""),
+      contactName: String(formData.get("contactName") ?? ""),
+      phone: String(formData.get("phone") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      notes: String(formData.get("notes") ?? ""),
+      createdBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo crear el cliente.";
+    redirect(`/dashboard?message=${encodeURIComponent(message)}`);
+  }
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard?message=Cliente%20creado");
+}
+
+async function createOrderAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    await createOrder({
+      clientId: String(formData.get("clientId") ?? ""),
+      title: String(formData.get("title") ?? ""),
+      description: String(formData.get("description") ?? ""),
+      quantity: String(formData.get("quantity") ?? ""),
+      material: String(formData.get("material") ?? ""),
+      size: String(formData.get("size") ?? ""),
+      dueDate: String(formData.get("dueDate") ?? ""),
+      status: (String(formData.get("status") ?? "recibido") as OrderStatus),
+      totalAmount: String(formData.get("totalAmount") ?? ""),
+      createdBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo crear el pedido.";
+    redirect(`/dashboard?message=${encodeURIComponent(message)}`);
+  }
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard?message=Pedido%20creado");
 }
 
 type DashboardPageProps = {
@@ -101,6 +176,20 @@ export default async function DashboardPage({
   }
 
   const users = await listUsers();
+  const clients = await listClients();
+  const orders = await listOrders();
+  const activeOrders = orders.filter((order) => order.status !== "entregado");
+  const deliveriesSoon = orders.filter((order) => {
+    if (!order.due_date || order.status === "entregado") {
+      return false;
+    }
+
+    const dueDate = new Date(order.due_date);
+    const now = new Date();
+    const diff = dueDate.getTime() - now.getTime();
+
+    return diff >= 0 && diff <= 1000 * 60 * 60 * 24 * 2;
+  });
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,_#16110e_0%,_#2b1d17_100%)] px-6 py-8 text-stone-50 sm:px-10">
@@ -137,12 +226,20 @@ export default async function DashboardPage({
 
         <section className="grid gap-4 md:grid-cols-3">
           {[
-            { label: "Pedidos hoy", value: "12", detail: "4 en impresion" },
-            { label: "Entregas cercanas", value: "5", detail: "Proximas 48h" },
             {
-              label: "Usuarios del panel",
-              value: String(users.length),
-              detail: `${users.filter((user) => user.role === "admin").length} admins activos`,
+              label: "Pedidos activos",
+              value: String(activeOrders.length),
+              detail: `${orders.filter((order) => order.status === "imprimiendo").length} en impresion`,
+            },
+            {
+              label: "Entregas cercanas",
+              value: String(deliveriesSoon.length),
+              detail: "Proximas 48h",
+            },
+            {
+              label: "Clientes registrados",
+              value: String(clients.length),
+              detail: `${users.length} usuarios del panel`,
             },
           ].map((card) => (
             <article
@@ -158,120 +255,342 @@ export default async function DashboardPage({
 
         <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
-            <h2 className="text-xl font-semibold">Flujo sugerido</h2>
-            <div className="mt-5 space-y-4">
-              {[
-                "Registrar clientes y canales de contacto.",
-                "Crear tabla de pedidos con medidas, material y acabados.",
-                "Agregar estados: recibido, disenando, imprimiendo, listo, entregado.",
-                "Crear reportes de ventas y tiempos de entrega.",
-              ].map((item, index) => (
-                <div
-                  key={item}
-                  className="flex items-start gap-4 rounded-2xl border border-white/8 bg-black/10 px-4 py-3"
-                >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-400 text-sm font-bold text-stone-950">
-                    {index + 1}
-                  </span>
-                  <p className="text-sm leading-6 text-stone-200">{item}</p>
-                </div>
-              ))}
-            </div>
-          </article>
-
-          <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
-            <h2 className="text-xl font-semibold">Crear usuario</h2>
-            <form action={createUserAction} className="mt-5 space-y-4">
+            <h2 className="text-xl font-semibold">Crear cliente</h2>
+            <form action={createClientAction} className="mt-5 space-y-4">
               <div>
-                <label className="mb-2 block text-sm text-stone-300" htmlFor="displayName">
-                  Nombre visible
+                <label className="mb-2 block text-sm text-stone-300" htmlFor="name">
+                  Nombre del cliente
                 </label>
                 <input
-                  id="displayName"
-                  name="displayName"
+                  id="name"
+                  name="name"
                   type="text"
                   className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
-                  placeholder="Juan Perez"
+                  placeholder="Panaderia Central"
                   required
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm text-stone-300" htmlFor="username">
-                  Usuario
+                <label className="mb-2 block text-sm text-stone-300" htmlFor="contactName">
+                  Contacto
                 </label>
                 <input
-                  id="username"
-                  name="username"
+                  id="contactName"
+                  name="contactName"
                   type="text"
                   className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
-                  placeholder="juan"
-                  required
+                  placeholder="Maria Perez"
                 />
               </div>
-              <div>
-                <label className="mb-2 block text-sm text-stone-300" htmlFor="password">
-                  Contrasena
-                </label>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <input
-                  id="password"
-                  name="password"
-                  type="password"
+                  name="phone"
+                  type="text"
                   className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
-                  placeholder="Minimo 6 caracteres"
-                  required
+                  placeholder="Telefono"
+                />
+                <input
+                  name="email"
+                  type="email"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  placeholder="Correo"
                 />
               </div>
-              <div>
-                <label className="mb-2 block text-sm text-stone-300" htmlFor="role">
-                  Rol
-                </label>
-                <select
-                  id="role"
-                  name="role"
-                  defaultValue="staff"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
-                >
-                  <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
+              <textarea
+                name="notes"
+                className="min-h-24 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                placeholder="Notas del cliente"
+              />
               <button
                 type="submit"
                 className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
               >
-                Crear usuario
+                Guardar cliente
+              </button>
+            </form>
+          </article>
+
+          <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+            <h2 className="text-xl font-semibold">Crear pedido</h2>
+            <form action={createOrderAction} className="mt-5 space-y-4">
+              <div>
+                <label className="mb-2 block text-sm text-stone-300" htmlFor="clientId">
+                  Cliente
+                </label>
+                <select
+                  id="clientId"
+                  name="clientId"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  required
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Selecciona un cliente
+                  </option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-stone-300" htmlFor="title">
+                  Trabajo
+                </label>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  placeholder="500 tarjetas personales"
+                  required
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <input
+                  name="quantity"
+                  type="number"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  placeholder="Cantidad"
+                  required
+                />
+                <select
+                  name="status"
+                  defaultValue="recibido"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                >
+                  {orderStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <input
+                  name="material"
+                  type="text"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  placeholder="Material"
+                />
+                <input
+                  name="size"
+                  type="text"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  placeholder="Tamano"
+                />
+                <input
+                  name="dueDate"
+                  type="date"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                />
+              </div>
+              <input
+                name="totalAmount"
+                type="number"
+                step="0.01"
+                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                placeholder="Monto total"
+              />
+              <textarea
+                name="description"
+                className="min-h-24 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                placeholder="Detalles del pedido"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+              >
+                Guardar pedido
               </button>
             </form>
           </article>
         </section>
 
-        <section className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
-          <h2 className="text-xl font-semibold">Usuarios registrados</h2>
-          <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
-            <table className="min-w-full divide-y divide-white/8 text-left text-sm">
-              <thead className="bg-black/20 text-stone-300">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Nombre</th>
-                  <th className="px-4 py-3 font-medium">Usuario</th>
-                  <th className="px-4 py-3 font-medium">Rol</th>
-                  <th className="px-4 py-3 font-medium">Estado</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/8 bg-black/10 text-stone-100">
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td className="px-4 py-3">{user.display_name}</td>
-                    <td className="px-4 py-3">{user.username}</td>
-                    <td className="px-4 py-3">{user.role}</td>
-                    <td className="px-4 py-3">
-                      {user.is_active ? "Activo" : "Inactivo"}
-                    </td>
+        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+            <h2 className="text-xl font-semibold">Pedidos recientes</h2>
+            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
+              <table className="min-w-full divide-y divide-white/8 text-left text-sm">
+                <thead className="bg-black/20 text-stone-300">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Trabajo</th>
+                    <th className="px-4 py-3 font-medium">Cliente</th>
+                    <th className="px-4 py-3 font-medium">Estado</th>
+                    <th className="px-4 py-3 font-medium">Entrega</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-white/8 bg-black/10 text-stone-100">
+                  {orders.length === 0 ? (
+                    <tr>
+                      <td className="px-4 py-4 text-stone-300" colSpan={4}>
+                        Aun no hay pedidos creados.
+                      </td>
+                    </tr>
+                  ) : (
+                    orders.map((order) => (
+                      <tr key={order.id}>
+                        <td className="px-4 py-3">
+                          <div className="font-medium">{order.title}</div>
+                          <div className="text-xs text-stone-400">
+                            Cantidad: {order.quantity}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          {order.client?.name ?? "Sin cliente"}
+                        </td>
+                        <td className="px-4 py-3">{order.status}</td>
+                        <td className="px-4 py-3">
+                          {order.due_date ?? "Sin fecha"}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+            <h2 className="text-xl font-semibold">Clientes registrados</h2>
+            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
+              <table className="min-w-full divide-y divide-white/8 text-left text-sm">
+                <thead className="bg-black/20 text-stone-300">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Cliente</th>
+                    <th className="px-4 py-3 font-medium">Contacto</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/8 bg-black/10 text-stone-100">
+                  {clients.length === 0 ? (
+                    <tr>
+                      <td className="px-4 py-4 text-stone-300" colSpan={2}>
+                        Aun no hay clientes registrados.
+                      </td>
+                    </tr>
+                  ) : (
+                    clients.map((client) => (
+                      <tr key={client.id}>
+                        <td className="px-4 py-3">
+                          <div className="font-medium">{client.name}</div>
+                          {client.notes ? (
+                            <div className="text-xs text-stone-400">
+                              {client.notes}
+                            </div>
+                          ) : null}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div>{client.contact_name ?? "Sin contacto"}</div>
+                          <div className="text-xs text-stone-400">
+                            {client.phone ?? client.email ?? "Sin datos"}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </article>
         </section>
+
+        {session.role === "admin" ? (
+          <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+              <h2 className="text-xl font-semibold">Crear usuario</h2>
+              <form action={createUserAction} className="mt-5 space-y-4">
+                <div>
+                  <label className="mb-2 block text-sm text-stone-300" htmlFor="displayName">
+                    Nombre visible
+                  </label>
+                  <input
+                    id="displayName"
+                    name="displayName"
+                    type="text"
+                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                    placeholder="Juan Perez"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm text-stone-300" htmlFor="username">
+                    Usuario
+                  </label>
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                    placeholder="juan"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm text-stone-300" htmlFor="password">
+                    Contrasena
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                    placeholder="Minimo 6 caracteres"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm text-stone-300" htmlFor="role">
+                    Rol
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    defaultValue="staff"
+                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  >
+                    <option value="staff">Staff</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+                >
+                  Crear usuario
+                </button>
+              </form>
+            </article>
+
+            <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+              <h2 className="text-xl font-semibold">Usuarios registrados</h2>
+              <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
+                <table className="min-w-full divide-y divide-white/8 text-left text-sm">
+                  <thead className="bg-black/20 text-stone-300">
+                    <tr>
+                      <th className="px-4 py-3 font-medium">Nombre</th>
+                      <th className="px-4 py-3 font-medium">Usuario</th>
+                      <th className="px-4 py-3 font-medium">Rol</th>
+                      <th className="px-4 py-3 font-medium">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/8 bg-black/10 text-stone-100">
+                    {users.map((user) => (
+                      <tr key={user.id}>
+                        <td className="px-4 py-3">{user.display_name}</td>
+                        <td className="px-4 py-3">{user.username}</td>
+                        <td className="px-4 py-3">{user.role}</td>
+                        <td className="px-4 py-3">
+                          {user.is_active ? "Activo" : "Inactivo"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+        ) : null}
       </div>
     </main>
   );
