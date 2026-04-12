@@ -25,6 +25,13 @@ const orderStatuses: OrderStatus[] = [
   "entregado",
 ];
 
+const sideNavItems = [
+  { label: "Resumen", href: "#resumen" },
+  { label: "Clientes", href: "#clientes" },
+  { label: "Pedidos", href: "#pedidos" },
+  { label: "Equipo", href: "#equipo" },
+];
+
 async function createUserAction(formData: FormData) {
   "use server";
 
@@ -205,39 +212,110 @@ export default async function DashboardPage({
   });
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,_#16110e_0%,_#2b1d17_100%)] px-6 py-8 text-stone-50 sm:px-10">
-      <div className="mx-auto flex max-w-7xl flex-col gap-8">
-        <header className="flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.25)] backdrop-blur lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-amber-300">
-              Centro de control
+    <main className="min-h-screen bg-[linear-gradient(180deg,_#160f0c_0%,_#241713_42%,_#2f211b_100%)] text-stone-50">
+      <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-4 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-8">
+        <aside className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.24)] backdrop-blur lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]">
+          <div className="border-b border-white/8 pb-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-amber-300">
+              Imprenta Atlas
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Bienvenido, {session.displayName}
+            <h1 className="mt-3 text-2xl font-semibold tracking-tight">
+              Panel principal
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-300">
-              Sesion iniciada como `{session.username}` con rol `{session.role}`.
-              Desde aqui podras administrar pedidos, clientes y accesos del equipo.
+            <p className="mt-2 text-sm leading-6 text-stone-300">
+              Opera clientes, pedidos y equipo desde un solo lugar.
             </p>
           </div>
 
-          <form action={signOutAction}>
+          <nav className="mt-6 space-y-2">
+            {sideNavItems.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="flex items-center justify-between rounded-2xl border border-white/8 bg-black/10 px-4 py-3 text-sm text-stone-200 transition hover:border-amber-400/40 hover:bg-black/20"
+              >
+                <span>{item.label}</span>
+                <span className="text-amber-300">+</span>
+              </a>
+            ))}
+          </nav>
+
+          <div className="mt-6 rounded-[1.6rem] border border-amber-300/15 bg-amber-300/10 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200">
+              Sesion
+            </p>
+            <p className="mt-3 text-lg font-semibold">{session.displayName}</p>
+            <p className="mt-1 text-sm text-stone-300">
+              @{session.username} · {session.role}
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="rounded-[1.4rem] border border-white/8 bg-black/10 px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-stone-400">
+                Activos
+              </p>
+              <p className="mt-2 text-3xl font-semibold">{activeOrders.length}</p>
+              <p className="mt-1 text-sm text-stone-300">Pedidos en curso</p>
+            </div>
+            <div className="rounded-[1.4rem] border border-white/8 bg-black/10 px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-stone-400">
+                Clientes
+              </p>
+              <p className="mt-2 text-3xl font-semibold">{clients.length}</p>
+              <p className="mt-1 text-sm text-stone-300">Base registrada</p>
+            </div>
+          </div>
+
+          <form action={signOutAction} className="mt-6">
             <button
               type="submit"
-              className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-stone-100 transition hover:bg-white/5"
+              className="w-full rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-stone-100 transition hover:bg-white/5"
             >
               Cerrar sesion
             </button>
           </form>
-        </header>
+        </aside>
 
-        {message || schemaMessage ? (
-          <div className="rounded-[1.5rem] border border-amber-300/40 bg-amber-50 px-5 py-4 text-sm text-amber-950">
-            {message || schemaMessage}
-          </div>
-        ) : null}
+        <div className="flex min-w-0 flex-col gap-6">
+          <header className="rounded-[2rem] border border-white/10 bg-white/6 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.2)] backdrop-blur">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-amber-300">
+                  Centro de control
+                </p>
+                <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+                  Bienvenido, {session.displayName}
+                </h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-300">
+                  Organiza produccion, agenda de entregas y atencion al cliente
+                  en un tablero mas claro y facil de operar.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="#clientes"
+                  className="rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+                >
+                  Nuevo cliente
+                </a>
+                <a
+                  href="#pedidos"
+                  className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-stone-100 transition hover:bg-white/5"
+                >
+                  Nuevo pedido
+                </a>
+              </div>
+            </div>
+          </header>
 
-        <section className="grid gap-4 md:grid-cols-3">
+          {message || schemaMessage ? (
+            <div className="rounded-[1.5rem] border border-amber-300/40 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+              {message || schemaMessage}
+            </div>
+          ) : null}
+
+          <section id="resumen" className="grid gap-4 md:grid-cols-3">
           {[
             {
               label: "Pedidos activos",
@@ -257,17 +335,20 @@ export default async function DashboardPage({
           ].map((card) => (
             <article
               key={card.label}
-              className="rounded-[1.75rem] border border-white/10 bg-white/6 p-5 shadow-lg"
+              className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.09),_rgba(255,255,255,0.04))] p-5 shadow-lg"
             >
               <p className="text-sm text-stone-300">{card.label}</p>
               <p className="mt-3 text-4xl font-semibold">{card.value}</p>
               <p className="mt-2 text-sm text-amber-200">{card.detail}</p>
             </article>
           ))}
-        </section>
+          </section>
 
-        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+          <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            <article
+              id="clientes"
+              className="rounded-[2rem] border border-white/10 bg-white/6 p-6"
+            >
             <h2 className="text-xl font-semibold">Crear cliente</h2>
             <form action={createClientAction} className="mt-5 space-y-4">
               <div>
@@ -321,9 +402,12 @@ export default async function DashboardPage({
                 Guardar cliente
               </button>
             </form>
-          </article>
+            </article>
 
-          <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+            <article
+              id="pedidos"
+              className="rounded-[2rem] border border-white/10 bg-white/6 p-6"
+            >
             <h2 className="text-xl font-semibold">Crear pedido</h2>
             <form action={createOrderAction} className="mt-5 space-y-4">
               <div>
@@ -418,11 +502,11 @@ export default async function DashboardPage({
                 Guardar pedido
               </button>
             </form>
-          </article>
-        </section>
+            </article>
+          </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+          <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
             <h2 className="text-xl font-semibold">Pedidos recientes</h2>
             <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
               <table className="min-w-full divide-y divide-white/8 text-left text-sm">
@@ -463,9 +547,9 @@ export default async function DashboardPage({
                 </tbody>
               </table>
             </div>
-          </article>
+            </article>
 
-          <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+            <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
             <h2 className="text-xl font-semibold">Clientes registrados</h2>
             <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
               <table className="min-w-full divide-y divide-white/8 text-left text-sm">
@@ -505,12 +589,15 @@ export default async function DashboardPage({
                 </tbody>
               </table>
             </div>
-          </article>
-        </section>
+            </article>
+          </section>
 
-        {session.role === "admin" ? (
-          <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+          {session.role === "admin" ? (
+            <section
+              id="equipo"
+              className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]"
+            >
+              <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
               <h2 className="text-xl font-semibold">Crear usuario</h2>
               <form action={createUserAction} className="mt-5 space-y-4">
                 <div>
@@ -573,9 +660,9 @@ export default async function DashboardPage({
                   Crear usuario
                 </button>
               </form>
-            </article>
+              </article>
 
-            <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+              <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
               <h2 className="text-xl font-semibold">Usuarios registrados</h2>
               <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
                 <table className="min-w-full divide-y divide-white/8 text-left text-sm">
@@ -601,9 +688,10 @@ export default async function DashboardPage({
                   </tbody>
                 </table>
               </div>
-            </article>
-          </section>
-        ) : null}
+              </article>
+            </section>
+          ) : null}
+        </div>
       </div>
     </main>
   );
