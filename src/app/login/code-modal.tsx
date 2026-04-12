@@ -1,13 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { resetPendingLoginAction, verifyCodeAction } from "@/app/login/actions";
+import {
+  resetPendingLoginAction,
+  verifyCodeStateAction,
+  type VerifyCodeState,
+} from "@/app/login/actions";
 
 type CodeModalProps = {
   displayName: string;
   username: string;
   message: string;
+};
+
+const initialState: VerifyCodeState = {
+  status: "idle",
+  message: "",
 };
 
 export function CodeModal({
@@ -16,13 +26,47 @@ export function CodeModal({
   message,
 }: CodeModalProps) {
   const [code, setCode] = useState("");
+  const router = useRouter();
   const submitRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, pending] = useActionState(
+    verifyCodeStateAction,
+    initialState,
+  );
+
+  const visualStatus = pending ? "loading" : state.status;
+  const feedbackMessage = state.message || message;
 
   useEffect(() => {
-    if (code.length === 4) {
+    if (code.length === 4 && !pending && state.status !== "success") {
       submitRef.current?.requestSubmit();
     }
-  }, [code]);
+  }, [code, pending, state.status]);
+
+  useEffect(() => {
+    if (state.status === "success") {
+      const timeout = window.setTimeout(() => {
+        router.push("/dashboard");
+      }, 550);
+
+      return () => window.clearTimeout(timeout);
+    }
+  }, [router, state.status]);
+
+  const inputClasses =
+    visualStatus === "loading"
+      ? "border-blue-300 bg-blue-50 ring-2 ring-blue-100 animate-pulse"
+      : visualStatus === "error"
+        ? "border-rose-300 bg-rose-50 ring-2 ring-rose-100"
+        : visualStatus === "success"
+          ? "border-emerald-300 bg-emerald-50 ring-2 ring-emerald-100"
+          : "border-slate-200 bg-slate-50 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100";
+
+  const messageClasses =
+    visualStatus === "error"
+      ? "border-rose-200 bg-rose-50 text-rose-700"
+      : visualStatus === "success"
+        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+        : "border-blue-200 bg-blue-50 text-slate-700";
 
   return (
     <div className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-slate-950/28 p-4 backdrop-blur-sm">
@@ -52,13 +96,15 @@ export function CodeModal({
           </form>
         </div>
 
-        {message ? (
-          <div className="mt-5 rounded-[1.2rem] border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-slate-700">
-            {message}
+        {feedbackMessage ? (
+          <div
+            className={`mt-5 rounded-[1.2rem] border px-4 py-3 text-sm leading-6 ${messageClasses}`}
+          >
+            {feedbackMessage}
           </div>
         ) : null}
 
-        <form ref={submitRef} action={verifyCodeAction} className="mt-6 space-y-4">
+        <form ref={submitRef} action={formAction} className="mt-6 space-y-4">
           <div>
             <label
               htmlFor="modal-password"
@@ -77,16 +123,22 @@ export function CodeModal({
               onChange={(event) =>
                 setCode(event.target.value.replace(/\D/g, "").slice(0, 4))
               }
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-2xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+              className={`w-full rounded-2xl px-4 py-3.5 text-center text-2xl tracking-[0.45em] text-slate-950 outline-none transition ${inputClasses}`}
               required
               autoFocus
+              disabled={visualStatus === "loading" || visualStatus === "success"}
             />
           </div>
           <button
             type="submit"
-            className="w-full rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+            className="w-full rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+            disabled={visualStatus === "loading" || visualStatus === "success"}
           >
-            Entrar al panel
+            {visualStatus === "loading"
+              ? "Validando..."
+              : visualStatus === "success"
+                ? "Correcto"
+                : "Entrar al panel"}
           </button>
         </form>
       </div>

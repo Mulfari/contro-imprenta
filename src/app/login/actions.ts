@@ -19,6 +19,11 @@ import {
 } from "@/lib/users";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
 
+export type VerifyCodeState = {
+  status: "idle" | "error" | "success";
+  message: string;
+};
+
 function encodeMessage(message: string) {
   return encodeURIComponent(message);
 }
@@ -35,20 +40,6 @@ function getIdentifier(formData: FormData) {
   }
 
   return identifier;
-}
-
-function getCode(formData: FormData) {
-  const password = String(formData.get("password") ?? "").trim();
-
-  if (!/^\d{4}$/.test(password)) {
-    redirect(
-      `/login?message=${encodeMessage(
-        "Escribe el codigo de 4 digitos para continuar.",
-      )}&step=code`,
-    );
-  }
-
-  return password;
 }
 
 export async function verifyIdentifierAction(formData: FormData) {
@@ -98,32 +89,45 @@ export async function verifyIdentifierAction(formData: FormData) {
   redirect("/login?step=code");
 }
 
-export async function verifyCodeAction(formData: FormData) {
+export async function verifyCodeStateAction(
+  _previousState: VerifyCodeState,
+  formData: FormData,
+): Promise<VerifyCodeState> {
   if (!hasPanelAuthConfig()) {
-    redirect(
-      `/login?message=${encodeMessage(
-        "Configura Supabase y APP_SESSION_SECRET antes de usar el login.",
-      )}`,
-    );
+    return {
+      status: "error",
+      message: "Configura Supabase y APP_SESSION_SECRET antes de usar el login.",
+    };
   }
 
   const pendingLogin = await getPendingLogin();
 
   if (!pendingLogin) {
-    redirect("/login?message=Primero%20verifica%20tu%20usuario%20o%20cedula");
+    return {
+      status: "error",
+      message: "Primero verifica tu usuario o cedula.",
+    };
   }
 
-  const password = getCode(formData);
+  const password = String(formData.get("password") ?? "").trim();
+
+  if (!/^\d{4}$/.test(password)) {
+    return {
+      status: "error",
+      message: "Ingresa un codigo valido.",
+    };
+  }
+
   let user;
 
   try {
     user = await authenticateUser(pendingLogin.identifier, password);
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "No se pudo validar el codigo.";
-    redirect(`/login?message=${encodeMessage(message)}&step=code`);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "No se pudo validar el codigo.",
+    };
   }
 
   if (!user) {
@@ -143,16 +147,21 @@ export async function verifyCodeAction(formData: FormData) {
       attempts: shouldAlert ? 0 : nextAttempts,
     });
 
-    const failedMessage = "Codigo incorrecto.";
-
-    redirect(`/login?message=${encodeMessage(failedMessage)}&step=code`);
+    return {
+      status: "error",
+      message: "Codigo incorrecto.",
+    };
   }
 
   await clearPendingLogin();
   await startSession(toSessionUser(user));
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+
+  return {
+    status: "success",
+    message: "Codigo correcto.",
+  };
 }
 
 export async function resetPendingLoginAction() {
