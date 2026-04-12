@@ -1,12 +1,13 @@
 # Control de Imprenta
 
-Base inicial para una tienda de imprenta construida con Next.js 16, Supabase Auth y despliegue pensado para Vercel.
+Base inicial para una tienda de imprenta construida con Next.js 16, Supabase y despliegue pensado para Vercel.
 
 ## Que incluye
 
 - Portada comercial para presentar el sistema.
-- Login y registro por correo usando Supabase Auth.
-- Dashboard protegido para usuarios autenticados.
+- Login con nombre de usuario y contrasena.
+- Admin inicial configurable por variables de entorno.
+- Dashboard protegido y modulo base para crear mas usuarios.
 - Middleware para mantener la sesion activa en App Router.
 - Archivos listos para publicar en GitHub y desplegar en Vercel.
 
@@ -22,16 +23,20 @@ Base inicial para una tienda de imprenta construida con Next.js 16, Supabase Aut
 1. Crea un proyecto en Supabase.
 2. En Supabase, ve a `Project Settings > API` y copia:
    - `Project URL`
-   - `anon public key`
+   - `service_role key`
 3. Duplica `.env.example` como `.env.local`.
 4. Completa las variables:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
+APP_SESSION_SECRET=una-clave-larga-y-segura
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=cambia-esta-contrasena
+ADMIN_DISPLAY_NAME=Administrador
 ```
 
-5. En Supabase, confirma que `Authentication > Providers > Email` este habilitado.
+5. Crea la tabla de usuarios ejecutando el SQL de [supabase/setup.sql](/C:/Users/joses/OneDrive/Documentos/control-imprenta/supabase/setup.sql) en el SQL Editor de Supabase.
 6. Instala dependencias y levanta el proyecto:
 
 ```bash
@@ -69,3 +74,8 @@ vercel --prod
 - Tabla de clientes.
 - Cotizaciones y estados de produccion.
 - Reportes de ventas y entregas.
+
+## Primer acceso
+
+- En el primer inicio de sesion, la app asegura automaticamente el usuario admin definido por `ADMIN_USERNAME` y `ADMIN_PASSWORD`.
+- Ese admin entra al panel y crea el resto de usuarios internos.

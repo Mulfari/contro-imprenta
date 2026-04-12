@@ -1,52 +1,46 @@
-import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
 import {
-  getSupabaseCredentials,
-  hasSupabaseCredentials,
+  getSessionSecret,
+  hasPanelAuthConfig,
 } from "@/lib/supabase/config";
+import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request,
   });
 
-  if (!hasSupabaseCredentials()) {
+  if (!hasPanelAuthConfig()) {
     return response;
   }
 
-  const { url, anonKey } = getSupabaseCredentials();
-  const supabase = createServerClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({
-          request,
-        });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options),
-        );
-      },
-    },
-  });
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  let hasValidSession = false;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (token) {
+    try {
+      await jwtVerify(
+        token,
+        new TextEncoder().encode(getSessionSecret()),
+      );
+      hasValidSession = true;
+    } catch {
+      hasValidSession = false;
+    }
+  }
 
   const pathname = request.nextUrl.pathname;
 
-  if (!user && pathname.startsWith("/dashboard")) {
+  if (!hasValidSession && pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("message", "Inicia sesion para entrar al tablero");
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === "/login") {
+  if (hasValidSession && pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";

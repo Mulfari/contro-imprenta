@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { signInAction, signUpAction } from "@/app/login/actions";
-import { hasSupabaseCredentials } from "@/lib/supabase/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { signInAction } from "@/app/login/actions";
+import { getCurrentSession } from "@/lib/auth/session";
+import { hasPanelAuthConfig } from "@/lib/supabase/config";
 
 type LoginPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -21,15 +21,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const message = resolveMessage(params.message);
 
-  if (hasSupabaseCredentials()) {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const session = await getCurrentSession();
 
-    if (user) {
-      redirect("/dashboard");
-    }
+  if (session) {
+    redirect("/dashboard");
   }
 
   return (
@@ -51,9 +46,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              "Acceso seguro con Supabase Auth",
+              "Acceso por usuario y contrasena",
+              "Admin inicial configurable por variables",
               "Preparado para publicar en Vercel",
-              "Base lista para modulos de pedidos y reportes",
+              "Base lista para crear mas usuarios desde el panel",
             ].map((item) => (
               <div
                 key={item}
@@ -73,7 +69,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   Login
                 </p>
                 <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">
-                  Entrar o crear cuenta
+                  Entrar al panel
                 </h2>
               </div>
               <Link
@@ -90,27 +86,27 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </div>
             ) : null}
 
-            {!hasSupabaseCredentials() ? (
+            {!hasPanelAuthConfig() ? (
               <div className="mt-6 rounded-[1.5rem] border border-dashed border-rose-300 bg-rose-50 px-4 py-4 text-sm leading-6 text-rose-950">
-                Falta configurar `NEXT_PUBLIC_SUPABASE_URL` y
-                `NEXT_PUBLIC_SUPABASE_ANON_KEY` en `.env.local` para activar el
-                login real.
+                Falta configurar `NEXT_PUBLIC_SUPABASE_URL`,
+                `SUPABASE_SERVICE_ROLE_KEY`, `APP_SESSION_SECRET`,
+                `ADMIN_USERNAME` y `ADMIN_PASSWORD`.
               </div>
             ) : null}
 
             <form className="mt-8 space-y-5">
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="username"
                   className="mb-2 block text-sm font-medium text-stone-700"
                 >
-                  Correo
+                  Usuario
                 </label>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="ventas@tuimprenta.com"
+                  id="username"
+                  name="username"
+                  type="text"
+                  placeholder="admin"
                   className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 text-stone-950 outline-none transition focus:border-amber-500 focus:bg-white"
                   required
                 />
@@ -137,24 +133,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 <button
                   type="submit"
                   formAction={signInAction}
-                  className="flex-1 rounded-full bg-stone-950 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-800"
+                  className="w-full rounded-full bg-stone-950 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-800"
                 >
                   Iniciar sesion
-                </button>
-                <button
-                  type="submit"
-                  formAction={signUpAction}
-                  className="flex-1 rounded-full border border-stone-900/10 px-5 py-3.5 text-sm font-semibold text-stone-800 transition hover:bg-stone-900/5"
-                >
-                  Crear cuenta
                 </button>
               </div>
             </form>
 
             <p className="mt-6 text-sm leading-6 text-stone-600">
-              Siguiente paso recomendado: crear el proyecto en Supabase,
-              habilitar Email/Password y copiar las variables en tu entorno
-              local y en Vercel.
+              El primer acceso lo controla el usuario admin definido en las
+              variables del proyecto. Luego, desde el panel, ese admin podra
+              crear los demas usuarios.
             </p>
           </div>
         </section>

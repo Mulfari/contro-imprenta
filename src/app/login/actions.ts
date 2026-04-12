@@ -3,91 +3,66 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { hasSupabaseCredentials } from "@/lib/supabase/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { endSession, startSession } from "@/lib/auth/session";
+import { authenticateUser, toSessionUser } from "@/lib/users";
+import { hasPanelAuthConfig } from "@/lib/supabase/config";
 
 function encodeMessage(message: string) {
   return encodeURIComponent(message);
 }
 
 function getCredentials(formData: FormData) {
-  const email = String(formData.get("email") ?? "").trim();
+  const username = String(formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "").trim();
 
-  if (!email || !password) {
+  if (!username || !password) {
     redirect(
       `/login?message=${encodeMessage(
-        "Escribe tu correo y tu contrasena para continuar.",
+        "Escribe tu usuario y tu contrasena para continuar.",
       )}`,
     );
   }
 
-  return { email, password };
-}
-
-function getFriendlyError(message: string) {
-  if (message.toLowerCase().includes("invalid login credentials")) {
-    return "Credenciales invalidas. Revisa tu correo y contrasena.";
-  }
-
-  if (message.toLowerCase().includes("email not confirmed")) {
-    return "Debes confirmar tu correo antes de iniciar sesion.";
-  }
-
-  return message;
+  return { username, password };
 }
 
 export async function signInAction(formData: FormData) {
-  if (!hasSupabaseCredentials()) {
+  if (!hasPanelAuthConfig()) {
     redirect(
       `/login?message=${encodeMessage(
-        "Configura las variables de Supabase antes de usar el login.",
+        "Configura Supabase, APP_SESSION_SECRET, ADMIN_USERNAME y ADMIN_PASSWORD antes de usar el login.",
       )}`,
     );
   }
 
-  const { email, password } = getCredentials(formData);
-  const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { username, password } = getCredentials(formData);
 
-  if (error) {
-    redirect(`/login?message=${encodeMessage(getFriendlyError(error.message))}`);
+  try {
+    const user = await authenticateUser(username, password);
+
+    if (!user) {
+      redirect(
+        `/login?message=${encodeMessage(
+          "Credenciales invalidas. Revisa tu usuario y tu contrasena.",
+        )}`,
+      );
+    }
+
+    await startSession(toSessionUser(user));
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No se pudo iniciar sesion con este usuario.";
+    redirect(`/login?message=${encodeMessage(message)}`);
   }
 
   revalidatePath("/", "layout");
   redirect("/dashboard");
 }
 
-export async function signUpAction(formData: FormData) {
-  if (!hasSupabaseCredentials()) {
-    redirect(
-      `/login?message=${encodeMessage(
-        "Configura las variables de Supabase antes de crear usuarios.",
-      )}`,
-    );
-  }
-
-  const { email, password } = getCredentials(formData);
-  const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.signUp({ email, password });
-
-  if (error) {
-    redirect(`/login?message=${encodeMessage(getFriendlyError(error.message))}`);
-  }
-
-  revalidatePath("/", "layout");
-  redirect(
-    `/login?message=${encodeMessage(
-      "Cuenta creada. Si activaste confirmacion por correo, revisa tu bandeja.",
-    )}`,
-  );
-}
-
 export async function signOutAction() {
-  if (hasSupabaseCredentials()) {
-    const supabase = await createServerSupabaseClient();
-    await supabase.auth.signOut();
-  }
+  await endSession();
 
   revalidatePath("/", "layout");
   redirect("/login?message=Sesion%20cerrada");

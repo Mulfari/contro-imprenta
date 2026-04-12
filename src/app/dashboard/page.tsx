@@ -1,21 +1,64 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { revalidatePath } from "next/cache";
+
 import { signOutAction } from "@/app/login/actions";
-import { hasSupabaseCredentials } from "@/lib/supabase/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getCurrentSession } from "@/lib/auth/session";
+import { hasPanelAuthConfig } from "@/lib/supabase/config";
+import { createUser, listUsers } from "@/lib/users";
 
-async function getAuthenticatedUser() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+async function createUserAction(formData: FormData) {
+  "use server";
 
-  return user;
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const username = String(formData.get("username") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const displayName = String(formData.get("displayName") ?? "");
+  const role = String(formData.get("role") ?? "staff");
+
+  try {
+    await createUser({
+      username,
+      password,
+      displayName,
+      role: role === "admin" ? "admin" : "staff",
+      createdBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No se pudo crear el usuario.";
+
+    redirect(`/dashboard?message=${encodeURIComponent(message)}`);
+  }
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard?message=Usuario%20creado");
 }
 
-export default async function DashboardPage() {
-  if (!hasSupabaseCredentials()) {
+type DashboardPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function resolveMessage(message: string | string[] | undefined) {
+  if (Array.isArray(message)) {
+    return message[0] ?? "";
+  }
+
+  return message ?? "";
+}
+
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
+  if (!hasPanelAuthConfig()) {
     return (
       <main className="min-h-screen bg-stone-950 px-6 py-10 text-stone-50 sm:px-10">
         <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
@@ -23,12 +66,12 @@ export default async function DashboardPage() {
             Configuracion pendiente
           </p>
           <h1 className="mt-4 text-4xl font-semibold tracking-tight">
-            Conecta Supabase para activar el panel.
+            Termina la configuracion del panel.
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300">
-            El dashboard ya esta creado, pero necesita tus variables
-            `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` para
-            verificar sesiones reales.
+            El dashboard ahora usa usuarios propios. Configura
+            `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+            `APP_SESSION_SECRET`, `ADMIN_USERNAME` y `ADMIN_PASSWORD`.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -49,11 +92,15 @@ export default async function DashboardPage() {
     );
   }
 
-  const user = await getAuthenticatedUser();
+  const session = await getCurrentSession();
+  const params = await searchParams;
+  const message = resolveMessage(params.message);
 
-  if (!user) {
+  if (!session) {
     redirect("/login?message=Inicia%20sesion%20para%20entrar%20al%20tablero");
   }
+
+  const users = await listUsers();
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,_#16110e_0%,_#2b1d17_100%)] px-6 py-8 text-stone-50 sm:px-10">
@@ -64,11 +111,11 @@ export default async function DashboardPage() {
               Centro de control
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Bienvenido, {user.email}
+              Bienvenido, {session.displayName}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-300">
-              Este dashboard es el punto de partida para administrar pedidos de
-              impresion, seguimientos, clientes frecuentes y entregas.
+              Sesion iniciada como `{session.username}` con rol `{session.role}`.
+              Desde aqui podras administrar pedidos, clientes y accesos del equipo.
             </p>
           </div>
 
@@ -82,11 +129,21 @@ export default async function DashboardPage() {
           </form>
         </header>
 
+        {message ? (
+          <div className="rounded-[1.5rem] border border-amber-300/40 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+            {message}
+          </div>
+        ) : null}
+
         <section className="grid gap-4 md:grid-cols-3">
           {[
             { label: "Pedidos hoy", value: "12", detail: "4 en impresion" },
             { label: "Entregas cercanas", value: "5", detail: "Proximas 48h" },
-            { label: "Clientes activos", value: "28", detail: "Con orden este mes" },
+            {
+              label: "Usuarios del panel",
+              value: String(users.length),
+              detail: `${users.filter((user) => user.role === "admin").length} admins activos`,
+            },
           ].map((card) => (
             <article
               key={card.label}
@@ -123,25 +180,97 @@ export default async function DashboardPage() {
           </article>
 
           <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
-            <h2 className="text-xl font-semibold">Modulos que siguen</h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {[
-                "Cotizaciones rapidas",
-                "Agenda de entregas",
-                "Control de materiales",
-                "Historial por cliente",
-                "Reportes mensuales",
-                "Roles de usuarios",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-[1.5rem] border border-white/8 bg-black/10 px-4 py-4 text-sm text-stone-200"
+            <h2 className="text-xl font-semibold">Crear usuario</h2>
+            <form action={createUserAction} className="mt-5 space-y-4">
+              <div>
+                <label className="mb-2 block text-sm text-stone-300" htmlFor="displayName">
+                  Nombre visible
+                </label>
+                <input
+                  id="displayName"
+                  name="displayName"
+                  type="text"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  placeholder="Juan Perez"
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-stone-300" htmlFor="username">
+                  Usuario
+                </label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  placeholder="juan"
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-stone-300" htmlFor="password">
+                  Contrasena
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  placeholder="Minimo 6 caracteres"
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-stone-300" htmlFor="role">
+                  Rol
+                </label>
+                <select
+                  id="role"
+                  name="role"
+                  defaultValue="staff"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
                 >
-                  {item}
-                </div>
-              ))}
-            </div>
+                  <option value="staff">Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+              >
+                Crear usuario
+              </button>
+            </form>
           </article>
+        </section>
+
+        <section className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+          <h2 className="text-xl font-semibold">Usuarios registrados</h2>
+          <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
+            <table className="min-w-full divide-y divide-white/8 text-left text-sm">
+              <thead className="bg-black/20 text-stone-300">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Nombre</th>
+                  <th className="px-4 py-3 font-medium">Usuario</th>
+                  <th className="px-4 py-3 font-medium">Rol</th>
+                  <th className="px-4 py-3 font-medium">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/8 bg-black/10 text-stone-100">
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td className="px-4 py-3">{user.display_name}</td>
+                    <td className="px-4 py-3">{user.username}</td>
+                    <td className="px-4 py-3">{user.role}</td>
+                    <td className="px-4 py-3">
+                      {user.is_active ? "Activo" : "Inactivo"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
     </main>

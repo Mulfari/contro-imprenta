@@ -1,31 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { hasSupabaseCredentials } from "@/lib/supabase/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-
-async function getCurrentUserEmail() {
-  if (!hasSupabaseCredentials()) {
-    return null;
-  }
-
-  try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    return user?.email ?? null;
-  } catch {
-    return null;
-  }
-}
+import { getCurrentSession } from "@/lib/auth/session";
+import { hasPanelAuthConfig } from "@/lib/supabase/config";
 
 export default async function Home() {
-  const userEmail = await getCurrentUserEmail();
-  const hasSupabase = hasSupabaseCredentials();
+  const session = await getCurrentSession();
+  const hasPanelConfig = hasPanelAuthConfig();
 
-  if (userEmail) {
+  if (session) {
     redirect("/dashboard");
   }
 
@@ -70,9 +53,9 @@ export default async function Home() {
                 sueltas ni pedidos perdidos.
               </h2>
               <p className="max-w-2xl text-lg leading-8 text-stone-700">
-                Esta primera version ya incluye una portada comercial, login con
-                Supabase, dashboard protegido y estructura lista para crecer con
-                pedidos, clientes, cotizaciones y estados de produccion.
+                Esta primera version ya incluye una portada comercial, login por
+                usuario, dashboard protegido y una base para que el admin cree
+                mas usuarios del sistema sin depender de correos.
               </p>
             </div>
 
@@ -142,9 +125,9 @@ export default async function Home() {
             <div className="mt-6 space-y-4">
               {[
                 "Aplicacion Next.js 16 con App Router",
-                "Login por correo y password usando Supabase Auth",
-                "Dashboard protegido para usuarios autenticados",
-                "Variables de entorno y README para despliegue",
+                "Acceso por usuario y contrasena con sesion por cookie",
+                "Panel admin para crear nuevos usuarios",
+                "Variables de entorno, SQL y README para despliegue",
               ].map((item) => (
                 <div
                   key={item}
@@ -158,14 +141,14 @@ export default async function Home() {
 
             <div className="mt-8 rounded-[1.5rem] border border-dashed border-amber-300/30 bg-amber-300/10 p-5">
               <p className="text-sm font-semibold text-amber-200">
-                {hasSupabase
-                  ? "Supabase parece listo para conectarse."
-                  : "Faltan las credenciales de Supabase para activar el login real."}
+                {hasPanelConfig
+                  ? "El panel parece listo para crear el admin inicial."
+                  : "Falta terminar las variables del panel y del admin inicial."}
               </p>
               <p className="mt-2 text-sm leading-6 text-amber-50/90">
-                {hasSupabase
-                  ? "Cuando agregues usuarios en Supabase ya podras iniciar sesion desde esta misma interfaz."
-                  : "Agrega NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en tu archivo .env.local y en Vercel."}
+                {hasPanelConfig
+                  ? "En el primer login se asegura automaticamente el usuario admin definido en las variables."
+                  : "Agrega NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, APP_SESSION_SECRET, ADMIN_USERNAME y ADMIN_PASSWORD."}
               </p>
             </div>
           </aside>
