@@ -241,8 +241,8 @@ export default async function DashboardPage({
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,_#160f0c_0%,_#241713_42%,_#2f211b_100%)] text-stone-50">
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6 lg:flex-row lg:px-8">
-        <aside className="w-full shrink-0 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.24)] backdrop-blur lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-[280px]">
+      <div className="flex min-h-screen flex-col gap-6 px-4 py-4 sm:px-6 lg:block lg:px-0 lg:py-0">
+        <aside className="w-full shrink-0 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.24)] backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[300px] lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-6 lg:py-8">
           <div className="border-b border-white/8 pb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-amber-300">
               Imprenta Atlas
@@ -313,7 +313,7 @@ export default async function DashboardPage({
           </form>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-6 lg:ml-[300px] lg:px-8 lg:py-6">
           <header className="rounded-[2rem] border border-white/10 bg-white/6 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.2)] backdrop-blur">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
