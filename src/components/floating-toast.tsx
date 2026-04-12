@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { createPortal } from "react-dom";
 
 type FloatingToastProps = {
   message: string;
@@ -67,7 +68,7 @@ function AnimatedToast({ message }: AnimatedToastProps) {
         ? "border-emerald-200/80 bg-emerald-50/92 text-emerald-700 shadow-[0_24px_60px_rgba(5,150,105,0.16)]"
         : "border-blue-200/80 bg-blue-50/90 text-slate-700 shadow-[0_24px_60px_rgba(59,130,246,0.14)]";
 
-  return (
+  const toast = (
     <div className="pointer-events-none fixed inset-x-0 top-5 z-50 flex justify-center px-4">
       <div
         className={`pointer-events-auto w-full max-w-md rounded-[1.35rem] border px-5 py-4 text-center text-sm font-medium backdrop-blur-xl ${
@@ -80,6 +81,12 @@ function AnimatedToast({ message }: AnimatedToastProps) {
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(toast, document.body);
 }
 
 export function FloatingToast({ message }: FloatingToastProps) {
