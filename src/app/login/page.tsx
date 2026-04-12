@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { verifyIdentifierAction } from "@/app/login/actions";
 import { CodeModal } from "@/app/login/code-modal";
+import { IdentifierForm } from "@/app/login/identifier-form";
 import { FloatingToast } from "@/components/floating-toast";
 import { getCurrentSession, getPendingLogin } from "@/lib/auth/session";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
@@ -47,18 +47,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.94)_42%,_rgba(232,236,241,0.96)_100%)] px-6 py-8 sm:px-10">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.95)_38%,_rgba(232,236,241,0.98)_100%)] px-6 py-8 sm:px-10">
       <FloatingToast message={message} />
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl items-center justify-center">
-        <section className="relative w-full max-w-md rounded-[2rem] border border-slate-200 bg-white/92 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur transition">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
+        <section className="relative w-full max-w-xl rounded-[2.3rem] border border-slate-200/90 bg-white/90 p-10 shadow-[0_38px_110px_rgba(15,23,42,0.1)] backdrop-blur-xl sm:p-12">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-                Imprenta Atlas
+              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
+                Panel administrativo
               </p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-                Iniciar sesion
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+                Inicia sesion
               </h1>
+              <p className="mt-3 text-lg font-medium text-slate-600">
+                Express Printer
+              </p>
             </div>
             <Link
               href="/"
@@ -75,36 +78,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           ) : null}
 
-          <form className="mt-8 space-y-5" noValidate>
-            <div>
-              <label
-                htmlFor="identifier"
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
-                Usuario o cedula
-              </label>
-              <input
-                id="identifier"
-                name="identifier"
-                type="text"
-                maxLength={8}
-                placeholder="Ingresa tu acceso"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-                defaultValue={pendingLogin?.identifier ?? ""}
-              />
-              <p className="mt-2 text-xs leading-5 text-slate-500">
-                Puedes entrar con tu usuario o tu cedula.
-              </p>
-            </div>
-
-            <button
-              type="submit"
-              formAction={verifyIdentifierAction}
-              className="w-full rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700"
-            >
-              Continuar
-            </button>
-          </form>
+          <IdentifierForm defaultValue={pendingLogin?.identifier ?? ""} />
 
           {isCodeStep ? (
             <CodeModal

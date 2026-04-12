@@ -87,7 +87,7 @@ export function CodeModal({
 
   const modal = (
     <div className="fixed inset-0 z-[60]">
-      <div className="absolute inset-0 bg-slate-950/64 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-white/18 backdrop-blur-xl" />
       <div className="relative flex min-h-screen items-center justify-center p-4">
         <FloatingToast message={state.message} />
         <div className="w-full max-w-sm rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.18)]">
