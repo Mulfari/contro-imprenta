@@ -14,12 +14,6 @@ create table if not exists public.app_users (
   created_by uuid null references public.app_users(id) on delete set null
 );
 
-create unique index if not exists app_users_national_id_idx
-  on public.app_users (national_id);
-
-create unique index if not exists app_users_username_idx
-  on public.app_users (username);
-
 alter table public.app_users enable row level security;
 
 alter table public.app_users add column if not exists national_id text;
@@ -32,6 +26,12 @@ alter table public.app_users add column if not exists role text;
 alter table public.app_users add column if not exists is_active boolean default true;
 alter table public.app_users add column if not exists created_at timestamptz default now();
 alter table public.app_users add column if not exists created_by uuid null;
+
+create unique index if not exists app_users_national_id_idx
+  on public.app_users (national_id);
+
+create unique index if not exists app_users_username_idx
+  on public.app_users (username);
 
 create table if not exists public.clients (
   id uuid primary key default gen_random_uuid(),
