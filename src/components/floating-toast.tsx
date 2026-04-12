@@ -69,7 +69,7 @@ function AnimatedToast({ message }: AnimatedToastProps) {
         : "border-blue-200/80 bg-blue-50/90 text-slate-700 shadow-[0_24px_60px_rgba(59,130,246,0.14)]";
 
   const toast = (
-    <div className="pointer-events-none fixed inset-x-0 top-5 z-50 flex justify-center px-4">
+    <div className="pointer-events-none fixed inset-x-0 top-5 z-[120] flex justify-center px-4">
       <div
         className={`pointer-events-auto w-full max-w-md rounded-[1.35rem] border px-5 py-4 text-center text-sm font-medium backdrop-blur-xl ${
           toneClasses
