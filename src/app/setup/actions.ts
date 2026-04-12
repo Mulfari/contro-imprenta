@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
 import { startSession } from "@/lib/auth/session";
@@ -32,6 +33,10 @@ export async function createInitialAdminAction(formData: FormData) {
     const user = await createInitialAdmin({ displayName, username, password });
     await startSession(toSessionUser(user));
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
     const message =
       error instanceof Error ? error.message : "No se pudo crear el admin.";
     redirect(`/setup?message=${encodeMessage(message)}`);

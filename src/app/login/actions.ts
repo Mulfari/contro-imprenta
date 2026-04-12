@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
 import { endSession, startSession } from "@/lib/auth/session";
@@ -54,6 +55,10 @@ export async function signInAction(formData: FormData) {
 
     await startSession(toSessionUser(user));
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
     const message =
       error instanceof Error
         ? error.message
