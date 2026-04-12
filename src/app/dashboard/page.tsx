@@ -6,10 +6,12 @@ import { revalidatePath } from "next/cache";
 import { signOutAction } from "@/app/login/actions";
 import { getCurrentSession } from "@/lib/auth/session";
 import {
+  type Client,
   createClient,
   createOrder,
   listClients,
   listOrders,
+  type OrderWithClient,
   type OrderStatus,
 } from "@/lib/business";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
@@ -176,8 +178,19 @@ export default async function DashboardPage({
   }
 
   const users = await listUsers();
-  const clients = await listClients();
-  const orders = await listOrders();
+  let clients: Client[] = [];
+  let orders: OrderWithClient[] = [];
+  let schemaMessage = "";
+
+  try {
+    clients = await listClients();
+    orders = await listOrders();
+  } catch {
+    clients = [];
+    orders = [];
+    schemaMessage =
+      "La base de datos no coincide con la ultima version del panel. Vuelve a ejecutar setup.sql en Supabase.";
+  }
   const activeOrders = orders.filter((order) => order.status !== "entregado");
   const deliveriesSoon = orders.filter((order) => {
     if (!order.due_date || order.status === "entregado") {
@@ -218,9 +231,9 @@ export default async function DashboardPage({
           </form>
         </header>
 
-        {message ? (
+        {message || schemaMessage ? (
           <div className="rounded-[1.5rem] border border-amber-300/40 bg-amber-50 px-5 py-4 text-sm text-amber-950">
-            {message}
+            {message || schemaMessage}
           </div>
         ) : null}
 
