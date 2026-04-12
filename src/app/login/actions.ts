@@ -81,7 +81,7 @@ export async function verifyIdentifierAction(formData: FormData) {
   if (!user) {
     redirect(
       `/login?message=${encodeMessage(
-        "No encontramos un usuario con ese usuario o cedula.",
+        "Usuario o Cedula incorrecto.",
       )}`,
     );
   }
