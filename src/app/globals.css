@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8f3ed;
-  --foreground: #1f1611;
+  --background: #f5f5f7;
+  --foreground: #111827;
 }
 
 @theme inline {
@@ -21,7 +21,9 @@ html {
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.96), rgba(245, 245, 247, 0.92)),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), sans-serif;
 }
@@ -42,6 +44,6 @@ a:hover {
 }
 
 ::selection {
-  background: #d97706;
-  color: #fff7ed;
+  background: #c7d2fe;
+  color: #111827;
 }

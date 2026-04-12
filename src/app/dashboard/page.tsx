@@ -167,15 +167,15 @@ export default async function DashboardPage({
 }: DashboardPageProps) {
   if (!hasPanelAuthConfig()) {
     return (
-      <main className="min-h-screen bg-stone-950 px-6 py-10 text-stone-50 sm:px-10">
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-amber-300">
+      <main className="min-h-screen bg-[#f5f5f7] px-6 py-10 text-slate-900 sm:px-10">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-slate-200 bg-white/90 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur">
+          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-500">
             Configuracion pendiente
           </p>
           <h1 className="mt-4 text-4xl font-semibold tracking-tight">
             Termina la configuracion del panel.
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300">
+          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
             El dashboard ahora usa usuarios propios. Configura
             `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
             `APP_SESSION_SECRET`, `ADMIN_USERNAME` y `ADMIN_PASSWORD`.
@@ -183,13 +183,13 @@ export default async function DashboardPage({
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/login"
-              className="rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+              className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
             >
               Ir al login
             </Link>
             <Link
               href="/"
-              className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-stone-100 transition hover:bg-white/5"
+              className="rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
             >
               Volver al inicio
             </Link>
@@ -240,17 +240,17 @@ export default async function DashboardPage({
   );
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,_#160f0c_0%,_#241713_42%,_#2f211b_100%)] text-stone-50">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
       <div className="min-h-screen lg:pl-[290px]">
-        <aside className="w-full border border-white/10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[290px] lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7">
-          <div className="border-b border-white/8 pb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-amber-300">
+        <aside className="w-full border border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(248,250,252,0.88))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[290px] lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7">
+          <div className="border-b border-slate-200 pb-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
               Imprenta Atlas
             </p>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight">
               Panel principal
             </h1>
-            <p className="mt-2 text-sm leading-6 text-stone-300">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               Entra a un modulo y trabaja sin ver todo a la vez.
             </p>
           </div>
@@ -265,48 +265,48 @@ export default async function DashboardPage({
                   href={buildDashboardUrl(item.view)}
                   className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
                     isActive
-                      ? "border-amber-300/60 bg-amber-300/15 text-amber-100"
-                      : "border-white/8 bg-black/10 text-stone-200 hover:border-amber-400/40 hover:bg-black/20"
+                      ? "border-blue-200 bg-blue-50 text-slate-900 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.1)]"
+                      : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white"
                   }`}
                 >
                   <span>{item.label}</span>
-                  <span className="text-amber-300">{isActive ? "*" : "+"}</span>
+                  <span className="text-slate-400">{isActive ? "*" : "+"}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="mt-6 rounded-[1.6rem] border border-amber-300/15 bg-amber-300/10 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200">
+          <div className="mt-6 rounded-[1.6rem] border border-slate-200 bg-slate-50/90 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
               Sesion
             </p>
             <p className="mt-3 text-lg font-semibold">{session.displayName}</p>
-            <p className="mt-1 text-sm text-stone-300">
+            <p className="mt-1 text-sm text-slate-500">
               @{session.username} - {session.role}
             </p>
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="rounded-[1.4rem] border border-white/8 bg-black/10 px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-stone-400">
+            <div className="rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
                 Activos
               </p>
               <p className="mt-2 text-3xl font-semibold">{activeOrders.length}</p>
-              <p className="mt-1 text-sm text-stone-300">Pedidos en curso</p>
+              <p className="mt-1 text-sm text-slate-500">Pedidos en curso</p>
             </div>
-            <div className="rounded-[1.4rem] border border-white/8 bg-black/10 px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-stone-400">
+            <div className="rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
                 Clientes
               </p>
               <p className="mt-2 text-3xl font-semibold">{clients.length}</p>
-              <p className="mt-1 text-sm text-stone-300">Base registrada</p>
+              <p className="mt-1 text-sm text-slate-500">Base registrada</p>
             </div>
           </div>
 
           <form action={signOutAction} className="mt-6">
             <button
               type="submit"
-              className="w-full rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-stone-100 transition hover:bg-white/5"
+              className="w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
             >
               Cerrar sesion
             </button>
@@ -314,10 +314,10 @@ export default async function DashboardPage({
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6 px-4 py-4 sm:px-6 lg:px-5 lg:py-5">
-          <header className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+          <header className="rounded-[2rem] border border-slate-200/80 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-amber-300">
+                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-500">
                   {activeView === "resumen" ? "Centro de control" : "Modulo activo"}
                 </p>
                 <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -326,7 +326,7 @@ export default async function DashboardPage({
                   {activeView === "pedidos" ? "Pedidos" : null}
                   {activeView === "equipo" ? "Equipo" : null}
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-300">
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
                   {activeView === "resumen"
                     ? "Consulta el estado general de la imprenta y entra al modulo que necesitas."
                     : null}
@@ -344,13 +344,13 @@ export default async function DashboardPage({
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={buildDashboardUrl("clientes")}
-                  className="rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+                  className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
                 >
                   Cliente
                 </Link>
                 <Link
                   href={buildDashboardUrl("pedidos")}
-                  className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-stone-100 transition hover:bg-white/5"
+                  className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
                 >
                   Pedido
                 </Link>
@@ -359,7 +359,7 @@ export default async function DashboardPage({
           </header>
 
           {message || schemaMessage ? (
-            <div className="rounded-[1.5rem] border border-amber-300/40 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+            <div className="rounded-[1.5rem] border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-slate-700">
               {message || schemaMessage}
             </div>
           ) : null}
@@ -385,11 +385,11 @@ export default async function DashboardPage({
           ].map((card) => (
             <article
               key={card.label}
-              className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.09),_rgba(255,255,255,0.04))] p-5 shadow-lg"
+              className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.05)]"
             >
-              <p className="text-sm text-stone-300">{card.label}</p>
+              <p className="text-sm text-slate-500">{card.label}</p>
               <p className="mt-3 text-4xl font-semibold">{card.value}</p>
-              <p className="mt-2 text-sm text-amber-200">{card.detail}</p>
+              <p className="mt-2 text-sm text-slate-600">{card.detail}</p>
             </article>
           ))}
           </section>
@@ -400,32 +400,32 @@ export default async function DashboardPage({
             {activeView === "clientes" ? (
             <article
               id="clientes"
-              className="rounded-[2rem] border border-white/10 bg-white/6 p-6"
+              className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
             >
             <h2 className="text-xl font-semibold">Crear cliente</h2>
             <form action={createClientAction} className="mt-5 space-y-4">
               <div>
-                <label className="mb-2 block text-sm text-stone-300" htmlFor="name">
+                <label className="mb-2 block text-sm text-slate-600" htmlFor="name">
                   Nombre del cliente
                 </label>
                 <input
                   id="name"
                   name="name"
                   type="text"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Panaderia Central"
                   required
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm text-stone-300" htmlFor="contactName">
+                <label className="mb-2 block text-sm text-slate-600" htmlFor="contactName">
                   Contacto
                 </label>
                 <input
                   id="contactName"
                   name="contactName"
                   type="text"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Maria Perez"
                 />
               </div>
@@ -433,24 +433,24 @@ export default async function DashboardPage({
                 <input
                   name="phone"
                   type="text"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Telefono"
                 />
                 <input
                   name="email"
                   type="email"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Correo"
                 />
               </div>
               <textarea
                 name="notes"
-                className="min-h-24 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                className="min-h-24 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 placeholder="Notas del cliente"
               />
               <button
                 type="submit"
-                className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+                className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
               >
                 Guardar cliente
               </button>
@@ -461,18 +461,18 @@ export default async function DashboardPage({
             {activeView === "pedidos" ? (
             <article
               id="pedidos"
-              className="rounded-[2rem] border border-white/10 bg-white/6 p-6"
+              className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
             >
             <h2 className="text-xl font-semibold">Crear pedido</h2>
             <form action={createOrderAction} className="mt-5 space-y-4">
               <div>
-                <label className="mb-2 block text-sm text-stone-300" htmlFor="clientId">
+                <label className="mb-2 block text-sm text-slate-600" htmlFor="clientId">
                   Cliente
                 </label>
                 <select
                   id="clientId"
                   name="clientId"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   required
                   defaultValue=""
                 >
@@ -487,14 +487,14 @@ export default async function DashboardPage({
                 </select>
               </div>
               <div>
-                <label className="mb-2 block text-sm text-stone-300" htmlFor="title">
+                <label className="mb-2 block text-sm text-slate-600" htmlFor="title">
                   Trabajo
                 </label>
                 <input
                   id="title"
                   name="title"
                   type="text"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="500 tarjetas personales"
                   required
                 />
@@ -503,14 +503,14 @@ export default async function DashboardPage({
                 <input
                   name="quantity"
                   type="number"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Cantidad"
                   required
                 />
                 <select
                   name="status"
                   defaultValue="recibido"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 >
                   {orderStatuses.map((status) => (
                     <option key={status} value={status}>
@@ -523,36 +523,36 @@ export default async function DashboardPage({
                 <input
                   name="material"
                   type="text"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Material"
                 />
                 <input
                   name="size"
                   type="text"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Tamano"
                 />
                 <input
                   name="dueDate"
                   type="date"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
               <input
                 name="totalAmount"
                 type="number"
                 step="0.01"
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 placeholder="Monto total"
               />
               <textarea
                 name="description"
-                className="min-h-24 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                className="min-h-24 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 placeholder="Detalles del pedido"
               />
               <button
                 type="submit"
-                className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+                className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
               >
                 Guardar pedido
               </button>
@@ -565,11 +565,11 @@ export default async function DashboardPage({
           {activeView === "clientes" || activeView === "pedidos" ? (
           <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
             {activeView === "pedidos" ? (
-            <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+            <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
             <h2 className="text-xl font-semibold">Pedidos recientes</h2>
-            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
-              <table className="min-w-full divide-y divide-white/8 text-left text-sm">
-                <thead className="bg-black/20 text-stone-300">
+            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+              <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                <thead className="bg-slate-50 text-slate-500">
                   <tr>
                     <th className="px-4 py-3 font-medium">Trabajo</th>
                     <th className="px-4 py-3 font-medium">Cliente</th>
@@ -577,10 +577,10 @@ export default async function DashboardPage({
                     <th className="px-4 py-3 font-medium">Entrega</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/8 bg-black/10 text-stone-100">
+                <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
                   {orders.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-4 text-stone-300" colSpan={4}>
+                      <td className="px-4 py-4 text-slate-500" colSpan={4}>
                         Aun no hay pedidos creados.
                       </td>
                     </tr>
@@ -589,7 +589,7 @@ export default async function DashboardPage({
                       <tr key={order.id}>
                         <td className="px-4 py-3">
                           <div className="font-medium">{order.title}</div>
-                          <div className="text-xs text-stone-400">
+                          <div className="text-xs text-slate-400">
                             Cantidad: {order.quantity}
                           </div>
                         </td>
@@ -610,20 +610,20 @@ export default async function DashboardPage({
             ) : null}
 
             {activeView === "clientes" ? (
-            <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+            <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
             <h2 className="text-xl font-semibold">Clientes registrados</h2>
-            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
-              <table className="min-w-full divide-y divide-white/8 text-left text-sm">
-                <thead className="bg-black/20 text-stone-300">
+            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+              <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                <thead className="bg-slate-50 text-slate-500">
                   <tr>
                     <th className="px-4 py-3 font-medium">Cliente</th>
                     <th className="px-4 py-3 font-medium">Contacto</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/8 bg-black/10 text-stone-100">
+                <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
                   {clients.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-4 text-stone-300" colSpan={2}>
+                      <td className="px-4 py-4 text-slate-500" colSpan={2}>
                         Aun no hay clientes registrados.
                       </td>
                     </tr>
@@ -633,14 +633,14 @@ export default async function DashboardPage({
                         <td className="px-4 py-3">
                           <div className="font-medium">{client.name}</div>
                           {client.notes ? (
-                            <div className="text-xs text-stone-400">
+                            <div className="text-xs text-slate-400">
                               {client.notes}
                             </div>
                           ) : null}
                         </td>
                         <td className="px-4 py-3">
                           <div>{client.contact_name ?? "Sin contacto"}</div>
-                          <div className="text-xs text-stone-400">
+                          <div className="text-xs text-slate-400">
                             {client.phone ?? client.email ?? "Sin datos"}
                           </div>
                         </td>
@@ -660,57 +660,57 @@ export default async function DashboardPage({
               id="equipo"
               className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]"
             >
-              <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
               <h2 className="text-xl font-semibold">Crear usuario</h2>
               <form action={createUserAction} className="mt-5 space-y-4">
                 <div>
-                  <label className="mb-2 block text-sm text-stone-300" htmlFor="displayName">
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="displayName">
                     Nombre visible
                   </label>
                   <input
                     id="displayName"
                     name="displayName"
                     type="text"
-                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                     placeholder="Juan Perez"
                     required
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-stone-300" htmlFor="username">
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
                     Usuario
                   </label>
                   <input
                     id="username"
                     name="username"
                     type="text"
-                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                     placeholder="juan"
                     required
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-stone-300" htmlFor="password">
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="password">
                     Contrasena
                   </label>
                   <input
                     id="password"
                     name="password"
                     type="password"
-                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                     placeholder="Minimo 6 caracteres"
                     required
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-stone-300" htmlFor="role">
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
                     Rol
                   </label>
                   <select
                     id="role"
                     name="role"
                     defaultValue="staff"
-                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-stone-50 outline-none transition focus:border-amber-400"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   >
                     <option value="staff">Staff</option>
                     <option value="admin">Admin</option>
@@ -718,18 +718,18 @@ export default async function DashboardPage({
                 </div>
                 <button
                   type="submit"
-                  className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
+                  className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
                 >
                   Crear usuario
                 </button>
               </form>
               </article>
 
-              <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
               <h2 className="text-xl font-semibold">Usuarios registrados</h2>
-              <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
-                <table className="min-w-full divide-y divide-white/8 text-left text-sm">
-                  <thead className="bg-black/20 text-stone-300">
+              <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+                <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                  <thead className="bg-slate-50 text-slate-500">
                     <tr>
                       <th className="px-4 py-3 font-medium">Nombre</th>
                       <th className="px-4 py-3 font-medium">Usuario</th>
@@ -737,7 +737,7 @@ export default async function DashboardPage({
                       <th className="px-4 py-3 font-medium">Estado</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/8 bg-black/10 text-stone-100">
+                  <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
                     {users.map((user) => (
                       <tr key={user.id}>
                         <td className="px-4 py-3">{user.display_name}</td>
