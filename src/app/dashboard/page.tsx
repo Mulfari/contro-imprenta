@@ -72,11 +72,11 @@ async function createUserAction(formData: FormData) {
         ? error.message
         : "No se pudo crear el usuario.";
 
-    redirect(buildDashboardUrl("equipo", message));
+    redirect(buildTeamUrl("nuevo", message));
   }
 
   revalidatePath("/dashboard");
-  redirect(buildDashboardUrl("equipo", "Usuario creado"));
+  redirect(buildTeamUrl("lista", "Usuario creado"));
 }
 
 async function createClientAction(formData: FormData) {
@@ -194,6 +194,19 @@ function buildDashboardUrl(view: DashboardView, message?: string) {
   return `/dashboard?${params.toString()}`;
 }
 
+function buildTeamUrl(mode: "lista" | "nuevo", message?: string) {
+  const params = new URLSearchParams({
+    view: "equipo",
+    team: mode,
+  });
+
+  if (message) {
+    params.set("message", message);
+  }
+
+  return `/dashboard?${params.toString()}`;
+}
+
 function resolveView(value: string, isAdmin: boolean): DashboardView {
   if (value === "equipo" && !isAdmin) {
     return "resumen";
@@ -275,6 +288,7 @@ export default async function DashboardPage({
   const params = await searchParams;
   const message = resolveValue(params.message);
   const activeStatus = resolveValue(params.status) || "todos";
+  const teamMode = resolveValue(params.team) === "nuevo" ? "nuevo" : "lista";
 
   if (!session) {
     redirect("/login?message=Inicia%20sesion%20para%20entrar%20al%20tablero");
@@ -850,102 +864,136 @@ export default async function DashboardPage({
           ) : null}
 
           {activeView === "equipo" && session.role === "admin" ? (
-            <section
-              id="equipo"
-              className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]"
-            >
+            <section id="equipo" className="grid gap-6">
               <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-              <h2 className="text-xl font-semibold">Crear usuario</h2>
-              <form action={createUserAction} className="mt-5 space-y-4">
-                <div>
-                  <label className="mb-2 block text-sm text-slate-600" htmlFor="displayName">
-                    Nombre visible
-                  </label>
-                  <input
-                    id="displayName"
-                    name="displayName"
-                    type="text"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                    placeholder="Juan Perez"
-                    required
-                  />
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Usuarios del equipo</h2>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Administra accesos y crea nuevas cuentas cuando las necesites.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href={buildTeamUrl("lista")}
+                      className={`rounded-full border px-5 py-3 text-sm font-semibold transition ${
+                        teamMode === "lista"
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      Ver usuarios
+                    </Link>
+                    <Link
+                      href={buildTeamUrl("nuevo")}
+                      className={`rounded-full border px-5 py-3 text-sm font-semibold transition ${
+                        teamMode === "nuevo"
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      Agregar usuario
+                    </Link>
+                  </div>
                 </div>
-                <div>
-                  <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
-                    Usuario
-                  </label>
-                  <input
-                    id="username"
-                    name="username"
-                    type="text"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                    placeholder="juan"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm text-slate-600" htmlFor="password">
-                    Contrasena
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                    placeholder="Minimo 6 caracteres"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
-                    Rol
-                  </label>
-                  <select
-                    id="role"
-                    name="role"
-                    defaultValue="staff"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="staff">Staff</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-                >
-                  Crear usuario
-                </button>
-              </form>
               </article>
 
-              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-              <h2 className="text-xl font-semibold">Usuarios registrados</h2>
-              <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
-                <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                  <thead className="bg-slate-50 text-slate-500">
-                    <tr>
-                      <th className="px-4 py-3 font-medium">Nombre</th>
-                      <th className="px-4 py-3 font-medium">Usuario</th>
-                      <th className="px-4 py-3 font-medium">Rol</th>
-                      <th className="px-4 py-3 font-medium">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
-                    {users.map((user) => (
-                      <tr key={user.id}>
-                        <td className="px-4 py-3">{user.display_name}</td>
-                        <td className="px-4 py-3">{user.username}</td>
-                        <td className="px-4 py-3">{user.role}</td>
-                        <td className="px-4 py-3">
-                          {user.is_active ? "Activo" : "Inactivo"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              </article>
+              {teamMode === "lista" ? (
+                <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                  <h3 className="text-xl font-semibold">Usuarios registrados</h3>
+                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                      <thead className="bg-slate-50 text-slate-500">
+                        <tr>
+                          <th className="px-4 py-3 font-medium">Nombre</th>
+                          <th className="px-4 py-3 font-medium">Usuario</th>
+                          <th className="px-4 py-3 font-medium">Rol</th>
+                          <th className="px-4 py-3 font-medium">Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
+                        {users.map((user) => (
+                          <tr key={user.id}>
+                            <td className="px-4 py-3">{user.display_name}</td>
+                            <td className="px-4 py-3">{user.username}</td>
+                            <td className="px-4 py-3">{user.role}</td>
+                            <td className="px-4 py-3">
+                              {user.is_active ? "Activo" : "Inactivo"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              ) : null}
+
+              {teamMode === "nuevo" ? (
+                <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                  <h3 className="text-xl font-semibold">Agregar usuario</h3>
+                  <form action={createUserAction} className="mt-5 space-y-4">
+                    <div>
+                      <label className="mb-2 block text-sm text-slate-600" htmlFor="displayName">
+                        Nombre visible
+                      </label>
+                      <input
+                        id="displayName"
+                        name="displayName"
+                        type="text"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        placeholder="Juan Perez"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
+                        Usuario
+                      </label>
+                      <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        placeholder="juan"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm text-slate-600" htmlFor="password">
+                        Contrasena
+                      </label>
+                      <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        placeholder="Minimo 6 caracteres"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
+                        Rol
+                      </label>
+                      <select
+                        id="role"
+                        name="role"
+                        defaultValue="staff"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                      >
+                        <option value="staff">Staff</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                    >
+                      Crear usuario
+                    </button>
+                  </form>
+                </article>
+              ) : null}
             </section>
           ) : null}
         </div>
