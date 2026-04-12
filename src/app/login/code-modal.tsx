@@ -2,6 +2,7 @@
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 
 import {
   resetPendingLoginAction,
@@ -84,7 +85,7 @@ export function CodeModal({
     });
   };
 
-  return (
+  const modal = (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/72 p-4 backdrop-blur-lg">
       <FloatingToast message={state.message} />
       <div className="w-full max-w-sm rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.18)]">
@@ -151,4 +152,10 @@ export function CodeModal({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(modal, document.body);
 }
