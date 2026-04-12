@@ -75,52 +75,6 @@ export async function hasAnyUsers() {
   return (count ?? 0) > 0;
 }
 
-export async function createInitialAdmin(input: {
-  username: string;
-  password: string;
-  displayName: string;
-}) {
-  if (await hasAnyUsers()) {
-    throw new Error("El usuario inicial ya fue creado.");
-  }
-
-  const supabase = createSupabaseAdminClient();
-  const normalizedUsername = normalizeUsername(input.username);
-  const displayName = input.displayName.trim();
-
-  if (normalizedUsername.length < 3) {
-    throw new Error("El usuario debe tener al menos 3 caracteres.");
-  }
-
-  if (input.password.length < 6) {
-    throw new Error("La contrasena debe tener al menos 6 caracteres.");
-  }
-
-  if (!displayName) {
-    throw new Error("Escribe un nombre visible para el admin.");
-  }
-
-  const passwordHash = await hash(input.password, 12);
-  const { data, error } = await supabase
-    .from("app_users")
-    .insert({
-      username: normalizedUsername,
-      display_name: displayName,
-      password_hash: passwordHash,
-      role: "admin",
-      is_active: true,
-      created_by: null,
-    })
-    .select("id, username, display_name, role, is_active, created_at, created_by")
-    .single<AppUser>();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
 export async function listUsers() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase

@@ -38,7 +38,7 @@ export async function signInAction(formData: FormData) {
   const { username, password } = getCredentials(formData);
 
   if (!(await hasAnyUsers())) {
-    redirect("/setup?message=Primero%20crea%20tu%20admin%20inicial");
+    redirect("/login?message=No%20hay%20usuarios%20configurados%20en%20el%20panel");
   }
 
   let user;
