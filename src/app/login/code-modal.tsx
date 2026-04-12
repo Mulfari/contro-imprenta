@@ -28,6 +28,7 @@ export function CodeModal({
   const [code, setCode] = useState("");
   const router = useRouter();
   const submitRef = useRef<HTMLFormElement>(null);
+  const lastSubmittedCodeRef = useRef("");
   const [state, formAction, pending] = useActionState(
     verifyCodeStateAction,
     initialState,
@@ -37,7 +38,19 @@ export function CodeModal({
   const feedbackMessage = state.message || message;
 
   useEffect(() => {
-    if (code.length === 4 && !pending && state.status !== "success") {
+    if (code.length < 4) {
+      lastSubmittedCodeRef.current = "";
+    }
+  }, [code]);
+
+  useEffect(() => {
+    if (
+      code.length === 4 &&
+      !pending &&
+      state.status !== "success" &&
+      lastSubmittedCodeRef.current !== code
+    ) {
+      lastSubmittedCodeRef.current = code;
       submitRef.current?.requestSubmit();
     }
   }, [code, pending, state.status]);
