@@ -20,6 +20,30 @@ const initialState: VerifyCodeState = {
   message: "",
 };
 
+function detectVariant(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("incorrecto") ||
+    normalized.includes("error") ||
+    normalized.includes("falta") ||
+    normalized.includes("no se pudo")
+  ) {
+    return "error";
+  }
+
+  if (
+    normalized.includes("creado") ||
+    normalized.includes("actualizado") ||
+    normalized.includes("cerrada") ||
+    normalized.includes("correcto")
+  ) {
+    return "success";
+  }
+
+  return "info";
+}
+
 export function CodeModal({
   displayName,
   username,
@@ -36,6 +60,7 @@ export function CodeModal({
 
   const visualStatus = pending ? "loading" : state.status;
   const feedbackMessage = state.message || message;
+  const feedbackVariant = feedbackMessage ? detectVariant(feedbackMessage) : "info";
 
   useEffect(() => {
     if (code.length < 4) {
@@ -75,11 +100,11 @@ export function CodeModal({
           : "border-slate-200 bg-slate-50 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100";
 
   const messageClasses =
-    visualStatus === "error"
-      ? "border-rose-200 bg-rose-50 text-rose-700"
-      : visualStatus === "success"
-        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-        : "border-blue-200 bg-blue-50 text-slate-700";
+    feedbackVariant === "error"
+      ? "border-rose-200/80 bg-rose-50/92 text-rose-700 shadow-[0_18px_40px_rgba(190,24,93,0.12)]"
+      : feedbackVariant === "success"
+        ? "border-emerald-200/80 bg-emerald-50/92 text-emerald-700 shadow-[0_18px_40px_rgba(5,150,105,0.12)]"
+        : "border-blue-200/80 bg-blue-50/92 text-slate-700 shadow-[0_18px_40px_rgba(59,130,246,0.1)]";
 
   return (
     <div className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-slate-950/28 p-4 backdrop-blur-sm">
@@ -111,7 +136,7 @@ export function CodeModal({
 
         {feedbackMessage ? (
           <div
-            className={`mt-5 rounded-[1.2rem] border px-4 py-3 text-sm leading-6 ${messageClasses}`}
+            className={`mt-5 rounded-[1.2rem] border px-4 py-3 text-sm font-medium leading-6 backdrop-blur-xl ${messageClasses}`}
           >
             {feedbackMessage}
           </div>
