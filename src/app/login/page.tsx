@@ -91,10 +91,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 id="identifier"
                 name="identifier"
                 type="text"
-                placeholder="admin o 12345678"
+                placeholder="Ingresa tu acceso"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
                 defaultValue={pendingLogin?.identifier ?? ""}
               />
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                Puedes entrar con tu usuario o tu cedula.
+              </p>
             </div>
 
             <button
