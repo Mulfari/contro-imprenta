@@ -25,11 +25,14 @@ const orderStatuses: OrderStatus[] = [
   "entregado",
 ];
 
-const sideNavItems = [
-  { label: "Resumen", href: "#resumen" },
-  { label: "Clientes", href: "#clientes" },
-  { label: "Pedidos", href: "#pedidos" },
-  { label: "Equipo", href: "#equipo" },
+const dashboardViews = ["resumen", "clientes", "pedidos", "equipo"] as const;
+type DashboardView = (typeof dashboardViews)[number];
+
+const sideNavItems: { label: string; view: DashboardView }[] = [
+  { label: "Resumen", view: "resumen" },
+  { label: "Clientes", view: "clientes" },
+  { label: "Pedidos", view: "pedidos" },
+  { label: "Equipo", view: "equipo" },
 ];
 
 async function createUserAction(formData: FormData) {
@@ -60,11 +63,11 @@ async function createUserAction(formData: FormData) {
         ? error.message
         : "No se pudo crear el usuario.";
 
-    redirect(`/dashboard?message=${encodeURIComponent(message)}`);
+    redirect(buildDashboardUrl("equipo", message));
   }
 
   revalidatePath("/dashboard");
-  redirect("/dashboard?message=Usuario%20creado");
+  redirect(buildDashboardUrl("equipo", "Usuario creado"));
 }
 
 async function createClientAction(formData: FormData) {
@@ -88,11 +91,11 @@ async function createClientAction(formData: FormData) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "No se pudo crear el cliente.";
-    redirect(`/dashboard?message=${encodeURIComponent(message)}`);
+    redirect(buildDashboardUrl("clientes", message));
   }
 
   revalidatePath("/dashboard");
-  redirect("/dashboard?message=Cliente%20creado");
+  redirect(buildDashboardUrl("clientes", "Cliente creado"));
 }
 
 async function createOrderAction(formData: FormData) {
@@ -120,23 +123,43 @@ async function createOrderAction(formData: FormData) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "No se pudo crear el pedido.";
-    redirect(`/dashboard?message=${encodeURIComponent(message)}`);
+    redirect(buildDashboardUrl("pedidos", message));
   }
 
   revalidatePath("/dashboard");
-  redirect("/dashboard?message=Pedido%20creado");
+  redirect(buildDashboardUrl("pedidos", "Pedido creado"));
 }
 
 type DashboardPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-function resolveMessage(message: string | string[] | undefined) {
-  if (Array.isArray(message)) {
-    return message[0] ?? "";
+function resolveValue(value: string | string[] | undefined) {
+  if (Array.isArray(value)) {
+    return value[0] ?? "";
   }
 
-  return message ?? "";
+  return value ?? "";
+}
+
+function buildDashboardUrl(view: DashboardView, message?: string) {
+  const params = new URLSearchParams({ view });
+
+  if (message) {
+    params.set("message", message);
+  }
+
+  return `/dashboard?${params.toString()}`;
+}
+
+function resolveView(value: string, isAdmin: boolean): DashboardView {
+  if (value === "equipo" && !isAdmin) {
+    return "resumen";
+  }
+
+  return dashboardViews.includes(value as DashboardView)
+    ? (value as DashboardView)
+    : "resumen";
 }
 
 export default async function DashboardPage({
@@ -178,7 +201,7 @@ export default async function DashboardPage({
 
   const session = await getCurrentSession();
   const params = await searchParams;
-  const message = resolveMessage(params.message);
+  const message = resolveValue(params.message);
 
   if (!session) {
     redirect("/login?message=Inicia%20sesion%20para%20entrar%20al%20tablero");
@@ -193,11 +216,13 @@ export default async function DashboardPage({
     clients = await listClients();
     orders = await listOrders();
   } catch {
-    clients = [];
-    orders = [];
     schemaMessage =
       "La base de datos no coincide con la ultima version del panel. Vuelve a ejecutar setup.sql en Supabase.";
   }
+  const activeView = resolveView(
+    resolveValue(params.view),
+    session.role === "admin",
+  );
   const activeOrders = orders.filter((order) => order.status !== "entregado");
   const deliveriesSoon = orders.filter((order) => {
     if (!order.due_date || order.status === "entregado") {
@@ -210,11 +235,14 @@ export default async function DashboardPage({
 
     return diff >= 0 && diff <= 1000 * 60 * 60 * 24 * 2;
   });
+  const sideItems = sideNavItems.filter((item) =>
+    item.view === "equipo" ? session.role === "admin" : true,
+  );
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,_#160f0c_0%,_#241713_42%,_#2f211b_100%)] text-stone-50">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-4 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-8">
-        <aside className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.24)] backdrop-blur lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]">
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6 lg:flex-row lg:px-8">
+        <aside className="w-full shrink-0 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.24)] backdrop-blur lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-[280px]">
           <div className="border-b border-white/8 pb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-amber-300">
               Imprenta Atlas
@@ -223,21 +251,29 @@ export default async function DashboardPage({
               Panel principal
             </h1>
             <p className="mt-2 text-sm leading-6 text-stone-300">
-              Opera clientes, pedidos y equipo desde un solo lugar.
+              Entra a un modulo y trabaja sin ver todo a la vez.
             </p>
           </div>
 
           <nav className="mt-6 space-y-2">
-            {sideNavItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="flex items-center justify-between rounded-2xl border border-white/8 bg-black/10 px-4 py-3 text-sm text-stone-200 transition hover:border-amber-400/40 hover:bg-black/20"
-              >
-                <span>{item.label}</span>
-                <span className="text-amber-300">+</span>
-              </a>
-            ))}
+            {sideItems.map((item) => {
+              const isActive = item.view === activeView;
+
+              return (
+                <Link
+                  key={item.view}
+                  href={buildDashboardUrl(item.view)}
+                  className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
+                    isActive
+                      ? "border-amber-300/60 bg-amber-300/15 text-amber-100"
+                      : "border-white/8 bg-black/10 text-stone-200 hover:border-amber-400/40 hover:bg-black/20"
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <span className="text-amber-300">{isActive ? "*" : "+"}</span>
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="mt-6 rounded-[1.6rem] border border-amber-300/15 bg-amber-300/10 p-4">
@@ -246,7 +282,7 @@ export default async function DashboardPage({
             </p>
             <p className="mt-3 text-lg font-semibold">{session.displayName}</p>
             <p className="mt-1 text-sm text-stone-300">
-              @{session.username} · {session.role}
+              @{session.username} - {session.role}
             </p>
           </div>
 
@@ -277,34 +313,47 @@ export default async function DashboardPage({
           </form>
         </aside>
 
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
           <header className="rounded-[2rem] border border-white/10 bg-white/6 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.2)] backdrop-blur">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.35em] text-amber-300">
-                  Centro de control
+                  {activeView === "resumen" ? "Centro de control" : "Modulo activo"}
                 </p>
                 <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Bienvenido, {session.displayName}
+                  {activeView === "resumen" ? `Bienvenido, ${session.displayName}` : null}
+                  {activeView === "clientes" ? "Clientes" : null}
+                  {activeView === "pedidos" ? "Pedidos" : null}
+                  {activeView === "equipo" ? "Equipo" : null}
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-300">
-                  Organiza produccion, agenda de entregas y atencion al cliente
-                  en un tablero mas claro y facil de operar.
+                  {activeView === "resumen"
+                    ? "Consulta el estado general de la imprenta y entra al modulo que necesitas."
+                    : null}
+                  {activeView === "clientes"
+                    ? "Registra clientes y consulta su informacion sin distracciones."
+                    : null}
+                  {activeView === "pedidos"
+                    ? "Crea pedidos nuevos y revisa produccion desde una sola vista."
+                    : null}
+                  {activeView === "equipo"
+                    ? "Administra usuarios del panel y controla los accesos del equipo."
+                    : null}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <a
-                  href="#clientes"
+                <Link
+                  href={buildDashboardUrl("clientes")}
                   className="rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-400"
                 >
-                  Nuevo cliente
-                </a>
-                <a
-                  href="#pedidos"
+                  Cliente
+                </Link>
+                <Link
+                  href={buildDashboardUrl("pedidos")}
                   className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-stone-100 transition hover:bg-white/5"
                 >
-                  Nuevo pedido
-                </a>
+                  Pedido
+                </Link>
               </div>
             </div>
           </header>
@@ -315,6 +364,7 @@ export default async function DashboardPage({
             </div>
           ) : null}
 
+          {activeView === "resumen" ? (
           <section id="resumen" className="grid gap-4 md:grid-cols-3">
           {[
             {
@@ -343,8 +393,11 @@ export default async function DashboardPage({
             </article>
           ))}
           </section>
+          ) : null}
 
+          {activeView === "clientes" || activeView === "pedidos" ? (
           <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            {activeView === "clientes" ? (
             <article
               id="clientes"
               className="rounded-[2rem] border border-white/10 bg-white/6 p-6"
@@ -403,7 +456,9 @@ export default async function DashboardPage({
               </button>
             </form>
             </article>
+            ) : null}
 
+            {activeView === "pedidos" ? (
             <article
               id="pedidos"
               className="rounded-[2rem] border border-white/10 bg-white/6 p-6"
@@ -503,9 +558,13 @@ export default async function DashboardPage({
               </button>
             </form>
             </article>
+            ) : null}
           </section>
+          ) : null}
 
+          {activeView === "clientes" || activeView === "pedidos" ? (
           <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            {activeView === "pedidos" ? (
             <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
             <h2 className="text-xl font-semibold">Pedidos recientes</h2>
             <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
@@ -548,7 +607,9 @@ export default async function DashboardPage({
               </table>
             </div>
             </article>
+            ) : null}
 
+            {activeView === "clientes" ? (
             <article className="rounded-[2rem] border border-white/10 bg-white/6 p-6">
             <h2 className="text-xl font-semibold">Clientes registrados</h2>
             <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/8">
@@ -590,9 +651,11 @@ export default async function DashboardPage({
               </table>
             </div>
             </article>
+            ) : null}
           </section>
+          ) : null}
 
-          {session.role === "admin" ? (
+          {activeView === "equipo" && session.role === "admin" ? (
             <section
               id="equipo"
               className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]"
@@ -696,3 +759,4 @@ export default async function DashboardPage({
     </main>
   );
 }
+
