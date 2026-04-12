@@ -12,18 +12,18 @@ function encodeMessage(message: string) {
 }
 
 function getCredentials(formData: FormData) {
-  const username = String(formData.get("username") ?? "").trim().toLowerCase();
+  const identifier = String(formData.get("identifier") ?? "").trim();
   const password = String(formData.get("password") ?? "").trim();
 
-  if (!username || !password) {
+  if (!identifier || !password) {
     redirect(
       `/login?message=${encodeMessage(
-        "Escribe tu usuario y tu contrasena para continuar.",
+        "Escribe tu usuario o cedula y tu codigo de 4 digitos.",
       )}`,
     );
   }
 
-  return { username, password };
+  return { identifier, password };
 }
 
 export async function signInAction(formData: FormData) {
@@ -35,7 +35,7 @@ export async function signInAction(formData: FormData) {
     );
   }
 
-  const { username, password } = getCredentials(formData);
+  const { identifier, password } = getCredentials(formData);
 
   if (!(await hasAnyUsers())) {
     redirect("/login?message=No%20hay%20usuarios%20configurados%20en%20el%20panel");
@@ -44,7 +44,7 @@ export async function signInAction(formData: FormData) {
   let user;
 
   try {
-    user = await authenticateUser(username, password);
+    user = await authenticateUser(identifier, password);
   } catch (error) {
     const message =
       error instanceof Error
@@ -56,7 +56,7 @@ export async function signInAction(formData: FormData) {
   if (!user) {
     redirect(
       `/login?message=${encodeMessage(
-        "Credenciales invalidas. Revisa tu usuario y tu contrasena.",
+        "Credenciales invalidas. Revisa tu usuario o cedula y tu codigo.",
       )}`,
     );
   }

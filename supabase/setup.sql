@@ -2,8 +2,11 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.app_users (
   id uuid primary key default gen_random_uuid(),
+  national_id text not null,
   username text not null,
   display_name text not null,
+  email text not null,
+  phone text not null,
   password_hash text not null,
   role text not null check (role in ('admin', 'staff')),
   is_active boolean not null default true,
@@ -11,13 +14,19 @@ create table if not exists public.app_users (
   created_by uuid null references public.app_users(id) on delete set null
 );
 
+create unique index if not exists app_users_national_id_idx
+  on public.app_users (national_id);
+
 create unique index if not exists app_users_username_idx
   on public.app_users (username);
 
 alter table public.app_users enable row level security;
 
+alter table public.app_users add column if not exists national_id text;
 alter table public.app_users add column if not exists username text;
 alter table public.app_users add column if not exists display_name text;
+alter table public.app_users add column if not exists email text;
+alter table public.app_users add column if not exists phone text;
 alter table public.app_users add column if not exists password_hash text;
 alter table public.app_users add column if not exists role text;
 alter table public.app_users add column if not exists is_active boolean default true;

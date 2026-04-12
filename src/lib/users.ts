@@ -7,8 +7,11 @@ type AppRole = "admin" | "staff";
 
 export type AppUser = {
   id: string;
+  national_id: string;
   username: string;
   display_name: string;
+  email: string;
+  phone: string;
   role: AppRole;
   is_active: boolean;
   created_at: string;
@@ -21,6 +24,18 @@ type AppUserRecord = AppUser & {
 
 function normalizeUsername(username: string) {
   return username.trim().toLowerCase();
+}
+
+function normalizeNationalId(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function normalizePhone(value: string) {
+  return value.trim();
 }
 
 function sanitizeUser(user: AppUserRecord): AppUser {
@@ -46,8 +61,28 @@ async function getUserRecordByUsername(username: string) {
   return data;
 }
 
-export async function authenticateUser(username: string, password: string) {
-  const user = await getUserRecordByUsername(username);
+async function getUserRecordByNationalId(nationalId: string) {
+  const supabase = createSupabaseAdminClient();
+  const normalizedNationalId = normalizeNationalId(nationalId);
+  const { data, error } = await supabase
+    .from("app_users")
+    .select("*")
+    .eq("national_id", normalizedNationalId)
+    .maybeSingle<AppUserRecord>();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function authenticateUser(identifier: string, password: string) {
+  const normalizedIdentifier = identifier.trim().toLowerCase();
+  const nationalIdCandidate = normalizeNationalId(identifier);
+  const user =
+    (nationalIdCandidate ? await getUserRecordByNationalId(nationalIdCandidate) : null) ??
+    (await getUserRecordByUsername(normalizedIdentifier));
 
   if (!user || !user.is_active) {
     return null;
@@ -79,7 +114,9 @@ export async function listUsers() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from("app_users")
-    .select("id, username, display_name, role, is_active, created_at, created_by")
+    .select(
+      "id, national_id, username, display_name, email, phone, role, is_active, created_at, created_by",
+    )
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -90,46 +127,74 @@ export async function listUsers() {
 }
 
 export async function createUser(input: {
+  nationalId: string;
   username: string;
   password: string;
   displayName: string;
+  email: string;
+  phone: string;
   role: AppRole;
   createdBy: string;
 }) {
   const supabase = createSupabaseAdminClient();
+  const normalizedNationalId = normalizeNationalId(input.nationalId);
   const normalizedUsername = normalizeUsername(input.username);
   const displayName = input.displayName.trim();
+  const email = normalizeEmail(input.email);
+  const phone = normalizePhone(input.phone);
 
   if (normalizedUsername.length < 3) {
     throw new Error("El usuario debe tener al menos 3 caracteres.");
   }
 
-  if (input.password.length < 6) {
-    throw new Error("La contrasena debe tener al menos 6 caracteres.");
+  if (normalizedNationalId.length < 6) {
+    throw new Error("La cedula debe tener al menos 6 digitos.");
+  }
+
+  if (!/^\d{4}$/.test(input.password)) {
+    throw new Error("El codigo debe tener exactamente 4 digitos.");
   }
 
   if (!displayName) {
     throw new Error("Escribe un nombre visible para el usuario.");
   }
 
+  if (!email) {
+    throw new Error("Escribe el correo del usuario.");
+  }
+
+  if (!phone) {
+    throw new Error("Escribe el telefono del usuario.");
+  }
+
   const existingUser = await getUserRecordByUsername(normalizedUsername);
+  const existingNationalId = await getUserRecordByNationalId(normalizedNationalId);
 
   if (existingUser) {
     throw new Error("Ese nombre de usuario ya existe.");
+  }
+
+  if (existingNationalId) {
+    throw new Error("Esa cedula ya existe.");
   }
 
   const passwordHash = await hash(input.password, 12);
   const { data, error } = await supabase
     .from("app_users")
     .insert({
+      national_id: normalizedNationalId,
       username: normalizedUsername,
       display_name: displayName,
+      email,
+      phone,
       password_hash: passwordHash,
       role: input.role,
       is_active: true,
       created_by: input.createdBy,
     })
-    .select("id, username, display_name, role, is_active, created_at, created_by")
+    .select(
+      "id, national_id, username, display_name, email, phone, role, is_active, created_at, created_by",
+    )
     .single<AppUser>();
 
   if (error) {

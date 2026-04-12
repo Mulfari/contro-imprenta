@@ -56,13 +56,19 @@ async function createUserAction(formData: FormData) {
   const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");
   const displayName = String(formData.get("displayName") ?? "");
+  const nationalId = String(formData.get("nationalId") ?? "");
+  const email = String(formData.get("email") ?? "");
+  const phone = String(formData.get("phone") ?? "");
   const role = String(formData.get("role") ?? "staff");
 
   try {
     await createUser({
+      nationalId,
       username,
       password,
       displayName,
+      email,
+      phone,
       role: role === "admin" ? "admin" : "staff",
       createdBy: session.userId,
     });
@@ -906,7 +912,9 @@ export default async function DashboardPage({
                       <thead className="bg-slate-50 text-slate-500">
                         <tr>
                           <th className="px-4 py-3 font-medium">Nombre</th>
+                          <th className="px-4 py-3 font-medium">Cedula</th>
                           <th className="px-4 py-3 font-medium">Usuario</th>
+                          <th className="px-4 py-3 font-medium">Contacto</th>
                           <th className="px-4 py-3 font-medium">Rol</th>
                           <th className="px-4 py-3 font-medium">Estado</th>
                         </tr>
@@ -915,7 +923,12 @@ export default async function DashboardPage({
                         {users.map((user) => (
                           <tr key={user.id}>
                             <td className="px-4 py-3">{user.display_name}</td>
+                            <td className="px-4 py-3">{user.national_id}</td>
                             <td className="px-4 py-3">{user.username}</td>
+                            <td className="px-4 py-3">
+                              <div>{user.phone}</div>
+                              <div className="text-xs text-slate-400">{user.email}</div>
+                            </td>
                             <td className="px-4 py-3">{user.role}</td>
                             <td className="px-4 py-3">
                               {user.is_active ? "Activo" : "Inactivo"}
@@ -946,6 +959,20 @@ export default async function DashboardPage({
                       />
                     </div>
                     <div>
+                      <label className="mb-2 block text-sm text-slate-600" htmlFor="nationalId">
+                        Cedula
+                      </label>
+                      <input
+                        id="nationalId"
+                        name="nationalId"
+                        type="text"
+                        inputMode="numeric"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        placeholder="12345678"
+                        required
+                      />
+                    </div>
+                    <div>
                       <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
                         Usuario
                       </label>
@@ -959,31 +986,61 @@ export default async function DashboardPage({
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm text-slate-600" htmlFor="password">
-                        Contrasena
+                      <label className="mb-2 block text-sm text-slate-600" htmlFor="email">
+                        Correo
                       </label>
                       <input
-                        id="password"
-                        name="password"
-                        type="password"
+                        id="email"
+                        name="email"
+                        type="email"
                         className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                        placeholder="Minimo 6 caracteres"
+                        placeholder="usuario@imprenta.com"
                         required
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
-                        Rol
+                      <label className="mb-2 block text-sm text-slate-600" htmlFor="phone">
+                        Telefono
                       </label>
-                      <select
-                        id="role"
-                        name="role"
-                        defaultValue="staff"
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="text"
                         className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                      >
-                        <option value="staff">Staff</option>
-                        <option value="admin">Admin</option>
-                      </select>
+                        placeholder="04141234567"
+                        required
+                      />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
+                          Rol
+                        </label>
+                        <select
+                          id="role"
+                          name="role"
+                          defaultValue="staff"
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        >
+                          <option value="staff">Staff</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm text-slate-600" htmlFor="password">
+                          Codigo de 4 digitos
+                        </label>
+                        <input
+                          id="password"
+                          name="password"
+                          type="password"
+                          inputMode="numeric"
+                          pattern="[0-9]{4}"
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          placeholder="1234"
+                          required
+                        />
+                      </div>
                     </div>
                     <button
                       type="submit"

@@ -47,7 +47,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              "Acceso por usuario y contrasena",
+              "Acceso por usuario o cedula",
               "Acceso interno para tu equipo",
               "Preparado para publicar en Vercel",
               "Base lista para crear mas usuarios desde el panel",
@@ -97,16 +97,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <form className="mt-8 space-y-5">
               <div>
                 <label
-                  htmlFor="username"
+                  htmlFor="identifier"
                   className="mb-2 block text-sm font-medium text-stone-700"
                 >
-                  Usuario
+                  Usuario o cedula
                 </label>
                 <input
-                  id="username"
-                  name="username"
+                  id="identifier"
+                  name="identifier"
                   type="text"
-                  placeholder="admin"
+                  placeholder="admin o 12345678"
                   className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 text-stone-950 outline-none transition focus:border-amber-500 focus:bg-white"
                   required
                 />
@@ -117,13 +117,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   htmlFor="password"
                   className="mb-2 block text-sm font-medium text-stone-700"
                 >
-                  Contrasena
+                  Codigo de 4 digitos
                 </label>
                 <input
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="Minimo 6 caracteres"
+                  placeholder="1234"
+                  inputMode="numeric"
+                  pattern="[0-9]{4}"
                   className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 text-stone-950 outline-none transition focus:border-amber-500 focus:bg-white"
                   required
                 />
@@ -141,8 +143,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </form>
 
             <p className="mt-6 text-sm leading-6 text-stone-600">
-              El admin entra aqui y desde el panel puede crear los demas
-              usuarios del sistema.
+              Cada usuario entra con su usuario o su cedula y su codigo de 4
+              digitos.
             </p>
           </div>
         </section>
