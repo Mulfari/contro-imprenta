@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { endSession, startSession } from "@/lib/auth/session";
-import { authenticateUser, toSessionUser } from "@/lib/users";
+import { authenticateUser, hasAnyUsers, toSessionUser } from "@/lib/users";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
 
 function encodeMessage(message: string) {
@@ -30,7 +30,7 @@ export async function signInAction(formData: FormData) {
   if (!hasPanelAuthConfig()) {
     redirect(
       `/login?message=${encodeMessage(
-        "Configura Supabase, APP_SESSION_SECRET, ADMIN_USERNAME y ADMIN_PASSWORD antes de usar el login.",
+        "Configura Supabase y APP_SESSION_SECRET antes de usar el login.",
       )}`,
     );
   }
@@ -38,6 +38,10 @@ export async function signInAction(formData: FormData) {
   const { username, password } = getCredentials(formData);
 
   try {
+    if (!(await hasAnyUsers())) {
+      redirect("/setup?message=Primero%20crea%20tu%20admin%20inicial");
+    }
+
     const user = await authenticateUser(username, password);
 
     if (!user) {

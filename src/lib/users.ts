@@ -1,7 +1,6 @@
 import { compare, hash } from "bcryptjs";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getAdminBootstrapCredentials } from "@/lib/supabase/config";
 import type { SessionUser } from "@/lib/auth/session";
 
 type AppRole = "admin" | "staff";
@@ -47,37 +46,7 @@ async function getUserRecordByUsername(username: string) {
   return data;
 }
 
-export async function ensureBootstrapAdmin() {
-  const { username, password, displayName } = getAdminBootstrapCredentials();
-  const existingUser = await getUserRecordByUsername(username);
-
-  if (existingUser) {
-    return sanitizeUser(existingUser);
-  }
-
-  const supabase = createSupabaseAdminClient();
-  const passwordHash = await hash(password, 12);
-  const { data, error } = await supabase
-    .from("app_users")
-    .insert({
-      username,
-      display_name: displayName,
-      password_hash: passwordHash,
-      role: "admin",
-      is_active: true,
-    })
-    .select("*")
-    .single<AppUserRecord>();
-
-  if (error) {
-    throw error;
-  }
-
-  return sanitizeUser(data);
-}
-
 export async function authenticateUser(username: string, password: string) {
-  await ensureBootstrapAdmin();
   const user = await getUserRecordByUsername(username);
 
   if (!user || !user.is_active) {
@@ -91,6 +60,65 @@ export async function authenticateUser(username: string, password: string) {
   }
 
   return sanitizeUser(user);
+}
+
+export async function hasAnyUsers() {
+  const supabase = createSupabaseAdminClient();
+  const { count, error } = await supabase
+    .from("app_users")
+    .select("*", { count: "exact", head: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return (count ?? 0) > 0;
+}
+
+export async function createInitialAdmin(input: {
+  username: string;
+  password: string;
+  displayName: string;
+}) {
+  if (await hasAnyUsers()) {
+    throw new Error("El usuario inicial ya fue creado.");
+  }
+
+  const supabase = createSupabaseAdminClient();
+  const normalizedUsername = normalizeUsername(input.username);
+  const displayName = input.displayName.trim();
+
+  if (normalizedUsername.length < 3) {
+    throw new Error("El usuario debe tener al menos 3 caracteres.");
+  }
+
+  if (input.password.length < 6) {
+    throw new Error("La contrasena debe tener al menos 6 caracteres.");
+  }
+
+  if (!displayName) {
+    throw new Error("Escribe un nombre visible para el admin.");
+  }
+
+  const passwordHash = await hash(input.password, 12);
+  const { data, error } = await supabase
+    .from("app_users")
+    .insert({
+      username: normalizedUsername,
+      display_name: displayName,
+      password_hash: passwordHash,
+      role: "admin",
+      is_active: true,
+      created_by: null,
+    })
+    .select("id, username, display_name, role, is_active, created_at, created_by")
+    .single<AppUser>();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }
 
 export async function listUsers() {

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { signInAction } from "@/app/login/actions";
 import { getCurrentSession } from "@/lib/auth/session";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
+import { hasAnyUsers } from "@/lib/users";
 
 type LoginPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -22,6 +23,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const message = resolveMessage(params.message);
 
   const session = await getCurrentSession();
+  const canUsePanel = hasPanelAuthConfig();
+  const needsSetup = canUsePanel ? !(await hasAnyUsers()) : false;
 
   if (session) {
     redirect("/dashboard");
@@ -47,7 +50,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div className="grid gap-4 sm:grid-cols-3">
             {[
               "Acceso por usuario y contrasena",
-              "Admin inicial configurable por variables",
+              "Registro inicial temporal para el admin",
               "Preparado para publicar en Vercel",
               "Base lista para crear mas usuarios desde el panel",
             ].map((item) => (
@@ -86,11 +89,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </div>
             ) : null}
 
-            {!hasPanelAuthConfig() ? (
+            {!canUsePanel ? (
               <div className="mt-6 rounded-[1.5rem] border border-dashed border-rose-300 bg-rose-50 px-4 py-4 text-sm leading-6 text-rose-950">
                 Falta configurar `NEXT_PUBLIC_SUPABASE_URL`,
-                `SUPABASE_SERVICE_ROLE_KEY`, `APP_SESSION_SECRET`,
-                `ADMIN_USERNAME` y `ADMIN_PASSWORD`.
+                `SUPABASE_SERVICE_ROLE_KEY` y `APP_SESSION_SECRET`.
+              </div>
+            ) : null}
+
+            {needsSetup ? (
+              <div className="mt-6 rounded-[1.5rem] border border-emerald-300/60 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-950">
+                Aun no existe ningun usuario. Crea el primero en{" "}
+                <Link href="/setup" className="font-semibold underline">
+                  /setup
+                </Link>
+                .
               </div>
             ) : null}
 
@@ -141,9 +153,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </form>
 
             <p className="mt-6 text-sm leading-6 text-stone-600">
-              El primer acceso lo controla el usuario admin definido en las
-              variables del proyecto. Luego, desde el panel, ese admin podra
-              crear los demas usuarios.
+              Primero crea tu admin en `/setup`. Luego entras aqui y ese admin
+              podra crear los demas usuarios.
             </p>
           </div>
         </section>

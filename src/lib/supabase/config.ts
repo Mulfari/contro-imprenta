@@ -6,12 +6,7 @@ export function hasSupabaseAdminConfig() {
 }
 
 export function hasPanelAuthConfig() {
-  return Boolean(
-    hasSupabaseAdminConfig() &&
-      process.env.APP_SESSION_SECRET &&
-      process.env.ADMIN_USERNAME &&
-      process.env.ADMIN_PASSWORD,
-  );
+  return Boolean(hasSupabaseAdminConfig() && process.env.APP_SESSION_SECRET);
 }
 
 export function getSupabaseAdminCredentials() {
@@ -37,18 +32,4 @@ export function getSessionSecret() {
   }
 
   return secret;
-}
-
-export function getAdminBootstrapCredentials() {
-  const username = process.env.ADMIN_USERNAME?.trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD?.trim();
-  const displayName = process.env.ADMIN_DISPLAY_NAME?.trim() || "Administrador";
-
-  if (!username || !password) {
-    throw new Error(
-      "Missing ADMIN_USERNAME or ADMIN_PASSWORD for bootstrap admin creation.",
-    );
-  }
-
-  return { username, password, displayName };
 }
