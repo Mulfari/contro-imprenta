@@ -79,7 +79,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           ) : null}
 
-          <form className="mt-8 space-y-5">
+          <form className="mt-8 space-y-5" noValidate>
             <div>
               <label
                 htmlFor="identifier"
@@ -94,7 +94,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 placeholder="admin o 12345678"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
                 defaultValue={pendingLogin?.identifier ?? ""}
-                required
               />
             </div>
 

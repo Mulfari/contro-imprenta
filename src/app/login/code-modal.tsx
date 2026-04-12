@@ -104,7 +104,7 @@ export function CodeModal({
           </div>
         ) : null}
 
-        <form ref={submitRef} action={formAction} className="mt-6 space-y-4">
+        <form ref={submitRef} action={formAction} className="mt-6 space-y-4" noValidate>
           <div>
             <label
               htmlFor="modal-password"
@@ -117,14 +117,12 @@ export function CodeModal({
               name="password"
               type="password"
               inputMode="numeric"
-              pattern="[0-9]{4}"
               maxLength={4}
               value={code}
               onChange={(event) =>
                 setCode(event.target.value.replace(/\D/g, "").slice(0, 4))
               }
               className={`w-full rounded-2xl px-4 py-3.5 text-center text-2xl tracking-[0.45em] text-slate-950 outline-none transition ${inputClasses}`}
-              required
               autoFocus
               disabled={visualStatus === "loading" || visualStatus === "success"}
             />
