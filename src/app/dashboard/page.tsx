@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { revalidatePath } from "next/cache";
 
+import { TeamUserModal } from "@/app/dashboard/team-user-modal";
 import { signOutAction } from "@/app/login/actions";
 import { FloatingToast } from "@/components/floating-toast";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -75,7 +76,6 @@ async function createUserAction(formData: FormData) {
     redirect("/login?message=Necesitas%20un%20usuario%20admin");
   }
 
-  const username = String(formData.get("username") ?? "");
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
   const nationalId = String(formData.get("nationalId") ?? "");
@@ -88,11 +88,12 @@ async function createUserAction(formData: FormData) {
   }
 
   const displayName = `${firstName} ${lastName}`.trim();
+  const usernameSeed = `${firstName}${lastName}`;
 
   try {
     await createUser({
       nationalId,
-      username,
+      username: usernameSeed,
       displayName,
       email,
       phone,
@@ -1160,179 +1161,10 @@ export default async function DashboardPage({
               </article>
 
               {teamMode === "nuevo" ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/18 px-4 py-6 backdrop-blur-sm">
-                  <div className="w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.16)] sm:p-7">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-xl font-semibold">Nuevo usuario</h3>
-                        <p className="mt-2 text-sm text-slate-500">
-                          Registra el acceso del equipo. El codigo se crea en el
-                          primer inicio de sesion.
-                        </p>
-                      </div>
-                      <Link
-                        href={buildTeamUrl("lista")}
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100"
-                        aria-label="Cerrar modal"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          viewBox="0 0 24 24"
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M18 6L6 18" />
-                          <path d="M6 6l12 12" />
-                        </svg>
-                      </Link>
-                    </div>
-
-                    <form action={createUserAction} className="mt-6 space-y-4">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="firstName">
-                            Nombre
-                          </label>
-                          <input
-                            id="firstName"
-                            name="firstName"
-                            type="text"
-                            autoComplete="off"
-                            spellCheck={false}
-                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                            placeholder="Juan"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="lastName">
-                            Apellido
-                          </label>
-                          <input
-                            id="lastName"
-                            name="lastName"
-                            type="text"
-                            autoComplete="off"
-                            spellCheck={false}
-                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                            placeholder="Perez"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
-                            Rol
-                          </label>
-                          <select
-                            id="role"
-                            name="role"
-                            defaultValue="staff"
-                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                          >
-                            <option value="staff">Staff</option>
-                            <option value="admin">Admin</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="nationalId">
-                            Cedula
-                          </label>
-                          <input
-                            id="nationalId"
-                            name="nationalId"
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={8}
-                            autoComplete="off"
-                            spellCheck={false}
-                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                            placeholder="12345678"
-                            required
-                          />
-                          <p className="mt-2 text-xs text-slate-400">
-                            Solo numeros, maximo 8 digitos.
-                          </p>
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
-                            Usuario
-                          </label>
-                          <input
-                            id="username"
-                            name="username"
-                            type="text"
-                            maxLength={8}
-                            autoComplete="off"
-                            autoCapitalize="none"
-                            spellCheck={false}
-                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                            placeholder="juan"
-                            required
-                          />
-                          <p className="mt-2 text-xs text-slate-400">
-                            Minimo 3 caracteres, maximo 8.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="email">
-                            Correo
-                          </label>
-                          <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="off"
-                            spellCheck={false}
-                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                            placeholder="usuario@imprenta.com"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="phone">
-                            Telefono
-                          </label>
-                          <input
-                            id="phone"
-                            name="phone"
-                            type="text"
-                            inputMode="tel"
-                            autoComplete="off"
-                            spellCheck={false}
-                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                            placeholder="04141234567"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="sm:col-span-2 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-500">
-                          El usuario creara su codigo de 4 digitos en su primer inicio de sesion.
-                        </div>
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-                      >
-                        Crear usuario
-                      </button>
-                    </form>
-                  </div>
-                </div>
+                <TeamUserModal
+                  closeHref={buildTeamUrl("lista")}
+                  action={createUserAction}
+                />
               ) : null}
             </section>
           ) : null}
