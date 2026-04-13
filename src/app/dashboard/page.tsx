@@ -42,6 +42,9 @@ const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Equipo", view: "equipo" },
 ];
 
+const userSideNavViews: DashboardView[] = ["resumen", "clientes", "pedidos"];
+const adminSideNavViews: DashboardView[] = ["equipo"];
+
 const orderStatusLabels: Record<OrderStatus, string> = {
   recibido: "Recibido",
   disenando: "Disenando",
@@ -366,9 +369,13 @@ export default async function DashboardPage({
 
     return diff >= 0 && diff <= 1000 * 60 * 60 * 24 * 2;
   });
-  const sideItems = sideNavItems.filter((item) =>
-    item.view === "equipo" ? session.role === "admin" : true,
+  const userSideItems = sideNavItems.filter((item) =>
+    userSideNavViews.includes(item.view),
   );
+  const adminSideItems =
+    session.role === "admin"
+      ? sideNavItems.filter((item) => adminSideNavViews.includes(item.view))
+      : [];
   const filteredOrders =
     activeStatus === "todos"
       ? orders
@@ -399,26 +406,61 @@ export default async function DashboardPage({
             </h1>
           </div>
 
-          <nav className="mt-6 space-y-2">
-            {sideItems.map((item) => {
-              const isActive = item.view === activeView;
+          <div className="mt-6 space-y-6">
+            <div>
+              <p className="border-b border-slate-200 pb-3 text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Opciones de usuario
+              </p>
+              <nav className="mt-3 space-y-2">
+                {userSideItems.map((item) => {
+                  const isActive = item.view === activeView;
 
-              return (
-                <Link
-                  key={item.view}
-                  href={buildDashboardUrl(item.view)}
-                  className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
-                    isActive
-                      ? "border-blue-200 bg-blue-50 text-slate-900 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.1)]"
-                      : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white"
-                  }`}
-                >
-                  <span>{item.label}</span>
-                  <span className="text-slate-400">{isActive ? "*" : "+"}</span>
-                </Link>
-              );
-            })}
-          </nav>
+                  return (
+                    <Link
+                      key={item.view}
+                      href={buildDashboardUrl(item.view)}
+                      className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
+                        isActive
+                          ? "border-blue-200 bg-blue-50 text-slate-900 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.1)]"
+                          : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <span className="text-slate-400">{isActive ? "*" : "+"}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {adminSideItems.length > 0 ? (
+              <div>
+                <p className="border-b border-slate-200 pb-3 text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Opciones administrativas
+                </p>
+                <nav className="mt-3 space-y-2">
+                  {adminSideItems.map((item) => {
+                    const isActive = item.view === activeView;
+
+                    return (
+                      <Link
+                        key={item.view}
+                        href={buildDashboardUrl(item.view)}
+                        className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
+                          isActive
+                            ? "border-blue-200 bg-blue-50 text-slate-900 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.1)]"
+                            : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white"
+                        }`}
+                      >
+                        <span>{item.label}</span>
+                        <span className="text-slate-400">{isActive ? "*" : "+"}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+            ) : null}
+          </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-4">
