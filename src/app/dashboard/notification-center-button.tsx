@@ -14,9 +14,12 @@ export type DashboardNotificationItem = {
 
 type NotificationCenterButtonProps = {
   items: DashboardNotificationItem[];
+  scopeKey: string;
 };
 
-const SEEN_NOTIFICATIONS_KEY = "dashboard_seen_notifications";
+function getSeenNotificationsKey(scopeKey: string) {
+  return `dashboard_seen_notifications_${scopeKey}`;
+}
 
 const notificationTone: Record<
   DashboardNotificationItem["type"],
@@ -32,6 +35,7 @@ const notificationTone: Record<
 
 export function NotificationCenterButton({
   items,
+  scopeKey,
 }: NotificationCenterButtonProps) {
   const [open, setOpen] = useState(false);
   const [displayItems, setDisplayItems] = useState<DashboardNotificationItem[]>([]);
@@ -41,7 +45,8 @@ export function NotificationCenterButton({
     }
 
     try {
-      const raw = window.localStorage.getItem(SEEN_NOTIFICATIONS_KEY);
+      const storageKey = getSeenNotificationsKey(scopeKey);
+      const raw = window.localStorage.getItem(storageKey);
 
       if (!raw) {
         return [];
@@ -65,8 +70,9 @@ export function NotificationCenterButton({
       return;
     }
 
-    window.localStorage.setItem(SEEN_NOTIFICATIONS_KEY, JSON.stringify(seenIds));
-  }, [seenIds]);
+    const storageKey = getSeenNotificationsKey(scopeKey);
+    window.localStorage.setItem(storageKey, JSON.stringify(seenIds));
+  }, [scopeKey, seenIds]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSessionSecret } from "@/lib/supabase/config";
-import { clearUserPresence, touchUserPresence } from "@/lib/users";
+import { createPanelSession, endPanelSession } from "@/lib/session-presence";
 
 export const SESSION_COOKIE_NAME = "imprenta_panel_session";
 export const PENDING_LOGIN_COOKIE_NAME = "imprenta_panel_pending_login";
@@ -14,7 +14,10 @@ export type SessionUser = {
   username: string;
   displayName: string;
   role: "admin" | "staff";
+  sessionId: string;
 };
+
+export type SessionStartInput = Omit<SessionUser, "sessionId">;
 
 export type PendingLogin = {
   userId: string;
@@ -117,6 +120,7 @@ export async function getCurrentSession() {
       username: data.username,
       displayName: data.display_name,
       role: data.role,
+      sessionId: typeof session.sessionId === "string" ? session.sessionId : "",
     };
   } catch {
     return null;
@@ -153,13 +157,13 @@ export async function getVerifiedRecovery() {
   }
 }
 
-export async function startSession(session: SessionUser) {
+export async function startSession(session: SessionStartInput) {
   const cookieStore = await cookies();
-  const token = await createSessionToken(session);
-
-  try {
-    await touchUserPresence(session.userId);
-  } catch {}
+  const sessionId = await createPanelSession(session.userId);
+  const token = await createSessionToken({
+    ...session,
+    sessionId,
+  });
 
   cookieStore.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
@@ -227,7 +231,7 @@ export async function endSession() {
   if (activeToken) {
     try {
       const session = await readSessionToken(activeToken);
-      await clearUserPresence(session.userId);
+      await endPanelSession(session.sessionId);
     } catch {}
   }
 

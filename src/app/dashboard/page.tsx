@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 
 import { revalidatePath } from "next/cache";
 
+import {
+  ActivePersonnelCard,
+  type ActivePersonnelItem,
+} from "@/app/dashboard/active-personnel-card";
 import { AdminNotificationsPanel } from "@/app/dashboard/admin-notifications-panel";
 import { DeleteUserButton } from "@/app/dashboard/delete-user-button";
 import { DashboardLiveRefresh } from "@/app/dashboard/dashboard-live-refresh";
@@ -28,9 +32,13 @@ import {
   listActivePasswordRecoveryRequests,
   type PasswordRecoveryRequest,
 } from "@/lib/password-recovery";
+import {
+  countActivePanelSessions,
+  listActivePanelSessions,
+} from "@/lib/session-presence";
 import { listSecurityAlerts, type SecurityAlert } from "@/lib/security-alerts";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
-import { countActiveUsers, createUser, deleteUser, listUsers } from "@/lib/users";
+import { createUser, deleteUser, listUsers } from "@/lib/users";
 
 const orderStatuses: OrderStatus[] = [
   "recibido",
@@ -66,7 +74,7 @@ const adminSideNavViews: DashboardView[] = [
   "equipo",
 ];
 const dashboardTimeZone = "America/Caracas";
-const activePresenceWindowMs = 60 * 1000;
+const activePresenceWindowMs = 90 * 1000;
 
 const orderStatusLabels: Record<OrderStatus, string> = {
   recibido: "Recibido",
@@ -338,6 +346,29 @@ function formatDateTime(value: string) {
   }).format(parsed);
 }
 
+function formatSessionDuration(value: string) {
+  const startedAt = new Date(value).getTime();
+
+  if (Number.isNaN(startedAt)) {
+    return "Sin dato";
+  }
+
+  const diffMs = Math.max(0, Date.now() - startedAt);
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours <= 0) {
+    return `${Math.max(1, minutes)} min`;
+  }
+
+  if (minutes === 0) {
+    return `${hours} h`;
+  }
+
+  return `${hours} h ${minutes} min`;
+}
+
 function getDateKey(value: string | Date) {
   const parsed = value instanceof Date ? value : new Date(value);
 
@@ -369,6 +400,20 @@ function normalizePersonalName(value: string) {
     .replace(/\s+/g, " ")
     .toLowerCase()
     .replace(/\b\p{L}/gu, (letter) => letter.toUpperCase());
+}
+
+function getAdminNotificationTitle(detail: string) {
+  const normalizedDetail = detail.toLowerCase();
+
+  if (normalizedDetail.includes("intento de inicio de sesion")) {
+    return "Intento de inicio de sesion";
+  }
+
+  if (normalizedDetail.includes("recuperacion")) {
+    return "Solicitud de recuperacion";
+  }
+
+  return "Actividad del panel";
 }
 
 function getViewLabel(view: DashboardView) {
@@ -443,6 +488,7 @@ export default async function DashboardPage({
   let clients: Client[] = [];
   let orders: OrderWithClient[] = [];
   let activeStaffCount = 0;
+  let activeSessions: Awaited<ReturnType<typeof listActivePanelSessions>> = [];
   let schemaMessage = "";
 
   try {
@@ -453,7 +499,13 @@ export default async function DashboardPage({
     clients = await listClients();
     orders = await listOrders();
     activeStaffCount =
-      session.role === "admin" ? await countActiveUsers(activePresenceWindowMs) : 0;
+      session.role === "admin"
+        ? await countActivePanelSessions(activePresenceWindowMs)
+        : 0;
+    activeSessions =
+      session.role === "admin"
+        ? await listActivePanelSessions(activePresenceWindowMs)
+        : [];
   } catch {
     schemaMessage =
       "La base de datos no coincide con la ultima version del panel. Vuelve a ejecutar setup.sql en Supabase.";
@@ -494,6 +546,17 @@ export default async function DashboardPage({
 
     return sum + (order.total_amount ?? 0);
   }, 0);
+  const activePersonnelItems: ActivePersonnelItem[] = activeSessions.map((activeSession) => {
+    const user = usersById.get(activeSession.user_id);
+
+    return {
+      id: activeSession.id,
+      displayName: user?.display_name ?? "Usuario desconocido",
+      role: capitalizeLabel(user?.role ?? "staff"),
+      connectedAtLabel: formatDateTime(activeSession.connected_at),
+      activeForLabel: formatSessionDuration(activeSession.connected_at),
+    };
+  });
   const adminNotificationItems: DashboardNotificationItem[] =
     session.role === "admin"
       ? [
@@ -509,7 +572,7 @@ export default async function DashboardPage({
           ...securityAlerts.map((alert) => ({
             id: `alert-${alert.id}`,
             type: "alert" as const,
-            title: "Notificacion administrativa",
+            title: getAdminNotificationTitle(alert.detail),
             subject:
               usersById.get(alert.user_id ?? "")?.display_name ?? "Usuario desconocido",
             detail: alert.detail,
@@ -631,7 +694,10 @@ export default async function DashboardPage({
               </div>
             </header>
 
-            <NotificationCenterButton items={adminNotificationItems} />
+            <NotificationCenterButton
+              items={adminNotificationItems}
+              scopeKey={session.userId}
+            />
 
             <aside className="rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
               <div className="flex items-start justify-between gap-3">
@@ -684,11 +750,6 @@ export default async function DashboardPage({
                   detail: "Entregados durante la jornada",
                 },
                 {
-                  label: "Personal activo",
-                  value: String(activeStaffCount),
-                  detail: "Usuarios con acceso al panel",
-                },
-                {
                   label: "Caja",
                   value: formatCurrency(billedToday),
                   detail: "Facturado hoy",
@@ -703,6 +764,10 @@ export default async function DashboardPage({
                   <p className="mt-2 text-sm text-slate-600">{card.detail}</p>
                 </article>
               ))}
+              <ActivePersonnelCard
+                count={activeStaffCount}
+                items={activePersonnelItems}
+              />
             </div>
 
             {session.role === "admin" ? (

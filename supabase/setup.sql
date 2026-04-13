@@ -38,6 +38,27 @@ create unique index if not exists app_users_username_idx
 create index if not exists app_users_last_seen_at_idx
   on public.app_users (last_seen_at desc);
 
+create table if not exists public.app_user_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.app_users(id) on delete cascade,
+  connected_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now(),
+  ended_at timestamptz null
+);
+
+create index if not exists app_user_sessions_user_id_idx
+  on public.app_user_sessions (user_id);
+
+create index if not exists app_user_sessions_last_seen_at_idx
+  on public.app_user_sessions (last_seen_at desc);
+
+alter table public.app_user_sessions enable row level security;
+
+alter table public.app_user_sessions add column if not exists user_id uuid null;
+alter table public.app_user_sessions add column if not exists connected_at timestamptz default now();
+alter table public.app_user_sessions add column if not exists last_seen_at timestamptz default now();
+alter table public.app_user_sessions add column if not exists ended_at timestamptz null;
+
 create table if not exists public.security_alerts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid null references public.app_users(id) on delete set null,
@@ -170,6 +191,15 @@ begin
     alter table public.orders
       add constraint orders_created_by_fkey
       foreign key (created_by) references public.app_users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'app_user_sessions_user_id_fkey'
+  ) then
+    alter table public.app_user_sessions
+      add constraint app_user_sessions_user_id_fkey
+      foreign key (user_id) references public.app_users(id) on delete cascade;
   end if;
 
   if not exists (

@@ -13,9 +13,27 @@ export function DashboardLiveRefresh({
   const router = useRouter();
   const versionRef = useRef<string | null>(null);
   const requestInFlightRef = useRef(false);
+  const presenceInFlightRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
+
+    const touchPresence = async () => {
+      if (presenceInFlightRef.current) {
+        return;
+      }
+
+      presenceInFlightRef.current = true;
+
+      try {
+        await fetch("/api/dashboard/presence", {
+          method: "POST",
+          cache: "no-store",
+        });
+      } finally {
+        presenceInFlightRef.current = false;
+      }
+    };
 
     const checkForChanges = async () => {
       if (requestInFlightRef.current || document.hidden) {
@@ -56,13 +74,17 @@ export function DashboardLiveRefresh({
       }
     };
 
+    void touchPresence();
     void checkForChanges();
 
     const interval = window.setInterval(() => {
+      void touchPresence();
       void checkForChanges();
     }, intervalMs);
 
     const handleVisibility = () => {
+      void touchPresence();
+
       if (!document.hidden) {
         void checkForChanges();
       }

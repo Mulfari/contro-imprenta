@@ -1,7 +1,7 @@
 import { compare, hash } from "bcryptjs";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { SessionUser } from "@/lib/auth/session";
+import type { SessionStartInput } from "@/lib/auth/session";
 
 type AppRole = "admin" | "staff";
 
@@ -14,7 +14,6 @@ export type AppUser = {
   phone: string;
   role: AppRole;
   is_active: boolean;
-  last_seen_at: string | null;
   created_at: string;
   created_by: string | null;
 };
@@ -28,8 +27,6 @@ export type LoginUser = AppUser & {
 };
 
 const userSelectFields =
-  "id, national_id, username, display_name, email, phone, role, is_active, last_seen_at, created_at, created_by";
-const userSelectFieldsLegacy =
   "id, national_id, username, display_name, email, phone, role, is_active, created_at, created_by";
 
 function normalizeNationalId(value: string) {
@@ -53,28 +50,6 @@ function sanitizeUser(user: AppUserRecord): AppUser {
   void password_hash;
 
   return safeUser;
-}
-
-function isMissingLastSeenColumnError(error: unknown) {
-  if (!error || typeof error !== "object") {
-    return false;
-  }
-
-  const maybeError = error as { code?: string; message?: string };
-
-  return (
-    maybeError.code === "42703" ||
-    maybeError.message?.includes("last_seen_at") === true
-  );
-}
-
-function withLegacyPresenceFallback(
-  records: Omit<AppUser, "last_seen_at">[],
-): AppUser[] {
-  return records.map((record) => ({
-    ...record,
-    last_seen_at: null,
-  }));
 }
 
 function toLoginUser(user: AppUserRecord): LoginUser {
@@ -173,46 +148,16 @@ export async function hasAnyUsers() {
 
 export async function listUsers() {
   const supabase = createSupabaseAdminClient();
-  const primaryQuery = await supabase
+  const query = await supabase
     .from("app_users")
     .select(userSelectFields)
     .order("created_at", { ascending: true });
 
-  if (!primaryQuery.error) {
-    return (primaryQuery.data ?? []) as AppUser[];
+  if (query.error) {
+    throw query.error;
   }
 
-  if (!isMissingLastSeenColumnError(primaryQuery.error)) {
-    throw primaryQuery.error;
-  }
-
-  const fallbackQuery = await supabase
-    .from("app_users")
-    .select(userSelectFieldsLegacy)
-    .order("created_at", { ascending: true });
-
-  if (fallbackQuery.error) {
-    throw fallbackQuery.error;
-  }
-
-  return withLegacyPresenceFallback(
-    (fallbackQuery.data ?? []) as Omit<AppUser, "last_seen_at">[],
-  );
-}
-
-export async function countActiveUsers(windowMs = 60 * 1000) {
-  const supabase = createSupabaseAdminClient();
-  const { count, error } = await supabase
-    .from("app_users")
-    .select("*", { count: "exact", head: true })
-    .eq("is_active", true)
-    .gte("last_seen_at", new Date(Date.now() - windowMs).toISOString());
-
-  if (error) {
-    throw error;
-  }
-
-  return count ?? 0;
+  return (query.data ?? []) as AppUser[];
 }
 
 export async function createUser(input: {
@@ -261,7 +206,7 @@ export async function createUser(input: {
     throw new Error("No se pudo registrar esta cedula.");
   }
 
-  const insertQuery = await supabase
+  const { data, error } = await supabase
     .from("app_users")
     .insert({
       national_id: normalizedNationalId,
@@ -277,38 +222,11 @@ export async function createUser(input: {
     .select(userSelectFields)
     .single<AppUser>();
 
-  if (!insertQuery.error) {
-    return insertQuery.data;
+  if (error) {
+    throw error;
   }
 
-  if (!isMissingLastSeenColumnError(insertQuery.error)) {
-    throw insertQuery.error;
-  }
-
-  const fallbackInsertQuery = await supabase
-    .from("app_users")
-    .insert({
-      national_id: normalizedNationalId,
-      username: normalizedUsername,
-      display_name: displayName,
-      email,
-      phone,
-      password_hash: "",
-      role: input.role,
-      is_active: true,
-      created_by: input.createdBy,
-    })
-    .select(userSelectFieldsLegacy)
-    .single<Omit<AppUser, "last_seen_at">>();
-
-  if (fallbackInsertQuery.error) {
-    throw fallbackInsertQuery.error;
-  }
-
-  return {
-    ...fallbackInsertQuery.data,
-    last_seen_at: null,
-  };
+  return data;
 }
 
 export async function setUserPassword(userId: string, password: string) {
@@ -339,43 +257,7 @@ export async function deleteUser(userId: string) {
   }
 }
 
-export async function touchUserPresence(userId: string) {
-  const supabase = createSupabaseAdminClient();
-  const { error } = await supabase
-    .from("app_users")
-    .update({
-      last_seen_at: new Date().toISOString(),
-    })
-    .eq("id", userId);
-
-  if (error) {
-    if (isMissingLastSeenColumnError(error)) {
-      return;
-    }
-
-    throw error;
-  }
-}
-
-export async function clearUserPresence(userId: string) {
-  const supabase = createSupabaseAdminClient();
-  const { error } = await supabase
-    .from("app_users")
-    .update({
-      last_seen_at: null,
-    })
-    .eq("id", userId);
-
-  if (error) {
-    if (isMissingLastSeenColumnError(error)) {
-      return;
-    }
-
-    throw error;
-  }
-}
-
-export function toSessionUser(user: AppUser): SessionUser {
+export function toSessionUser(user: AppUser): SessionStartInput {
   return {
     userId: user.id,
     username: user.username,
