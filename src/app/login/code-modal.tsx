@@ -240,10 +240,10 @@ export function CodeModal({
             <div className="mt-8 space-y-4 rounded-[1.8rem] border border-slate-200/80 bg-slate-50/65 p-5 sm:p-6">
               <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4">
                 <p className="text-sm font-medium text-slate-800">
-                  Solicita un codigo a administracion
+                  Solicita tu codigo de acceso a administracion
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-500">
-                  El codigo temporal aparecera en el panel de los administradores para este acceso.
+                  Debes solicitar a administracion el codigo de acceso generado para este usuario.
                 </p>
                 <form action={requestRecoveryAction} className="mt-4" noValidate>
                   <button
