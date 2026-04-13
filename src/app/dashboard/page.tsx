@@ -408,16 +408,6 @@ export default async function DashboardPage({
             })}
           </nav>
 
-          <div className="mt-6 rounded-[1.6rem] border border-slate-200 bg-slate-50/90 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-              Sesion
-            </p>
-            <p className="mt-3 text-lg font-semibold">{session.displayName}</p>
-            <p className="mt-1 text-sm text-slate-500">
-              @{session.username} - {session.role}
-            </p>
-          </div>
-
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-4">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
@@ -435,14 +425,6 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          <form action={signOutAction} className="mt-6">
-            <button
-              type="submit"
-              className="w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-            >
-              Cerrar sesion
-            </button>
-          </form>
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6 px-4 py-4 sm:px-6 lg:px-5 lg:py-5">
@@ -473,19 +455,40 @@ export default async function DashboardPage({
                     : null}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href={buildDashboardUrl("clientes")}
-                  className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-                >
-                  Cliente
-                </Link>
-                <Link
-                  href={buildDashboardUrl("pedidos")}
-                  className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Pedido
-                </Link>
+              <div className="flex flex-col items-start gap-3 lg:items-end">
+                <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50/90 px-4 py-3 text-left lg:min-w-[240px]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Sesion
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {session.displayName}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {session.username} · {session.role}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href={buildDashboardUrl("clientes")}
+                    className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                  >
+                    Cliente
+                  </Link>
+                  <Link
+                    href={buildDashboardUrl("pedidos")}
+                    className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  >
+                    Pedido
+                  </Link>
+                  <form action={signOutAction}>
+                    <button
+                      type="submit"
+                      className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                    >
+                      Cerrar sesion
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           </header>
