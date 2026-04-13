@@ -394,12 +394,17 @@ export default async function DashboardPage({
     delivered: orders.filter((order) => order.status === "entregado").length,
   };
   const viewTitle = getViewTitle(activeView);
+  const notificationCount =
+    session.role === "admin"
+      ? recoveryRequests.length + securityAlerts.length
+      : 0;
+  const sessionInitial = capitalizeLabel(session.displayName).charAt(0);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
       <FloatingToast message={message || schemaMessage} />
       <div className="min-h-screen lg:pl-[290px]">
-        <aside className="w-full border border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(248,250,252,0.88))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[290px] lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7">
+        <aside className="w-full border border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(248,250,252,0.88))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[290px] lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7 lg:pb-32">
           <div className="border-b border-slate-200 pb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
               Imprenta Atlas
@@ -450,7 +455,7 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          <form action={signOutAction} className="mt-6">
+          <form action={signOutAction} className="mt-6 lg:absolute lg:bottom-7 lg:left-5 lg:right-5">
             <button
               type="submit"
               className="w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
@@ -462,20 +467,87 @@ export default async function DashboardPage({
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6 px-4 py-4 sm:px-6 lg:px-5 lg:py-5">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_280px]">
             <header className="rounded-[1.7rem] border border-slate-200/80 bg-white/85 px-6 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
               <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
                 {viewTitle}
               </h2>
             </header>
 
-            <aside className="rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-3 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
-              <p className="text-sm font-semibold text-slate-900">
-                {capitalizeLabel(session.displayName)}
-              </p>
-              <p className="mt-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-                {capitalizeLabel(session.role)}
-              </p>
+            <Link
+              href={buildDashboardUrl("resumen")}
+              className="flex items-center justify-between rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur transition hover:bg-white"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white">
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 17h5l-1.4-1.4a2 2 0 0 1-.6-1.4V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                    <path d="M10 17a2 2 0 0 0 4 0" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Notificaciones
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {notificationCount === 0
+                      ? "Sin novedades"
+                      : `${notificationCount} nuevas`}
+                  </p>
+                </div>
+              </div>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
+                {notificationCount}
+              </span>
+            </Link>
+
+            <aside className="rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                    {sessionInitial}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {capitalizeLabel(session.displayName)}
+                    </p>
+                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+                      {capitalizeLabel(session.role)}
+                    </p>
+                  </div>
+                </div>
+                <form action={signOutAction}>
+                  <button
+                    type="submit"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
+                    aria-label="Cerrar sesion"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <path d="M16 17l5-5-5-5" />
+                      <path d="M21 12H9" />
+                    </svg>
+                  </button>
+                </form>
+              </div>
             </aside>
           </div>
 
