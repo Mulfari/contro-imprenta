@@ -31,6 +31,13 @@ export function AdminNotificationsPanel({
   items,
 }: AdminNotificationsPanelProps) {
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 8;
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const paginatedItems = useMemo(
+    () => items.slice((page - 1) * pageSize, page * pageSize),
+    [items, page],
+  );
   const activeItem = useMemo(
     () => items.find((item) => item.id === activeItemId) ?? null,
     [activeItemId, items],
@@ -57,7 +64,7 @@ export function AdminNotificationsPanel({
               No hay notificaciones administrativas registradas.
             </div>
           ) : (
-            items.map((item) => {
+            paginatedItems.map((item) => {
               const tone = notificationTone[item.type];
 
               return (
@@ -94,6 +101,32 @@ export function AdminNotificationsPanel({
             })
           )}
         </div>
+
+        {items.length > 0 ? (
+          <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+              Pagina {page} de {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={page === 1}
+                className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                disabled={page === totalPages}
+                className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        ) : null}
       </article>
 
       {activeItem ? (

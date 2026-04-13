@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type DashboardNotificationItem = {
   id: string;
@@ -15,6 +15,8 @@ export type DashboardNotificationItem = {
 type NotificationCenterButtonProps = {
   items: DashboardNotificationItem[];
 };
+
+const SEEN_NOTIFICATIONS_KEY = "dashboard_seen_notifications";
 
 const notificationTone: Record<
   DashboardNotificationItem["type"],
@@ -36,8 +38,39 @@ export function NotificationCenterButton({
   items,
 }: NotificationCenterButtonProps) {
   const [open, setOpen] = useState(false);
+  const [displayItems, setDisplayItems] = useState<DashboardNotificationItem[]>([]);
+  const [seenIds, setSeenIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") {
+      return [];
+    }
+
+    try {
+      const raw = window.localStorage.getItem(SEEN_NOTIFICATIONS_KEY);
+
+      if (!raw) {
+        return [];
+      }
+
+      const parsed = JSON.parse(raw) as string[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const notificationCount = items.length;
+  const unseenItems = useMemo(
+    () => items.filter((item) => !seenIds.includes(item.id)),
+    [items, seenIds],
+  );
+  const notificationCount = unseenItems.length;
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(SEEN_NOTIFICATIONS_KEY, JSON.stringify(seenIds));
+  }, [seenIds]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -65,7 +98,22 @@ export function NotificationCenterButton({
     <div ref={wrapperRef} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          if (open) {
+            setOpen(false);
+            return;
+          }
+
+          setDisplayItems(unseenItems);
+
+          if (unseenItems.length > 0) {
+            setSeenIds((current) => [
+              ...new Set([...current, ...unseenItems.map((item) => item.id)]),
+            ]);
+          }
+
+          setOpen(true);
+        }}
         className="flex w-full cursor-pointer items-center justify-between rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-4 text-left shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur transition hover:bg-white lg:min-w-[220px]"
       >
         <div className="flex items-center gap-3">
@@ -124,13 +172,13 @@ export function NotificationCenterButton({
           </div>
 
           <div className="max-h-[420px] overflow-y-auto p-3">
-            {items.length === 0 ? (
+            {displayItems.length === 0 ? (
               <div className="rounded-[1.25rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
                 No hay notificaciones nuevas.
               </div>
             ) : (
               <div className="space-y-2">
-                {items.map((item) => {
+                {displayItems.map((item) => {
                   const tone = notificationTone[item.type];
 
                   return (

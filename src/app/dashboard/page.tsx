@@ -472,6 +472,7 @@ export default async function DashboardPage({
     delivered: orders.filter((order) => order.status === "entregado").length,
   };
   const sessionInitial = capitalizeLabel(session.displayName).charAt(0);
+  const usersById = new Map(users.map((user) => [user.id, user]));
   const adminNotificationItems: DashboardNotificationItem[] =
     session.role === "admin"
       ? [
@@ -479,7 +480,7 @@ export default async function DashboardPage({
             id: `recovery-${request.id}`,
             type: "recovery" as const,
             title: "Codigo de recuperacion solicitado",
-            subject: `${request.display_name} · ${request.username}`,
+            subject: request.display_name,
             detail: `Codigo generado: ${request.recovery_code}. Comparte este codigo con el usuario correcto para que pueda restablecer su acceso.`,
             createdAt: request.created_at,
             createdAtLabel: formatDateTime(request.created_at),
@@ -488,7 +489,8 @@ export default async function DashboardPage({
             id: `alert-${alert.id}`,
             type: "alert" as const,
             title: "Movimiento sensible detectado",
-            subject: `Cedula ${alert.username}`,
+            subject:
+              usersById.get(alert.user_id ?? "")?.display_name ?? "Usuario desconocido",
             detail: alert.detail,
             createdAt: alert.created_at,
             createdAtLabel: formatDateTime(alert.created_at),
