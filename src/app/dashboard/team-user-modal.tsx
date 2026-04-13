@@ -15,6 +15,14 @@ function normalizeDigits(value: string, maxLength: number) {
   return value.replace(/\D/g, "").slice(0, maxLength);
 }
 
+function normalizePersonalName(value: string) {
+  return value
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+    .replace(/\b\p{L}/gu, (letter) => letter.toUpperCase());
+}
+
 function SubmitButton() {
   const { pending } = useFormStatus();
 
@@ -40,7 +48,7 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
   const [stepMessage, setStepMessage] = useState("");
 
   const steps = [
-    { id: 1, label: "Datos" },
+    { id: 1, label: "Datos personales" },
     { id: 2, label: "Contacto" },
     { id: 3, label: "Rol" },
   ] as const;
@@ -75,6 +83,11 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
   };
 
   const goToNextStep = () => {
+    if (step === 1) {
+      setFirstName((current) => normalizePersonalName(current));
+      setLastName((current) => normalizePersonalName(current));
+    }
+
     if (!validateCurrentStep()) {
       return;
     }
@@ -161,6 +174,7 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
                   spellCheck={false}
                   value={firstName}
                   onChange={(event) => setFirstName(event.target.value)}
+                  onBlur={() => setFirstName((current) => normalizePersonalName(current))}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Juan"
                 />
@@ -176,6 +190,7 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
                   spellCheck={false}
                   value={lastName}
                   onChange={(event) => setLastName(event.target.value)}
+                  onBlur={() => setLastName((current) => normalizePersonalName(current))}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Perez"
                 />

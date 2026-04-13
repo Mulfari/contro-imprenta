@@ -76,8 +76,8 @@ async function createUserAction(formData: FormData) {
     redirect("/login?message=Necesitas%20un%20usuario%20admin");
   }
 
-  const firstName = String(formData.get("firstName") ?? "").trim();
-  const lastName = String(formData.get("lastName") ?? "").trim();
+  const firstName = normalizePersonalName(String(formData.get("firstName") ?? ""));
+  const lastName = normalizePersonalName(String(formData.get("lastName") ?? ""));
   const nationalId = String(formData.get("nationalId") ?? "");
   const email = String(formData.get("email") ?? "");
   const phone = String(formData.get("phone") ?? "");
@@ -305,6 +305,14 @@ function capitalizeLabel(value: string) {
   }
 
   return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;
+}
+
+function normalizePersonalName(value: string) {
+  return value
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+    .replace(/\b\p{L}/gu, (letter) => letter.toUpperCase());
 }
 
 function getViewLabel(view: DashboardView) {
