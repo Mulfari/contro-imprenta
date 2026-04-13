@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { touchUserPresence } from "@/lib/users";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -50,6 +51,8 @@ export async function GET() {
   }
 
   try {
+    await touchUserPresence(session.userId);
+
     const [
       clientsCount,
       latestClientCreatedAt,
@@ -61,6 +64,7 @@ export async function GET() {
       readyOrders,
       deliveredOrders,
       usersCount,
+      activeUsersCount,
       latestUserCreatedAt,
       alertsCount,
       latestAlertCreatedAt,
@@ -77,6 +81,16 @@ export async function GET() {
       getCount("orders", (query) => query.eq("status", "listo")),
       getCount("orders", (query) => query.eq("status", "entregado")),
       session.role === "admin" ? getCount("app_users") : Promise.resolve(0),
+      session.role === "admin"
+        ? getCount("app_users", (query) =>
+            query
+              .eq("is_active", true)
+              .gte(
+                "last_seen_at",
+                new Date(Date.now() - 60 * 1000).toISOString(),
+              ),
+          )
+        : Promise.resolve(0),
       session.role === "admin" ? getLatestCreatedAt("app_users") : Promise.resolve(""),
       session.role === "admin" ? getCount("security_alerts") : Promise.resolve(0),
       session.role === "admin"
@@ -101,6 +115,7 @@ export async function GET() {
       readyOrders,
       deliveredOrders,
       usersCount,
+      activeUsersCount,
       latestUserCreatedAt,
       alertsCount,
       latestAlertCreatedAt,

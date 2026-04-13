@@ -14,6 +14,7 @@ export type AppUser = {
   phone: string;
   role: AppRole;
   is_active: boolean;
+  last_seen_at: string | null;
   created_at: string;
   created_by: string | null;
 };
@@ -148,7 +149,7 @@ export async function listUsers() {
   const { data, error } = await supabase
     .from("app_users")
     .select(
-      "id, national_id, username, display_name, email, phone, role, is_active, created_at, created_by",
+      "id, national_id, username, display_name, email, phone, role, is_active, last_seen_at, created_at, created_by",
     )
     .order("created_at", { ascending: true });
 
@@ -157,6 +158,21 @@ export async function listUsers() {
   }
 
   return (data ?? []) as AppUser[];
+}
+
+export async function countActiveUsers(windowMs = 60 * 1000) {
+  const supabase = createSupabaseAdminClient();
+  const { count, error } = await supabase
+    .from("app_users")
+    .select("*", { count: "exact", head: true })
+    .eq("is_active", true)
+    .gte("last_seen_at", new Date(Date.now() - windowMs).toISOString());
+
+  if (error) {
+    throw error;
+  }
+
+  return count ?? 0;
 }
 
 export async function createUser(input: {
@@ -219,7 +235,7 @@ export async function createUser(input: {
       created_by: input.createdBy,
     })
     .select(
-      "id, national_id, username, display_name, email, phone, role, is_active, created_at, created_by",
+      "id, national_id, username, display_name, email, phone, role, is_active, last_seen_at, created_at, created_by",
     )
     .single<AppUser>();
 
@@ -252,6 +268,34 @@ export async function setUserPassword(userId: string, password: string) {
 export async function deleteUser(userId: string) {
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase.from("app_users").delete().eq("id", userId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function touchUserPresence(userId: string) {
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase
+    .from("app_users")
+    .update({
+      last_seen_at: new Date().toISOString(),
+    })
+    .eq("id", userId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function clearUserPresence(userId: string) {
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase
+    .from("app_users")
+    .update({
+      last_seen_at: null,
+    })
+    .eq("id", userId);
 
   if (error) {
     throw error;

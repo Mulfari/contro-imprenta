@@ -30,7 +30,7 @@ import {
 } from "@/lib/password-recovery";
 import { listSecurityAlerts, type SecurityAlert } from "@/lib/security-alerts";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
-import { createUser, deleteUser, listUsers } from "@/lib/users";
+import { countActiveUsers, createUser, deleteUser, listUsers } from "@/lib/users";
 
 const orderStatuses: OrderStatus[] = [
   "recibido",
@@ -66,6 +66,7 @@ const adminSideNavViews: DashboardView[] = [
   "equipo",
 ];
 const dashboardTimeZone = "America/Caracas";
+const activePresenceWindowMs = 60 * 1000;
 
 const orderStatusLabels: Record<OrderStatus, string> = {
   recibido: "Recibido",
@@ -441,6 +442,7 @@ export default async function DashboardPage({
   let recoveryRequests: PasswordRecoveryRequest[] = [];
   let clients: Client[] = [];
   let orders: OrderWithClient[] = [];
+  let activeStaffCount = 0;
   let schemaMessage = "";
 
   try {
@@ -450,6 +452,8 @@ export default async function DashboardPage({
       session.role === "admin" ? await listActivePasswordRecoveryRequests(10) : [];
     clients = await listClients();
     orders = await listOrders();
+    activeStaffCount =
+      session.role === "admin" ? await countActiveUsers(activePresenceWindowMs) : 0;
   } catch {
     schemaMessage =
       "La base de datos no coincide con la ultima version del panel. Vuelve a ejecutar setup.sql en Supabase.";
@@ -483,7 +487,6 @@ export default async function DashboardPage({
     (order) =>
       order.status === "entregado" && getDateKey(order.created_at) === todayKey,
   ).length;
-  const activeStaffCount = users.filter((user) => user.is_active).length;
   const billedToday = orders.reduce((sum, order) => {
     if (getDateKey(order.created_at) !== todayKey) {
       return sum;

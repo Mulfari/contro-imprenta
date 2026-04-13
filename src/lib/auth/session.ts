@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSessionSecret } from "@/lib/supabase/config";
+import { clearUserPresence, touchUserPresence } from "@/lib/users";
 
 export const SESSION_COOKIE_NAME = "imprenta_panel_session";
 export const PENDING_LOGIN_COOKIE_NAME = "imprenta_panel_pending_login";
@@ -156,6 +157,10 @@ export async function startSession(session: SessionUser) {
   const cookieStore = await cookies();
   const token = await createSessionToken(session);
 
+  try {
+    await touchUserPresence(session.userId);
+  } catch {}
+
   cookieStore.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
@@ -217,6 +222,14 @@ export async function clearVerifiedRecovery() {
 
 export async function endSession() {
   const cookieStore = await cookies();
+  const activeToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+  if (activeToken) {
+    try {
+      const session = await readSessionToken(activeToken);
+      await clearUserPresence(session.userId);
+    } catch {}
+  }
 
   cookieStore.set(SESSION_COOKIE_NAME, "", {
     httpOnly: true,

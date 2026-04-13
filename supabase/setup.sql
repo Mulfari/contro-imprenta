@@ -10,6 +10,7 @@ create table if not exists public.app_users (
   password_hash text not null,
   role text not null check (role in ('admin', 'staff')),
   is_active boolean not null default true,
+  last_seen_at timestamptz null,
   created_at timestamptz not null default now(),
   created_by uuid null references public.app_users(id) on delete set null
 );
@@ -24,6 +25,7 @@ alter table public.app_users add column if not exists phone text;
 alter table public.app_users add column if not exists password_hash text;
 alter table public.app_users add column if not exists role text;
 alter table public.app_users add column if not exists is_active boolean default true;
+alter table public.app_users add column if not exists last_seen_at timestamptz null;
 alter table public.app_users add column if not exists created_at timestamptz default now();
 alter table public.app_users add column if not exists created_by uuid null;
 
@@ -32,6 +34,9 @@ create unique index if not exists app_users_national_id_idx
 
 create unique index if not exists app_users_username_idx
   on public.app_users (username);
+
+create index if not exists app_users_last_seen_at_idx
+  on public.app_users (last_seen_at desc);
 
 create table if not exists public.security_alerts (
   id uuid primary key default gen_random_uuid(),
