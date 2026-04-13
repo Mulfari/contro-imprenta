@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { revalidatePath } from "next/cache";
 
+import { DeleteUserButton } from "@/app/dashboard/delete-user-button";
 import { TeamUserModal } from "@/app/dashboard/team-user-modal";
 import { signOutAction } from "@/app/login/actions";
 import { FloatingToast } from "@/components/floating-toast";
@@ -1186,17 +1187,10 @@ export default async function DashboardPage({
                           </td>
                           <td className="px-4 py-3">{user.role}</td>
                           <td className="px-4 py-3">
-                            <div className="flex justify-end">
-                              <form action={deleteUserAction}>
-                                <input type="hidden" name="userId" value={user.id} />
-                                <button
-                                  type="submit"
-                                  className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
-                                >
-                                  Eliminar
-                                </button>
-                              </form>
-                            </div>
+                            <DeleteUserButton
+                              action={deleteUserAction}
+                              userId={user.id}
+                            />
                           </td>
                         </tr>
                       ))}
