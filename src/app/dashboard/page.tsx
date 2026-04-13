@@ -468,10 +468,18 @@ export default async function DashboardPage({
 
         <div className="flex min-w-0 flex-col gap-6 px-4 py-4 sm:px-6 lg:px-5 lg:py-5">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_280px]">
-            <header className="rounded-[1.7rem] border border-slate-200/80 bg-white/85 px-6 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
-              <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-                {viewTitle}
-              </h2>
+            <header className="rounded-[1.7rem] border border-slate-200/80 bg-white/88 px-6 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
+              <div className="flex items-center gap-4">
+                <div className="h-11 w-1.5 rounded-full bg-slate-900" />
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Seccion actual
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+                    {viewTitle}
+                  </h2>
+                </div>
+              </div>
             </header>
 
             <Link
