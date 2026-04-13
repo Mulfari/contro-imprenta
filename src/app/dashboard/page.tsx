@@ -426,17 +426,19 @@ export default async function DashboardPage({
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-4">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                Activos
+                Pedidos activos
               </p>
               <p className="mt-2 text-3xl font-semibold">{activeOrders.length}</p>
               <p className="mt-1 text-sm text-slate-500">Pedidos en curso</p>
             </div>
             <div className="rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-4">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                Clientes
+                Nuevos pedidos
               </p>
-              <p className="mt-2 text-3xl font-semibold">{clients.length}</p>
-              <p className="mt-1 text-sm text-slate-500">Base registrada</p>
+              <p className="mt-2 text-3xl font-semibold">
+                {orders.filter((order) => order.status === "recibido").length}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">Pendientes por iniciar</p>
             </div>
           </div>
 
