@@ -3,8 +3,13 @@ import { redirect } from "next/navigation";
 
 import { revalidatePath } from "next/cache";
 
+import { AdminNotificationsPanel } from "@/app/dashboard/admin-notifications-panel";
 import { DeleteUserButton } from "@/app/dashboard/delete-user-button";
 import { DashboardLiveRefresh } from "@/app/dashboard/dashboard-live-refresh";
+import {
+  NotificationCenterButton,
+  type DashboardNotificationItem,
+} from "@/app/dashboard/notification-center-button";
 import { TeamUserModal } from "@/app/dashboard/team-user-modal";
 import { signOutAction } from "@/app/login/actions";
 import { FloatingToast } from "@/components/floating-toast";
@@ -466,11 +471,33 @@ export default async function DashboardPage({
     ready: orders.filter((order) => order.status === "listo").length,
     delivered: orders.filter((order) => order.status === "entregado").length,
   };
-  const notificationCount =
-    session.role === "admin"
-      ? recoveryRequests.length + securityAlerts.length
-      : 0;
   const sessionInitial = capitalizeLabel(session.displayName).charAt(0);
+  const adminNotificationItems: DashboardNotificationItem[] =
+    session.role === "admin"
+      ? [
+          ...recoveryRequests.map((request) => ({
+            id: `recovery-${request.id}`,
+            type: "recovery" as const,
+            title: "Codigo de recuperacion solicitado",
+            subject: `${request.display_name} · ${request.username}`,
+            detail: `Codigo generado: ${request.recovery_code}. Comparte este codigo con el usuario correcto para que pueda restablecer su acceso.`,
+            createdAt: request.created_at,
+            createdAtLabel: formatDateTime(request.created_at),
+          })),
+          ...securityAlerts.map((alert) => ({
+            id: `alert-${alert.id}`,
+            type: "alert" as const,
+            title: "Movimiento sensible detectado",
+            subject: `Cedula ${alert.username}`,
+            detail: alert.detail,
+            createdAt: alert.created_at,
+            createdAtLabel: formatDateTime(alert.created_at),
+          })),
+        ].sort(
+          (left, right) =>
+            new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+        )
+      : [];
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
@@ -581,41 +608,7 @@ export default async function DashboardPage({
               </div>
             </header>
 
-            <Link
-              href={buildDashboardUrl("resumen")}
-              className="flex items-center justify-between rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur transition hover:bg-white"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white">
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M15 17h5l-1.4-1.4a2 2 0 0 1-.6-1.4V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
-                    <path d="M10 17a2 2 0 0 0 4 0" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Notificaciones
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {notificationCount === 0
-                      ? "Sin novedades"
-                      : `${notificationCount} nuevas`}
-                  </p>
-                </div>
-              </div>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-                {notificationCount}
-              </span>
-            </Link>
+            <NotificationCenterButton items={adminNotificationItems} />
 
             <aside className="rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
               <div className="flex items-start justify-between gap-3">
@@ -690,96 +683,7 @@ export default async function DashboardPage({
             </div>
 
             {session.role === "admin" ? (
-              <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-                <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-xl font-semibold">Codigos de recuperacion</h3>
-                    <p className="mt-2 text-sm text-slate-500">
-                        Comparte estos codigos temporales con el usuario correcto. Cada codigo es de un solo uso.
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                      {recoveryRequests.length} activos
-                    </span>
-                  </div>
-                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
-                    <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                      <thead className="bg-slate-50 text-slate-500">
-                        <tr>
-                          <th className="px-4 py-3 font-medium">Cedula</th>
-                          <th className="px-4 py-3 font-medium">Codigo</th>
-                          <th className="px-4 py-3 font-medium">Generado</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
-                        {recoveryRequests.length === 0 ? (
-                          <tr>
-                            <td className="px-4 py-4 text-slate-500" colSpan={3}>
-                              No hay codigos de recuperacion pendientes.
-                            </td>
-                          </tr>
-                        ) : (
-                          recoveryRequests.map((request) => (
-                            <tr key={request.id}>
-                              <td className="px-4 py-3">
-                                <div className="font-medium">{request.display_name}</div>
-                                <div className="text-xs text-slate-400">{request.username}</div>
-                              </td>
-                              <td className="px-4 py-3 text-base font-semibold tracking-[0.2em]">
-                                {request.recovery_code}
-                              </td>
-                              <td className="px-4 py-3">{formatDateTime(request.created_at)}</td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </article>
-
-                <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-xl font-semibold">Alertas de administracion</h3>
-                      <p className="mt-2 text-sm text-slate-500">
-                        Notificaciones de intentos sensibles dentro del panel.
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                      {securityAlerts.length} alertas
-                    </span>
-                  </div>
-                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
-                    <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                      <thead className="bg-slate-50 text-slate-500">
-                        <tr>
-                          <th className="px-4 py-3 font-medium">Cedula</th>
-                          <th className="px-4 py-3 font-medium">Fecha</th>
-                          <th className="px-4 py-3 font-medium">Detalle</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
-                        {securityAlerts.length === 0 ? (
-                          <tr>
-                            <td className="px-4 py-4 text-slate-500" colSpan={3}>
-                              No hay alertas registradas.
-                            </td>
-                          </tr>
-                        ) : (
-                          securityAlerts.map((alert) => (
-                            <tr key={alert.id}>
-                              <td className="px-4 py-3">{alert.username}</td>
-                              <td className="px-4 py-3">{formatDateTime(alert.created_at)}</td>
-                              <td className="px-4 py-3">{alert.detail}</td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </article>
-              </div>
+              <AdminNotificationsPanel items={adminNotificationItems} />
             ) : null}
           </section>
           ) : null}
