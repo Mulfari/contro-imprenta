@@ -345,71 +345,75 @@ export function CodeModal({
             </div>
           ) : (
             <div className={`${authSectionClassName} space-y-4`}>
-              <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4">
-                <p className="text-sm font-medium text-slate-800">
-                  Solicita tu codigo de acceso a administracion
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Debes solicitar a administracion el codigo de acceso generado para este usuario.
-                </p>
-                <form action={requestRecoveryAction} className="mt-4" noValidate>
-                  <button
-                    type="submit"
-                    className={authSecondaryButtonClassName}
-                    disabled={isRecoveryBusy}
-                  >
-                    {requestingRecovery ? (
-                      <>
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
-                        Solicitando codigo...
-                      </>
-                    ) : (
-                      "Solicitar codigo a administracion"
-                    )}
-                  </button>
-                </form>
-              </div>
+              {!recoveryVerified ? (
+                <>
+                  <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4">
+                    <p className="text-sm font-medium text-slate-800">
+                      Solicita tu codigo de acceso a administracion
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      Debes solicitar a administracion el codigo de acceso generado para este usuario.
+                    </p>
+                    <form action={requestRecoveryAction} className="mt-4" noValidate>
+                      <button
+                        type="submit"
+                        className={authSecondaryButtonClassName}
+                        disabled={isRecoveryBusy}
+                      >
+                        {requestingRecovery ? (
+                          <>
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+                            Solicitando codigo...
+                          </>
+                        ) : (
+                          "Solicitar codigo a administracion"
+                        )}
+                      </button>
+                    </form>
+                  </div>
 
-              <form
-                action={verifyRecoveryAction}
-                className="space-y-4"
-                noValidate
-              >
-                <div>
-                  <label
-                    htmlFor="recoveryCode"
-                    className="mb-2 block text-sm font-medium text-slate-700"
+                  <form
+                    action={verifyRecoveryAction}
+                    className="space-y-4"
+                    noValidate
                   >
-                    Codigo de administracion
-                  </label>
-                  <input
-                    id="recoveryCode"
-                    name="recoveryCode"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={recoveryCode}
-                    onChange={(event) =>
-                      setRecoveryCode(event.target.value.replace(/\D/g, "").slice(0, 6))
-                    }
-                    className={authNumericInputClassName}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className={authPrimaryButtonClassName}
-                  disabled={isRecoveryBusy}
-                >
-                  {verifyingRecovery ? (
-                    <>
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Validando codigo...
-                    </>
-                  ) : (
-                    "Recuperar codigo de acceso"
-                  )}
-                </button>
-              </form>
+                    <div>
+                      <label
+                        htmlFor="recoveryCode"
+                        className="mb-2 block text-sm font-medium text-slate-700"
+                      >
+                        Codigo de administracion
+                      </label>
+                      <input
+                        id="recoveryCode"
+                        name="recoveryCode"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={recoveryCode}
+                        onChange={(event) =>
+                          setRecoveryCode(event.target.value.replace(/\D/g, "").slice(0, 6))
+                        }
+                        className={authNumericInputClassName}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className={authPrimaryButtonClassName}
+                      disabled={isRecoveryBusy}
+                    >
+                      {verifyingRecovery ? (
+                        <>
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          Validando codigo...
+                        </>
+                      ) : (
+                        "Recuperar codigo de acceso"
+                      )}
+                    </button>
+                  </form>
+                </>
+              ) : null}
 
               {recoveryVerified ? (
                 <form action={completeRecoveryAction} className="space-y-4" noValidate>
