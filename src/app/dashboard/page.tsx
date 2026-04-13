@@ -527,8 +527,8 @@ export default async function DashboardPage({
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <h3 className="text-xl font-semibold">Codigos de recuperacion</h3>
-                      <p className="mt-2 text-sm text-slate-500">
-                        Comparte estos codigos temporales con el usuario correcto. Vencen en 15 minutos.
+                    <p className="mt-2 text-sm text-slate-500">
+                        Comparte estos codigos temporales con el usuario correcto. Cada codigo es de un solo uso.
                       </p>
                     </div>
                     <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
@@ -541,7 +541,7 @@ export default async function DashboardPage({
                         <tr>
                           <th className="px-4 py-3 font-medium">Usuario</th>
                           <th className="px-4 py-3 font-medium">Codigo</th>
-                          <th className="px-4 py-3 font-medium">Vence</th>
+                          <th className="px-4 py-3 font-medium">Generado</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
@@ -561,7 +561,7 @@ export default async function DashboardPage({
                               <td className="px-4 py-3 text-base font-semibold tracking-[0.2em]">
                                 {request.recovery_code}
                               </td>
-                              <td className="px-4 py-3">{formatDateTime(request.expires_at)}</td>
+                              <td className="px-4 py-3">{formatDateTime(request.created_at)}</td>
                             </tr>
                           ))
                         )}

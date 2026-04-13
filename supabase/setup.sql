@@ -57,7 +57,7 @@ create table if not exists public.password_recovery_requests (
   username text not null,
   display_name text not null,
   recovery_code text not null,
-  expires_at timestamptz not null,
+  expires_at timestamptz null,
   created_at timestamptz not null default now(),
   used_at timestamptz null
 );
@@ -77,6 +77,7 @@ alter table public.password_recovery_requests add column if not exists recovery_
 alter table public.password_recovery_requests add column if not exists expires_at timestamptz default now();
 alter table public.password_recovery_requests add column if not exists created_at timestamptz default now();
 alter table public.password_recovery_requests add column if not exists used_at timestamptz null;
+alter table public.password_recovery_requests alter column expires_at drop not null;
 
 create table if not exists public.clients (
   id uuid primary key default gen_random_uuid(),

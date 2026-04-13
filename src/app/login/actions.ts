@@ -4,13 +4,20 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
+  clearVerifiedRecovery,
   clearPendingLogin,
   endSession,
   getPendingLogin,
+  getVerifiedRecovery,
   startPendingLogin,
+  startVerifiedRecovery,
   startSession,
 } from "@/lib/auth/session";
-import { createPasswordRecoveryRequest, resetPasswordWithRecovery } from "@/lib/password-recovery";
+import {
+  createPasswordRecoveryRequest,
+  resetPasswordWithRecovery,
+  verifyPasswordRecoveryCode,
+} from "@/lib/password-recovery";
 import { createSecurityAlert } from "@/lib/security-alerts";
 import {
   authenticateUser,
@@ -26,6 +33,11 @@ export type VerifyCodeState = {
 };
 
 export type RecoveryCodeState = {
+  status: "idle" | "error" | "success";
+  message: string;
+};
+
+export type RecoveryPasswordState = {
   status: "idle" | "error" | "success";
   message: string;
 };
@@ -90,6 +102,7 @@ export async function verifyIdentifierAction(formData: FormData) {
     identifier,
     attempts: 0,
   });
+  await clearVerifiedRecovery();
 
   revalidatePath("/login");
   redirect("/login?step=code");
@@ -149,10 +162,12 @@ export async function requestPasswordRecoveryStateAction(
   };
 }
 
-export async function completePasswordRecoveryStateAction(
-  _previousState: RecoveryCodeState,
+export async function verifyRecoveryCodeStateAction(
+  previousState: RecoveryCodeState,
   formData: FormData,
 ): Promise<RecoveryCodeState> {
+  void previousState;
+
   if (!hasPanelAuthConfig()) {
     return {
       status: "error",
@@ -170,16 +185,84 @@ export async function completePasswordRecoveryStateAction(
   }
 
   const recoveryCode = String(formData.get("recoveryCode") ?? "").trim();
+
+  try {
+    const result = await verifyPasswordRecoveryCode({
+      identifier: pendingLogin.identifier,
+      recoveryCode,
+    });
+
+    await startVerifiedRecovery({
+      requestId: result.request.id,
+      userId: result.user.id,
+      identifier: pendingLogin.identifier,
+    });
+  } catch (error) {
+    return {
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "No se pudo verificar el codigo de recuperacion.",
+    };
+  }
+
+  return {
+    status: "success",
+    message: "Codigo validado. Ahora define tu nuevo codigo.",
+  };
+}
+
+export async function completePasswordRecoveryStateAction(
+  previousState: RecoveryPasswordState,
+  formData: FormData,
+): Promise<RecoveryPasswordState> {
+  void previousState;
+
+  if (!hasPanelAuthConfig()) {
+    return {
+      status: "error",
+      message: "Configura Supabase y APP_SESSION_SECRET antes de usar la recuperacion.",
+    };
+  }
+
+  const pendingLogin = await getPendingLogin();
+
+  if (!pendingLogin) {
+    return {
+      status: "error",
+      message: "Primero verifica tu usuario o cedula.",
+    };
+  }
+
+  const verifiedRecovery = await getVerifiedRecovery();
+
+  if (!verifiedRecovery || verifiedRecovery.identifier !== pendingLogin.identifier) {
+    return {
+      status: "error",
+      message: "Primero valida el codigo de recuperacion.",
+    };
+  }
+
   const nextPassword = String(formData.get("nextPassword") ?? "").trim();
+  const confirmPassword = String(formData.get("confirmPassword") ?? "").trim();
+
+  if (nextPassword !== confirmPassword) {
+    return {
+      status: "error",
+      message: "La confirmacion no coincide con el nuevo codigo.",
+    };
+  }
 
   let user;
 
   try {
-    user = await resetPasswordWithRecovery({
-      identifier: pendingLogin.identifier,
-      recoveryCode,
+    await resetPasswordWithRecovery({
+      requestId: verifiedRecovery.requestId,
+      userId: verifiedRecovery.userId,
       nextPassword,
     });
+    user = await authenticateUser(pendingLogin.identifier, nextPassword);
   } catch (error) {
     return {
       status: "error",
@@ -190,6 +273,14 @@ export async function completePasswordRecoveryStateAction(
     };
   }
 
+  if (!user) {
+    return {
+      status: "error",
+      message: "No se pudo iniciar sesion con el nuevo codigo.",
+    };
+  }
+
+  await clearVerifiedRecovery();
   await clearPendingLogin();
   await startSession(toSessionUser(user));
   revalidatePath("/", "layout");
@@ -276,6 +367,7 @@ export async function verifyCodeStateAction(
 }
 
 export async function resetPendingLoginAction() {
+  await clearVerifiedRecovery();
   await clearPendingLogin();
 
   revalidatePath("/login");

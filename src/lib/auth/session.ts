@@ -5,6 +5,7 @@ import { getSessionSecret } from "@/lib/supabase/config";
 
 export const SESSION_COOKIE_NAME = "imprenta_panel_session";
 export const PENDING_LOGIN_COOKIE_NAME = "imprenta_panel_pending_login";
+export const VERIFIED_RECOVERY_COOKIE_NAME = "imprenta_panel_verified_recovery";
 
 export type SessionUser = {
   userId: string;
@@ -19,6 +20,12 @@ export type PendingLogin = {
   displayName: string;
   identifier: string;
   attempts: number;
+};
+
+export type VerifiedRecovery = {
+  requestId: string;
+  userId: string;
+  identifier: string;
 };
 
 function getSecretKey() {
@@ -41,6 +48,14 @@ export async function createPendingLoginToken(pendingLogin: PendingLogin) {
     .sign(getSecretKey());
 }
 
+export async function createVerifiedRecoveryToken(verifiedRecovery: VerifiedRecovery) {
+  return new SignJWT(verifiedRecovery)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("2h")
+    .sign(getSecretKey());
+}
+
 export async function readSessionToken(token: string) {
   const { payload } = await jwtVerify(token, getSecretKey());
 
@@ -51,6 +66,12 @@ export async function readPendingLoginToken(token: string) {
   const { payload } = await jwtVerify(token, getSecretKey());
 
   return payload as PendingLogin;
+}
+
+export async function readVerifiedRecoveryToken(token: string) {
+  const { payload } = await jwtVerify(token, getSecretKey());
+
+  return payload as VerifiedRecovery;
 }
 
 export async function getCurrentSession() {
@@ -83,6 +104,21 @@ export async function getPendingLogin() {
   }
 }
 
+export async function getVerifiedRecovery() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(VERIFIED_RECOVERY_COOKIE_NAME)?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    return await readVerifiedRecoveryToken(token);
+  } catch {
+    return null;
+  }
+}
+
 export async function startSession(session: SessionUser) {
   const cookieStore = await cookies();
   const token = await createSessionToken(session);
@@ -109,10 +145,35 @@ export async function startPendingLogin(pendingLogin: PendingLogin) {
   });
 }
 
+export async function startVerifiedRecovery(verifiedRecovery: VerifiedRecovery) {
+  const cookieStore = await cookies();
+  const token = await createVerifiedRecoveryToken(verifiedRecovery);
+
+  cookieStore.set(VERIFIED_RECOVERY_COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 2,
+  });
+}
+
 export async function clearPendingLogin() {
   const cookieStore = await cookies();
 
   cookieStore.set(PENDING_LOGIN_COOKIE_NAME, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
+}
+
+export async function clearVerifiedRecovery() {
+  const cookieStore = await cookies();
+
+  cookieStore.set(VERIFIED_RECOVERY_COOKIE_NAME, "", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -133,6 +194,14 @@ export async function endSession() {
   });
 
   cookieStore.set(PENDING_LOGIN_COOKIE_NAME, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
+
+  cookieStore.set(VERIFIED_RECOVERY_COOKIE_NAME, "", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

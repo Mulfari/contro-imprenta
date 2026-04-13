@@ -9,6 +9,8 @@ import {
   resetPendingLoginAction,
   requestPasswordRecoveryStateAction,
   type RecoveryCodeState,
+  type RecoveryPasswordState,
+  verifyRecoveryCodeStateAction,
   verifyCodeStateAction,
   type VerifyCodeState,
 } from "@/app/login/actions";
@@ -28,13 +30,20 @@ const initialRecoveryState: RecoveryCodeState = {
   message: "",
 };
 
+const initialRecoveryPasswordState: RecoveryPasswordState = {
+  status: "idle",
+  message: "",
+};
+
 export function CodeModal({
   displayName,
 }: CodeModalProps) {
   const [code, setCode] = useState("");
   const [recoveryCode, setRecoveryCode] = useState("");
   const [nextPassword, setNextPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [mode, setMode] = useState<"login" | "recovery">("login");
+  const [recoveryVerified, setRecoveryVerified] = useState(false);
   const router = useRouter();
   const submitRef = useRef<HTMLFormElement>(null);
   const lastSubmittedCodeRef = useRef("");
@@ -45,12 +54,15 @@ export function CodeModal({
   );
   const [requestRecoveryState, requestRecoveryAction, requestingRecovery] =
     useActionState(requestPasswordRecoveryStateAction, initialRecoveryState);
+  const [verifyRecoveryState, verifyRecoveryAction, verifyingRecovery] =
+    useActionState(verifyRecoveryCodeStateAction, initialRecoveryState);
   const [completeRecoveryState, completeRecoveryAction, completingRecovery] =
-    useActionState(completePasswordRecoveryStateAction, initialRecoveryState);
+    useActionState(completePasswordRecoveryStateAction, initialRecoveryPasswordState);
 
   const visualStatus = pending ? "loading" : state.status;
   const activeToastMessage =
     completeRecoveryState.message ||
+    verifyRecoveryState.message ||
     requestRecoveryState.message ||
     state.message;
 
@@ -93,6 +105,29 @@ export function CodeModal({
     }
   }, [completeRecoveryState.status, router]);
 
+  useEffect(() => {
+    if (verifyRecoveryState.status === "success") {
+      const timeout = window.setTimeout(() => {
+        setRecoveryVerified(true);
+      }, 0);
+
+      return () => window.clearTimeout(timeout);
+    }
+  }, [verifyRecoveryState.status]);
+
+  useEffect(() => {
+    if (requestRecoveryState.status === "success") {
+      const timeout = window.setTimeout(() => {
+        setRecoveryVerified(false);
+        setRecoveryCode("");
+        setNextPassword("");
+        setConfirmPassword("");
+      }, 0);
+
+      return () => window.clearTimeout(timeout);
+    }
+  }, [requestRecoveryState.status]);
+
   const inputClasses =
     visualStatus === "loading"
       ? "border-blue-300 bg-blue-50 ring-2 ring-blue-100 animate-pulse"
@@ -113,7 +148,8 @@ export function CodeModal({
     });
   };
 
-  const isRecoveryBusy = requestingRecovery || completingRecovery;
+  const isRecoveryBusy =
+    requestingRecovery || verifyingRecovery || completingRecovery;
 
   const modal = (
     <div className="fixed inset-0 z-[60]">
@@ -188,7 +224,13 @@ export function CodeModal({
 
               <button
                 type="button"
-                onClick={() => setMode("recovery")}
+                onClick={() => {
+                  setMode("recovery");
+                  setRecoveryVerified(false);
+                  setRecoveryCode("");
+                  setNextPassword("");
+                  setConfirmPassword("");
+                }}
                 className="mt-4 w-full text-sm font-medium text-slate-500 transition hover:text-slate-900"
               >
                 Recuperar codigo de acceso
@@ -221,7 +263,11 @@ export function CodeModal({
                 </form>
               </div>
 
-              <form action={completeRecoveryAction} className="space-y-4" noValidate>
+              <form
+                action={verifyRecoveryAction}
+                className="space-y-4"
+                noValidate
+              >
                 <div>
                   <label
                     htmlFor="recoveryCode"
@@ -242,45 +288,87 @@ export function CodeModal({
                     className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.35em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
-                <div>
-                  <label
-                    htmlFor="nextPassword"
-                    className="mb-2 block text-sm font-medium text-slate-700"
-                  >
-                    Nuevo codigo de 4 digitos
-                  </label>
-                  <input
-                    id="nextPassword"
-                    name="nextPassword"
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={4}
-                    value={nextPassword}
-                    onChange={(event) =>
-                      setNextPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
-                    }
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
                 <button
                   type="submit"
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
                   disabled={isRecoveryBusy}
                 >
-                  {completingRecovery ? (
+                  {verifyingRecovery ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Restableciendo acceso...
+                      Validando codigo...
                     </>
                   ) : (
-                    "Restablecer codigo"
+                    "Recuperar codigo de acceso"
                   )}
                 </button>
               </form>
 
+              {recoveryVerified ? (
+                <form action={completeRecoveryAction} className="space-y-4" noValidate>
+                  <div>
+                    <label
+                      htmlFor="nextPassword"
+                      className="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                      Nuevo codigo de 4 digitos
+                    </label>
+                    <input
+                      id="nextPassword"
+                      name="nextPassword"
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={nextPassword}
+                      onChange={(event) =>
+                        setNextPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
+                      }
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="confirmPassword"
+                      className="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                      Confirmar codigo
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={confirmPassword}
+                      onChange={(event) =>
+                        setConfirmPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
+                      }
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                    disabled={isRecoveryBusy}
+                  >
+                    {completingRecovery ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        Guardando nuevo codigo...
+                      </>
+                    ) : (
+                      "Guardar nuevo codigo"
+                    )}
+                  </button>
+                </form>
+              ) : null}
+
               <button
                 type="button"
-                onClick={() => setMode("login")}
+                onClick={() => {
+                  setMode("login");
+                  setRecoveryVerified(false);
+                }}
                 className="w-full text-sm font-medium text-slate-500 transition hover:text-slate-900"
               >
                 Volver a ingresar codigo

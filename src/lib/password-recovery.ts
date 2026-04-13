@@ -11,7 +11,7 @@ export type PasswordRecoveryRequest = {
   username: string;
   display_name: string;
   recovery_code: string;
-  expires_at: string;
+  expires_at: string | null;
   created_at: string;
   used_at: string | null;
 };
@@ -38,7 +38,6 @@ export async function createPasswordRecoveryRequest(identifier: string) {
     .is("used_at", null);
 
   const recoveryCode = generateRecoveryCode();
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 15).toISOString();
 
   const { data, error } = await supabase
     .from("password_recovery_requests")
@@ -47,7 +46,7 @@ export async function createPasswordRecoveryRequest(identifier: string) {
       username: user.username,
       display_name: user.display_name,
       recovery_code: recoveryCode,
-      expires_at: expiresAt,
+      expires_at: null,
     })
     .select("*")
     .single<PasswordRecoveryRequest>();
@@ -59,10 +58,9 @@ export async function createPasswordRecoveryRequest(identifier: string) {
   return data;
 }
 
-export async function resetPasswordWithRecovery(input: {
+export async function verifyPasswordRecoveryCode(input: {
   identifier: string;
   recoveryCode: string;
-  nextPassword: string;
 }) {
   const user = await findUserForLogin(input.identifier);
 
@@ -74,6 +72,35 @@ export async function resetPasswordWithRecovery(input: {
     throw new Error("Ingresa un codigo de recuperacion valido.");
   }
 
+  const supabase = createSupabaseAdminClient();
+  const { data: request, error: requestError } = await supabase
+    .from("password_recovery_requests")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("recovery_code", input.recoveryCode)
+    .is("used_at", null)
+    .order("created_at", { ascending: false })
+    .maybeSingle<PasswordRecoveryRequest>();
+
+  if (requestError) {
+    throw requestError;
+  }
+
+  if (!request) {
+    throw new Error("Codigo de recuperacion incorrecto.");
+  }
+
+  return {
+    user,
+    request,
+  };
+}
+
+export async function resetPasswordWithRecovery(input: {
+  requestId: string;
+  userId: string;
+  nextPassword: string;
+}) {
   if (!/^\d{4}$/.test(input.nextPassword)) {
     throw new Error("El nuevo codigo debe tener exactamente 4 digitos.");
   }
@@ -83,11 +110,9 @@ export async function resetPasswordWithRecovery(input: {
   const { data: request, error: requestError } = await supabase
     .from("password_recovery_requests")
     .select("*")
-    .eq("user_id", user.id)
-    .eq("recovery_code", input.recoveryCode)
+    .eq("id", input.requestId)
+    .eq("user_id", input.userId)
     .is("used_at", null)
-    .gt("expires_at", now)
-    .order("created_at", { ascending: false })
     .maybeSingle<PasswordRecoveryRequest>();
 
   if (requestError) {
@@ -95,7 +120,7 @@ export async function resetPasswordWithRecovery(input: {
   }
 
   if (!request) {
-    throw new Error("Codigo de recuperacion incorrecto o vencido.");
+    throw new Error("Este codigo de recuperacion ya fue usado.");
   }
 
   const passwordHash = await hash(input.nextPassword, 12);
@@ -104,7 +129,7 @@ export async function resetPasswordWithRecovery(input: {
     .update({
       password_hash: passwordHash,
     })
-    .eq("id", user.id);
+    .eq("id", input.userId);
 
   if (updateUserError) {
     throw updateUserError;
@@ -121,19 +146,17 @@ export async function resetPasswordWithRecovery(input: {
     throw updateRequestError;
   }
 
-  return user;
+  return request;
 }
 
 export async function listActivePasswordRecoveryRequests(limit = 10) {
   const supabase = createSupabaseAdminClient();
-  const now = new Date().toISOString();
   const { data, error } = await supabase
     .from("password_recovery_requests")
     .select(
       "id, user_id, username, display_name, recovery_code, expires_at, created_at, used_at",
     )
     .is("used_at", null)
-    .gt("expires_at", now)
     .order("created_at", { ascending: false })
     .limit(limit);
 
