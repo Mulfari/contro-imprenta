@@ -1112,15 +1112,6 @@ export default async function DashboardPage({
           {activeView === "equipo" && session.role === "admin" ? (
             <section id="equipo" className="grid gap-6">
               <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                <div>
-                  <h2 className="text-xl font-semibold">Usuarios registrados</h2>
-                  <p className="mt-2 text-sm text-slate-500">
-                    Administra accesos y crea nuevas cuentas cuando las necesites.
-                  </p>
-                </div>
-              </article>
-
-              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <h3 className="text-xl font-semibold">Usuarios registrados</h3>
                   <Link
