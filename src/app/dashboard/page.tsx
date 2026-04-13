@@ -275,6 +275,20 @@ function formatDateTime(value: string) {
   }).format(parsed);
 }
 
+function getViewTitle(view: DashboardView) {
+  switch (view) {
+    case "clientes":
+      return "Clientes";
+    case "pedidos":
+      return "Pedidos";
+    case "equipo":
+      return "Equipo";
+    case "resumen":
+    default:
+      return "Resumen";
+  }
+}
+
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
@@ -369,6 +383,7 @@ export default async function DashboardPage({
     ready: orders.filter((order) => order.status === "listo").length,
     delivered: orders.filter((order) => order.status === "entregado").length,
   };
+  const viewTitle = getViewTitle(activeView);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
@@ -428,70 +443,48 @@ export default async function DashboardPage({
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6 px-4 py-4 sm:px-6 lg:px-5 lg:py-5">
-          <header className="rounded-[2rem] border border-slate-200/80 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-500">
-                  {activeView === "resumen" ? "Centro de control" : "Modulo activo"}
-                </p>
-                <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-                  {activeView === "resumen" ? `Bienvenido, ${session.displayName}` : null}
-                  {activeView === "clientes" ? "Clientes" : null}
-                  {activeView === "pedidos" ? "Pedidos" : null}
-                  {activeView === "equipo" ? "Equipo" : null}
-                </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
-                  {activeView === "resumen"
-                    ? "Consulta el estado general de la imprenta y entra al modulo que necesitas."
-                    : null}
-                  {activeView === "clientes"
-                    ? "Registra clientes y consulta su informacion sin distracciones."
-                    : null}
-                  {activeView === "pedidos"
-                    ? "Crea pedidos nuevos y revisa produccion desde una sola vista."
-                    : null}
-                  {activeView === "equipo"
-                    ? "Administra usuarios del panel y controla los accesos del equipo."
-                    : null}
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-3 lg:items-end">
-                <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50/90 px-4 py-3 text-left lg:min-w-[240px]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Sesion
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">
-                    {session.displayName}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {session.username} · {session.role}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    href={buildDashboardUrl("clientes")}
-                    className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-                  >
-                    Cliente
-                  </Link>
-                  <Link
-                    href={buildDashboardUrl("pedidos")}
-                    className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                  >
-                    Pedido
-                  </Link>
-                  <form action={signOutAction}>
-                    <button
-                      type="submit"
-                      className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                    >
-                      Cerrar sesion
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </header>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <header className="rounded-[2rem] border border-slate-200/80 bg-white/85 px-6 py-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur">
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                {viewTitle}
+              </h2>
+            </header>
+
+            <aside className="rounded-[1.6rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)] backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Sesion
+              </p>
+              <p className="mt-2 text-sm font-semibold text-slate-900">
+                {session.displayName}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                {session.username} · {session.role}
+              </p>
+              <form action={signOutAction} className="mt-4">
+                <button
+                  type="submit"
+                  className="w-full rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                >
+                  Cerrar sesion
+                </button>
+              </form>
+            </aside>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={buildDashboardUrl("clientes")}
+              className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              Cliente
+            </Link>
+            <Link
+              href={buildDashboardUrl("pedidos")}
+              className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              Pedido
+            </Link>
+          </div>
 
           {activeView === "resumen" ? (
           <section className="grid gap-6">
