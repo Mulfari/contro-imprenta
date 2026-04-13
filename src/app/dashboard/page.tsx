@@ -1173,7 +1173,7 @@ export default async function DashboardPage({
                         <th className="px-4 py-3 font-medium">Cedula</th>
                         <th className="px-4 py-3 font-medium">Contacto</th>
                         <th className="px-4 py-3 font-medium">Rol</th>
-                        <th className="px-4 py-3 font-medium text-right">Acciones</th>
+                        <th className="px-4 py-3 font-medium">Acciones</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
@@ -1186,7 +1186,7 @@ export default async function DashboardPage({
                             <div className="text-xs text-slate-400">{user.email}</div>
                           </td>
                           <td className="px-4 py-3">{user.role}</td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 align-middle">
                             <DeleteUserButton
                               action={deleteUserAction}
                               userId={user.id}
