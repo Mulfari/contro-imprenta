@@ -155,7 +155,7 @@ async function deleteUserAction(formData: FormData) {
   }
 
   if (userId === session.userId) {
-    redirect(buildTeamUrl("lista", "No puedes eliminar tu propia cuenta."));
+    redirect(buildTeamUrl("lista", "No puedes borrar tu propio usuario."));
   }
 
   try {
