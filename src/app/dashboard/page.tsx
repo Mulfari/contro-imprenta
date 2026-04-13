@@ -1112,186 +1112,197 @@ export default async function DashboardPage({
           {activeView === "equipo" && session.role === "admin" ? (
             <section id="equipo" className="grid gap-6">
               <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold">Usuarios registrados</h2>
-                    <p className="mt-2 text-sm text-slate-500">
-                      Administra accesos y crea nuevas cuentas cuando las necesites.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <Link
-                      href={buildTeamUrl("lista")}
-                      className={`rounded-full border px-5 py-3 text-sm font-semibold transition ${
-                        teamMode === "lista"
-                          ? "border-slate-900 bg-slate-900 text-white"
-                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
-                      }`}
-                    >
-                      Ver usuarios
-                    </Link>
-                    <Link
-                      href={buildTeamUrl("nuevo")}
-                      className={`rounded-full border px-5 py-3 text-sm font-semibold transition ${
-                        teamMode === "nuevo"
-                          ? "border-slate-900 bg-slate-900 text-white"
-                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
-                      }`}
-                    >
-                      Agregar usuario
-                    </Link>
-                  </div>
+                <div>
+                  <h2 className="text-xl font-semibold">Usuarios registrados</h2>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Administra accesos y crea nuevas cuentas cuando las necesites.
+                  </p>
                 </div>
               </article>
 
-              {teamMode === "lista" ? (
-                <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                  <h3 className="text-xl font-semibold">Listado de usuarios</h3>
-                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
-                    <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                      <thead className="bg-slate-50 text-slate-500">
-                        <tr>
-                          <th className="px-4 py-3 font-medium">Nombre</th>
-                          <th className="px-4 py-3 font-medium">Cedula</th>
-                          <th className="px-4 py-3 font-medium">Usuario</th>
-                          <th className="px-4 py-3 font-medium">Contacto</th>
-                          <th className="px-4 py-3 font-medium">Rol</th>
-                          <th className="px-4 py-3 font-medium">Estado</th>
+              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <h3 className="text-xl font-semibold">Usuarios registrados</h3>
+                  <Link
+                    href={buildTeamUrl("nuevo")}
+                    className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                  >
+                    Nuevo usuario
+                  </Link>
+                </div>
+                <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+                  <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                    <thead className="bg-slate-50 text-slate-500">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Nombre</th>
+                        <th className="px-4 py-3 font-medium">Cedula</th>
+                        <th className="px-4 py-3 font-medium">Usuario</th>
+                        <th className="px-4 py-3 font-medium">Contacto</th>
+                        <th className="px-4 py-3 font-medium">Rol</th>
+                        <th className="px-4 py-3 font-medium">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
+                      {users.map((user) => (
+                        <tr key={user.id}>
+                          <td className="px-4 py-3">{user.display_name}</td>
+                          <td className="px-4 py-3">{user.national_id}</td>
+                          <td className="px-4 py-3">{user.username}</td>
+                          <td className="px-4 py-3">
+                            <div>{user.phone}</div>
+                            <div className="text-xs text-slate-400">{user.email}</div>
+                          </td>
+                          <td className="px-4 py-3">{user.role}</td>
+                          <td className="px-4 py-3">
+                            {user.is_active ? "Activo" : "Inactivo"}
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
-                        {users.map((user) => (
-                          <tr key={user.id}>
-                            <td className="px-4 py-3">{user.display_name}</td>
-                            <td className="px-4 py-3">{user.national_id}</td>
-                            <td className="px-4 py-3">{user.username}</td>
-                            <td className="px-4 py-3">
-                              <div>{user.phone}</div>
-                              <div className="text-xs text-slate-400">{user.email}</div>
-                            </td>
-                            <td className="px-4 py-3">{user.role}</td>
-                            <td className="px-4 py-3">
-                              {user.is_active ? "Activo" : "Inactivo"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </article>
-              ) : null}
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </article>
 
               {teamMode === "nuevo" ? (
-                <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                  <h3 className="text-xl font-semibold">Agregar usuario</h3>
-                  <form action={createUserAction} className="mt-5 space-y-4">
-                    <div>
-                      <label className="mb-2 block text-sm text-slate-600" htmlFor="displayName">
-                        Nombre visible
-                      </label>
-                      <input
-                        id="displayName"
-                        name="displayName"
-                        type="text"
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                        placeholder="Juan Perez"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-2 block text-sm text-slate-600" htmlFor="nationalId">
-                        Cedula
-                      </label>
-                      <input
-                        id="nationalId"
-                        name="nationalId"
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={8}
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                        placeholder="12345678"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
-                        Usuario
-                      </label>
-                      <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        maxLength={8}
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                        placeholder="juan"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-2 block text-sm text-slate-600" htmlFor="email">
-                        Correo
-                      </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                        placeholder="usuario@imprenta.com"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-2 block text-sm text-slate-600" htmlFor="phone">
-                        Telefono
-                      </label>
-                      <input
-                        id="phone"
-                        name="phone"
-                        type="text"
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                        placeholder="04141234567"
-                        required
-                      />
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/18 px-4 py-6 backdrop-blur-sm">
+                  <div className="w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.16)] sm:p-7">
+                    <div className="flex items-start justify-between gap-4">
                       <div>
-                        <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
-                          Rol
-                        </label>
-                        <select
-                          id="role"
-                          name="role"
-                          defaultValue="staff"
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                        >
-                          <option value="staff">Staff</option>
-                          <option value="admin">Admin</option>
-                        </select>
+                        <h3 className="text-xl font-semibold">Nuevo usuario</h3>
+                        <p className="mt-2 text-sm text-slate-500">
+                          Completa los datos del acceso y el codigo de 4 digitos.
+                        </p>
                       </div>
+                      <Link
+                        href={buildTeamUrl("lista")}
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100"
+                        aria-label="Cerrar modal"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          className="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M18 6L6 18" />
+                          <path d="M6 6l12 12" />
+                        </svg>
+                      </Link>
+                    </div>
+
+                    <form action={createUserAction} className="mt-6 space-y-4">
                       <div>
-                        <label className="mb-2 block text-sm text-slate-600" htmlFor="password">
-                          Codigo de 4 digitos
+                        <label className="mb-2 block text-sm text-slate-600" htmlFor="displayName">
+                          Nombre visible
                         </label>
                         <input
-                          id="password"
-                          name="password"
-                          type="password"
-                          inputMode="numeric"
-                          pattern="[0-9]{4}"
+                          id="displayName"
+                          name="displayName"
+                          type="text"
                           className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                          placeholder="1234"
+                          placeholder="Juan Perez"
                           required
                         />
                       </div>
-                    </div>
-                    <button
-                      type="submit"
-                      className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-                    >
-                      Crear usuario
-                    </button>
-                  </form>
-                </article>
+                      <div>
+                        <label className="mb-2 block text-sm text-slate-600" htmlFor="nationalId">
+                          Cedula
+                        </label>
+                        <input
+                          id="nationalId"
+                          name="nationalId"
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={8}
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          placeholder="12345678"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
+                          Usuario
+                        </label>
+                        <input
+                          id="username"
+                          name="username"
+                          type="text"
+                          maxLength={8}
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          placeholder="juan"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm text-slate-600" htmlFor="email">
+                          Correo
+                        </label>
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          placeholder="usuario@imprenta.com"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm text-slate-600" htmlFor="phone">
+                          Telefono
+                        </label>
+                        <input
+                          id="phone"
+                          name="phone"
+                          type="text"
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          placeholder="04141234567"
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
+                            Rol
+                          </label>
+                          <select
+                            id="role"
+                            name="role"
+                            defaultValue="staff"
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          >
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="password">
+                            Codigo de 4 digitos
+                          </label>
+                          <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            inputMode="numeric"
+                            pattern="[0-9]{4}"
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            placeholder="1234"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                      >
+                        Crear usuario
+                      </button>
+                    </form>
+                  </div>
+                </div>
               ) : null}
             </section>
           ) : null}
