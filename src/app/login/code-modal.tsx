@@ -16,7 +16,6 @@ import { FloatingToast } from "@/components/floating-toast";
 
 type CodeModalProps = {
   displayName: string;
-  username: string;
 };
 
 const initialState: VerifyCodeState = {
@@ -31,7 +30,6 @@ const initialRecoveryState: RecoveryCodeState = {
 
 export function CodeModal({
   displayName,
-  username,
 }: CodeModalProps) {
   const [code, setCode] = useState("");
   const [recoveryCode, setRecoveryCode] = useState("");
@@ -122,19 +120,21 @@ export function CodeModal({
       <div className="absolute inset-0 bg-white/18 backdrop-blur-xl" />
       <div className="relative flex min-h-screen items-center justify-center p-4">
         <FloatingToast message={activeToastMessage} />
-        <div className="w-full max-w-sm rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.18)]">
+        <div className="w-full max-w-xl rounded-[2.3rem] border border-slate-200/90 bg-white/92 p-8 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:p-9">
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-                Verificacion
+            <div className="max-w-lg">
+              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
+                Panel Administrativo
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-950">
-                Bienvenido, {displayName}
+              <h2 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950">
+                Express Printer
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Ingresa tu codigo
+              <p className="mt-4 text-base font-medium text-slate-600">
+                {mode === "login" ? "Verificar acceso" : "Recuperar acceso"}
               </p>
-              <p className="text-sm leading-6 text-slate-500">@{username}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                {displayName}
+              </p>
             </div>
 
             <button
@@ -149,8 +149,8 @@ export function CodeModal({
           </div>
 
           {mode === "login" ? (
-            <>
-              <form ref={submitRef} action={formAction} className="mt-6 space-y-4" noValidate>
+            <div className="mt-8 rounded-[1.8rem] border border-slate-200/80 bg-slate-50/65 p-5 sm:p-6">
+              <form ref={submitRef} action={formAction} className="space-y-4" noValidate>
                 <div>
                   <label
                     htmlFor="modal-password"
@@ -193,15 +193,15 @@ export function CodeModal({
               >
                 Recuperar codigo de acceso
               </button>
-            </>
+            </div>
           ) : (
-            <div className="mt-6 space-y-4">
-              <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50/70 p-4">
+            <div className="mt-8 space-y-4 rounded-[1.8rem] border border-slate-200/80 bg-slate-50/65 p-5 sm:p-6">
+              <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4">
                 <p className="text-sm font-medium text-slate-800">
                   Solicita un codigo a administracion
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-500">
-                  El codigo temporal llegara al panel de los administradores para @{username}.
+                  El codigo temporal aparecera en el panel de los administradores para este acceso.
                 </p>
                 <form action={requestRecoveryAction} className="mt-4" noValidate>
                   <button
@@ -239,7 +239,7 @@ export function CodeModal({
                     onChange={(event) =>
                       setRecoveryCode(event.target.value.replace(/\D/g, "").slice(0, 6))
                     }
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-xl tracking-[0.35em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.35em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
                 <div>
@@ -259,7 +259,7 @@ export function CodeModal({
                     onChange={(event) =>
                       setNextPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
                     }
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
                 <button

@@ -85,7 +85,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           {isCodeStep ? (
             <CodeModal
               displayName={pendingDisplayName}
-              username={pendingLogin?.username ?? ""}
             />
           ) : null}
         </section>
