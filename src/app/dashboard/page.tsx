@@ -1159,7 +1159,8 @@ export default async function DashboardPage({
                       <div>
                         <h3 className="text-xl font-semibold">Nuevo usuario</h3>
                         <p className="mt-2 text-sm text-slate-500">
-                          Completa los datos del acceso y el codigo de 4 digitos.
+                          Registra el acceso del equipo. El codigo se crea en el
+                          primer inicio de sesion.
                         </p>
                       </div>
                       <Link
@@ -1184,75 +1185,26 @@ export default async function DashboardPage({
                     </div>
 
                     <form action={createUserAction} className="mt-6 space-y-4">
-                      <div>
-                        <label className="mb-2 block text-sm text-slate-600" htmlFor="displayName">
-                          Nombre visible
-                        </label>
-                        <input
-                          id="displayName"
-                          name="displayName"
-                          type="text"
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                          placeholder="Juan Perez"
-                          required
-                        />
+                      <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                        El `usuario` y la `cedula` deben ser unicos dentro del panel.
                       </div>
-                      <div>
-                        <label className="mb-2 block text-sm text-slate-600" htmlFor="nationalId">
-                          Cedula
-                        </label>
-                        <input
-                          id="nationalId"
-                          name="nationalId"
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={8}
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                          placeholder="12345678"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
-                          Usuario
-                        </label>
-                        <input
-                          id="username"
-                          name="username"
-                          type="text"
-                          maxLength={8}
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                          placeholder="juan"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm text-slate-600" htmlFor="email">
-                          Correo
-                        </label>
-                        <input
-                          id="email"
-                          name="email"
-                          type="email"
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                          placeholder="usuario@imprenta.com"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm text-slate-600" htmlFor="phone">
-                          Telefono
-                        </label>
-                        <input
-                          id="phone"
-                          name="phone"
-                          type="text"
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                          placeholder="04141234567"
-                          required
-                        />
-                      </div>
+
                       <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="displayName">
+                            Nombre visible
+                          </label>
+                          <input
+                            id="displayName"
+                            name="displayName"
+                            type="text"
+                            autoComplete="off"
+                            spellCheck={false}
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            placeholder="Juan Perez"
+                            required
+                          />
+                        </div>
                         <div>
                           <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
                             Rol
@@ -1267,8 +1219,91 @@ export default async function DashboardPage({
                             <option value="admin">Admin</option>
                           </select>
                         </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="nationalId">
+                            Cedula
+                          </label>
+                          <input
+                            id="nationalId"
+                            name="nationalId"
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={8}
+                            autoComplete="off"
+                            spellCheck={false}
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            placeholder="12345678"
+                            required
+                          />
+                          <p className="mt-2 text-xs text-slate-400">
+                            Solo numeros, maximo 8 digitos.
+                          </p>
+                        </div>
+                        <div>
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="username">
+                            Usuario
+                          </label>
+                          <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            maxLength={8}
+                            autoComplete="off"
+                            autoCapitalize="none"
+                            spellCheck={false}
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            placeholder="juan"
+                            required
+                          />
+                          <p className="mt-2 text-xs text-slate-400">
+                            Minimo 3 caracteres, maximo 8.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="email">
+                            Correo
+                          </label>
+                          <input
+                            id="email"
+                            name="email"
+                            type="email"
+                            autoComplete="off"
+                            spellCheck={false}
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            placeholder="usuario@imprenta.com"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="phone">
+                            Telefono
+                          </label>
+                          <input
+                            id="phone"
+                            name="phone"
+                            type="text"
+                            inputMode="tel"
+                            autoComplete="off"
+                            spellCheck={false}
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            placeholder="04141234567"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
                         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
                           El usuario creara su codigo de 4 digitos en su primer inicio de sesion.
+                        </div>
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                          Si la cedula o el usuario ya existen, el sistema lo notificara antes de guardar.
                         </div>
                       </div>
                       <button
