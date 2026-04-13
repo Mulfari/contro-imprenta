@@ -407,13 +407,13 @@ export default async function DashboardPage({
         <aside className="w-full border border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(248,250,252,0.88))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[290px] lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7 lg:pb-32">
           <div className="border-b border-slate-200 pb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
-              Imprenta Atlas
+              Express Printer
             </p>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight">
-              Panel principal
+              Panel administrativo
             </h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Entra a un modulo y trabaja sin ver todo a la vez.
+              Gestiona clientes, pedidos y equipo desde un solo lugar.
             </p>
           </div>
 
