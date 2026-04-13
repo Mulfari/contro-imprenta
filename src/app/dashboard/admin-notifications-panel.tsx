@@ -127,7 +127,7 @@ type AdminNotificationModalProps = {
   onClose: () => void;
 };
 
-function AdminNotificationModal({
+export function AdminNotificationModal({
   item,
   onClose,
 }: AdminNotificationModalProps) {

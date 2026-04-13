@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { AdminNotificationModal } from "@/app/dashboard/admin-notifications-panel";
+
 export type DashboardNotificationItem = {
   id: string;
   type: "recovery" | "alert";
@@ -38,6 +40,7 @@ export function NotificationCenterButton({
   scopeKey,
 }: NotificationCenterButtonProps) {
   const [open, setOpen] = useState(false);
+  const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [displayItems, setDisplayItems] = useState<DashboardNotificationItem[]>([]);
   const [seenIds, setSeenIds] = useState<string[]>(() => {
     if (typeof window === "undefined") {
@@ -62,6 +65,10 @@ export function NotificationCenterButton({
   const unseenItems = useMemo(
     () => items.filter((item) => !seenIds.includes(item.id)),
     [items, seenIds],
+  );
+  const activeItem = useMemo(
+    () => displayItems.find((item) => item.id === activeItemId) ?? null,
+    [activeItemId, displayItems],
   );
   const notificationCount = unseenItems.length;
 
@@ -184,9 +191,11 @@ export function NotificationCenterButton({
                   const tone = notificationTone[item.type];
 
                   return (
-                    <div
+                    <button
                       key={item.id}
-                      className="rounded-[1.25rem] border border-slate-200 bg-slate-50/70 px-4 py-4"
+                      type="button"
+                      onClick={() => setActiveItemId(item.id)}
+                      className="w-full cursor-pointer rounded-[1.25rem] border border-slate-200 bg-slate-50/70 px-4 py-4 text-left transition hover:border-slate-300 hover:bg-white"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2">
@@ -203,13 +212,20 @@ export function NotificationCenterButton({
                       <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">
                         {item.createdAtLabel}
                       </p>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
             )}
           </div>
         </div>
+      ) : null}
+
+      {activeItem ? (
+        <AdminNotificationModal
+          item={activeItem}
+          onClose={() => setActiveItemId(null)}
+        />
       ) : null}
     </div>
   );
