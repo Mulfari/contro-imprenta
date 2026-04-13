@@ -289,6 +289,16 @@ function getViewTitle(view: DashboardView) {
   }
 }
 
+function capitalizeLabel(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return "";
+  }
+
+  return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;
+}
+
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
@@ -440,34 +450,32 @@ export default async function DashboardPage({
             </div>
           </div>
 
+          <form action={signOutAction} className="mt-6">
+            <button
+              type="submit"
+              className="w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              Cerrar sesion
+            </button>
+          </form>
+
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6 px-4 py-4 sm:px-6 lg:px-5 lg:py-5">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-            <header className="rounded-[2rem] border border-slate-200/80 bg-white/85 px-6 py-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+            <header className="rounded-[1.7rem] border border-slate-200/80 bg-white/85 px-6 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
+              <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
                 {viewTitle}
               </h2>
             </header>
 
-            <aside className="rounded-[1.6rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)] backdrop-blur">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Sesion
+            <aside className="rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-3 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
+              <p className="text-sm font-semibold text-slate-900">
+                {capitalizeLabel(session.displayName)}
               </p>
-              <p className="mt-2 text-sm font-semibold text-slate-900">
-                {session.displayName}
+              <p className="mt-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+                {capitalizeLabel(session.role)}
               </p>
-              <p className="mt-1 text-xs text-slate-500">
-                {session.username} · {session.role}
-              </p>
-              <form action={signOutAction} className="mt-4">
-                <button
-                  type="submit"
-                  className="w-full rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Cerrar sesion
-                </button>
-              </form>
             </aside>
           </div>
 
