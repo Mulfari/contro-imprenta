@@ -76,11 +76,18 @@ async function createUserAction(formData: FormData) {
   }
 
   const username = String(formData.get("username") ?? "");
-  const displayName = String(formData.get("displayName") ?? "");
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
   const nationalId = String(formData.get("nationalId") ?? "");
   const email = String(formData.get("email") ?? "");
   const phone = String(formData.get("phone") ?? "");
   const role = String(formData.get("role") ?? "staff");
+
+  if (!firstName || !lastName) {
+    redirect(buildTeamUrl("nuevo", "Escribe nombre y apellido del usuario."));
+  }
+
+  const displayName = `${firstName} ${lastName}`.trim();
 
   try {
     await createUser({
@@ -1185,26 +1192,40 @@ export default async function DashboardPage({
                     </div>
 
                     <form action={createUserAction} className="mt-6 space-y-4">
-                      <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
-                        El `usuario` y la `cedula` deben ser unicos dentro del panel.
-                      </div>
-
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="displayName">
-                            Nombre visible
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="firstName">
+                            Nombre
                           </label>
                           <input
-                            id="displayName"
-                            name="displayName"
+                            id="firstName"
+                            name="firstName"
                             type="text"
                             autoComplete="off"
                             spellCheck={false}
                             className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                            placeholder="Juan Perez"
+                            placeholder="Juan"
                             required
                           />
                         </div>
+                        <div>
+                          <label className="mb-2 block text-sm text-slate-600" htmlFor="lastName">
+                            Apellido
+                          </label>
+                          <input
+                            id="lastName"
+                            name="lastName"
+                            type="text"
+                            autoComplete="off"
+                            spellCheck={false}
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            placeholder="Perez"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
                         <div>
                           <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
                             Rol
@@ -1299,11 +1320,8 @@ export default async function DashboardPage({
                       </div>
 
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                        <div className="sm:col-span-2 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-500">
                           El usuario creara su codigo de 4 digitos en su primer inicio de sesion.
-                        </div>
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-                          Si la cedula o el usuario ya existen, el sistema lo notificara antes de guardar.
                         </div>
                       </div>
                       <button
