@@ -4,6 +4,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { SessionStartInput } from "@/lib/auth/session";
 
 type AppRole = "admin" | "staff";
+export type StaffSecondaryRole = "vendedor" | "digital" | "caja";
+export type AppBranch = "5 de julio" | "las americas";
 
 export type AppUser = {
   id: string;
@@ -13,6 +15,8 @@ export type AppUser = {
   email: string;
   phone: string;
   role: AppRole;
+  secondary_role: StaffSecondaryRole | null;
+  branch: AppBranch | null;
   is_active: boolean;
   created_at: string;
   created_by: string | null;
@@ -27,7 +31,7 @@ export type LoginUser = AppUser & {
 };
 
 const userSelectFields =
-  "id, national_id, username, display_name, email, phone, role, is_active, created_at, created_by";
+  "id, national_id, username, display_name, email, phone, role, secondary_role, branch, is_active, created_at, created_by";
 
 function normalizeNationalId(value: string) {
   return value.replace(/\D/g, "");
@@ -166,6 +170,8 @@ export async function createUser(input: {
   email: string;
   phone: string;
   role: AppRole;
+  secondaryRole?: StaffSecondaryRole | null;
+  branch?: AppBranch | null;
   createdBy: string;
 }) {
   const supabase = createSupabaseAdminClient();
@@ -174,6 +180,8 @@ export async function createUser(input: {
   const displayName = input.displayName.trim();
   const email = normalizeEmail(input.email);
   const phone = normalizePhone(input.phone);
+  const secondaryRole = input.role === "staff" ? input.secondaryRole ?? null : null;
+  const branch = input.branch ?? null;
 
   if (normalizedNationalId.length < 6) {
     throw new Error("La cedula debe tener al menos 6 digitos.");
@@ -193,6 +201,14 @@ export async function createUser(input: {
 
   if (!phone) {
     throw new Error("Escribe el telefono del usuario.");
+  }
+
+  if (input.role === "staff" && !secondaryRole) {
+    throw new Error("Selecciona el rol secundario del staff.");
+  }
+
+  if (!branch) {
+    throw new Error("Selecciona la sucursal del usuario.");
   }
 
   const existingNationalId = await getUserRecordByNationalId(normalizedNationalId);
@@ -216,9 +232,96 @@ export async function createUser(input: {
       phone,
       password_hash: "",
       role: input.role,
+      secondary_role: secondaryRole,
+      branch,
       is_active: true,
       created_by: input.createdBy,
     })
+    .select(userSelectFields)
+    .single<AppUser>();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateUser(input: {
+  userId: string;
+  nationalId: string;
+  displayName: string;
+  email: string;
+  phone: string;
+  role: AppRole;
+  secondaryRole?: StaffSecondaryRole | null;
+  branch?: AppBranch | null;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const normalizedNationalId = normalizeNationalId(input.nationalId);
+  const normalizedUsername = normalizedNationalId;
+  const displayName = input.displayName.trim();
+  const email = normalizeEmail(input.email);
+  const phone = normalizePhone(input.phone);
+  const secondaryRole = input.role === "staff" ? input.secondaryRole ?? null : null;
+  const branch = input.branch ?? null;
+
+  if (!input.userId) {
+    throw new Error("No se pudo identificar el usuario.");
+  }
+
+  if (normalizedNationalId.length < 6) {
+    throw new Error("La cedula debe tener al menos 6 digitos.");
+  }
+
+  if (normalizedNationalId.length > 8) {
+    throw new Error("La cedula no puede tener mas de 8 digitos.");
+  }
+
+  if (!displayName) {
+    throw new Error("Escribe nombre y apellido del usuario.");
+  }
+
+  if (!email) {
+    throw new Error("Escribe el correo del usuario.");
+  }
+
+  if (!phone) {
+    throw new Error("Escribe el telefono del usuario.");
+  }
+
+  if (input.role === "staff" && !secondaryRole) {
+    throw new Error("Selecciona el rol secundario del staff.");
+  }
+
+  if (!branch) {
+    throw new Error("Selecciona la sucursal del usuario.");
+  }
+
+  const existingNationalId = await getUserRecordByNationalId(normalizedNationalId);
+  const existingInternalUsername = await getUserRecordByUsername(normalizedUsername);
+
+  if (existingNationalId && existingNationalId.id !== input.userId) {
+    throw new Error("Esa cedula ya existe.");
+  }
+
+  if (existingInternalUsername && existingInternalUsername.id !== input.userId) {
+    throw new Error("No se pudo registrar esta cedula.");
+  }
+
+  const { data, error } = await supabase
+    .from("app_users")
+    .update({
+      national_id: normalizedNationalId,
+      username: normalizedUsername,
+      display_name: displayName,
+      email,
+      phone,
+      role: input.role,
+      secondary_role: secondaryRole,
+      branch,
+    })
+    .eq("id", input.userId)
     .select(userSelectFields)
     .single<AppUser>();
 

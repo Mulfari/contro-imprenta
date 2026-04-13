@@ -88,7 +88,7 @@ export async function endPanelSession(sessionId: string) {
   }
 }
 
-export async function countActivePanelSessions(windowMs = 90 * 1000) {
+export async function countActivePanelSessions(windowMs = 5 * 60 * 1000) {
   const supabase = createSupabaseAdminClient();
   const threshold = new Date(Date.now() - windowMs).toISOString();
   const { count, error } = await supabase
@@ -108,7 +108,7 @@ export async function countActivePanelSessions(windowMs = 90 * 1000) {
   return count ?? 0;
 }
 
-export async function listActivePanelSessions(windowMs = 90 * 1000) {
+export async function listActivePanelSessions(windowMs = 5 * 60 * 1000) {
   const supabase = createSupabaseAdminClient();
   const threshold = new Date(Date.now() - windowMs).toISOString();
   const { data, error } = await supabase

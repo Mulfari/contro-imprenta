@@ -4,12 +4,29 @@ import Link from "next/link";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
+import type { AppBranch, StaffSecondaryRole } from "@/lib/users";
+
 type TeamUserModalProps = {
   closeHref: string;
   action: (formData: FormData) => void;
+  mode?: "create" | "edit";
+  initialData?: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    nationalId: string;
+    phone: string;
+    email: string;
+    role: "staff" | "admin";
+    secondaryRole: StaffSecondaryRole | "";
+    branch: AppBranch | "";
+  };
 };
 
 type Step = 1 | 2 | 3;
+
+const branchOptions: AppBranch[] = ["5 de julio", "las americas"];
+const secondaryRoleOptions: StaffSecondaryRole[] = ["vendedor", "digital", "caja"];
 
 function normalizeDigits(value: string, maxLength: number) {
   return value.replace(/\D/g, "").slice(0, maxLength);
@@ -33,34 +50,78 @@ function normalizePersonalName(value: string) {
     .replace(/\b\p{L}/gu, (letter) => letter.toUpperCase());
 }
 
-function SubmitButton() {
+function formatSelectLabel(value: string) {
+  return value
+    .split(" ")
+    .map((chunk) => `${chunk.charAt(0).toUpperCase()}${chunk.slice(1)}`)
+    .join(" ");
+}
+
+function splitDisplayName(value: string) {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length <= 1) {
+    return {
+      firstName: parts[0] ?? "",
+      lastName: "",
+    };
+  }
+
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts.at(-1) ?? "",
+  };
+}
+
+function SubmitButton({ mode }: { mode: "create" | "edit" }) {
   const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
-      className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+      className="w-full cursor-pointer rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
       disabled={pending}
     >
-      {pending ? "Registrando usuario..." : "Registrar usuario"}
+      {pending
+        ? mode === "edit"
+          ? "Guardando cambios..."
+          : "Registrando usuario..."
+        : mode === "edit"
+          ? "Guardar cambios"
+          : "Registrar usuario"}
     </button>
   );
 }
 
-export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
+export function TeamUserModal({
+  closeHref,
+  action,
+  mode = "create",
+  initialData,
+}: TeamUserModalProps) {
+  const initialNames = initialData
+    ? {
+        firstName: initialData.firstName,
+        lastName: initialData.lastName,
+      }
+    : splitDisplayName("");
   const [step, setStep] = useState<Step>(1);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [nationalId, setNationalId] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"staff" | "admin">("staff");
+  const [firstName, setFirstName] = useState(initialNames.firstName);
+  const [lastName, setLastName] = useState(initialNames.lastName);
+  const [nationalId, setNationalId] = useState(initialData?.nationalId ?? "");
+  const [phone, setPhone] = useState(initialData?.phone ?? "");
+  const [email, setEmail] = useState(initialData?.email ?? "");
+  const [role, setRole] = useState<"staff" | "admin">(initialData?.role ?? "staff");
+  const [secondaryRole, setSecondaryRole] = useState<StaffSecondaryRole | "">(
+    initialData?.secondaryRole ?? "vendedor",
+  );
+  const [branch, setBranch] = useState<AppBranch | "">(initialData?.branch ?? "");
   const [stepMessage, setStepMessage] = useState("");
 
   const steps = [
     { id: 1, label: "Datos personales" },
     { id: 2, label: "Contacto" },
-    { id: 3, label: "Rol" },
+    { id: 3, label: "Rol y sucursal" },
   ] as const;
 
   const validateCurrentStep = () => {
@@ -83,9 +144,16 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
       }
     }
 
-    if (step === 3 && !role) {
-      setStepMessage("Selecciona un rol para continuar.");
-      return false;
+    if (step === 3) {
+      if (!branch) {
+        setStepMessage("Selecciona la sucursal.");
+        return false;
+      }
+
+      if (role === "staff" && !secondaryRole) {
+        setStepMessage("Selecciona el rol secundario del staff.");
+        return false;
+      }
     }
 
     setStepMessage("");
@@ -115,14 +183,18 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
       <div className="w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.16)] sm:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-xl font-semibold">Nuevo usuario</h3>
+            <h3 className="text-xl font-semibold">
+              {mode === "edit" ? "Editar usuario" : "Nuevo usuario"}
+            </h3>
             <p className="mt-2 text-sm text-slate-500">
-              Registra el acceso del equipo por fases.
+              {mode === "edit"
+                ? "Actualiza los datos del miembro del equipo."
+                : "Registra el acceso del equipo por fases."}
             </p>
           </div>
           <Link
             href={closeHref}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100"
             aria-label="Cerrar modal"
           >
             <svg
@@ -164,12 +236,15 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
         </div>
 
         <form action={action} className="mt-6 space-y-5">
+          {initialData ? <input type="hidden" name="userId" value={initialData.userId} /> : null}
           <input type="hidden" name="firstName" value={firstName} />
           <input type="hidden" name="lastName" value={lastName} />
           <input type="hidden" name="nationalId" value={nationalId} />
           <input type="hidden" name="phone" value={phone} />
           <input type="hidden" name="email" value={email} />
           <input type="hidden" name="role" value={role} />
+          <input type="hidden" name="secondaryRole" value={secondaryRole} />
+          <input type="hidden" name="branch" value={branch} />
 
           {step === 1 ? (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -267,24 +342,79 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
 
           {step === 3 ? (
             <div className="space-y-4">
-              <div>
-                <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
-                  Rol
-                </label>
-                <select
-                  id="role"
-                  value={role}
-                  onChange={(event) => setRole(event.target.value as "staff" | "admin")}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
-                </select>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="role">
+                    Rol principal
+                  </label>
+                  <select
+                    id="role"
+                    value={role}
+                    onChange={(event) => {
+                      const nextRole = event.target.value as "staff" | "admin";
+                      setRole(nextRole);
+
+                      if (nextRole === "admin") {
+                        setSecondaryRole("");
+                      } else if (!secondaryRole) {
+                        setSecondaryRole("vendedor");
+                      }
+                    }}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  >
+                    <option value="staff">Staff</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="branch">
+                    Sucursal
+                  </label>
+                  <select
+                    id="branch"
+                    value={branch}
+                    onChange={(event) => setBranch(event.target.value as AppBranch)}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  >
+                    <option value="">Selecciona una sucursal</option>
+                    {branchOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {formatSelectLabel(option)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-500">
-                El usuario creara su codigo de 4 digitos en su primer inicio de sesion.
-              </div>
+              {role === "staff" ? (
+                <div>
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="secondaryRole">
+                    Rol secundario
+                  </label>
+                  <select
+                    id="secondaryRole"
+                    value={secondaryRole}
+                    onChange={(event) =>
+                      setSecondaryRole(event.target.value as StaffSecondaryRole)
+                    }
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  >
+                    <option value="">Selecciona un rol secundario</option>
+                    {secondaryRoleOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {formatSelectLabel(option)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+
+              {mode === "create" ? (
+                <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-500">
+                  El usuario creara su codigo de 4 digitos en su primer inicio de sesion.
+                </div>
+              ) : null}
             </div>
           ) : null}
 
@@ -299,7 +429,7 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
               type="button"
               onClick={goToPreviousStep}
               disabled={step === 1}
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Volver
             </button>
@@ -309,12 +439,12 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
                 <button
                   type="button"
                   onClick={goToNextStep}
-                  className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                  className="w-full cursor-pointer rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
                 >
                   Continuar
                 </button>
               ) : (
-                <SubmitButton />
+                <SubmitButton mode={mode} />
               )}
             </div>
           </div>

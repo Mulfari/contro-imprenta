@@ -36,9 +36,20 @@ import {
   countActivePanelSessions,
   listActivePanelSessions,
 } from "@/lib/session-presence";
-import { listSecurityAlerts, type SecurityAlert } from "@/lib/security-alerts";
+import {
+  createSecurityAlert,
+  listSecurityAlerts,
+  type SecurityAlert,
+} from "@/lib/security-alerts";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
-import { createUser, deleteUser, listUsers } from "@/lib/users";
+import {
+  type AppBranch,
+  createUser,
+  deleteUser,
+  listUsers,
+  type StaffSecondaryRole,
+  updateUser,
+} from "@/lib/users";
 
 const orderStatuses: OrderStatus[] = [
   "recibido",
@@ -74,7 +85,7 @@ const adminSideNavViews: DashboardView[] = [
   "equipo",
 ];
 const dashboardTimeZone = "America/Caracas";
-const activePresenceWindowMs = 90 * 1000;
+const activePresenceWindowMs = 5 * 60 * 1000;
 
 const orderStatusLabels: Record<OrderStatus, string> = {
   recibido: "Recibido",
@@ -99,6 +110,8 @@ async function createUserAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const phone = String(formData.get("phone") ?? "");
   const role = String(formData.get("role") ?? "staff");
+  const secondaryRole = String(formData.get("secondaryRole") ?? "");
+  const branch = String(formData.get("branch") ?? "");
 
   if (!firstName || !lastName) {
     redirect(buildTeamUrl("nuevo", "Escribe nombre y apellido del usuario."));
@@ -112,7 +125,15 @@ async function createUserAction(formData: FormData) {
       email,
       phone,
       role: role === "admin" ? "admin" : "staff",
+      secondaryRole:
+        role === "staff" ? (secondaryRole as StaffSecondaryRole | "") || null : null,
+      branch: (branch as AppBranch | "") || null,
       createdBy: session.userId,
+    });
+    await createSecurityAlert({
+      userId: session.userId,
+      username: session.username,
+      detail: `Creo el usuario ${displayName}.`,
     });
   } catch (error) {
     const message =
@@ -125,6 +146,63 @@ async function createUserAction(formData: FormData) {
 
   revalidatePath("/dashboard");
   redirect(buildTeamUrl("lista", "Usuario creado"));
+}
+
+async function updateUserAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const userId = String(formData.get("userId") ?? "");
+  const firstName = normalizePersonalName(String(formData.get("firstName") ?? ""));
+  const lastName = normalizePersonalName(String(formData.get("lastName") ?? ""));
+  const nationalId = String(formData.get("nationalId") ?? "");
+  const email = String(formData.get("email") ?? "");
+  const phone = String(formData.get("phone") ?? "");
+  const role = String(formData.get("role") ?? "staff");
+  const secondaryRole = String(formData.get("secondaryRole") ?? "");
+  const branch = String(formData.get("branch") ?? "");
+
+  if (!userId) {
+    redirect(buildTeamUrl("lista", "No se pudo identificar el usuario."));
+  }
+
+  if (!firstName || !lastName) {
+    redirect(buildTeamEditUrl(userId, "Escribe nombre y apellido del usuario."));
+  }
+
+  const displayName = `${firstName} ${lastName}`.trim();
+
+  try {
+    await updateUser({
+      userId,
+      nationalId,
+      displayName,
+      email,
+      phone,
+      role: role === "admin" ? "admin" : "staff",
+      secondaryRole:
+        role === "staff" ? (secondaryRole as StaffSecondaryRole | "") || null : null,
+      branch: (branch as AppBranch | "") || null,
+    });
+    await createSecurityAlert({
+      userId: session.userId,
+      username: session.username,
+      detail: `Modifico el usuario ${displayName}.`,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo actualizar el usuario.";
+
+    redirect(buildTeamEditUrl(userId, message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildTeamUrl("lista", "Usuario actualizado"));
 }
 
 async function createClientAction(formData: FormData) {
@@ -274,17 +352,25 @@ function buildDashboardUrl(view: DashboardView, message?: string) {
   return `/dashboard?${params.toString()}`;
 }
 
-function buildTeamUrl(mode: "lista" | "nuevo", message?: string) {
+function buildTeamUrl(mode: "lista" | "nuevo" | "editar", message?: string, userId?: string) {
   const params = new URLSearchParams({
     view: "equipo",
     team: mode,
   });
+
+  if (userId) {
+    params.set("user", userId);
+  }
 
   if (message) {
     params.set("message", message);
   }
 
   return `/dashboard?${params.toString()}`;
+}
+
+function buildTeamEditUrl(userId: string, message?: string) {
+  return buildTeamUrl("editar", message, userId);
 }
 
 function resolveView(value: string, isAdmin: boolean): DashboardView {
@@ -402,6 +488,22 @@ function normalizePersonalName(value: string) {
     .replace(/\b\p{L}/gu, (letter) => letter.toUpperCase());
 }
 
+function splitDisplayName(value: string) {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length <= 1) {
+    return {
+      firstName: parts[0] ?? "",
+      lastName: "",
+    };
+  }
+
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts.at(-1) ?? "",
+  };
+}
+
 function getAdminNotificationTitle(detail: string) {
   const normalizedDetail = detail.toLowerCase();
 
@@ -413,7 +515,27 @@ function getAdminNotificationTitle(detail: string) {
     return "Solicitud de recuperacion";
   }
 
+  if (normalizedDetail.includes("creo el usuario")) {
+    return "Usuario creado";
+  }
+
+  if (normalizedDetail.includes("modifico el usuario")) {
+    return "Usuario modificado";
+  }
+
   return "Actividad del panel";
+}
+
+function getRoleLabel(role: string, secondaryRole?: string | null) {
+  if (role === "admin") {
+    return "Admin";
+  }
+
+  if (!secondaryRole) {
+    return "Staff";
+  }
+
+  return `Staff / ${capitalizeLabel(secondaryRole)}`;
 }
 
 function getViewLabel(view: DashboardView) {
@@ -476,7 +598,10 @@ export default async function DashboardPage({
   const params = await searchParams;
   const message = resolveValue(params.message);
   const activeStatus = resolveValue(params.status) || "todos";
-  const teamMode = resolveValue(params.team) === "nuevo" ? "nuevo" : "lista";
+  const teamParam = resolveValue(params.team);
+  const teamMode =
+    teamParam === "nuevo" || teamParam === "editar" ? teamParam : "lista";
+  const selectedTeamUserId = resolveValue(params.user);
 
   if (!session) {
     redirect("/login?message=Inicia%20sesion%20para%20entrar%20al%20tablero");
@@ -584,6 +709,13 @@ export default async function DashboardPage({
             new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
         )
       : [];
+  const selectedTeamUser =
+    session.role === "admin"
+      ? users.find((user) => user.id === selectedTeamUserId) ?? null
+      : null;
+  const selectedTeamUserNames = selectedTeamUser
+    ? splitDisplayName(selectedTeamUser.display_name)
+    : null;
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
@@ -1154,7 +1286,7 @@ export default async function DashboardPage({
                   <h3 className="text-xl font-semibold">Usuarios registrados</h3>
                   <Link
                     href={buildTeamUrl("nuevo")}
-                    className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                    className="inline-flex cursor-pointer items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
                   >
                     Nuevo usuario
                   </Link>
@@ -1167,6 +1299,7 @@ export default async function DashboardPage({
                         <th className="px-4 py-3 font-medium">Cedula</th>
                         <th className="px-4 py-3 font-medium">Contacto</th>
                         <th className="px-4 py-3 font-medium">Rol</th>
+                        <th className="px-4 py-3 font-medium">Sucursal</th>
                         <th className="px-4 py-3 font-medium">Acciones</th>
                       </tr>
                     </thead>
@@ -1179,12 +1312,25 @@ export default async function DashboardPage({
                             <div>{user.phone}</div>
                             <div className="text-xs text-slate-400">{user.email}</div>
                           </td>
-                          <td className="px-4 py-3">{user.role}</td>
+                          <td className="px-4 py-3">
+                            {getRoleLabel(user.role, user.secondary_role)}
+                          </td>
+                          <td className="px-4 py-3">
+                            {user.branch ? capitalizeLabel(user.branch) : "Sin sucursal"}
+                          </td>
                           <td className="px-4 py-3 align-middle">
-                            <DeleteUserButton
-                              action={deleteUserAction}
-                              userId={user.id}
-                            />
+                            <div className="flex items-center gap-3">
+                              <Link
+                                href={buildTeamEditUrl(user.id)}
+                                className="inline-flex cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                              >
+                                Editar
+                              </Link>
+                              <DeleteUserButton
+                                action={deleteUserAction}
+                                userId={user.id}
+                              />
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1197,6 +1343,25 @@ export default async function DashboardPage({
                 <TeamUserModal
                   closeHref={buildTeamUrl("lista")}
                   action={createUserAction}
+                />
+              ) : null}
+
+              {teamMode === "editar" && selectedTeamUser ? (
+                <TeamUserModal
+                  closeHref={buildTeamUrl("lista")}
+                  action={updateUserAction}
+                  mode="edit"
+                  initialData={{
+                    userId: selectedTeamUser.id,
+                    firstName: selectedTeamUserNames?.firstName ?? "",
+                    lastName: selectedTeamUserNames?.lastName ?? "",
+                    nationalId: selectedTeamUser.national_id,
+                    phone: selectedTeamUser.phone,
+                    email: selectedTeamUser.email,
+                    role: selectedTeamUser.role,
+                    secondaryRole: selectedTeamUser.secondary_role ?? "",
+                    branch: selectedTeamUser.branch ?? "",
+                  }}
                 />
               ) : null}
             </section>

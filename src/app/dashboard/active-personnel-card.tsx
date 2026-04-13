@@ -34,7 +34,7 @@ export function ActivePersonnelCard({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 text-left shadow-[0_20px_40px_rgba(15,23,42,0.05)] transition hover:bg-white"
+        className="cursor-pointer rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 text-left shadow-[0_20px_40px_rgba(15,23,42,0.05)] transition hover:bg-white"
       >
         <p className="text-sm text-slate-500">Personal activo</p>
         <p className="mt-3 text-4xl font-semibold">{count}</p>

@@ -9,6 +9,8 @@ create table if not exists public.app_users (
   phone text not null,
   password_hash text not null,
   role text not null check (role in ('admin', 'staff')),
+  secondary_role text null check (secondary_role in ('vendedor', 'digital', 'caja')),
+  branch text null check (branch in ('5 de julio', 'las americas')),
   is_active boolean not null default true,
   last_seen_at timestamptz null,
   created_at timestamptz not null default now(),
@@ -24,10 +26,33 @@ alter table public.app_users add column if not exists email text;
 alter table public.app_users add column if not exists phone text;
 alter table public.app_users add column if not exists password_hash text;
 alter table public.app_users add column if not exists role text;
+alter table public.app_users add column if not exists secondary_role text;
+alter table public.app_users add column if not exists branch text;
 alter table public.app_users add column if not exists is_active boolean default true;
 alter table public.app_users add column if not exists last_seen_at timestamptz null;
 alter table public.app_users add column if not exists created_at timestamptz default now();
 alter table public.app_users add column if not exists created_by uuid null;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'app_users_secondary_role_check'
+  ) then
+    alter table public.app_users
+      add constraint app_users_secondary_role_check
+      check (secondary_role in ('vendedor', 'digital', 'caja') or secondary_role is null);
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'app_users_branch_check'
+  ) then
+    alter table public.app_users
+      add constraint app_users_branch_check
+      check (branch in ('5 de julio', 'las americas') or branch is null);
+  end if;
+end $$;
 
 create unique index if not exists app_users_national_id_idx
   on public.app_users (national_id);
