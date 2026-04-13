@@ -76,7 +76,6 @@ async function createUserAction(formData: FormData) {
   }
 
   const username = String(formData.get("username") ?? "");
-  const password = String(formData.get("password") ?? "");
   const displayName = String(formData.get("displayName") ?? "");
   const nationalId = String(formData.get("nationalId") ?? "");
   const email = String(formData.get("email") ?? "");
@@ -87,7 +86,6 @@ async function createUserAction(formData: FormData) {
     await createUser({
       nationalId,
       username,
-      password,
       displayName,
       email,
       phone,
@@ -1269,20 +1267,8 @@ export default async function DashboardPage({
                             <option value="admin">Admin</option>
                           </select>
                         </div>
-                        <div>
-                          <label className="mb-2 block text-sm text-slate-600" htmlFor="password">
-                            Codigo de 4 digitos
-                          </label>
-                          <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            inputMode="numeric"
-                            pattern="[0-9]{4}"
-                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                            placeholder="1234"
-                            required
-                          />
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                          El usuario creara su codigo de 4 digitos en su primer inicio de sesion.
                         </div>
                       </div>
                       <button

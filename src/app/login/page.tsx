@@ -86,6 +86,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           {isCodeStep ? (
             <CodeModal
               displayName={pendingDisplayName}
+              requiresPasswordSetup={pendingLogin?.requiresPasswordSetup ?? false}
             />
           ) : null}
         </section>

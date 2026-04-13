@@ -19,7 +19,11 @@ export type AppUser = {
 };
 
 type AppUserRecord = AppUser & {
-  password_hash: string;
+  password_hash: string | null;
+};
+
+export type LoginUser = AppUser & {
+  requires_password_setup: boolean;
 };
 
 function normalizeUsername(username: string) {
@@ -43,6 +47,15 @@ function sanitizeUser(user: AppUserRecord): AppUser {
   void password_hash;
 
   return safeUser;
+}
+
+function toLoginUser(user: AppUserRecord): LoginUser {
+  const safeUser = sanitizeUser(user);
+
+  return {
+    ...safeUser,
+    requires_password_setup: !user.password_hash,
+  };
 }
 
 async function getUserRecordByUsername(username: string) {
@@ -95,6 +108,10 @@ export async function authenticateUser(identifier: string, password: string) {
     return null;
   }
 
+  if (!user.password_hash) {
+    return null;
+  }
+
   const isValid = await compare(password, user.password_hash);
 
   if (!isValid) {
@@ -111,7 +128,7 @@ export async function findUserForLogin(identifier: string) {
     return null;
   }
 
-  return sanitizeUser(user);
+  return toLoginUser(user);
 }
 
 export async function hasAnyUsers() {
@@ -146,7 +163,6 @@ export async function listUsers() {
 export async function createUser(input: {
   nationalId: string;
   username: string;
-  password: string;
   displayName: string;
   email: string;
   phone: string;
@@ -176,10 +192,6 @@ export async function createUser(input: {
     throw new Error("La cedula no puede tener mas de 8 digitos.");
   }
 
-  if (!/^\d{4}$/.test(input.password)) {
-    throw new Error("El codigo debe tener exactamente 4 digitos.");
-  }
-
   if (!displayName) {
     throw new Error("Escribe un nombre visible para el usuario.");
   }
@@ -203,7 +215,6 @@ export async function createUser(input: {
     throw new Error("Esa cedula ya existe.");
   }
 
-  const passwordHash = await hash(input.password, 12);
   const { data, error } = await supabase
     .from("app_users")
     .insert({
@@ -212,7 +223,7 @@ export async function createUser(input: {
       display_name: displayName,
       email,
       phone,
-      password_hash: passwordHash,
+      password_hash: "",
       role: input.role,
       is_active: true,
       created_by: input.createdBy,
@@ -227,6 +238,25 @@ export async function createUser(input: {
   }
 
   return data;
+}
+
+export async function setUserPassword(userId: string, password: string) {
+  if (!/^\d{4}$/.test(password)) {
+    throw new Error("El codigo debe tener exactamente 4 digitos.");
+  }
+
+  const supabase = createSupabaseAdminClient();
+  const passwordHash = await hash(password, 12);
+  const { error } = await supabase
+    .from("app_users")
+    .update({
+      password_hash: passwordHash,
+    })
+    .eq("id", userId);
+
+  if (error) {
+    throw error;
+  }
 }
 
 export function toSessionUser(user: AppUser): SessionUser {

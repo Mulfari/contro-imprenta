@@ -23,6 +23,7 @@ import {
   authenticateUser,
   findUserForLogin,
   hasAnyUsers,
+  setUserPassword,
   toSessionUser,
 } from "@/lib/users";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
@@ -38,6 +39,11 @@ export type RecoveryCodeState = {
 };
 
 export type RecoveryPasswordState = {
+  status: "idle" | "error" | "success";
+  message: string;
+};
+
+export type SetupPasswordState = {
   status: "idle" | "error" | "success";
   message: string;
 };
@@ -101,6 +107,7 @@ export async function verifyIdentifierAction(formData: FormData) {
     displayName: user.display_name,
     identifier,
     attempts: 0,
+    requiresPasswordSetup: user.requires_password_setup,
   });
   await clearVerifiedRecovery();
 
@@ -288,6 +295,85 @@ export async function completePasswordRecoveryStateAction(
   return {
     status: "success",
     message: "Acceso restablecido.",
+  };
+}
+
+export async function completeFirstAccessStateAction(
+  previousState: SetupPasswordState,
+  formData: FormData,
+): Promise<SetupPasswordState> {
+  void previousState;
+
+  if (!hasPanelAuthConfig()) {
+    return {
+      status: "error",
+      message: "Configura Supabase y APP_SESSION_SECRET antes de usar el login.",
+    };
+  }
+
+  const pendingLogin = await getPendingLogin();
+
+  if (!pendingLogin) {
+    return {
+      status: "error",
+      message: "Primero verifica tu usuario o cedula.",
+    };
+  }
+
+  if (!pendingLogin.requiresPasswordSetup) {
+    return {
+      status: "error",
+      message: "Este usuario ya tiene un codigo configurado.",
+    };
+  }
+
+  const nextPassword = String(formData.get("nextPassword") ?? "").trim();
+  const confirmPassword = String(formData.get("confirmPassword") ?? "").trim();
+
+  if (!/^\d{4}$/.test(nextPassword)) {
+    return {
+      status: "error",
+      message: "El codigo debe tener exactamente 4 digitos.",
+    };
+  }
+
+  if (nextPassword !== confirmPassword) {
+    return {
+      status: "error",
+      message: "La confirmacion no coincide con el nuevo codigo.",
+    };
+  }
+
+  let user;
+
+  try {
+    await setUserPassword(pendingLogin.userId, nextPassword);
+    user = await authenticateUser(pendingLogin.identifier, nextPassword);
+  } catch (error) {
+    return {
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "No se pudo guardar el codigo de acceso.",
+    };
+  }
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "No se pudo iniciar sesion con el nuevo codigo.",
+    };
+  }
+
+  await clearPendingLogin();
+  await clearVerifiedRecovery();
+  await startSession(toSessionUser(user));
+  revalidatePath("/", "layout");
+
+  return {
+    status: "success",
+    message: "Codigo creado correctamente.",
   };
 }
 

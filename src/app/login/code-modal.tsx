@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 
 import {
+  completeFirstAccessStateAction,
   completePasswordRecoveryStateAction,
   resetPendingLoginAction,
   requestPasswordRecoveryStateAction,
   type RecoveryCodeState,
   type RecoveryPasswordState,
+  type SetupPasswordState,
   verifyRecoveryCodeStateAction,
   verifyCodeStateAction,
   type VerifyCodeState,
@@ -27,6 +29,7 @@ import { FloatingToast } from "@/components/floating-toast";
 
 type CodeModalProps = {
   displayName: string;
+  requiresPasswordSetup: boolean;
 };
 
 const initialState: VerifyCodeState = {
@@ -44,14 +47,22 @@ const initialRecoveryPasswordState: RecoveryPasswordState = {
   message: "",
 };
 
+const initialSetupPasswordState: SetupPasswordState = {
+  status: "idle",
+  message: "",
+};
+
 export function CodeModal({
   displayName,
+  requiresPasswordSetup,
 }: CodeModalProps) {
   const [code, setCode] = useState("");
   const [recoveryCode, setRecoveryCode] = useState("");
   const [nextPassword, setNextPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [mode, setMode] = useState<"login" | "recovery">("login");
+  const [mode, setMode] = useState<"login" | "recovery" | "setup">(
+    requiresPasswordSetup ? "setup" : "login",
+  );
   const [recoveryVerified, setRecoveryVerified] = useState(false);
   const router = useRouter();
   const submitRef = useRef<HTMLFormElement>(null);
@@ -67,9 +78,14 @@ export function CodeModal({
     useActionState(verifyRecoveryCodeStateAction, initialRecoveryState);
   const [completeRecoveryState, completeRecoveryAction, completingRecovery] =
     useActionState(completePasswordRecoveryStateAction, initialRecoveryPasswordState);
+  const [setupState, completeSetupAction, completingSetup] = useActionState(
+    completeFirstAccessStateAction,
+    initialSetupPasswordState,
+  );
 
   const visualStatus = pending ? "loading" : state.status;
   const activeToastMessage =
+    setupState.message ||
     completeRecoveryState.message ||
     verifyRecoveryState.message ||
     requestRecoveryState.message ||
@@ -113,6 +129,16 @@ export function CodeModal({
       return () => window.clearTimeout(timeout);
     }
   }, [completeRecoveryState.status, router]);
+
+  useEffect(() => {
+    if (setupState.status === "success") {
+      const timeout = window.setTimeout(() => {
+        router.push("/dashboard");
+      }, 550);
+
+      return () => window.clearTimeout(timeout);
+    }
+  }, [router, setupState.status]);
 
   useEffect(() => {
     if (verifyRecoveryState.status === "success") {
@@ -175,7 +201,11 @@ export function CodeModal({
                 Express Printer
               </h2>
               <p className="mt-4 text-base font-medium text-slate-600">
-                {mode === "login" ? "Verificar acceso" : "Recuperar acceso"}
+                {mode === "login"
+                  ? "Verificar acceso"
+                  : mode === "setup"
+                    ? "Crear codigo de acceso"
+                    : "Recuperar acceso"}
               </p>
               <p className="mt-3 text-sm leading-6 text-slate-500">
                 {displayName}
@@ -244,6 +274,74 @@ export function CodeModal({
               >
                 Recuperar codigo de acceso
               </button>
+            </div>
+          ) : mode === "setup" ? (
+            <div className={`${authSectionClassName} space-y-4`}>
+              <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4">
+                <p className="text-sm font-medium text-slate-800">
+                  Este es tu primer acceso
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Crea ahora tu codigo personal de 4 digitos para entrar al panel.
+                </p>
+              </div>
+
+              <form action={completeSetupAction} className="space-y-4" noValidate>
+                <div>
+                  <label
+                    htmlFor="setupNextPassword"
+                    className="mb-2 block text-sm font-medium text-slate-700"
+                  >
+                    Nuevo codigo de 4 digitos
+                  </label>
+                  <input
+                    id="setupNextPassword"
+                    name="nextPassword"
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={nextPassword}
+                    onChange={(event) =>
+                      setNextPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
+                    }
+                    className={authNumericInputClassName}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="setupConfirmPassword"
+                    className="mb-2 block text-sm font-medium text-slate-700"
+                  >
+                    Confirmar codigo
+                  </label>
+                  <input
+                    id="setupConfirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={confirmPassword}
+                    onChange={(event) =>
+                      setConfirmPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
+                    }
+                    className={authNumericInputClassName}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className={authPrimaryButtonClassName}
+                  disabled={completingSetup}
+                >
+                  {completingSetup ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Guardando codigo...
+                    </>
+                  ) : (
+                    "Crear codigo e ingresar"
+                  )}
+                </button>
+              </form>
             </div>
           ) : (
             <div className={`${authSectionClassName} space-y-4`}>

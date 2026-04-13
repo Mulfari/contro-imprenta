@@ -1,9 +1,7 @@
 import { randomInt } from "node:crypto";
 
-import { hash } from "bcryptjs";
-
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { findUserForLogin } from "@/lib/users";
+import { findUserForLogin, setUserPassword } from "@/lib/users";
 
 export type PasswordRecoveryRequest = {
   id: string;
@@ -123,17 +121,7 @@ export async function resetPasswordWithRecovery(input: {
     throw new Error("Este codigo de recuperacion ya fue usado.");
   }
 
-  const passwordHash = await hash(input.nextPassword, 12);
-  const { error: updateUserError } = await supabase
-    .from("app_users")
-    .update({
-      password_hash: passwordHash,
-    })
-    .eq("id", input.userId);
-
-  if (updateUserError) {
-    throw updateUserError;
-  }
+  await setUserPassword(input.userId, input.nextPassword);
 
   const { error: updateRequestError } = await supabase
     .from("password_recovery_requests")

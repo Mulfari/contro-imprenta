@@ -20,6 +20,7 @@ export type PendingLogin = {
   displayName: string;
   identifier: string;
   attempts: number;
+  requiresPasswordSetup: boolean;
 };
 
 export type VerifiedRecovery = {
