@@ -58,7 +58,7 @@ function getIdentifier(formData: FormData) {
   if (!identifier) {
     redirect(
       `/login?message=${encodeMessage(
-        "Escribe tu usuario o cedula para continuar.",
+        "Escribe tu cedula para continuar.",
       )}`,
     );
   }
@@ -89,21 +89,21 @@ export async function verifyIdentifierAction(formData: FormData) {
     const message =
       error instanceof Error
         ? error.message
-        : "No se pudo verificar este usuario.";
+        : "No se pudo verificar esta cedula.";
     redirect(`/login?message=${encodeMessage(message)}`);
   }
 
   if (!user) {
     redirect(
       `/login?message=${encodeMessage(
-        "Usuario o Cedula incorrecto.",
+        "Cedula incorrecta.",
       )}`,
     );
   }
 
   await startPendingLogin({
     userId: user.id,
-    username: user.username,
+    username: user.national_id,
     displayName: user.display_name,
     identifier,
     attempts: 0,
@@ -134,7 +134,7 @@ export async function requestPasswordRecoveryStateAction(
   if (!pendingLogin) {
     return {
       status: "error",
-      message: "Primero verifica tu usuario o cedula.",
+      message: "Primero verifica tu cedula.",
     };
   }
 
@@ -144,7 +144,7 @@ export async function requestPasswordRecoveryStateAction(
     if (!request) {
       return {
         status: "error",
-        message: "Usuario o Cedula incorrecto.",
+        message: "Cedula incorrecta.",
       };
     }
 
@@ -187,7 +187,7 @@ export async function verifyRecoveryCodeStateAction(
   if (!pendingLogin) {
     return {
       status: "error",
-      message: "Primero verifica tu usuario o cedula.",
+      message: "Primero verifica tu cedula.",
     };
   }
 
@@ -238,7 +238,7 @@ export async function completePasswordRecoveryStateAction(
   if (!pendingLogin) {
     return {
       status: "error",
-      message: "Primero verifica tu usuario o cedula.",
+      message: "Primero verifica tu cedula.",
     };
   }
 
@@ -316,7 +316,7 @@ export async function completeFirstAccessStateAction(
   if (!pendingLogin) {
     return {
       status: "error",
-      message: "Primero verifica tu usuario o cedula.",
+      message: "Primero verifica tu cedula.",
     };
   }
 
@@ -393,7 +393,7 @@ export async function verifyCodeStateAction(
   if (!pendingLogin) {
     return {
       status: "error",
-      message: "Primero verifica tu usuario o cedula.",
+      message: "Primero verifica tu cedula.",
     };
   }
 

@@ -88,12 +88,9 @@ async function createUserAction(formData: FormData) {
   }
 
   const displayName = `${firstName} ${lastName}`.trim();
-  const usernameSeed = `${firstName}${lastName}`;
-
   try {
     await createUser({
       nationalId,
-      username: usernameSeed,
       displayName,
       email,
       phone,
@@ -667,7 +664,7 @@ export default async function DashboardPage({
                     <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
                       <thead className="bg-slate-50 text-slate-500">
                         <tr>
-                          <th className="px-4 py-3 font-medium">Usuario</th>
+                          <th className="px-4 py-3 font-medium">Cedula</th>
                           <th className="px-4 py-3 font-medium">Codigo</th>
                           <th className="px-4 py-3 font-medium">Generado</th>
                         </tr>
@@ -684,7 +681,7 @@ export default async function DashboardPage({
                             <tr key={request.id}>
                               <td className="px-4 py-3">
                                 <div className="font-medium">{request.display_name}</div>
-                                <div className="text-xs text-slate-400">@{request.username}</div>
+                                <div className="text-xs text-slate-400">{request.username}</div>
                               </td>
                               <td className="px-4 py-3 text-base font-semibold tracking-[0.2em]">
                                 {request.recovery_code}
@@ -714,7 +711,7 @@ export default async function DashboardPage({
                     <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
                       <thead className="bg-slate-50 text-slate-500">
                         <tr>
-                          <th className="px-4 py-3 font-medium">Usuario</th>
+                          <th className="px-4 py-3 font-medium">Cedula</th>
                           <th className="px-4 py-3 font-medium">Fecha</th>
                           <th className="px-4 py-3 font-medium">Detalle</th>
                         </tr>
@@ -1133,7 +1130,6 @@ export default async function DashboardPage({
                       <tr>
                         <th className="px-4 py-3 font-medium">Nombre</th>
                         <th className="px-4 py-3 font-medium">Cedula</th>
-                        <th className="px-4 py-3 font-medium">Usuario</th>
                         <th className="px-4 py-3 font-medium">Contacto</th>
                         <th className="px-4 py-3 font-medium">Rol</th>
                         <th className="px-4 py-3 font-medium">Estado</th>
@@ -1144,7 +1140,6 @@ export default async function DashboardPage({
                         <tr key={user.id}>
                           <td className="px-4 py-3">{user.display_name}</td>
                           <td className="px-4 py-3">{user.national_id}</td>
-                          <td className="px-4 py-3">{user.username}</td>
                           <td className="px-4 py-3">
                             <div>{user.phone}</div>
                             <div className="text-xs text-slate-400">{user.email}</div>

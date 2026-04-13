@@ -40,7 +40,7 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
   const [stepMessage, setStepMessage] = useState("");
 
   const steps = [
-    { id: 1, label: "Usuario" },
+    { id: 1, label: "Datos" },
     { id: 2, label: "Contacto" },
     { id: 3, label: "Rol" },
   ] as const;

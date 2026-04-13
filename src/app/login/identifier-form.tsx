@@ -41,14 +41,15 @@ export function IdentifierForm({ defaultValue }: IdentifierFormProps) {
           htmlFor="identifier"
           className="mb-2 block text-sm font-medium text-slate-700"
         >
-          Metodo de acceso
+          Cedula
         </label>
         <input
           id="identifier"
           name="identifier"
           type="text"
+          inputMode="numeric"
           maxLength={8}
-          placeholder="Usuario o cedula"
+          placeholder="Numero de cedula"
           className={authInputClassName}
           defaultValue={defaultValue}
         />

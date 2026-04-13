@@ -54,7 +54,7 @@ export default async function Home() {
               </h2>
               <p className="max-w-2xl text-lg leading-8 text-stone-700">
                 Esta primera version ya incluye una portada comercial, login por
-                usuario, dashboard protegido y una base para que el admin cree
+                cedula, dashboard protegido y una base para que el admin cree
                 mas usuarios del sistema sin depender de correos.
               </p>
             </div>
@@ -125,7 +125,7 @@ export default async function Home() {
             <div className="mt-6 space-y-4">
               {[
                 "Aplicacion Next.js 16 con App Router",
-                "Acceso por usuario y contrasena con sesion por cookie",
+                "Acceso por cedula y codigo con sesion por cookie",
                 "Panel admin para crear nuevos usuarios",
                 "Variables de entorno, SQL y README para despliegue",
               ].map((item) => (

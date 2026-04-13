@@ -26,12 +26,12 @@ export type LoginUser = AppUser & {
   requires_password_setup: boolean;
 };
 
-function normalizeUsername(username: string) {
-  return username.trim().toLowerCase();
-}
-
 function normalizeNationalId(value: string) {
   return value.replace(/\D/g, "");
+}
+
+function normalizeUsername(username: string) {
+  return username.trim().toLowerCase();
 }
 
 function normalizeEmail(value: string) {
@@ -91,14 +91,13 @@ async function getUserRecordByNationalId(nationalId: string) {
 }
 
 async function getUserRecordByIdentifier(identifier: string) {
-  const normalizedIdentifier = identifier.trim().toLowerCase();
   const nationalIdCandidate = normalizeNationalId(identifier);
 
-  return (
-    (nationalIdCandidate
-      ? await getUserRecordByNationalId(nationalIdCandidate)
-      : null) ?? (await getUserRecordByUsername(normalizedIdentifier))
-  );
+  if (!nationalIdCandidate) {
+    return null;
+  }
+
+  return getUserRecordByNationalId(nationalIdCandidate);
 }
 
 export async function authenticateUser(identifier: string, password: string) {
@@ -162,7 +161,6 @@ export async function listUsers() {
 
 export async function createUser(input: {
   nationalId: string;
-  username: string;
   displayName: string;
   email: string;
   phone: string;
@@ -171,18 +169,10 @@ export async function createUser(input: {
 }) {
   const supabase = createSupabaseAdminClient();
   const normalizedNationalId = normalizeNationalId(input.nationalId);
-  const normalizedUsername = normalizeUsername(input.username).slice(0, 8);
+  const normalizedUsername = normalizedNationalId;
   const displayName = input.displayName.trim();
   const email = normalizeEmail(input.email);
   const phone = normalizePhone(input.phone);
-
-  if (normalizedUsername.length < 3) {
-    throw new Error("El usuario debe tener al menos 3 caracteres.");
-  }
-
-  if (normalizedUsername.length > 8) {
-    throw new Error("El usuario no puede tener mas de 8 caracteres.");
-  }
 
   if (normalizedNationalId.length < 6) {
     throw new Error("La cedula debe tener al menos 6 digitos.");
@@ -204,15 +194,15 @@ export async function createUser(input: {
     throw new Error("Escribe el telefono del usuario.");
   }
 
-  const existingUser = await getUserRecordByUsername(normalizedUsername);
   const existingNationalId = await getUserRecordByNationalId(normalizedNationalId);
-
-  if (existingUser) {
-    throw new Error("Ese nombre de usuario ya existe.");
-  }
+  const existingInternalUsername = await getUserRecordByUsername(normalizedUsername);
 
   if (existingNationalId) {
     throw new Error("Esa cedula ya existe.");
+  }
+
+  if (existingInternalUsername) {
+    throw new Error("No se pudo registrar esta cedula.");
   }
 
   const { data, error } = await supabase

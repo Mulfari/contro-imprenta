@@ -41,7 +41,7 @@ export async function createPasswordRecoveryRequest(identifier: string) {
     .from("password_recovery_requests")
     .insert({
       user_id: user.id,
-      username: user.username,
+      username: user.national_id,
       display_name: user.display_name,
       recovery_code: recoveryCode,
       expires_at: null,
@@ -63,7 +63,7 @@ export async function verifyPasswordRecoveryCode(input: {
   const user = await findUserForLogin(input.identifier);
 
   if (!user) {
-    throw new Error("Usuario o Cedula incorrecto.");
+    throw new Error("Cedula incorrecta.");
   }
 
   if (!/^\d{6}$/.test(input.recoveryCode)) {
