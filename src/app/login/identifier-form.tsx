@@ -31,13 +31,13 @@ function SubmitButton() {
 
 export function IdentifierForm({ defaultValue }: IdentifierFormProps) {
   return (
-    <form action={verifyIdentifierAction} className="mt-8 space-y-6" noValidate>
+    <form action={verifyIdentifierAction} className="space-y-6" noValidate>
       <div>
         <label
           htmlFor="identifier"
           className="mb-2 block text-sm font-medium text-slate-700"
         >
-          Ingrese su metodo de acceso
+          Metodo de acceso
         </label>
         <input
           id="identifier"
@@ -48,9 +48,6 @@ export function IdentifierForm({ defaultValue }: IdentifierFormProps) {
           className="w-full rounded-[1.6rem] border border-slate-200 bg-slate-50 px-5 py-4 text-base text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
           defaultValue={defaultValue}
         />
-        <p className="mt-3 text-sm leading-6 text-slate-500">
-          Puedes ingresar con tu usuario o numero de cedula.
-        </p>
       </div>
 
       <SubmitButton />

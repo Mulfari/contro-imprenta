@@ -52,18 +52,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
         <section className="relative w-full max-w-xl rounded-[2.3rem] border border-slate-200/90 bg-white/90 p-10 shadow-[0_38px_110px_rgba(15,23,42,0.1)] backdrop-blur-xl sm:p-12">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="max-w-lg">
               <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
-                Panel administrativo
+                Panel Administrativo
               </p>
               <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-                Inicia sesion
-              </h1>
-              <p className="mt-3 text-lg font-medium text-slate-600">
                 Express Printer
-              </p>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-500">
-                Ingrese su metodo de acceso. Puedes ingresar con tu usuario o numero de cedula.
+              </h1>
+              <p className="mt-4 text-base font-medium text-slate-600 sm:text-lg">
+                Iniciar sesion
               </p>
             </div>
             <Link
@@ -81,7 +78,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           ) : null}
 
-          <IdentifierForm defaultValue={pendingLogin?.identifier ?? ""} />
+          <div className="mt-8 rounded-[1.8rem] border border-slate-200/80 bg-slate-50/65 p-6 sm:p-7">
+            <IdentifierForm defaultValue={pendingLogin?.identifier ?? ""} />
+          </div>
 
           {isCodeStep ? (
             <CodeModal
