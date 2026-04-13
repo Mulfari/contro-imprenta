@@ -20,17 +20,13 @@ const SEEN_NOTIFICATIONS_KEY = "dashboard_seen_notifications";
 
 const notificationTone: Record<
   DashboardNotificationItem["type"],
-  { badge: string; dot: string; label: string }
+  { dot: string }
 > = {
   recovery: {
-    badge: "bg-blue-100 text-blue-700",
     dot: "bg-blue-500",
-    label: "Recuperacion",
   },
   alert: {
-    badge: "bg-amber-100 text-amber-700",
     dot: "bg-amber-500",
-    label: "Alerta",
   },
 };
 
@@ -193,11 +189,6 @@ export function NotificationCenterButton({
                             {item.title}
                           </p>
                         </div>
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone.badge}`}
-                        >
-                          {tone.label}
-                        </span>
                       </div>
                       <p className="mt-2 text-sm text-slate-600">{item.subject}</p>
                       <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">

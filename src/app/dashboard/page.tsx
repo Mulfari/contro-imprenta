@@ -65,6 +65,7 @@ const adminSideNavViews: DashboardView[] = [
   "proveedores",
   "equipo",
 ];
+const dashboardTimeZone = "America/Caracas";
 
 const orderStatusLabels: Record<OrderStatus, string> = {
   recibido: "Recibido",
@@ -336,6 +337,21 @@ function formatDateTime(value: string) {
   }).format(parsed);
 }
 
+function getDateKey(value: string | Date) {
+  const parsed = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: dashboardTimeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(parsed);
+}
+
 function capitalizeLabel(value: string) {
   const trimmed = value.trim();
 
@@ -443,17 +459,7 @@ export default async function DashboardPage({
     session.role === "admin",
   );
   const activeOrders = orders.filter((order) => order.status !== "entregado");
-  const deliveriesSoon = orders.filter((order) => {
-    if (!order.due_date || order.status === "entregado") {
-      return false;
-    }
-
-    const dueDate = new Date(order.due_date);
-    const now = new Date();
-    const diff = dueDate.getTime() - now.getTime();
-
-    return diff >= 0 && diff <= 1000 * 60 * 60 * 24 * 2;
-  });
+  const todayKey = getDateKey(new Date());
   const userSideItems = sideNavItems.filter((item) =>
     userSideNavViews.includes(item.view),
   );
@@ -473,6 +479,18 @@ export default async function DashboardPage({
   };
   const sessionInitial = capitalizeLabel(session.displayName).charAt(0);
   const usersById = new Map(users.map((user) => [user.id, user]));
+  const completedToday = orders.filter(
+    (order) =>
+      order.status === "entregado" && getDateKey(order.created_at) === todayKey,
+  ).length;
+  const activeStaffCount = users.filter((user) => user.is_active).length;
+  const billedToday = orders.reduce((sum, order) => {
+    if (getDateKey(order.created_at) !== todayKey) {
+      return sum;
+    }
+
+    return sum + (order.total_amount ?? 0);
+  }, 0);
   const adminNotificationItems: DashboardNotificationItem[] =
     session.role === "admin"
       ? [
@@ -488,7 +506,7 @@ export default async function DashboardPage({
           ...securityAlerts.map((alert) => ({
             id: `alert-${alert.id}`,
             type: "alert" as const,
-            title: "Movimiento sensible detectado",
+            title: "Notificacion administrativa",
             subject:
               usersById.get(alert.user_id ?? "")?.display_name ?? "Usuario desconocido",
             detail: alert.detail,
@@ -658,19 +676,19 @@ export default async function DashboardPage({
             <div id="resumen" className="grid gap-4 md:grid-cols-3">
               {[
                 {
-                  label: "Pedidos activos",
-                  value: String(activeOrders.length),
-                  detail: `${orders.filter((order) => order.status === "imprimiendo").length} en impresion`,
+                  label: "Pedidos completados de hoy",
+                  value: String(completedToday),
+                  detail: "Entregados durante la jornada",
                 },
                 {
-                  label: "Entregas cercanas",
-                  value: String(deliveriesSoon.length),
-                  detail: "Proximas 48h",
+                  label: "Personal activo",
+                  value: String(activeStaffCount),
+                  detail: "Usuarios con acceso al panel",
                 },
                 {
-                  label: "Clientes registrados",
-                  value: String(clients.length),
-                  detail: `${users.length} usuarios del panel`,
+                  label: "Caja",
+                  value: formatCurrency(billedToday),
+                  detail: "Facturado hoy",
                 },
               ].map((card) => (
                 <article
