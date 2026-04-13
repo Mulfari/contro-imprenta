@@ -408,10 +408,7 @@ export default async function DashboardPage({
 
           <div className="mt-6 space-y-6">
             <div>
-              <p className="border-b border-slate-200 pb-3 text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Opciones de usuario
-              </p>
-              <nav className="mt-3 space-y-2">
+              <nav className="space-y-2">
                 {userSideItems.map((item) => {
                   const isActive = item.view === activeView;
 
