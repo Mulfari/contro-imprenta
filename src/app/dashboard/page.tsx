@@ -477,7 +477,7 @@ export default async function DashboardPage({
       <DashboardLiveRefresh />
       <FloatingToast message={message || schemaMessage} />
       <div className="min-h-screen lg:pl-[290px]">
-        <aside className="w-full border border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(248,250,252,0.88))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[290px] lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7 lg:pb-32">
+        <aside className="w-full border border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(248,250,252,0.88))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:flex lg:h-screen lg:w-[290px] lg:flex-col lg:overflow-hidden lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7">
           <div className="border-b border-slate-200 pb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
               Express Printer
@@ -487,7 +487,7 @@ export default async function DashboardPage({
             </h1>
           </div>
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             <div>
               <nav className="space-y-2">
                 {userSideItems.map((item) => {
@@ -540,7 +540,7 @@ export default async function DashboardPage({
             ) : null}
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:mt-5 lg:grid-cols-1">
             <div className="rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-4">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
                 Nuevos pedidos
@@ -559,7 +559,7 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          <form action={signOutAction} className="mt-6 lg:absolute lg:bottom-7 lg:left-5 lg:right-5">
+          <form action={signOutAction} className="mt-6 lg:mt-5">
             <button
               type="submit"
               className="w-full cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
