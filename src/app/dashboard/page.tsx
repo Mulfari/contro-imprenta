@@ -397,9 +397,6 @@ export default async function DashboardPage({
             <h1 className="mt-3 text-2xl font-semibold tracking-tight">
               Panel administrativo
             </h1>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Gestiona clientes, pedidos y equipo desde un solo lugar.
-            </p>
           </div>
 
           <nav className="mt-6 space-y-2">
@@ -458,14 +455,12 @@ export default async function DashboardPage({
             <header className="rounded-[1.7rem] border border-slate-200/80 bg-white/88 px-6 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
               <div className="flex items-center gap-4">
                 <div className="h-11 w-1.5 rounded-full bg-slate-900" />
-                <div>
-                  <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-                    Express Printer
-                  </h2>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Panel administrativo
-                  </p>
-                </div>
+                <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+                  {activeView === "resumen" ? "Resumen" : null}
+                  {activeView === "clientes" ? "Clientes" : null}
+                  {activeView === "pedidos" ? "Pedidos" : null}
+                  {activeView === "equipo" ? "Equipo" : null}
+                </h2>
               </div>
             </header>
 
