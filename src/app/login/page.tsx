@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { CodeModal } from "@/app/login/code-modal";
 import { IdentifierForm } from "@/app/login/identifier-form";
+import { authCardClassName, authSectionClassName } from "@/app/login/styles";
 import { FloatingToast } from "@/components/floating-toast";
 import { getCurrentSession, getPendingLogin } from "@/lib/auth/session";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
@@ -50,7 +51,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.95)_38%,_rgba(232,236,241,0.98)_100%)] px-6 py-8 sm:px-10">
       <FloatingToast message={message} />
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
-        <section className="relative w-full max-w-xl rounded-[2.3rem] border border-slate-200/90 bg-white/90 p-10 shadow-[0_38px_110px_rgba(15,23,42,0.1)] backdrop-blur-xl sm:p-12">
+        <section className={`relative ${authCardClassName}`}>
           <div className="flex items-start justify-between gap-4">
             <div className="max-w-lg">
               <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
@@ -78,7 +79,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           ) : null}
 
-          <div className="mt-8 rounded-[1.8rem] border border-slate-200/80 bg-slate-50/65 p-6 sm:p-7">
+          <div className={authSectionClassName}>
             <IdentifierForm defaultValue={pendingLogin?.identifier ?? ""} />
           </div>
 

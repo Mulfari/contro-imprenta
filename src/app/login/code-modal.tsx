@@ -14,6 +14,15 @@ import {
   verifyCodeStateAction,
   type VerifyCodeState,
 } from "@/app/login/actions";
+import {
+  authCardClassName,
+  authCodeInputClassName,
+  authGhostButtonClassName,
+  authNumericInputClassName,
+  authPrimaryButtonClassName,
+  authSecondaryButtonClassName,
+  authSectionClassName,
+} from "@/app/login/styles";
 import { FloatingToast } from "@/components/floating-toast";
 
 type CodeModalProps = {
@@ -130,12 +139,12 @@ export function CodeModal({
 
   const inputClasses =
     visualStatus === "loading"
-      ? "border-blue-300 bg-white ring-2 ring-blue-100 animate-pulse"
+      ? `${authCodeInputClassName} border-blue-300 animate-pulse`
       : visualStatus === "error"
-        ? "border-rose-300 bg-white ring-2 ring-rose-100"
+        ? "w-full rounded-2xl border border-rose-300 bg-white px-4 py-3.5 text-center text-2xl tracking-[0.45em] text-slate-950 outline-none ring-2 ring-rose-100 transition"
         : visualStatus === "success"
-          ? "border-emerald-300 bg-white ring-2 ring-emerald-100"
-          : "border-blue-400 bg-white ring-2 ring-blue-100 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100";
+          ? "w-full rounded-2xl border border-emerald-300 bg-white px-4 py-3.5 text-center text-2xl tracking-[0.45em] text-slate-950 outline-none ring-2 ring-emerald-100 transition"
+          : authCodeInputClassName;
 
   const handleClose = () => {
     if (closing) {
@@ -156,7 +165,7 @@ export function CodeModal({
       <div className="absolute inset-0 bg-white/18 backdrop-blur-xl" />
       <div className="relative flex min-h-screen items-center justify-center p-4">
         <FloatingToast message={activeToastMessage} />
-        <div className="w-full max-w-xl rounded-[2.3rem] border border-slate-200/90 bg-white/92 p-8 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:p-9">
+        <div className={authCardClassName}>
           <div className="flex items-start justify-between gap-4">
             <div className="max-w-lg">
               <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
@@ -185,7 +194,7 @@ export function CodeModal({
           </div>
 
           {mode === "login" ? (
-            <div className="mt-8 rounded-[1.8rem] border border-slate-200/80 bg-slate-50/65 p-5 sm:p-6">
+            <div className={authSectionClassName}>
               <form ref={submitRef} action={formAction} className="space-y-4" noValidate>
                 <div>
                   <label
@@ -211,7 +220,7 @@ export function CodeModal({
                 </div>
                 <button
                   type="submit"
-                  className="w-full rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  className={authPrimaryButtonClassName}
                   disabled={visualStatus === "loading" || visualStatus === "success"}
                 >
                   {visualStatus === "loading"
@@ -231,13 +240,13 @@ export function CodeModal({
                   setNextPassword("");
                   setConfirmPassword("");
                 }}
-                className="mt-4 w-full text-sm font-medium text-slate-500 transition hover:text-slate-900"
+                className={`mt-4 ${authGhostButtonClassName}`}
               >
                 Recuperar codigo de acceso
               </button>
             </div>
           ) : (
-            <div className="mt-8 space-y-4 rounded-[1.8rem] border border-slate-200/80 bg-slate-50/65 p-5 sm:p-6">
+            <div className={`${authSectionClassName} space-y-4`}>
               <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4">
                 <p className="text-sm font-medium text-slate-800">
                   Solicita tu codigo de acceso a administracion
@@ -248,7 +257,7 @@ export function CodeModal({
                 <form action={requestRecoveryAction} className="mt-4" noValidate>
                   <button
                     type="submit"
-                    className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={authSecondaryButtonClassName}
                     disabled={isRecoveryBusy}
                   >
                     {requestingRecovery ? (
@@ -285,12 +294,12 @@ export function CodeModal({
                     onChange={(event) =>
                       setRecoveryCode(event.target.value.replace(/\D/g, "").slice(0, 6))
                     }
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.35em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className={authNumericInputClassName}
                   />
                 </div>
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  className={authPrimaryButtonClassName}
                   disabled={isRecoveryBusy}
                 >
                   {verifyingRecovery ? (
@@ -316,14 +325,14 @@ export function CodeModal({
                     <input
                       id="nextPassword"
                       name="nextPassword"
-                      type="password"
-                      inputMode="numeric"
-                      maxLength={4}
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
                       value={nextPassword}
                       onChange={(event) =>
                         setNextPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
                       }
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                      className={authNumericInputClassName}
                     />
                   </div>
                   <div>
@@ -336,19 +345,19 @@ export function CodeModal({
                     <input
                       id="confirmPassword"
                       name="confirmPassword"
-                      type="password"
-                      inputMode="numeric"
-                      maxLength={4}
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
                       value={confirmPassword}
                       onChange={(event) =>
                         setConfirmPassword(event.target.value.replace(/\D/g, "").slice(0, 4))
                       }
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-center text-xl tracking-[0.45em] text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                      className={authNumericInputClassName}
                     />
                   </div>
                   <button
                     type="submit"
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                    className={authPrimaryButtonClassName}
                     disabled={isRecoveryBusy}
                   >
                     {completingRecovery ? (
@@ -369,7 +378,7 @@ export function CodeModal({
                   setMode("login");
                   setRecoveryVerified(false);
                 }}
-                className="w-full text-sm font-medium text-slate-500 transition hover:text-slate-900"
+                className={authGhostButtonClassName}
               >
                 Volver a ingresar codigo
               </button>
