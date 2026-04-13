@@ -1114,7 +1114,7 @@ export default async function DashboardPage({
               <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold">Usuarios del equipo</h2>
+                    <h2 className="text-xl font-semibold">Usuarios registrados</h2>
                     <p className="mt-2 text-sm text-slate-500">
                       Administra accesos y crea nuevas cuentas cuando las necesites.
                     </p>
@@ -1146,7 +1146,7 @@ export default async function DashboardPage({
 
               {teamMode === "lista" ? (
                 <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                  <h3 className="text-xl font-semibold">Usuarios registrados</h3>
+                  <h3 className="text-xl font-semibold">Listado de usuarios</h3>
                   <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
                       <thead className="bg-slate-50 text-slate-500">
