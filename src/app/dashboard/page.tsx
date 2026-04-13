@@ -57,6 +57,7 @@ const adminSideNavViews: DashboardView[] = [
   "proveedores",
   "equipo",
 ];
+const adminLocations = ["5 de Julio", "Las Americas"] as const;
 
 const orderStatusLabels: Record<OrderStatus, string> = {
   recibido: "Recibido",
@@ -612,20 +613,28 @@ export default async function DashboardPage({
             </aside>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href={buildDashboardUrl("clientes")}
-              className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-            >
-              Cliente
-            </Link>
-            <Link
-              href={buildDashboardUrl("pedidos")}
-              className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-            >
-              Pedido
-            </Link>
-          </div>
+          {session.role === "admin" ? (
+            <section className="rounded-[1.7rem] border border-slate-200/80 bg-white/88 px-6 py-5 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Sedes</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    El panel queda preparado para trabajar con ambas ubicaciones.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {adminLocations.map((location) => (
+                    <span
+                      key={location}
+                      className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700"
+                    >
+                      {location}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           {activeView === "resumen" ? (
           <section className="grid gap-6">
