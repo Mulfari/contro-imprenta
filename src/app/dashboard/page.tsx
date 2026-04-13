@@ -23,7 +23,7 @@ import {
 } from "@/lib/password-recovery";
 import { listSecurityAlerts, type SecurityAlert } from "@/lib/security-alerts";
 import { hasPanelAuthConfig } from "@/lib/supabase/config";
-import { createUser, listUsers } from "@/lib/users";
+import { createUser, deleteUser, listUsers } from "@/lib/users";
 
 const orderStatuses: OrderStatus[] = [
   "recibido",
@@ -136,6 +136,38 @@ async function createClientAction(formData: FormData) {
 
   revalidatePath("/dashboard");
   redirect(buildDashboardUrl("clientes", "Cliente creado"));
+}
+
+async function deleteUserAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const userId = String(formData.get("userId") ?? "");
+
+  if (!userId) {
+    redirect(buildTeamUrl("lista", "No se pudo identificar el usuario."));
+  }
+
+  if (userId === session.userId) {
+    redirect(buildTeamUrl("lista", "No puedes eliminar tu propia cuenta."));
+  }
+
+  try {
+    await deleteUser(userId);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo eliminar el usuario.";
+
+    redirect(buildTeamUrl("lista", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildTeamUrl("lista", "Usuario eliminado"));
 }
 
 async function createOrderAction(formData: FormData) {
@@ -1140,7 +1172,7 @@ export default async function DashboardPage({
                         <th className="px-4 py-3 font-medium">Cedula</th>
                         <th className="px-4 py-3 font-medium">Contacto</th>
                         <th className="px-4 py-3 font-medium">Rol</th>
-                        <th className="px-4 py-3 font-medium">Estado</th>
+                        <th className="px-4 py-3 font-medium text-right">Acciones</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
@@ -1154,7 +1186,17 @@ export default async function DashboardPage({
                           </td>
                           <td className="px-4 py-3">{user.role}</td>
                           <td className="px-4 py-3">
-                            {user.is_active ? "Activo" : "Inactivo"}
+                            <div className="flex justify-end">
+                              <form action={deleteUserAction}>
+                                <input type="hidden" name="userId" value={user.id} />
+                                <button
+                                  type="submit"
+                                  className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                                >
+                                  Eliminar
+                                </button>
+                              </form>
+                            </div>
                           </td>
                         </tr>
                       ))}

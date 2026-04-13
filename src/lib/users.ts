@@ -249,6 +249,15 @@ export async function setUserPassword(userId: string, password: string) {
   }
 }
 
+export async function deleteUser(userId: string) {
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase.from("app_users").delete().eq("id", userId);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export function toSessionUser(user: AppUser): SessionUser {
   return {
     userId: user.id,
