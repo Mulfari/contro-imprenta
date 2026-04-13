@@ -27,6 +27,11 @@ export type LoginUser = AppUser & {
   requires_password_setup: boolean;
 };
 
+const userSelectFields =
+  "id, national_id, username, display_name, email, phone, role, is_active, last_seen_at, created_at, created_by";
+const userSelectFieldsLegacy =
+  "id, national_id, username, display_name, email, phone, role, is_active, created_at, created_by";
+
 function normalizeNationalId(value: string) {
   return value.replace(/\D/g, "");
 }
@@ -48,6 +53,28 @@ function sanitizeUser(user: AppUserRecord): AppUser {
   void password_hash;
 
   return safeUser;
+}
+
+function isMissingLastSeenColumnError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybeError = error as { code?: string; message?: string };
+
+  return (
+    maybeError.code === "42703" ||
+    maybeError.message?.includes("last_seen_at") === true
+  );
+}
+
+function withLegacyPresenceFallback(
+  records: Omit<AppUser, "last_seen_at">[],
+): AppUser[] {
+  return records.map((record) => ({
+    ...record,
+    last_seen_at: null,
+  }));
 }
 
 function toLoginUser(user: AppUserRecord): LoginUser {
@@ -146,18 +173,31 @@ export async function hasAnyUsers() {
 
 export async function listUsers() {
   const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase
+  const primaryQuery = await supabase
     .from("app_users")
-    .select(
-      "id, national_id, username, display_name, email, phone, role, is_active, last_seen_at, created_at, created_by",
-    )
+    .select(userSelectFields)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    throw error;
+  if (!primaryQuery.error) {
+    return (primaryQuery.data ?? []) as AppUser[];
   }
 
-  return (data ?? []) as AppUser[];
+  if (!isMissingLastSeenColumnError(primaryQuery.error)) {
+    throw primaryQuery.error;
+  }
+
+  const fallbackQuery = await supabase
+    .from("app_users")
+    .select(userSelectFieldsLegacy)
+    .order("created_at", { ascending: true });
+
+  if (fallbackQuery.error) {
+    throw fallbackQuery.error;
+  }
+
+  return withLegacyPresenceFallback(
+    (fallbackQuery.data ?? []) as Omit<AppUser, "last_seen_at">[],
+  );
 }
 
 export async function countActiveUsers(windowMs = 60 * 1000) {
@@ -221,7 +261,7 @@ export async function createUser(input: {
     throw new Error("No se pudo registrar esta cedula.");
   }
 
-  const { data, error } = await supabase
+  const insertQuery = await supabase
     .from("app_users")
     .insert({
       national_id: normalizedNationalId,
@@ -234,16 +274,41 @@ export async function createUser(input: {
       is_active: true,
       created_by: input.createdBy,
     })
-    .select(
-      "id, national_id, username, display_name, email, phone, role, is_active, last_seen_at, created_at, created_by",
-    )
+    .select(userSelectFields)
     .single<AppUser>();
 
-  if (error) {
-    throw error;
+  if (!insertQuery.error) {
+    return insertQuery.data;
   }
 
-  return data;
+  if (!isMissingLastSeenColumnError(insertQuery.error)) {
+    throw insertQuery.error;
+  }
+
+  const fallbackInsertQuery = await supabase
+    .from("app_users")
+    .insert({
+      national_id: normalizedNationalId,
+      username: normalizedUsername,
+      display_name: displayName,
+      email,
+      phone,
+      password_hash: "",
+      role: input.role,
+      is_active: true,
+      created_by: input.createdBy,
+    })
+    .select(userSelectFieldsLegacy)
+    .single<Omit<AppUser, "last_seen_at">>();
+
+  if (fallbackInsertQuery.error) {
+    throw fallbackInsertQuery.error;
+  }
+
+  return {
+    ...fallbackInsertQuery.data,
+    last_seen_at: null,
+  };
 }
 
 export async function setUserPassword(userId: string, password: string) {
@@ -284,6 +349,10 @@ export async function touchUserPresence(userId: string) {
     .eq("id", userId);
 
   if (error) {
+    if (isMissingLastSeenColumnError(error)) {
+      return;
+    }
+
     throw error;
   }
 }
@@ -298,6 +367,10 @@ export async function clearUserPresence(userId: string) {
     .eq("id", userId);
 
   if (error) {
+    if (isMissingLastSeenColumnError(error)) {
+      return;
+    }
+
     throw error;
   }
 }
