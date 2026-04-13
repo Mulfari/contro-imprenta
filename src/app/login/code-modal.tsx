@@ -130,12 +130,12 @@ export function CodeModal({
 
   const inputClasses =
     visualStatus === "loading"
-      ? "border-blue-300 bg-blue-50 ring-2 ring-blue-100 animate-pulse"
+      ? "border-blue-300 bg-white ring-2 ring-blue-100 animate-pulse"
       : visualStatus === "error"
-        ? "border-rose-300 bg-rose-50 ring-2 ring-rose-100"
+        ? "border-rose-300 bg-white ring-2 ring-rose-100"
         : visualStatus === "success"
-          ? "border-emerald-300 bg-emerald-50 ring-2 ring-emerald-100"
-          : "border-slate-200 bg-slate-50 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100";
+          ? "border-emerald-300 bg-white ring-2 ring-emerald-100"
+          : "border-slate-200 bg-white focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100";
 
   const handleClose = () => {
     if (closing) {
