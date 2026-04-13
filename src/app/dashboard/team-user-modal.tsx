@@ -15,6 +15,16 @@ function normalizeDigits(value: string, maxLength: number) {
   return value.replace(/\D/g, "").slice(0, maxLength);
 }
 
+function formatPersonalNameInput(value: string) {
+  return value
+    .replace(/\s{2,}/g, " ")
+    .toLowerCase()
+    .replace(/(^|\s)(\p{L})/gu, (match, prefix: string, letter: string) => {
+      void match;
+      return `${prefix}${letter.toUpperCase()}`;
+    });
+}
+
 function normalizePersonalName(value: string) {
   return value
     .trim()
@@ -173,7 +183,9 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
                   autoComplete="off"
                   spellCheck={false}
                   value={firstName}
-                  onChange={(event) => setFirstName(event.target.value)}
+                  onChange={(event) =>
+                    setFirstName(formatPersonalNameInput(event.target.value))
+                  }
                   onBlur={() => setFirstName((current) => normalizePersonalName(current))}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Juan"
@@ -189,7 +201,9 @@ export function TeamUserModal({ closeHref, action }: TeamUserModalProps) {
                   autoComplete="off"
                   spellCheck={false}
                   value={lastName}
-                  onChange={(event) => setLastName(event.target.value)}
+                  onChange={(event) =>
+                    setLastName(formatPersonalNameInput(event.target.value))
+                  }
                   onBlur={() => setLastName((current) => normalizePersonalName(current))}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   placeholder="Perez"
