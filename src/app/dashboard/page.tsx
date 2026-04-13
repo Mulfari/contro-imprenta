@@ -32,18 +32,31 @@ const orderStatuses: OrderStatus[] = [
   "entregado",
 ];
 
-const dashboardViews = ["resumen", "clientes", "pedidos", "equipo"] as const;
+const dashboardViews = [
+  "resumen",
+  "clientes",
+  "pedidos",
+  "inventario",
+  "proveedores",
+  "equipo",
+] as const;
 type DashboardView = (typeof dashboardViews)[number];
 
 const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Resumen", view: "resumen" },
   { label: "Clientes", view: "clientes" },
   { label: "Pedidos", view: "pedidos" },
+  { label: "Inventario", view: "inventario" },
+  { label: "Proveedores", view: "proveedores" },
   { label: "Equipo", view: "equipo" },
 ];
 
 const userSideNavViews: DashboardView[] = ["resumen", "clientes", "pedidos"];
-const adminSideNavViews: DashboardView[] = ["equipo"];
+const adminSideNavViews: DashboardView[] = [
+  "inventario",
+  "proveedores",
+  "equipo",
+];
 
 const orderStatusLabels: Record<OrderStatus, string> = {
   recibido: "Recibido",
@@ -223,7 +236,10 @@ function buildTeamUrl(mode: "lista" | "nuevo", message?: string) {
 }
 
 function resolveView(value: string, isAdmin: boolean): DashboardView {
-  if (value === "equipo" && !isAdmin) {
+  if (
+    ["inventario", "proveedores", "equipo"].includes(value) &&
+    !isAdmin
+  ) {
     return "resumen";
   }
 
@@ -286,6 +302,25 @@ function capitalizeLabel(value: string) {
   }
 
   return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;
+}
+
+function getViewLabel(view: DashboardView) {
+  switch (view) {
+    case "resumen":
+      return "Resumen";
+    case "clientes":
+      return "Clientes";
+    case "pedidos":
+      return "Pedidos";
+    case "inventario":
+      return "Inventario";
+    case "proveedores":
+      return "Proveedores";
+    case "equipo":
+      return "Equipo";
+    default:
+      return "Resumen";
+  }
 }
 
 export default async function DashboardPage({
@@ -495,10 +530,7 @@ export default async function DashboardPage({
               <div className="flex items-center gap-4">
                 <div className="h-11 w-1.5 rounded-full bg-slate-900" />
                 <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-                  {activeView === "resumen" ? "Resumen" : null}
-                  {activeView === "clientes" ? "Clientes" : null}
-                  {activeView === "pedidos" ? "Pedidos" : null}
-                  {activeView === "equipo" ? "Equipo" : null}
+                  {getViewLabel(activeView)}
                 </h2>
               </div>
             </header>
@@ -1276,6 +1308,68 @@ export default async function DashboardPage({
                   </form>
                 </article>
               ) : null}
+            </section>
+          ) : null}
+
+          {(activeView === "inventario" || activeView === "proveedores") &&
+          session.role === "admin" ? (
+            <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">
+                      {activeView === "inventario"
+                        ? "Inventario"
+                        : "Proveedores"}
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-500">
+                      {activeView === "inventario"
+                        ? "Organiza materiales, stock y movimientos internos de la imprenta."
+                        : "Centraliza los datos de talleres, distribuidores y aliados del negocio."}
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                    Proximo modulo
+                  </span>
+                </div>
+
+                <div className="mt-6 rounded-[1.75rem] border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center">
+                  <p className="text-base font-semibold text-slate-900">
+                    Este modulo ya tiene espacio reservado en el panel.
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    En el siguiente paso podemos construir sus formularios, listados
+                    y controles reales sin mover la navegacion administrativa.
+                  </p>
+                </div>
+              </article>
+
+              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Lo siguiente aqui
+                </h3>
+                <div className="mt-5 space-y-3">
+                  {(activeView === "inventario"
+                    ? [
+                        "Registrar materiales y productos base",
+                        "Controlar entradas, salidas y stock actual",
+                        "Relacionar inventario con pedidos en produccion",
+                      ]
+                    : [
+                        "Guardar datos de contacto y categoria del proveedor",
+                        "Registrar servicios, materiales y observaciones",
+                        "Consultar rapidamente proveedores frecuentes",
+                      ]
+                  ).map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </article>
             </section>
           ) : null}
         </div>
