@@ -135,7 +135,7 @@ export function CodeModal({
         ? "border-rose-300 bg-white ring-2 ring-rose-100"
         : visualStatus === "success"
           ? "border-emerald-300 bg-white ring-2 ring-emerald-100"
-          : "border-slate-200 bg-white focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100";
+          : "border-blue-400 bg-white ring-2 ring-blue-100 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100";
 
   const handleClose = () => {
     if (closing) {
