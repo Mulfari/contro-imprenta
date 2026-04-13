@@ -560,7 +560,7 @@ export default async function DashboardPage({
           <form action={signOutAction} className="mt-6 lg:absolute lg:bottom-7 lg:left-5 lg:right-5">
             <button
               type="submit"
-              className="w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="w-full cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
             >
               Cerrar sesion
             </button>
@@ -633,7 +633,7 @@ export default async function DashboardPage({
                 <form action={signOutAction}>
                   <button
                     type="submit"
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
                     aria-label="Cerrar sesion"
                   >
                     <svg
