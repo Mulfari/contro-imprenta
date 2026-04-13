@@ -1,6 +1,7 @@
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSessionSecret } from "@/lib/supabase/config";
 
 export const SESSION_COOKIE_NAME = "imprenta_panel_session";
@@ -84,7 +85,38 @@ export async function getCurrentSession() {
   }
 
   try {
-    return await readSessionToken(token);
+    const session = await readSessionToken(token);
+    const supabase = createSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("app_users")
+      .select("id, role, display_name, username, is_active")
+      .eq("id", session.userId)
+      .maybeSingle<{
+        id: string;
+        role: "admin" | "staff";
+        display_name: string;
+        username: string;
+        is_active: boolean;
+      }>();
+
+    if (error || !data || !data.is_active) {
+      cookieStore.set(SESSION_COOKIE_NAME, "", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 0,
+      });
+
+      return null;
+    }
+
+    return {
+      userId: data.id,
+      username: data.username,
+      displayName: data.display_name,
+      role: data.role,
+    };
   } catch {
     return null;
   }
