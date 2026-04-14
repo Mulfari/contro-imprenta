@@ -1200,9 +1200,7 @@ export default async function DashboardPage({
                               </span>
                               <div>
                                 <div className="font-medium text-slate-900">
-                                  {hasPendingBalance
-                                    ? formatCurrency(pendingTotal)
-                                    : "Sin deuda"}
+                                  {formatCurrency(pendingTotal)}
                                 </div>
                                 <div
                                   className={`text-xs ${
