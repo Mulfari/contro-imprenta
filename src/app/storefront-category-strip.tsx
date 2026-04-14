@@ -103,18 +103,10 @@ export function StorefrontCategoryStrip() {
     pointerId: number | null;
     startX: number;
     startScrollLeft: number;
-    lastX: number;
-    lastTime: number;
-    velocity: number;
-    raf: number | null;
   }>({
     pointerId: null,
     startX: 0,
     startScrollLeft: 0,
-    lastX: 0,
-    lastTime: 0,
-    velocity: 0,
-    raf: null,
   });
   const repeatedItems = useMemo(
     () =>
@@ -152,43 +144,12 @@ export function StorefrontCategoryStrip() {
     };
   }, []);
 
-  const stopMomentum = () => {
-    if (dragState.current.raf !== null) {
-      cancelAnimationFrame(dragState.current.raf);
-      dragState.current.raf = null;
-    }
-  };
-
-  const startMomentum = () => {
-    const track = trackRef.current;
-    if (!track) {
-      return;
-    }
-
-    stopMomentum();
-
-    const tick = () => {
-      dragState.current.velocity *= 0.94;
-
-      if (Math.abs(dragState.current.velocity) < 0.02) {
-        dragState.current.raf = null;
-        return;
-      }
-
-      track.scrollLeft -= dragState.current.velocity * 18;
-      dragState.current.raf = requestAnimationFrame(tick);
-    };
-
-    dragState.current.raf = requestAnimationFrame(tick);
-  };
-
   const slideBy = (direction: "prev" | "next") => {
     const track = trackRef.current;
     if (!track) {
       return;
     }
 
-    stopMomentum();
     track.scrollBy({
       left: direction === "next" ? ITEM_STRIDE : -ITEM_STRIDE,
       behavior: "smooth",
@@ -218,13 +179,9 @@ export function StorefrontCategoryStrip() {
               return;
             }
 
-            stopMomentum();
             dragState.current.pointerId = event.pointerId;
             dragState.current.startX = event.clientX;
             dragState.current.startScrollLeft = track.scrollLeft;
-            dragState.current.lastX = event.clientX;
-            dragState.current.lastTime = performance.now();
-            dragState.current.velocity = 0;
             track.setPointerCapture(event.pointerId);
           }}
           onPointerMove={(event) => {
@@ -233,15 +190,8 @@ export function StorefrontCategoryStrip() {
               return;
             }
 
-            const now = performance.now();
             const deltaX = event.clientX - dragState.current.startX;
             track.scrollLeft = dragState.current.startScrollLeft - deltaX;
-
-            const stepX = event.clientX - dragState.current.lastX;
-            const stepTime = Math.max(now - dragState.current.lastTime, 1);
-            dragState.current.velocity = stepX / stepTime;
-            dragState.current.lastX = event.clientX;
-            dragState.current.lastTime = now;
           }}
           onPointerUp={(event) => {
             const track = trackRef.current;
@@ -251,11 +201,9 @@ export function StorefrontCategoryStrip() {
 
             track.releasePointerCapture(event.pointerId);
             dragState.current.pointerId = null;
-            startMomentum();
           }}
           onPointerCancel={() => {
             dragState.current.pointerId = null;
-            startMomentum();
           }}
         >
           {repeatedItems.map((item) => (
