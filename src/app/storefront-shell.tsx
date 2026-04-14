@@ -2,11 +2,29 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { storefrontCategories, storefrontProducts } from "@/app/storefront-data";
+import { storefrontProducts } from "@/app/storefront-data";
 import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
 
 const RECENT_SEARCHES_KEY = "express-printer-recent-searches";
+const categoryGroups = [
+  {
+    title: "Papeleria comercial",
+    items: ["Tarjetas", "Facturas", "Sobres", "Talonarios"],
+  },
+  {
+    title: "Publicidad impresa",
+    items: ["Volantes", "Dipticos", "Tripticos", "Afiches"],
+  },
+  {
+    title: "Etiquetas y stickers",
+    items: ["Etiquetas", "Stickers", "Sellos", "Packaging"],
+  },
+  {
+    title: "Gran formato",
+    items: ["Pendones", "Banners", "Vinil", "Lonas"],
+  },
+];
 
 function normalizeSearchList(items: string[]) {
   return Array.from(new Set(items.map((item) => item.trim()).filter(Boolean))).slice(0, 6);
@@ -77,30 +95,35 @@ export function StorefrontShell() {
           <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
             <aside className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
               <h2 className="text-base font-semibold tracking-tight">Compra por categoria</h2>
-              <div className="mt-5 space-y-2">
-                {storefrontCategories.map((category) => {
-                  const categoryMatches = storefrontProducts.filter(
-                    (item) =>
-                      item.category === category &&
-                      `${item.title} ${item.note} ${item.category}`
-                        .toLowerCase()
-                        .includes(debouncedQuery.toLowerCase()),
-                  ).length;
+              <div className="mt-5 space-y-5">
+                {categoryGroups.map((group) => (
+                  <div key={group.title}>
+                    <h3 className="text-sm font-semibold text-slate-500">{group.title}</h3>
+                    <div className="mt-3 space-y-2">
+                      {group.items.map((item) => {
+                        const categoryMatches = storefrontProducts.filter((product) =>
+                          `${product.title} ${product.note} ${product.category}`
+                            .toLowerCase()
+                            .includes(item.toLowerCase()),
+                        ).length;
 
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => setSearchQuery(category)}
-                      className="flex w-full cursor-pointer items-center justify-between rounded-[1rem] px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-                    >
-                      <span>{category}</span>
-                      <span className="text-xs font-semibold text-slate-400">
-                        {categoryMatches}
-                      </span>
-                    </button>
-                  );
-                })}
+                        return (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => setSearchQuery(item)}
+                            className="flex w-full cursor-pointer items-center justify-between text-left text-sm text-slate-700 transition hover:text-slate-950"
+                          >
+                            <span>{item}</span>
+                            <span className="text-xs font-semibold text-slate-400">
+                              {categoryMatches}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </aside>
 
@@ -128,18 +151,22 @@ export function StorefrontShell() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <span className="rounded-full bg-[#fff4c6] px-3 py-1 text-xs font-semibold text-[#8a6a00]">
+                          Destacado
+                        </span>
+                        <span className="text-xs font-medium text-slate-400">
                           {item.category}
                         </span>
-                        <span className="text-xs font-medium text-slate-400">Disponible</span>
                       </div>
 
                       <div
                         className={`mt-5 rounded-[1.3rem] bg-gradient-to-br ${item.tint} p-5`}
                       >
-                        <div className="flex h-28 items-center justify-center rounded-[1rem] border border-white/80 bg-white/80">
-                          <span className="text-sm font-semibold text-slate-400">
-                            Vista previa
-                          </span>
+                        <div className="flex h-28 items-end justify-between rounded-[1rem] border border-white/55 bg-white/40 p-4">
+                          <div className="space-y-2">
+                            <div className="h-3 w-24 rounded-full bg-white/80" />
+                            <div className="h-3 w-16 rounded-full bg-white/55" />
+                          </div>
+                          <div className="h-16 w-16 rounded-[1rem] border border-white/60 bg-white/80 shadow-sm" />
                         </div>
                       </div>
 
