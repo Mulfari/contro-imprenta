@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { storefrontProducts } from "@/app/storefront-data";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
 import { StorefrontDealsSection } from "@/app/storefront-deals-section";
+import { StorefrontFeatureGridSection } from "@/app/storefront-feature-grid-section";
 import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
 import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
@@ -225,6 +226,7 @@ export function StorefrontShell() {
           <StorefrontCategoryStrip />
           <StorefrontPromoPanels />
           <StorefrontDealsSection />
+          <StorefrontFeatureGridSection />
         </>
       )}
     </main>
