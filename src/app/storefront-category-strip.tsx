@@ -94,6 +94,7 @@ function CategoryArt({ art }: { art: string }) {
 
 export function StorefrontCategoryStrip() {
   const [startIndex, setStartIndex] = useState(0);
+  const [direction, setDirection] = useState<"left" | "right">("right");
   const touchStartX = useRef<number | null>(null);
   const pageSize = 6;
   const visibleItems = useMemo(
@@ -104,9 +105,14 @@ export function StorefrontCategoryStrip() {
       }),
     [startIndex],
   );
-  const goPrev = () =>
+  const goPrev = () => {
+    setDirection("left");
     setStartIndex((current) => (current === 0 ? items.length - 1 : current - 1));
-  const goNext = () => setStartIndex((current) => (current + 1) % items.length);
+  };
+  const goNext = () => {
+    setDirection("right");
+    setStartIndex((current) => (current + 1) % items.length);
+  };
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
@@ -114,16 +120,19 @@ export function StorefrontCategoryStrip() {
           <button
             type="button"
             onClick={goPrev}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white/96 text-slate-500 shadow-[0_10px_22px_rgba(15,23,42,0.06)] transition hover:border-slate-300 hover:bg-white hover:text-slate-900"
             aria-label="Anterior"
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.05rem] w-[1.05rem]" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               <path d="m15 18-6-6 6-6" />
             </svg>
           </button>
 
           <div
-            className="grid gap-4 sm:grid-cols-3 xl:grid-cols-6"
+            key={`${direction}-${startIndex}`}
+            className={`grid gap-4 sm:grid-cols-3 xl:grid-cols-6 ${
+              direction === "right" ? "storefront-strip-enter-right" : "storefront-strip-enter-left"
+            }`}
             onTouchStart={(event) => {
               touchStartX.current = event.touches[0]?.clientX ?? null;
             }}
@@ -166,10 +175,10 @@ export function StorefrontCategoryStrip() {
           <button
             type="button"
             onClick={goNext}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white/96 text-slate-500 shadow-[0_10px_22px_rgba(15,23,42,0.06)] transition hover:border-slate-300 hover:bg-white hover:text-slate-900"
             aria-label="Siguiente"
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.05rem] w-[1.05rem]" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               <path d="m9 6 6 6-6 6" />
             </svg>
           </button>

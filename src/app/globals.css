@@ -91,10 +91,42 @@ a:hover {
   }
 }
 
+@keyframes storefront-strip-enter-right {
+  0% {
+    opacity: 0;
+    transform: translateX(26px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes storefront-strip-enter-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-26px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .toast-enter {
   animation: toast-enter 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .toast-leave {
   animation: toast-leave 320ms ease forwards;
+}
+
+.storefront-strip-enter-right {
+  animation: storefront-strip-enter-right 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.storefront-strip-enter-left {
+  animation: storefront-strip-enter-left 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
