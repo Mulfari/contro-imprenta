@@ -23,14 +23,19 @@ const searchTags = ["Tarjetas", "Stickers", "Pendones", "Etiquetas", "Facturas"]
 export function StorefrontHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchAreaRef = useRef<HTMLDivElement | null>(null);
+  const searchPanelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
-      if (!searchAreaRef.current) {
+      if (!searchAreaRef.current && !searchPanelRef.current) {
         return;
       }
 
-      if (!searchAreaRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const clickedInsideInput = searchAreaRef.current?.contains(target);
+      const clickedInsidePanel = searchPanelRef.current?.contains(target);
+
+      if (!clickedInsideInput && !clickedInsidePanel) {
         setSearchOpen(false);
       }
     }
@@ -42,6 +47,10 @@ export function StorefrontHeader() {
 
   return (
     <>
+      {searchOpen ? (
+        <div className="fixed inset-0 z-30 bg-slate-950/12 backdrop-blur-[6px]" />
+      ) : null}
+
       <div className="border-b border-slate-800 bg-slate-950 text-white">
         <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 2xl:px-10">
           <p>Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.</p>
@@ -58,7 +67,7 @@ export function StorefrontHeader() {
         </div>
       </div>
 
-      <header className="border-b border-slate-200 bg-white">
+      <header className="relative z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
@@ -151,66 +160,6 @@ export function StorefrontHeader() {
             </div>
           </div>
 
-          <div
-            className={`grid overflow-hidden transition-all duration-300 ${
-              searchOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-            }`}
-          >
-            <div className="min-h-0">
-              <div className="rounded-[1.7rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_20px_45px_rgba(15,23,42,0.05)]">
-                <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-                  <div className="max-w-xl">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                      Busqueda rapida
-                    </p>
-                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                      Encuentra productos y categorias al instante
-                    </h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Selecciona una sugerencia o una categoria destacada para entrar directo a la parte de la tienda que necesitas.
-                    </p>
-                  </div>
-
-                  <div className="inline-flex w-fit items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">
-                    Resultados
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-950">Busquedas sugeridas</p>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                      {searchSuggestions.map((item) => (
-                        <button
-                          key={item}
-                          type="button"
-                          className="cursor-pointer rounded-[1.2rem] border border-slate-200 bg-white px-4 py-4 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                        >
-                          {item}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-slate-950">Categorias destacadas</p>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {searchTags.map((item) => (
-                        <button
-                          key={item}
-                          type="button"
-                          className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-                        >
-                          {item}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 text-sm font-medium text-slate-700">
             <a href="#catalogo" className="transition hover:text-slate-950">
               Catalogo
@@ -230,6 +179,72 @@ export function StorefrontHeader() {
           </div>
         </div>
       </header>
+
+      <div
+        className={`fixed inset-x-0 top-[7.9rem] z-50 px-4 transition-all duration-300 sm:px-6 lg:px-8 2xl:px-10 ${
+          searchOpen
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-8 opacity-0"
+        }`}
+      >
+        <div ref={searchPanelRef} className="mx-auto w-full max-w-[112rem]">
+          <div className="rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_30px_70px_rgba(15,23,42,0.14)]">
+            <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+              <div className="max-w-xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                  Busqueda rapida
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+                  Encuentra productos y categorias al instante
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Selecciona una sugerencia o una categoria destacada para entrar directo a la parte de la tienda que necesitas.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                className="inline-flex w-fit cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+              <div>
+                <p className="text-sm font-semibold text-slate-950">Busquedas sugeridas</p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {searchSuggestions.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      className="cursor-pointer rounded-[1.2rem] border border-slate-200 bg-white px-4 py-4 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-slate-950">Categorias destacadas</p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {searchTags.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <section className="border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfe_100%)]">
         <div className="overflow-hidden">
