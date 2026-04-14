@@ -6,13 +6,11 @@ type HeroSlide = {
   id: string;
   eyebrow: string;
   title: string;
-  subtitle: string;
   cta: string;
-  bgClass: string;
-  accentClass: string;
-  cardClass: string;
-  imageLabel: string;
   price: string;
+  shellClass: string;
+  imageClass: string;
+  accentClass: string;
 };
 
 const slides: HeroSlide[] = [
@@ -20,43 +18,37 @@ const slides: HeroSlide[] = [
     id: "tarjetas",
     eyebrow: "Tarjetas premium",
     title: "Presentacion profesional para tu marca",
-    subtitle: "Acabados premium y entrega express",
     cta: "Comprar tarjetas",
-    bgClass:
-      "bg-[linear-gradient(120deg,#0f1f35_0%,#1d4f79_42%,#3b88c8_100%)]",
+    price: "Desde $18",
+    shellClass:
+      "bg-[linear-gradient(135deg,#0f1f35_0%,#19426a_40%,#2d78b8_100%)]",
+    imageClass:
+      "bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_48%,#dbeafe_100%)]",
     accentClass: "bg-[#ffcf33]",
-    cardClass:
-      "bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_58%,#dbeafe_100%)]",
-    imageLabel: "Tarjetas corporativas",
-    price: "$18",
   },
   {
     id: "stickers",
     eyebrow: "Stickers y etiquetas",
-    title: "Identidad visual para productos y empaques",
-    subtitle: "Corte especial para envases y branding",
+    title: "Identidad visual para empaques y productos",
     cta: "Ver stickers",
-    bgClass:
-      "bg-[linear-gradient(120deg,#1b1230_0%,#4c1d95_40%,#7c3aed_100%)]",
+    price: "Desde $14",
+    shellClass:
+      "bg-[linear-gradient(135deg,#2b153f_0%,#5b21b6_42%,#8b5cf6_100%)]",
+    imageClass:
+      "bg-[linear-gradient(135deg,#faf5ff_0%,#ffffff_46%,#ede9fe_100%)]",
     accentClass: "bg-[#f9a8d4]",
-    cardClass:
-      "bg-[linear-gradient(135deg,#faf5ff_0%,#ffffff_58%,#ede9fe_100%)]",
-    imageLabel: "Etiquetas adhesivas",
-    price: "$14",
   },
   {
     id: "pendones",
     eyebrow: "Gran formato",
     title: "Pendones listos para promociones y eventos",
-    subtitle: "Impresion de alto impacto para vitrinas y ferias",
     cta: "Pedir pendones",
-    bgClass:
-      "bg-[linear-gradient(120deg,#10261f_0%,#0f766e_45%,#14b8a6_100%)]",
+    price: "Desde $35",
+    shellClass:
+      "bg-[linear-gradient(135deg,#0f2d28_0%,#0f766e_46%,#14b8a6_100%)]",
+    imageClass:
+      "bg-[linear-gradient(135deg,#ecfeff_0%,#ffffff_46%,#ccfbf1_100%)]",
     accentClass: "bg-[#fde047]",
-    cardClass:
-      "bg-[linear-gradient(135deg,#ecfeff_0%,#ffffff_56%,#ccfbf1_100%)]",
-    imageLabel: "Banner promocional",
-    price: "$35",
   },
 ];
 
@@ -66,105 +58,63 @@ export function StorefrontHero() {
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % slides.length);
-    }, 4500);
+    }, 5000);
 
     return () => window.clearInterval(intervalId);
   }, []);
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="relative h-[430px] overflow-hidden rounded-[2.25rem] shadow-[0_28px_70px_rgba(15,23,42,0.24)] sm:h-[500px] xl:h-[560px]">
+      <div className="relative h-[420px] overflow-hidden rounded-[2.35rem] shadow-[0_30px_80px_rgba(15,23,42,0.22)] sm:h-[500px] xl:h-[600px]">
         {slides.map((slide, index) => {
           const isActive = index === activeIndex;
 
           return (
             <article
               key={slide.id}
-              className={`absolute inset-0 px-6 py-6 text-white transition-all duration-700 sm:px-8 sm:py-8 xl:px-10 xl:py-10 ${
-                slide.bgClass
-              } ${
-                isActive
-                  ? "pointer-events-auto opacity-100"
-                  : "pointer-events-none opacity-0"
-              }`}
+              className={`absolute inset-0 transition-all duration-700 ${
+                isActive ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+              } ${slide.shellClass}`}
             >
-              <div className="absolute left-8 top-8 h-44 w-44 rounded-full bg-white/8 blur-3xl" />
-              <div className="absolute right-10 top-10 h-56 w-56 rounded-full bg-white/8 blur-3xl" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_30%)]" />
+              <div className="absolute left-0 top-0 h-full w-full bg-[linear-gradient(90deg,rgba(7,12,20,0.58)_0%,rgba(7,12,20,0.2)_38%,rgba(7,12,20,0)_70%)]" />
 
-              <div className="relative grid h-full gap-6 xl:grid-cols-[0.28fr_1.72fr] xl:items-stretch">
-                <div className="flex max-w-sm flex-col justify-between gap-4 xl:py-6">
-                  <div>
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.34em] text-white/68">
+              <div className="relative grid h-full grid-cols-1 xl:grid-cols-[0.42fr_1.58fr]">
+                <div className="flex h-full flex-col justify-end px-6 py-6 sm:px-8 sm:py-8 xl:px-10 xl:py-10">
+                  <div className="max-w-md">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-white/72">
                       {slide.eyebrow}
-                    </span>
-                    <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+                    </p>
+                    <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl xl:text-[2.9rem]">
                       {slide.title}
                     </h1>
-                    <p className="mt-3 max-w-xs text-sm leading-6 text-white/72">
-                      {slide.subtitle}
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="inline-flex rounded-full border border-white/14 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm">
-                      Desde {slide.price}
+                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                      <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm">
+                        {slide.price}
+                      </span>
+                      <button
+                        type="button"
+                        className="cursor-pointer rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                      >
+                        {slide.cta}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className="inline-flex w-fit cursor-pointer items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
-                    >
-                      {slide.cta}
-                    </button>
                   </div>
                 </div>
 
-                <div className="relative min-h-[250px] sm:min-h-[340px] xl:min-h-0">
-                  <div className="absolute inset-0 rounded-[2rem] border border-white/10 bg-white/8 backdrop-blur-sm" />
-                  <div className="absolute left-6 top-6 h-24 w-24 rounded-[1.6rem] border border-white/15 bg-white/10" />
-                  <div className="absolute right-8 top-8 h-20 w-20 rounded-[1.4rem] border border-white/15 bg-white/10" />
-
-                  <div className="relative flex h-full items-center justify-center p-5 sm:p-6">
-                    <div className="grid h-full w-full gap-4 xl:grid-cols-[1fr]">
-                      <div className="rounded-[1.9rem] border border-white/16 bg-white p-4 text-slate-950 shadow-[0_24px_45px_rgba(0,0,0,0.18)] sm:p-5">
-                        <div className="flex h-full flex-col justify-between">
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                              Imagen principal
-                            </p>
-                            <div className="mt-4 rounded-[1.5rem] bg-slate-100 p-4">
-                              <div className="grid gap-4 xl:grid-cols-[1.32fr_0.68fr]">
-                                <div className={`flex min-h-[280px] items-center justify-center rounded-[1.3rem] border border-slate-200 xl:min-h-[330px] ${slide.cardClass}`}>
-                                  <span className="text-sm font-semibold text-slate-400">
-                                    {slide.imageLabel}
-                                  </span>
-                                </div>
-                                <div className="grid gap-3">
-                                  <div className="rounded-[1rem] border border-slate-200 bg-white p-3">
-                                    <div className="flex h-28 items-center justify-center rounded-[0.9rem] bg-slate-100">
-                                      <span className={`h-10 w-10 rounded-full ${slide.accentClass}`} />
-                                    </div>
-                                  </div>
-                                  <div className="rounded-[1rem] border border-slate-200 bg-white p-3">
-                                    <div className="flex h-28 items-center justify-center rounded-[0.9rem] bg-slate-100 px-4 text-center text-sm font-semibold text-slate-500">
-                                      Promocion web
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                <div className="relative hidden h-full xl:block">
+                  <div className="absolute inset-y-8 left-0 right-8 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur-sm">
+                    <div className={`relative h-full rounded-[1.7rem] border border-white/40 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.18)] ${slide.imageClass}`}>
+                      <div className="absolute left-6 top-6 h-24 w-24 rounded-[1.5rem] bg-white/80 shadow-sm" />
+                      <div className={`absolute right-6 top-6 h-16 w-16 rounded-full ${slide.accentClass} shadow-[0_12px_30px_rgba(0,0,0,0.12)]`} />
+                      <div className="absolute bottom-6 left-6 right-6 rounded-[1.3rem] bg-white/92 p-5 shadow-[0_18px_40px_rgba(0,0,0,0.1)]">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="space-y-2">
+                            <div className="h-3 w-24 rounded-full bg-slate-300" />
+                            <div className="h-3 w-16 rounded-full bg-slate-200" />
                           </div>
-
-                          <div className="mt-4 flex items-center justify-between gap-4">
-                            <div>
-                              <p className="text-sm text-slate-500">Promocion online</p>
-                              <p className="text-3xl font-semibold tracking-tight">{slide.price}</p>
-                            </div>
-                            <button
-                              type="button"
-                              className="cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                            >
-                              Ver mas
-                            </button>
+                          <div className="flex h-20 w-20 items-center justify-center rounded-[1rem] border border-slate-200 bg-white text-xs font-semibold text-slate-400">
+                            Imagen
                           </div>
                         </div>
                       </div>
@@ -176,7 +126,7 @@ export function StorefrontHero() {
           );
         })}
 
-        <div className="relative z-10 flex h-full items-end justify-between px-6 pb-5 sm:px-8 sm:pb-6 xl:px-10 xl:pb-8">
+        <div className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-between px-6 pb-5 sm:px-8 sm:pb-6 xl:px-10 xl:pb-8">
           <div className="flex items-center gap-2">
             {slides.map((slide, index) => {
               const isActive = index === activeIndex;
@@ -187,7 +137,7 @@ export function StorefrontHero() {
                   type="button"
                   onClick={() => setActiveIndex(index)}
                   className={`h-2.5 rounded-full transition-all ${
-                    isActive ? "w-10 bg-white" : "w-2.5 bg-white/45"
+                    isActive ? "w-10 bg-white" : "w-2.5 bg-white/40"
                   }`}
                   aria-label={`Mostrar banner ${index + 1}`}
                 />
@@ -201,14 +151,14 @@ export function StorefrontHero() {
               onClick={() =>
                 setActiveIndex((current) => (current - 1 + slides.length) % slides.length)
               }
-              className="cursor-pointer rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+              className="cursor-pointer rounded-full border border-white/18 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
             >
               Anterior
             </button>
             <button
               type="button"
               onClick={() => setActiveIndex((current) => (current + 1) % slides.length)}
-              className="cursor-pointer rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+              className="cursor-pointer rounded-full border border-white/18 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
             >
               Siguiente
             </button>
