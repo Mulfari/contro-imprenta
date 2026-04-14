@@ -96,6 +96,8 @@ export function StorefrontCategoryStrip() {
   const [startIndex, setStartIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const pageSize = 6;
+  const progressWidth = Math.max(22, (pageSize / items.length) * 100);
+  const progressOffset = (startIndex / items.length) * 100;
   const visibleItems = useMemo(
     () =>
       Array.from({ length: Math.min(pageSize, items.length) }, (_, index) => {
@@ -177,20 +179,19 @@ export function StorefrontCategoryStrip() {
         </div>
 
         {items.length > pageSize ? (
-          <div className="flex items-center justify-center gap-2">
-            {items.map((item, index) => (
-              <button
-                key={item.title}
-                type="button"
-                onClick={() => setStartIndex(index)}
-                className={`h-2.5 rounded-full transition ${
-                  startIndex === index
-                    ? "w-8 bg-slate-900"
-                    : "w-2.5 bg-slate-300 hover:bg-slate-400"
-                }`}
-                aria-label={`Ir a posicion ${index + 1}`}
+          <div className="flex items-center justify-center gap-4">
+            <span className="text-sm text-slate-400">
+              {startIndex + 1}-{Math.min(startIndex + pageSize, items.length)} de {items.length}
+            </span>
+            <div className="relative h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="absolute inset-y-0 rounded-full bg-slate-900 transition-all duration-300"
+                style={{
+                  width: `${progressWidth}%`,
+                  transform: `translateX(${progressOffset}%)`,
+                }}
               />
-            ))}
+            </div>
           </div>
         ) : null}
       </div>
