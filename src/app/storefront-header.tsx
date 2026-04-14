@@ -11,14 +11,40 @@ const promoTickerItems = [
   "Produccion publicitaria, corporativa y gran formato",
 ];
 
-const searchSuggestions = [
+const searchCategories = [
   "Tarjetas de presentacion",
-  "Stickers personalizados",
-  "Pendones publicitarios",
+  "Stickers y etiquetas",
+  "Pendones y gran formato",
   "Facturas y talonarios",
+  "Invitaciones y papeleria",
 ];
 
-const searchTags = ["Tarjetas", "Stickers", "Pendones", "Etiquetas", "Facturas"];
+const searchProducts = [
+  {
+    title: "Tarjetas premium",
+    price: "Desde $18",
+    note: "Mate o brillante",
+    tint: "from-amber-100 via-white to-orange-50",
+  },
+  {
+    title: "Stickers troquelados",
+    price: "Desde $12",
+    note: "Personalizados",
+    tint: "from-sky-100 via-white to-cyan-50",
+  },
+  {
+    title: "Pendon publicitario",
+    price: "Desde $25",
+    note: "Gran formato",
+    tint: "from-violet-100 via-white to-fuchsia-50",
+  },
+  {
+    title: "Talonarios fiscales",
+    price: "Desde $14",
+    note: "Autocopiativos",
+    tint: "from-emerald-100 via-white to-lime-50",
+  },
+];
 
 export function StorefrontHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -215,32 +241,61 @@ export function StorefrontHeader() {
               </button>
             </div>
 
-            <div className="mt-5 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <div className="mt-5 grid gap-5 xl:grid-cols-[0.72fr_1.28fr]">
               <div>
-                <p className="text-sm font-semibold text-slate-950">Sugerencias</p>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  {searchSuggestions.map((item) => (
+                <p className="text-sm font-semibold text-slate-950">Categorias</p>
+                <div className="mt-3 space-y-2">
+                  {searchCategories.map((item) => (
                     <button
                       key={item}
                       type="button"
-                      className="cursor-pointer rounded-[1.2rem] border border-slate-200 bg-white px-4 py-4 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                      className="flex w-full cursor-pointer items-center justify-between rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white"
                     >
-                      {item}
+                      <span>{item}</span>
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        className="h-4 w-4 text-slate-400"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="m9 6 6 6-6 6" />
+                      </svg>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-slate-950">Categorias</p>
-                <div className="mt-3 flex flex-wrap gap-3">
-                  {searchTags.map((item) => (
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-sm font-semibold text-slate-950">Productos sugeridos</p>
+                  <button
+                    type="button"
+                    className="cursor-pointer text-sm font-medium text-slate-500 transition hover:text-slate-950"
+                  >
+                    Ver todo
+                  </button>
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {searchProducts.map((item) => (
                     <button
-                      key={item}
+                      key={item.title}
                       type="button"
-                      className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                      className="cursor-pointer overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white text-left shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_34px_rgba(15,23,42,0.1)]"
                     >
-                      {item}
+                      <div
+                        className={`flex h-32 items-end rounded-b-[1.8rem] rounded-t-[1.35rem] bg-gradient-to-br ${item.tint} p-4`}
+                      >
+                        <div className="h-14 w-20 rounded-2xl border border-white/80 bg-white/80 shadow-sm" />
+                      </div>
+                      <div className="space-y-1 px-4 py-4">
+                        <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                        <p className="text-xs text-slate-500">{item.note}</p>
+                        <p className="pt-1 text-sm font-semibold text-slate-700">{item.price}</p>
+                      </div>
                     </button>
                   ))}
                 </div>
