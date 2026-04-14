@@ -828,6 +828,18 @@ export default async function DashboardPage({
   const selectedClientOrders = selectedClient
     ? orders.filter((order) => order.client_id === selectedClient.id)
     : [];
+  const clientPendingTotals = new Map<string, number>();
+
+  for (const order of orders) {
+    if (!order.client_id || order.total_amount === null || order.status === "entregado") {
+      continue;
+    }
+
+    clientPendingTotals.set(
+      order.client_id,
+      (clientPendingTotals.get(order.client_id) ?? 0) + order.total_amount,
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
@@ -1075,6 +1087,7 @@ export default async function DashboardPage({
                     <th className="px-4 py-3 font-medium">Cliente</th>
                     <th className="px-4 py-3 font-medium">Contacto</th>
                     <th className="px-4 py-3 font-medium">Datos</th>
+                    <th className="px-4 py-3 font-medium">Total por cobrar</th>
                     {session.role === "admin" ? (
                       <th className="px-4 py-3 font-medium">Acciones</th>
                     ) : null}
@@ -1085,7 +1098,7 @@ export default async function DashboardPage({
                     <tr>
                       <td
                         className="px-4 py-4 text-slate-500"
-                        colSpan={session.role === "admin" ? 4 : 3}
+                        colSpan={session.role === "admin" ? 5 : 4}
                       >
                         No hay clientes que coincidan con la busqueda.
                       </td>
@@ -1093,6 +1106,8 @@ export default async function DashboardPage({
                   ) : (
                     filteredClients.map((client) => {
                       const isSelected = selectedClient?.id === client.id;
+                      const pendingTotal = clientPendingTotals.get(client.id) ?? 0;
+                      const hasPendingBalance = pendingTotal > 0;
                       const detailHref = buildClientUrl(
                         "detalle",
                         client.id,
@@ -1139,6 +1154,65 @@ export default async function DashboardPage({
                               <div>{client.document_id ?? "Sin cedula / RIF"}</div>
                               <div className="text-xs text-slate-400">
                                 {client.preferred_branch ?? client.address ?? "Sin direccion"}
+                              </div>
+                            </Link>
+                          </td>
+                          <td className="p-0">
+                            <Link
+                              href={detailHref}
+                              className="flex cursor-pointer items-center gap-3 px-4 py-3"
+                            >
+                              <span
+                                className={`inline-flex h-9 w-9 items-center justify-center rounded-full ${
+                                  hasPendingBalance
+                                    ? "bg-rose-100 text-rose-600"
+                                    : "bg-emerald-100 text-emerald-600"
+                                }`}
+                                aria-hidden="true"
+                              >
+                                {hasPendingBalance ? (
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.9"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M12 8v5" />
+                                    <path d="M12 16h.01" />
+                                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.9"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M20 6 9 17l-5-5" />
+                                  </svg>
+                                )}
+                              </span>
+                              <div>
+                                <div className="font-medium text-slate-900">
+                                  {hasPendingBalance
+                                    ? formatCurrency(pendingTotal)
+                                    : "Sin deuda"}
+                                </div>
+                                <div
+                                  className={`text-xs ${
+                                    hasPendingBalance ? "text-rose-500" : "text-emerald-600"
+                                  }`}
+                                >
+                                  {hasPendingBalance
+                                    ? "Saldo pendiente"
+                                    : "Sin saldo pendiente"}
+                                </div>
                               </div>
                             </Link>
                           </td>
