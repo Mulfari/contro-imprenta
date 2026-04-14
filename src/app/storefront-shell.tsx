@@ -74,18 +74,10 @@ export function StorefrontShell() {
 
       {debouncedQuery ? (
         <section className="mx-auto w-full max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8 2xl:px-10">
-          <div className="grid gap-5 xl:grid-cols-[19rem_minmax(0,1fr)]">
-            <aside className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
-              <div className="border-b border-slate-200 pb-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
-                  Catalogo
-                </p>
-                <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
-                  Explora categorias
-                </h2>
-              </div>
-
-              <div className="mt-4 space-y-2">
+          <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
+            <aside className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+              <h2 className="text-base font-semibold tracking-tight">Compra por categoria</h2>
+              <div className="mt-5 space-y-2">
                 {storefrontCategories.map((category) => {
                   const categoryMatches = storefrontProducts.filter(
                     (item) =>
@@ -100,10 +92,10 @@ export function StorefrontShell() {
                       key={category}
                       type="button"
                       onClick={() => setSearchQuery(category)}
-                      className="flex w-full cursor-pointer items-center justify-between rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white"
+                      className="flex w-full cursor-pointer items-center justify-between rounded-[1rem] px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
                     >
                       <span>{category}</span>
-                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
+                      <span className="text-xs font-semibold text-slate-400">
                         {categoryMatches}
                       </span>
                     </button>
@@ -112,42 +104,64 @@ export function StorefrontShell() {
               </div>
             </aside>
 
-            <div className="rounded-[2.15rem] border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] sm:p-8">
-              <div className="flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+            <section className="rounded-[1.9rem] border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Resultados de busqueda</p>
-                  <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+                  <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
+                    Resultados de busqueda
+                  </p>
+                  <h2 className="mt-2 text-3xl font-semibold tracking-tight">
                     {debouncedQuery}
-                  </h1>
+                  </h2>
                 </div>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm font-medium text-slate-500">
                   {filteredProducts.length} producto{filteredProducts.length === 1 ? "" : "s"}
                 </p>
               </div>
 
               {filteredProducts.length > 0 ? (
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {filteredProducts.map((item) => (
                     <article
                       key={item.title}
-                      className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_14px_32px_rgba(15,23,42,0.06)]"
+                      className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.04)]"
                     >
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="rounded-full bg-[#fff4c6] px-3 py-1 text-xs font-semibold text-[#8a6a00]">
+                          {item.category}
+                        </span>
+                        <span className="text-xs font-medium text-slate-400">Disponible</span>
+                      </div>
+
                       <div
-                        className={`flex h-44 items-end bg-gradient-to-br ${item.tint} p-5`}
+                        className={`mt-5 rounded-[1.3rem] bg-gradient-to-br ${item.tint} p-5`}
                       >
-                        <div className="flex h-20 w-28 items-center justify-center rounded-[1.4rem] border border-white/80 bg-white/85 shadow-sm">
-                          <div className="h-10 w-16 rounded-xl bg-slate-200/80" />
+                        <div className="flex h-28 items-center justify-center rounded-[1rem] border border-white/80 bg-white/80">
+                          <span className="text-sm font-semibold text-slate-400">
+                            Vista previa
+                          </span>
                         </div>
                       </div>
-                      <div className="space-y-2 px-5 py-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                          {item.category}
-                        </p>
-                        <h2 className="text-base font-semibold text-slate-950">{item.title}</h2>
-                        <p className="text-sm text-slate-500">{item.note}</p>
-                        <p className="pt-2 text-base font-semibold text-slate-800">
-                          Desde {item.price}
-                        </p>
+
+                      <h3 className="mt-5 text-lg font-semibold tracking-tight">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.note}</p>
+                      <p className="mt-3 text-lg font-semibold text-slate-950">
+                        Desde {item.price}
+                      </p>
+
+                      <div className="mt-5 flex gap-3">
+                        <button
+                          type="button"
+                          className="flex-1 cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                        >
+                          Pedir
+                        </button>
+                        <button
+                          type="button"
+                          className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                        >
+                          Ver
+                        </button>
                       </div>
                     </article>
                   ))}
@@ -158,11 +172,11 @@ export function StorefrontShell() {
                     No encontramos productos para esa busqueda
                   </p>
                   <p className="mt-2 text-sm text-slate-500">
-                    Prueba con otra palabra o revisa las categorias del catalogo.
+                    Prueba con otra palabra o selecciona una categoria del catalogo.
                   </p>
                 </div>
               )}
-            </div>
+            </section>
           </div>
         </section>
       ) : (
