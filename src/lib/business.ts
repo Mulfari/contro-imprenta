@@ -3,9 +3,10 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 export type Client = {
   id: string;
   name: string;
-  contact_name: string | null;
   phone: string | null;
   email: string | null;
+  document_id: string | null;
+  address: string | null;
   notes: string | null;
   created_at: string;
   created_by: string | null;
@@ -60,26 +61,33 @@ export async function listClients() {
 
 export async function createClient(input: {
   name: string;
-  contactName: string;
   phone: string;
   email: string;
+  documentId: string;
+  address: string;
   notes: string;
   createdBy: string;
 }) {
   const supabase = createSupabaseAdminClient();
   const name = normalizeText(input.name);
+  const phone = normalizeText(input.phone);
 
   if (!name) {
-    throw new Error("Escribe el nombre del cliente.");
+    throw new Error("Escribe el nombre o razon social del cliente.");
+  }
+
+  if (!phone) {
+    throw new Error("Escribe el telefono del cliente.");
   }
 
   const { data, error } = await supabase
     .from("clients")
     .insert({
       name,
-      contact_name: normalizeText(input.contactName) || null,
-      phone: normalizeText(input.phone) || null,
+      phone,
       email: normalizeText(input.email) || null,
+      document_id: normalizeText(input.documentId) || null,
+      address: normalizeText(input.address) || null,
       notes: normalizeText(input.notes) || null,
       created_by: input.createdBy,
     })

@@ -217,9 +217,10 @@ async function createClientAction(formData: FormData) {
   try {
     await createClient({
       name: String(formData.get("name") ?? ""),
-      contactName: String(formData.get("contactName") ?? ""),
       phone: String(formData.get("phone") ?? ""),
       email: String(formData.get("email") ?? ""),
+      documentId: String(formData.get("documentId") ?? ""),
+      address: String(formData.get("address") ?? ""),
       notes: String(formData.get("notes") ?? ""),
       createdBy: session.userId,
     });
@@ -915,52 +916,85 @@ export default async function DashboardPage({
               id="clientes"
               className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
             >
-            <h2 className="text-xl font-semibold">Crear cliente</h2>
+            <h2 className="text-xl font-semibold">Datos del cliente</h2>
             <form action={createClientAction} className="mt-5 space-y-4">
               <div>
                 <label className="mb-2 block text-sm text-slate-600" htmlFor="name">
-                  Nombre del cliente
+                  Nombre o razon social
                 </label>
                 <input
                   id="name"
                   name="name"
                   type="text"
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  placeholder="Panaderia Central"
+                  placeholder="Papeleria Central"
                   required
                 />
               </div>
-              <div>
-                <label className="mb-2 block text-sm text-slate-600" htmlFor="contactName">
-                  Contacto
-                </label>
-                <input
-                  id="contactName"
-                  name="contactName"
-                  type="text"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  placeholder="Maria Perez"
-                />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="phone">
+                    Telefono
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="text"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    placeholder="04141234567"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="email">
+                    Email opcional
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    placeholder="cliente@correo.com"
+                  />
+                </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <input
-                  name="phone"
-                  type="text"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  placeholder="Telefono"
-                />
-                <input
-                  name="email"
-                  type="email"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  placeholder="Correo"
-                />
+                <div>
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="documentId">
+                    Cedula / RIF opcional
+                  </label>
+                  <input
+                    id="documentId"
+                    name="documentId"
+                    type="text"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    placeholder="V12345678 o J123456789"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm text-slate-600" htmlFor="address">
+                    Direccion si aplica delivery
+                  </label>
+                  <input
+                    id="address"
+                    name="address"
+                    type="text"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    placeholder="Av. principal, local 4"
+                  />
+                </div>
               </div>
+              <div>
+                <label className="mb-2 block text-sm text-slate-600" htmlFor="notes">
+                  Observaciones del cliente
+                </label>
               <textarea
+                id="notes"
                 name="notes"
                 className="min-h-24 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                placeholder="Notas del cliente"
+                placeholder="Indicaciones, preferencias o datos importantes"
               />
+              </div>
               <button
                 type="submit"
                 className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
@@ -1242,12 +1276,13 @@ export default async function DashboardPage({
                   <tr>
                     <th className="px-4 py-3 font-medium">Cliente</th>
                     <th className="px-4 py-3 font-medium">Contacto</th>
+                    <th className="px-4 py-3 font-medium">Datos</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
                   {clients.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-4 text-slate-500" colSpan={2}>
+                      <td className="px-4 py-4 text-slate-500" colSpan={3}>
                         Aun no hay clientes registrados.
                       </td>
                     </tr>
@@ -1263,9 +1298,15 @@ export default async function DashboardPage({
                           ) : null}
                         </td>
                         <td className="px-4 py-3">
-                          <div>{client.contact_name ?? "Sin contacto"}</div>
+                          <div>{client.phone ?? "Sin telefono"}</div>
                           <div className="text-xs text-slate-400">
-                            {client.phone ?? client.email ?? "Sin datos"}
+                            {client.email ?? "Sin email"}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div>{client.document_id ?? "Sin cedula / RIF"}</div>
+                          <div className="text-xs text-slate-400">
+                            {client.address ?? "Sin direccion"}
                           </div>
                         </td>
                       </tr>
