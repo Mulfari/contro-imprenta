@@ -24,15 +24,6 @@ const mainCategories = [
   },
 ];
 
-const heroCategories = [
-  "Tarjetas",
-  "Volantes",
-  "Pendones",
-  "Etiquetas",
-  "Stickers",
-  "Facturas",
-];
-
 const featuredProducts = [
   {
     name: "Tarjetas de presentacion premium",
@@ -63,21 +54,6 @@ const featuredProducts = [
     name: "Stickers personalizados",
     category: "Etiquetas y stickers",
     price: "$14",
-  },
-];
-
-const valueCards = [
-  {
-    title: "Compra por categoria",
-    text: "Organiza la tienda por lineas de impresion para que el cliente llegue rapido al producto.",
-  },
-  {
-    title: "Pedido online",
-    text: "El cliente puede escoger un producto, detallar su necesidad y enviar el pedido desde la web.",
-  },
-  {
-    title: "Control interno",
-    text: "Cada solicitud puede entrar al panel administrativo para produccion, cobro y entrega.",
   },
 ];
 
@@ -230,130 +206,92 @@ export default async function Home() {
           </aside>
 
           <div className="grid gap-6">
-            <section className="grid gap-6 2xl:grid-cols-[1.28fr_0.72fr]">
-              <article className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#11243d_0%,#1f4e79_48%,#2d6ea4_100%)] p-7 text-white shadow-[0_28px_70px_rgba(15,23,42,0.24)]">
-                <div className="absolute left-10 top-10 h-44 w-44 rounded-full bg-sky-300/18 blur-3xl" />
-                <div className="absolute right-8 top-8 h-56 w-56 rounded-full bg-[#ffcf33]/16 blur-3xl" />
+            <section className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,#102038_0%,#1a4b74_44%,#3b86c4_100%)] p-8 text-white shadow-[0_28px_70px_rgba(15,23,42,0.24)]">
+              <div className="absolute left-8 top-8 h-44 w-44 rounded-full bg-sky-300/16 blur-3xl" />
+              <div className="absolute right-12 top-8 h-56 w-56 rounded-full bg-[#ffcf33]/14 blur-3xl" />
 
-                <div className="relative grid gap-8 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.34em] text-sky-100/75">
-                      Buscar impresiones
-                    </p>
-                    <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                      Escoge el producto ideal para tu marca, negocio o evento.
-                    </h1>
-                    <p className="mt-4 max-w-2xl text-base leading-7 text-slate-100/88">
-                      Esta web sera la tienda online de Express Printer para recibir
-                      pedidos, cotizaciones y solicitudes de impresion desde internet.
-                    </p>
+              <div className="relative grid gap-8 xl:grid-cols-[1.02fr_1.08fr] xl:items-center">
+                <div className="max-w-2xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-100/75">
+                    Hero principal
+                  </p>
+                  <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+                    Impresion profesional para marcas, negocios y eventos.
+                  </h1>
+                  <p className="mt-4 text-base leading-7 text-slate-100/88">
+                    Compra, cotiza y solicita impresiones desde la web de Express Printer.
+                    Este espacio puede usarse para campañas, promociones, lanzamientos o categorias destacadas.
+                  </p>
 
-                    <div className="mt-7 rounded-[1.6rem] bg-white/10 p-4 backdrop-blur-sm">
-                      <p className="text-sm font-semibold text-white">Buscar por producto</p>
-                      <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-                        <select className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none">
-                          <option className="text-slate-900">Selecciona categoria</option>
-                          {heroCategories.map((item) => (
-                            <option key={item} className="text-slate-900">
-                              {item}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          type="text"
-                          placeholder="Describe lo que necesitas"
-                          className="flex-1 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-200/70"
-                        />
-                        <button
-                          type="button"
-                          className="cursor-pointer rounded-xl bg-[#ffcf33] px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-[#f5c61f]"
-                        >
-                          Buscar
-                        </button>
+                  <div className="mt-7 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      className="cursor-pointer rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                    >
+                      Comprar ahora
+                    </button>
+                    <button
+                      type="button"
+                      className="cursor-pointer rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                    >
+                      Solicitar cotizacion
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative min-h-[320px] rounded-[2rem] border border-white/12 bg-[linear-gradient(140deg,rgba(255,255,255,0.12),rgba(255,255,255,0.03))] p-5 backdrop-blur-sm sm:min-h-[380px]">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_35%)]" />
+                  <div className="relative flex h-full flex-col justify-between rounded-[1.6rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-100/75">
+                          Banner promocional
+                        </p>
+                        <h3 className="mt-3 text-3xl font-semibold tracking-tight">
+                          Tarjetas Premium
+                        </h3>
+                      </div>
+                      <span className="rounded-full bg-[#ffcf33] px-3 py-1 text-xs font-semibold text-slate-950">
+                        Oferta
+                      </span>
+                    </div>
+
+                    <div className="grid flex-1 gap-4 py-6 md:grid-cols-[1.05fr_0.95fr]">
+                      <div className="rounded-[1.5rem] border border-white/12 bg-white/8 p-4">
+                        <div className="h-full rounded-[1.2rem] border border-white/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0.05))] p-4">
+                          <div className="space-y-3">
+                            <div className="h-3 w-24 rounded-full bg-white/35" />
+                            <div className="h-3 w-32 rounded-full bg-white/20" />
+                            <div className="h-3 w-20 rounded-full bg-white/20" />
+                          </div>
+                          <div className="mt-6 grid grid-cols-2 gap-3">
+                            <div className="h-20 rounded-[1rem] border border-white/12 bg-white/12" />
+                            <div className="h-20 rounded-[1rem] border border-white/12 bg-white/8" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-center rounded-[1.5rem] border border-white/12 bg-white/8 p-4">
+                        <div className="flex h-full min-h-[180px] w-full items-center justify-center rounded-[1.3rem] border border-white/16 bg-white text-center text-sm font-semibold text-slate-400 shadow-[0_18px_40px_rgba(0,0,0,0.18)]">
+                          Imagen principal
+                        </div>
                       </div>
                     </div>
 
-                    <div className="mt-7 flex flex-wrap gap-3">
+                    <div className="flex items-center justify-between gap-4 rounded-[1.2rem] border border-white/12 bg-white/8 px-4 py-4">
+                      <div>
+                        <p className="text-sm text-slate-100/75">Desde</p>
+                        <p className="text-3xl font-semibold tracking-tight">$18</p>
+                      </div>
                       <button
                         type="button"
                         className="cursor-pointer rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
                       >
-                        Comprar ahora
+                        Ver producto
                       </button>
-                      <button
-                        type="button"
-                        className="cursor-pointer rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                      >
-                        Solicitar cotizacion
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="relative hidden xl:flex xl:justify-end">
-                    <div className="relative w-full max-w-[34rem]">
-                      <div className="absolute -left-8 top-8 h-36 w-36 rounded-[2rem] border border-white/10 bg-white/10 backdrop-blur-sm" />
-                      <div className="absolute right-4 top-0 h-24 w-24 rounded-[1.5rem] border border-white/10 bg-[#ffcf33]/90 shadow-[0_18px_35px_rgba(0,0,0,0.18)]" />
-
-                      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] p-5 shadow-[0_24px_50px_rgba(0,0,0,0.2)] backdrop-blur-md">
-                        <div className="rounded-[1.6rem] bg-white p-5 text-slate-950">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700">
-                                Producto destacado
-                              </p>
-                              <h3 className="mt-3 text-2xl font-semibold tracking-tight">
-                                Tarjetas Premium
-                              </h3>
-                            </div>
-                            <span className="rounded-full bg-[#fff4c6] px-3 py-1 text-xs font-semibold text-[#8a6a00]">
-                              Oferta
-                            </span>
-                          </div>
-
-                          <div className="mt-5 rounded-[1.6rem] bg-[linear-gradient(135deg,#e0f2fe_0%,#eff6ff_45%,#ffffff_100%)] p-5">
-                            <div className="rounded-[1.3rem] border border-white/70 bg-white/90 p-4 shadow-sm">
-                              <div className="flex items-center justify-between gap-4">
-                                <div className="space-y-2">
-                                  <div className="h-3 w-24 rounded-full bg-slate-200" />
-                                  <div className="h-3 w-20 rounded-full bg-slate-100" />
-                                  <div className="h-3 w-28 rounded-full bg-slate-100" />
-                                </div>
-                                <div className="flex h-24 w-24 items-center justify-center rounded-[1.2rem] border border-slate-200 bg-white text-xs font-semibold text-slate-400">
-                                  Vista
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="mt-5 flex items-center justify-between">
-                            <div>
-                              <p className="text-sm text-slate-500">Desde</p>
-                              <p className="text-3xl font-semibold tracking-tight">$18</p>
-                            </div>
-                            <button
-                              type="button"
-                              className="cursor-pointer rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                            >
-                              Pedir ahora
-                            </button>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
-              </article>
-
-              <div className="grid gap-4">
-                {valueCards.map((item) => (
-                  <article
-                    key={item.title}
-                    className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
-                  >
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">{item.text}</p>
-                  </article>
-                ))}
               </div>
             </section>
 
