@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const items = [
   { title: "Tarjetas premium", count: "18 productos", art: "cards" },
@@ -16,7 +16,6 @@ const items = [
 const ITEM_WIDTH = 188;
 const ITEM_GAP = 18;
 const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
-const LOOP_MULTIPLIER = 5;
 
 function CategoryArt({ art }: { art: string }) {
   if (art === "stickers") {
@@ -100,6 +99,8 @@ function CategoryArt({ art }: { art: string }) {
 export function StorefrontCategoryStrip() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const dragState = useRef<{
     pointerId: number | null;
     startX: number;
@@ -115,24 +116,24 @@ export function StorefrontCategoryStrip() {
     frame: null,
     pendingScrollLeft: null,
   });
-  const repeatedItems = useMemo(
-    () =>
-      Array.from({ length: LOOP_MULTIPLIER }, (_, copyIndex) =>
-        items.map((item, itemIndex) => ({
-          ...item,
-          key: `${copyIndex}-${itemIndex}-${item.title}`,
-        })),
-      ).flat(),
-    [],
-  );
-
   useEffect(() => {
     const track = trackRef.current;
     if (!track) {
       return;
     }
 
-    track.scrollLeft = items.length * ITEM_STRIDE;
+    const updateControls = () => {
+      const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
+      setCanScrollLeft(track.scrollLeft > 4);
+      setCanScrollRight(track.scrollLeft < maxScrollLeft - 4);
+    };
+
+    updateControls();
+    track.addEventListener("scroll", updateControls, { passive: true });
+
+    return () => {
+      track.removeEventListener("scroll", updateControls);
+    };
   }, []);
 
   useEffect(() => {
@@ -163,8 +164,13 @@ export function StorefrontCategoryStrip() {
         <button
           type="button"
           onClick={() => slideBy("prev")}
-          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
+          className={`flex h-12 w-12 items-center justify-center rounded-full border bg-white shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition ${
+            canScrollLeft
+              ? "cursor-pointer border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
+              : "cursor-default border-slate-100 text-slate-300"
+          }`}
           aria-label="Anterior"
+          disabled={!canScrollLeft}
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
             <path d="m15 18-6-6 6-6" />
@@ -197,7 +203,11 @@ export function StorefrontCategoryStrip() {
             }
 
             const deltaX = (event.clientX - dragState.current.startX) * 1.08;
-            dragState.current.pendingScrollLeft = dragState.current.startScrollLeft - deltaX;
+            const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
+            dragState.current.pendingScrollLeft = Math.min(
+              Math.max(dragState.current.startScrollLeft - deltaX, 0),
+              maxScrollLeft,
+            );
             dragState.current.hasMoved ||= Math.abs(deltaX) > 6;
 
             if (dragState.current.frame !== null) {
@@ -227,9 +237,9 @@ export function StorefrontCategoryStrip() {
             setIsDragging(false);
           }}
         >
-          {repeatedItems.map((item) => (
+          {items.map((item) => (
             <button
-              key={item.key}
+              key={item.title}
               type="button"
               draggable={false}
               className="w-[188px] shrink-0 cursor-pointer px-2 py-4 text-center transition hover:opacity-85"
@@ -255,8 +265,13 @@ export function StorefrontCategoryStrip() {
         <button
           type="button"
           onClick={() => slideBy("next")}
-          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
+          className={`flex h-12 w-12 items-center justify-center rounded-full border bg-white shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition ${
+            canScrollRight
+              ? "cursor-pointer border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
+              : "cursor-default border-slate-100 text-slate-300"
+          }`}
           aria-label="Siguiente"
+          disabled={!canScrollRight}
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
             <path d="m9 6 6 6-6 6" />
