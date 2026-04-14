@@ -104,11 +104,45 @@ export function StorefrontCategoryStrip() {
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
       <div className="rounded-[2rem] border border-slate-200 bg-white px-5 py-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:px-6">
-        <div className="grid grid-cols-[2.8rem_1fr_2.8rem] items-center gap-3">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
+              Categorias destacadas
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+              Explora por tipo de impresion
+            </h2>
+          </div>
+
+          <div className="hidden items-center gap-2 md:flex">
+            <button
+              type="button"
+              onClick={() => setPage((current) => (current === 0 ? totalPages - 1 : current - 1))}
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+              aria-label="Anterior"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((current) => (current + 1) % totalPages)}
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+              aria-label="Siguiente"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-[2.8rem_1fr_2.8rem] items-center gap-3 md:grid-cols-1">
           <button
             type="button"
             onClick={() => setPage((current) => (current === 0 ? totalPages - 1 : current - 1))}
-            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 md:hidden"
             aria-label="Anterior"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -121,9 +155,9 @@ export function StorefrontCategoryStrip() {
               <button
                 key={item.title}
                 type="button"
-                className="cursor-pointer rounded-[1.35rem] px-2 py-3 text-center transition hover:bg-slate-50"
+                className="cursor-pointer rounded-[1.45rem] border border-transparent px-3 py-4 text-center transition hover:border-slate-200 hover:bg-slate-50"
               >
-                <div className="mx-auto flex h-28 w-full max-w-[8.4rem] items-center justify-center rounded-[1.5rem] bg-white">
+                <div className="mx-auto flex h-28 w-full max-w-[8.4rem] items-center justify-center rounded-[1.5rem] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
                   <CategoryArt art={item.art} />
                 </div>
                 <p className="mt-4 text-[1.05rem] font-semibold tracking-tight text-slate-950">
@@ -137,7 +171,7 @@ export function StorefrontCategoryStrip() {
           <button
             type="button"
             onClick={() => setPage((current) => (current + 1) % totalPages)}
-            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 md:hidden"
             aria-label="Siguiente"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
