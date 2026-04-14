@@ -17,16 +17,19 @@ type StorefrontHeaderProps = {
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
   recentSearches: string[];
+  hasActiveSearch: boolean;
 };
 
 export function StorefrontHeader({
   searchQuery,
   onSearchQueryChange,
   recentSearches,
+  hasActiveSearch,
 }: StorefrontHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchAreaRef = useRef<HTMLDivElement | null>(null);
   const searchPanelRef = useRef<HTMLDivElement | null>(null);
+  const showSearchPanel = searchOpen && !hasActiveSearch;
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const suggestedProducts = normalizedQuery
     ? storefrontProducts.filter((item) =>
@@ -53,10 +56,9 @@ export function StorefrontHeader({
 
     return () => window.removeEventListener("mousedown", handlePointerDown);
   }, []);
-
   return (
     <>
-      {searchOpen ? (
+      {showSearchPanel ? (
         <div className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-[4px]" />
       ) : null}
 
@@ -193,7 +195,7 @@ export function StorefrontHeader({
 
       <div
         className={`fixed inset-x-0 top-[7.2rem] z-50 px-4 transition-all duration-300 sm:px-6 lg:px-8 2xl:px-10 ${
-          searchOpen
+          showSearchPanel
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-6 opacity-0"
         }`}
