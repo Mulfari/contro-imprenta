@@ -12,6 +12,24 @@ const promoTickerItems = [
   "Cotizaciones rapidas para negocios, marcas y eventos",
   "Produccion publicitaria, corporativa y gran formato",
 ];
+const categoryMenu = [
+  {
+    title: "Papeleria comercial",
+    items: ["Tarjetas de presentacion", "Facturas", "Talonarios", "Sobres"],
+  },
+  {
+    title: "Publicidad impresa",
+    items: ["Volantes", "Dipticos", "Tripticos", "Afiches"],
+  },
+  {
+    title: "Etiquetas y stickers",
+    items: ["Stickers", "Etiquetas", "Packaging", "Sellos"],
+  },
+  {
+    title: "Gran formato",
+    items: ["Pendones", "Banners", "Vinil", "Lonas"],
+  },
+];
 
 type StorefrontHeaderProps = {
   searchQuery: string;
@@ -27,8 +45,12 @@ export function StorefrontHeader({
   hasActiveSearch,
 }: StorefrontHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const searchAreaRef = useRef<HTMLDivElement | null>(null);
   const searchPanelRef = useRef<HTMLDivElement | null>(null);
+  const categoryAreaRef = useRef<HTMLDivElement | null>(null);
+  const categoryPanelRef = useRef<HTMLDivElement | null>(null);
   const showSearchPanel = searchOpen && !hasActiveSearch;
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const suggestedProducts = normalizedQuery
@@ -39,16 +61,18 @@ export function StorefrontHeader({
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
-      if (!searchAreaRef.current && !searchPanelRef.current) {
-        return;
-      }
-
       const target = event.target as Node;
       const clickedInsideInput = searchAreaRef.current?.contains(target);
       const clickedInsidePanel = searchPanelRef.current?.contains(target);
+      const clickedInsideCategoryButton = categoryAreaRef.current?.contains(target);
+      const clickedInsideCategoryPanel = categoryPanelRef.current?.contains(target);
 
       if (!clickedInsideInput && !clickedInsidePanel) {
         setSearchOpen(false);
+      }
+
+      if (!clickedInsideCategoryButton && !clickedInsideCategoryPanel) {
+        setCategoryOpen(false);
       }
     }
 
@@ -99,26 +123,98 @@ export function StorefrontHeader({
               ref={searchAreaRef}
               className="flex flex-1 flex-col gap-3 xl:mx-10 xl:max-w-4xl xl:flex-row xl:items-center"
             >
-              <button
-                type="button"
-                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-              >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              <div ref={categoryAreaRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setCategoryOpen((current) => !current)}
+                  className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${
+                    categoryOpen
+                      ? "border-slate-950 bg-white text-slate-950"
+                      : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100"
+                  }`}
                 >
-                  <path d="M3 6h18" />
-                  <path d="M3 12h18" />
-                  <path d="M3 18h18" />
-                </svg>
-                Todas las categorias
-              </button>
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 6h18" />
+                    <path d="M3 12h18" />
+                    <path d="M3 18h18" />
+                  </svg>
+                  Todas las categorias
+                </button>
+
+                <div
+                  className={`absolute left-0 top-[calc(100%+0.9rem)] z-50 transition-all duration-200 ${
+                    categoryOpen
+                      ? "pointer-events-auto translate-y-0 opacity-100"
+                      : "pointer-events-none -translate-y-2 opacity-0"
+                  }`}
+                >
+                  <div
+                    ref={categoryPanelRef}
+                    className="grid w-[42rem] grid-cols-[16rem_1fr] overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white shadow-[0_28px_60px_rgba(15,23,42,0.16)]"
+                  >
+                    <div className="border-r border-slate-200 bg-white">
+                      {categoryMenu.map((group, index) => (
+                        <button
+                          key={group.title}
+                          type="button"
+                          onMouseEnter={() => setActiveCategoryIndex(index)}
+                          onFocus={() => setActiveCategoryIndex(index)}
+                          onClick={() => setActiveCategoryIndex(index)}
+                          className={`flex w-full cursor-pointer items-center justify-between border-b border-slate-100 px-5 py-4 text-left text-sm font-medium transition last:border-b-0 ${
+                            activeCategoryIndex === index
+                              ? "bg-slate-50 text-slate-950"
+                              : "bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950"
+                          }`}
+                        >
+                          <span>{group.title}</span>
+                          <svg
+                            aria-hidden="true"
+                            viewBox="0 0 24 24"
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="m9 6 6 6-6 6" />
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="bg-white p-5">
+                      <p className="text-sm font-semibold text-slate-950">
+                        {categoryMenu[activeCategoryIndex]?.title}
+                      </p>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        {categoryMenu[activeCategoryIndex]?.items.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => {
+                              onSearchQueryChange(item);
+                              setCategoryOpen(false);
+                            }}
+                            className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white hover:text-slate-950"
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div
                 className={`flex flex-1 items-center rounded-xl border bg-white px-4 py-3 shadow-sm transition ${
