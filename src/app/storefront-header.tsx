@@ -159,9 +159,9 @@ export function StorefrontHeader({
                 >
                   <div
                     ref={categoryPanelRef}
-                    className="grid w-[42rem] grid-cols-[16rem_1fr] overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white shadow-[0_28px_60px_rgba(15,23,42,0.16)]"
+                    className="grid w-[44rem] grid-cols-[17rem_1fr] overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_26px_60px_rgba(15,23,42,0.18)]"
                   >
-                    <div className="border-r border-slate-200 bg-white">
+                    <div className="border-r border-slate-200 bg-slate-50/65">
                       {categoryMenu.map((group, index) => (
                         <button
                           key={group.title}
@@ -169,10 +169,10 @@ export function StorefrontHeader({
                           onMouseEnter={() => setActiveCategoryIndex(index)}
                           onFocus={() => setActiveCategoryIndex(index)}
                           onClick={() => setActiveCategoryIndex(index)}
-                          className={`flex w-full cursor-pointer items-center justify-between border-b border-slate-100 px-5 py-4 text-left text-sm font-medium transition last:border-b-0 ${
+                          className={`flex w-full cursor-pointer items-center justify-between border-b border-slate-200 px-5 py-4 text-left text-[15px] font-medium transition last:border-b-0 ${
                             activeCategoryIndex === index
-                              ? "bg-slate-50 text-slate-950"
-                              : "bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950"
+                              ? "bg-white text-slate-950"
+                              : "bg-transparent text-slate-700 hover:bg-white hover:text-slate-950"
                           }`}
                         >
                           <span>{group.title}</span>
@@ -192,11 +192,14 @@ export function StorefrontHeader({
                       ))}
                     </div>
 
-                    <div className="bg-white p-5">
-                      <p className="text-sm font-semibold text-slate-950">
+                    <div className="bg-white p-6">
+                      <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
+                        Subcategorias
+                      </p>
+                      <p className="mt-2 text-base font-semibold text-slate-950">
                         {categoryMenu[activeCategoryIndex]?.title}
                       </p>
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
                         {categoryMenu[activeCategoryIndex]?.items.map((item) => (
                           <button
                             key={item}
@@ -205,9 +208,21 @@ export function StorefrontHeader({
                               onSearchQueryChange(item);
                               setCategoryOpen(false);
                             }}
-                            className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white hover:text-slate-950"
+                            className="flex cursor-pointer items-center justify-between rounded-lg border border-transparent px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-950"
                           >
-                            {item}
+                            <span>{item}</span>
+                            <svg
+                              aria-hidden="true"
+                              viewBox="0 0 24 24"
+                              className="h-4 w-4 text-slate-300"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="m9 6 6 6-6 6" />
+                            </svg>
                           </button>
                         ))}
                       </div>
