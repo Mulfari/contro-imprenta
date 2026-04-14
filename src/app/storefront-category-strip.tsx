@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 const items = [
   { title: "Tarjetas premium", count: "18 productos", art: "cards" },
@@ -94,19 +94,23 @@ function CategoryArt({ art }: { art: string }) {
 
 export function StorefrontCategoryStrip() {
   const [page, setPage] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const pageSize = 6;
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
   const visibleItems = useMemo(
     () => items.slice(page * pageSize, page * pageSize + pageSize),
     [page],
   );
+  const goPrev = () => setPage((current) => (current === 0 ? totalPages - 1 : current - 1));
+  const goNext = () => setPage((current) => (current + 1) % totalPages);
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="grid grid-cols-[2.8rem_1fr_2.8rem] items-center gap-4">
+      <div className="space-y-4">
+        <div className="grid grid-cols-[2.8rem_1fr_2.8rem] items-center gap-4">
           <button
             type="button"
-            onClick={() => setPage((current) => (current === 0 ? totalPages - 1 : current - 1))}
+            onClick={goPrev}
             className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
             aria-label="Anterior"
           >
@@ -115,7 +119,30 @@ export function StorefrontCategoryStrip() {
             </svg>
           </button>
 
-          <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-6">
+          <div
+            className="grid gap-4 sm:grid-cols-3 xl:grid-cols-6"
+            onTouchStart={(event) => {
+              touchStartX.current = event.touches[0]?.clientX ?? null;
+            }}
+            onTouchEnd={(event) => {
+              if (touchStartX.current === null) {
+                return;
+              }
+
+              const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+              const deltaX = touchEndX - touchStartX.current;
+
+              if (Math.abs(deltaX) > 45) {
+                if (deltaX < 0) {
+                  goNext();
+                } else {
+                  goPrev();
+                }
+              }
+
+              touchStartX.current = null;
+            }}
+          >
             {visibleItems.map((item) => (
               <button
                 key={item.title}
@@ -135,7 +162,7 @@ export function StorefrontCategoryStrip() {
 
           <button
             type="button"
-            onClick={() => setPage((current) => (current + 1) % totalPages)}
+            onClick={goNext}
             className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
             aria-label="Siguiente"
           >
@@ -143,6 +170,25 @@ export function StorefrontCategoryStrip() {
               <path d="m9 6 6 6-6 6" />
             </svg>
           </button>
+        </div>
+
+        {totalPages > 1 ? (
+          <div className="flex items-center justify-center gap-2">
+            {Array.from({ length: totalPages }).map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setPage(index)}
+                className={`h-2.5 rounded-full transition ${
+                  page === index
+                    ? "w-8 bg-slate-900"
+                    : "w-2.5 bg-slate-300 hover:bg-slate-400"
+                }`}
+                aria-label={`Ir a pagina ${index + 1}`}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   );
