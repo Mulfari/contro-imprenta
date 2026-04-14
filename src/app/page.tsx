@@ -5,6 +5,12 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { StorefrontHero } from "@/app/storefront-hero";
 
 const quickLinks = ["Catalogo", "FAQ", "Contactanos"];
+const promoTickerItems = [
+  "Impresion express para tarjetas, stickers y pendones",
+  "Pedidos online conectados al panel administrativo",
+  "Cotizaciones rapidas para negocios, marcas y eventos",
+  "Produccion publicitaria, corporativa y gran formato",
+];
 
 export default async function Home() {
   const session = await getCurrentSession();
@@ -126,6 +132,22 @@ export default async function Home() {
           </div>
         </div>
       </header>
+
+      <section className="border-b border-slate-200 bg-white">
+        <div className="overflow-hidden">
+          <div className="storefront-marquee flex min-w-max items-center gap-8 px-4 py-3 sm:px-6 lg:px-8 2xl:px-10">
+            {[...promoTickerItems, ...promoTickerItems].map((item, index) => (
+              <div
+                key={`${item}-${index}`}
+                className="flex items-center gap-8 text-sm font-medium text-slate-700"
+              >
+                <span className="whitespace-nowrap">{item}</span>
+                <span className="h-2 w-2 rounded-full bg-[#ffcf33]" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <StorefrontHero />
     </main>
