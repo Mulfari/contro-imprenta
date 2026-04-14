@@ -101,6 +101,66 @@ export async function createClient(input: {
   return data;
 }
 
+export async function updateClient(input: {
+  clientId: string;
+  name: string;
+  phone: string;
+  email: string;
+  documentId: string;
+  address: string;
+  notes: string;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const name = normalizeText(input.name);
+  const phone = normalizeText(input.phone);
+
+  if (!input.clientId) {
+    throw new Error("No se pudo identificar el cliente.");
+  }
+
+  if (!name) {
+    throw new Error("Escribe el nombre o razon social del cliente.");
+  }
+
+  if (!phone) {
+    throw new Error("Escribe el telefono del cliente.");
+  }
+
+  const { data, error } = await supabase
+    .from("clients")
+    .update({
+      name,
+      phone,
+      email: normalizeText(input.email) || null,
+      document_id: normalizeText(input.documentId) || null,
+      address: normalizeText(input.address) || null,
+      notes: normalizeText(input.notes) || null,
+    })
+    .eq("id", input.clientId)
+    .select("*")
+    .single<Client>();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteClient(clientId: string) {
+  const supabase = createSupabaseAdminClient();
+
+  if (!clientId) {
+    throw new Error("No se pudo identificar el cliente.");
+  }
+
+  const { error } = await supabase.from("clients").delete().eq("id", clientId);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function listOrders() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
