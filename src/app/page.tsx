@@ -3,97 +3,82 @@ import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/lib/auth/session";
 
-const categories = [
-  "Tarjetas",
-  "Volantes",
-  "Pendones",
-  "Stickers",
-  "Etiquetas",
-  "Lonas",
-  "Facturas",
-  "Papeleria",
-];
+const quickLinks = ["Catalogo", "FAQ", "Contactanos"];
 
-const categoryGroups = [
+const mainCategories = [
   {
-    title: "Compra por categoria",
-    items: ["Tarjetas de presentacion", "Volantes y flyers", "Stickers", "Papeleria"],
+    title: "Papeleria comercial",
+    items: ["Tarjetas", "Facturas", "Sobres", "Talonarios"],
   },
   {
-    title: "Negocio y marca",
-    items: ["Etiquetas", "Empaques impresos", "Facturas", "Sobres"],
+    title: "Publicidad impresa",
+    items: ["Volantes", "Dipticos", "Tripticos", "Afiches"],
+  },
+  {
+    title: "Etiquetas y stickers",
+    items: ["Etiquetas", "Stickers", "Sellos", "Packaging"],
   },
   {
     title: "Gran formato",
-    items: ["Pendones", "Banners", "Vinil", "Avisos"],
+    items: ["Pendones", "Banners", "Vinil", "Lonas"],
   },
+];
+
+const heroCategories = [
+  "Tarjetas",
+  "Volantes",
+  "Pendones",
+  "Etiquetas",
+  "Stickers",
+  "Facturas",
 ];
 
 const featuredProducts = [
   {
     name: "Tarjetas de presentacion premium",
-    category: "Tarjetas",
-    price: "Desde $18",
-    badge: "Mas vendido",
-    description: "Acabado mate o brillante para marcas, emprendedores y negocios.",
+    category: "Papeleria comercial",
+    price: "$18",
   },
   {
     name: "Volantes promocionales",
-    category: "Publicidad",
-    price: "Desde $25",
-    badge: "Entrega hoy",
-    description: "Ideal para promociones, aperturas, eventos y campañas locales.",
+    category: "Publicidad impresa",
+    price: "$25",
   },
   {
-    name: "Stickers personalizados",
-    category: "Etiquetas",
-    price: "Desde $14",
-    badge: "Corte especial",
-    description: "Perfectos para empaques, branding de producto y promociones.",
+    name: "Etiquetas para productos",
+    category: "Etiquetas y stickers",
+    price: "$16",
   },
   {
     name: "Pendones publicitarios",
     category: "Gran formato",
-    price: "Desde $35",
-    badge: "Express",
-    description: "Produccion para tiendas, ferias, activaciones y exhibiciones.",
+    price: "$35",
   },
   {
-    name: 'Facturas y talonarios',
-    category: "Papeleria",
-    price: "Desde $22",
-    badge: "Corporativo",
-    description: "Formatos impresos para control administrativo y ventas diarias.",
+    name: "Facturas y talonarios",
+    category: "Papeleria comercial",
+    price: "$22",
   },
   {
-    name: "Etiquetas para productos",
-    category: "Etiquetas",
-    price: "Desde $16",
-    badge: "Branding",
-    description: "Presentacion profesional para envases, frascos, bolsas y cajas.",
+    name: "Stickers personalizados",
+    category: "Etiquetas y stickers",
+    price: "$14",
   },
 ];
 
-const promoBlocks = [
+const valueCards = [
   {
-    title: "Impresion para marcas",
-    description: "Papeleria, etiquetas, facturas y materiales listos para vender mejor.",
+    title: "Compra por categoria",
+    text: "Organiza la tienda por lineas de impresion para que el cliente llegue rapido al producto.",
   },
   {
-    title: "Pedidos online",
-    description: "La web puede convertirse en el canal para tomar solicitudes y producirlas.",
+    title: "Pedido online",
+    text: "El cliente puede escoger un producto, detallar su necesidad y enviar el pedido desde la web.",
   },
   {
-    title: "Atencion rapida",
-    description: "Cotizacion, produccion y seguimiento conectados al panel interno.",
+    title: "Control interno",
+    text: "Cada solicitud puede entrar al panel administrativo para produccion, cobro y entrega.",
   },
-];
-
-const trustPoints = [
-  "Catalogo digital de productos impresos",
-  "Solicitud de pedido desde la web",
-  "Seguimiento interno desde el panel administrativo",
-  "Base lista para evolucionar a ecommerce funcional",
 ];
 
 export default async function Home() {
@@ -104,17 +89,16 @@ export default async function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7fb] text-slate-950">
-      <div className="border-b border-slate-200 bg-slate-950 text-white">
+    <main className="min-h-screen bg-[#f3f5f8] text-slate-950">
+      <div className="border-b border-slate-800 bg-slate-950 text-white">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-5 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
           <p>Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.</p>
-          <div className="flex items-center gap-4 text-slate-300">
-            <a href="#catalogo" className="hover:text-white">
-              Catalogo
-            </a>
-            <a href="#destacados" className="hover:text-white">
-              Destacados
-            </a>
+          <div className="flex flex-wrap items-center gap-4 text-slate-300">
+            {quickLinks.map((item) => (
+              <button key={item} type="button" className="cursor-pointer hover:text-white">
+                {item}
+              </button>
+            ))}
             <Link href="/login" className="hover:text-white">
               Panel administrativo
             </Link>
@@ -122,208 +106,204 @@ export default async function Home() {
         </div>
       </div>
 
-      <header className="w-full border-b border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-5 sm:px-8 lg:px-10">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-5 py-5 sm:px-8 lg:px-10">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[1rem] bg-slate-950 text-lg font-semibold text-white">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffcf33] text-lg font-bold text-slate-950">
                 EP
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-700">
+                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-slate-500">
                   Express Printer
                 </p>
-                <p className="mt-1 text-lg font-semibold tracking-tight text-slate-950">
-                  Impresion online para negocios y marcas
+                <p className="mt-1 text-xl font-semibold tracking-tight">
+                  Tienda online de impresion
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 lg:min-w-[540px] lg:flex-row lg:items-center">
-              <div className="flex flex-1 items-center rounded-full border border-slate-200 bg-slate-50 px-5 py-3.5">
+            <div className="flex flex-1 flex-col gap-3 xl:mx-10 xl:max-w-4xl xl:flex-row xl:items-center">
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+              >
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 24 24"
-                  className="h-4 w-4 text-slate-400"
+                  className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-3.5-3.5" />
+                  <path d="M3 6h18" />
+                  <path d="M3 12h18" />
+                  <path d="M3 18h18" />
                 </svg>
+                Todas las categorias
+              </button>
+
+              <div className="flex flex-1 items-center rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                 <input
                   type="text"
                   placeholder="Buscar productos de impresion..."
-                  className="ml-3 w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                  className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
                 />
+                <button
+                  type="button"
+                  className="cursor-pointer rounded-lg bg-[#ffcf33] px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-[#f5c61f]"
+                >
+                  Buscar
+                </button>
               </div>
-              <button
-                type="button"
-                className="cursor-pointer rounded-full bg-sky-600 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-sky-500"
-              >
-                Buscar
-              </button>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                Mi cuenta
+              </button>
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 Cotizar
               </button>
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                Panel administrativo
-              </Link>
+                Carrito $0
+              </button>
             </div>
           </div>
 
-          <nav className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 text-sm font-medium text-slate-700">
-            <a href="#catalogo" className="transition hover:text-sky-700">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 text-sm font-medium text-slate-700">
+            <a href="#catalogo" className="transition hover:text-slate-950">
               Catalogo
             </a>
-            <a href="#destacados" className="transition hover:text-sky-700">
+            <a href="#destacados" className="transition hover:text-slate-950">
               Destacados
             </a>
-            {categories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                className="cursor-pointer transition hover:text-sky-700"
-              >
-                {category}
-              </button>
-            ))}
-          </nav>
+            <button type="button" className="cursor-pointer transition hover:text-slate-950">
+              Nuevos productos
+            </button>
+            <button type="button" className="cursor-pointer transition hover:text-slate-950">
+              Promociones
+            </button>
+            <button type="button" className="cursor-pointer transition hover:text-slate-950">
+              Empresas
+            </button>
+          </div>
         </div>
       </header>
 
       <section className="mx-auto w-full max-w-7xl px-5 py-5 sm:px-8 lg:px-10">
-
-        <div className="mt-6 grid gap-6 xl:grid-cols-[290px_1fr]">
+        <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
           <aside
             id="catalogo"
-            className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_22px_55px_rgba(15,23,42,0.05)]"
+            className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
           >
-            {categoryGroups.map((group) => (
-              <div key={group.title} className="border-b border-slate-100 py-4 last:border-b-0">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  {group.title}
-                </h2>
-                <div className="mt-4 space-y-3">
-                  {group.items.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      className="block cursor-pointer text-left text-sm font-medium text-slate-700 transition hover:text-sky-700"
-                    >
-                      {item}
-                    </button>
-                  ))}
+            <h2 className="text-base font-semibold tracking-tight">Compra por categoria</h2>
+            <div className="mt-5 space-y-5">
+              {mainCategories.map((group) => (
+                <div key={group.title}>
+                  <h3 className="text-sm font-semibold text-slate-500">{group.title}</h3>
+                  <div className="mt-3 space-y-2">
+                    {group.items.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        className="block cursor-pointer text-left text-sm text-slate-700 transition hover:text-slate-950"
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </aside>
 
           <div className="grid gap-6">
-            <section className="grid gap-6 lg:grid-cols-[1.12fr_0.88fr]">
-              <article className="overflow-hidden rounded-[2.2rem] bg-[linear-gradient(135deg,#07111f_0%,#0d2744_45%,#1172c9_100%)] p-7 text-white shadow-[0_30px_80px_rgba(8,18,38,0.28)]">
-                <p className="text-xs uppercase tracking-[0.34em] text-sky-200/80">
-                  Ecommerce para imprenta
+            <section className="grid gap-6 lg:grid-cols-[1.18fr_0.82fr]">
+              <article className="overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#11243d_0%,#1f4e79_48%,#2d6ea4_100%)] p-7 text-white shadow-[0_28px_70px_rgba(15,23,42,0.24)]">
+                <p className="text-xs uppercase tracking-[0.34em] text-sky-100/75">
+                  Buscar impresiones
                 </p>
-                <h2 className="mt-4 max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Diseña, cotiza y pide tus impresiones desde una sola web.
-                </h2>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-200/88">
-                  Esta portada puede funcionar como tienda online para que tus
-                  clientes exploren productos, elijan formatos y hagan pedidos
-                  que luego entren al panel administrativo.
+                <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
+                  Escoge el producto ideal para tu marca, negocio o evento.
+                </h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-100/88">
+                  Esta web sera la tienda online de Express Printer para recibir
+                  pedidos, cotizaciones y solicitudes de impresion desde internet.
                 </p>
+
+                <div className="mt-7 rounded-[1.6rem] bg-white/10 p-4 backdrop-blur-sm">
+                  <p className="text-sm font-semibold text-white">Buscar por producto</p>
+                  <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                    <select className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none">
+                      <option className="text-slate-900">Selecciona categoria</option>
+                      {heroCategories.map((item) => (
+                        <option key={item} className="text-slate-900">
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Describe lo que necesitas"
+                      className="flex-1 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-200/70"
+                    />
+                    <button
+                      type="button"
+                      className="cursor-pointer rounded-xl bg-[#ffcf33] px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-[#f5c61f]"
+                    >
+                      Buscar
+                    </button>
+                  </div>
+                </div>
 
                 <div className="mt-7 flex flex-wrap gap-3">
                   <button
                     type="button"
-                    className="cursor-pointer rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                    className="cursor-pointer rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
                   >
                     Comprar ahora
                   </button>
                   <button
                     type="button"
-                    className="cursor-pointer rounded-full border border-white/15 bg-white/8 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/12"
+                    className="cursor-pointer rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
                   >
                     Solicitar cotizacion
                   </button>
                 </div>
-
-                <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                  {promoBlocks.map((item) => (
-                    <div
-                      key={item.title}
-                      className="rounded-[1.4rem] border border-white/10 bg-white/8 px-4 py-4 backdrop-blur-sm"
-                    >
-                      <h3 className="text-base font-semibold">{item.title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-200/84">
-                        {item.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               </article>
 
-              <article className="rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_22px_55px_rgba(15,23,42,0.05)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-700">
-                  Proceso de compra
-                </p>
-                <div className="mt-5 space-y-4">
-                  {[
-                    {
-                      step: "01",
-                      title: "Escoge un producto",
-                      description: "Selecciona la categoria y el tipo de impresion que necesitas.",
-                    },
-                    {
-                      step: "02",
-                      title: "Personaliza tu pedido",
-                      description: "Cantidad, tamaño, material, acabados y comentarios para produccion.",
-                    },
-                    {
-                      step: "03",
-                      title: "Confirma y espera respuesta",
-                      description: "El pedido entra al sistema para cotizacion, seguimiento y entrega.",
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.step}
-                      className="flex gap-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-4"
-                    >
-                      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-700">
-                        {item.step}
-                      </span>
-                      <div>
-                        <h3 className="text-base font-semibold text-slate-950">{item.title}</h3>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">
-                          {item.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </article>
+              <div className="grid gap-4">
+                {valueCards.map((item) => (
+                  <article
+                    key={item.title}
+                    className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
+                  >
+                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{item.text}</p>
+                  </article>
+                ))}
+              </div>
             </section>
 
             <section
               id="destacados"
-              className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_22px_55px_rgba(15,23,42,0.05)]"
+              className="rounded-[1.9rem] border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-700">
+                  <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
                     Productos destacados
                   </p>
                   <h2 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -332,7 +312,7 @@ export default async function Home() {
                 </div>
                 <button
                   type="button"
-                  className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                  className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
                 >
                   Ver todos
                 </button>
@@ -342,97 +322,43 @@ export default async function Home() {
                 {featuredProducts.map((product) => (
                   <article
                     key={product.name}
-                    className="rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(247,249,252,1))] p-5 shadow-[0_16px_40px_rgba(15,23,42,0.05)]"
+                    className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.04)]"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
-                        {product.badge}
+                      <span className="rounded-full bg-[#fff4c6] px-3 py-1 text-xs font-semibold text-[#8a6a00]">
+                        Destacado
                       </span>
-                      <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                      <span className="text-xs font-medium text-slate-400">
                         {product.category}
                       </span>
                     </div>
 
-                    <div className="mt-5 rounded-[1.4rem] bg-[linear-gradient(135deg,#dbeafe_0%,#eff6ff_46%,#f8fafc_100%)] p-5">
-                      <div className="flex h-28 items-end justify-between">
-                        <div className="space-y-2">
-                          <div className="h-3 w-24 rounded-full bg-sky-200" />
-                          <div className="h-3 w-16 rounded-full bg-sky-100" />
-                        </div>
-                        <div className="h-16 w-16 rounded-[1.2rem] border border-white/60 bg-white/80 shadow-sm" />
+                    <div className="mt-5 rounded-[1.3rem] bg-slate-100 p-5">
+                      <div className="flex h-28 items-center justify-center rounded-[1rem] border border-white/80 bg-white">
+                        <span className="text-sm font-semibold text-slate-400">Vista previa</span>
                       </div>
                     </div>
 
-                    <h3 className="mt-5 text-lg font-semibold tracking-tight text-slate-950">
-                      {product.name}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      {product.description}
-                    </p>
+                    <h3 className="mt-5 text-lg font-semibold tracking-tight">{product.name}</h3>
+                    <p className="mt-2 text-lg font-semibold text-slate-950">{product.price}</p>
 
-                    <div className="mt-5 flex items-center justify-between">
-                      <p className="text-lg font-semibold text-slate-950">{product.price}</p>
+                    <div className="mt-5 flex gap-3">
                       <button
                         type="button"
-                        className="cursor-pointer rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                        className="flex-1 cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
                       >
                         Pedir
+                      </button>
+                      <button
+                        type="button"
+                        className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                      >
+                        Ver
                       </button>
                     </div>
                   </article>
                 ))}
               </div>
-            </section>
-
-            <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-              <article className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_22px_55px_rgba(15,23,42,0.05)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-700">
-                  Lo que sigue
-                </p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight">
-                  Convertir esta portada en ecommerce funcional
-                </h2>
-                <div className="mt-5 space-y-3">
-                  {trustPoints.map((point) => (
-                    <div
-                      key={point}
-                      className="flex items-start gap-3 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4"
-                    >
-                      <span className="mt-1 inline-flex h-5 w-5 shrink-0 rounded-full bg-emerald-100" />
-                      <p className="text-sm leading-6 text-slate-700">{point}</p>
-                    </div>
-                  ))}
-                </div>
-              </article>
-
-              <article className="rounded-[2rem] bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_100%)] p-6 text-white shadow-[0_30px_80px_rgba(15,23,42,0.22)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-200/80">
-                  Panel conectado
-                </p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight">
-                  Cada pedido web puede caer directo en tu control interno
-                </h2>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-200/85">
-                  La idea es que el cliente compre o solicite su impresion desde
-                  esta pagina y el equipo la reciba en el dashboard para
-                  gestionar cliente, produccion, cobro y entrega.
-                </p>
-
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    className="cursor-pointer rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
-                  >
-                    Simular pedido
-                  </button>
-                  <Link
-                    href="/login"
-                    className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                  >
-                    Ir al panel
-                  </Link>
-                </div>
-              </article>
             </section>
           </div>
         </div>
