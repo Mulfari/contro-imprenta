@@ -91,8 +91,8 @@ export function StorefrontHero() {
               <div className="absolute left-8 top-8 h-44 w-44 rounded-full bg-white/8 blur-3xl" />
               <div className="absolute right-10 top-10 h-56 w-56 rounded-full bg-white/8 blur-3xl" />
 
-              <div className="relative grid h-full gap-6 xl:grid-cols-[0.34fr_1.66fr] xl:items-stretch">
-                <div className="flex max-w-sm flex-col justify-between gap-4 xl:py-4">
+              <div className="relative grid h-full gap-6 xl:grid-cols-[0.28fr_1.72fr] xl:items-stretch">
+                <div className="flex max-w-sm flex-col justify-between gap-4 xl:py-6">
                   <div>
                     <span className="text-[11px] font-semibold uppercase tracking-[0.34em] text-white/68">
                       {slide.eyebrow}
@@ -100,7 +100,7 @@ export function StorefrontHero() {
                     <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
                       {slide.title}
                     </h1>
-                    <p className="mt-3 max-w-xs text-sm leading-6 text-white/76">
+                    <p className="mt-3 max-w-xs text-sm leading-6 text-white/72">
                       {slide.subtitle}
                     </p>
                   </div>
@@ -124,28 +124,7 @@ export function StorefrontHero() {
                   <div className="absolute right-8 top-8 h-20 w-20 rounded-[1.4rem] border border-white/15 bg-white/10" />
 
                   <div className="relative flex h-full items-center justify-center p-5 sm:p-6">
-                    <div className="grid h-full w-full gap-4 xl:grid-cols-[0.34fr_1.66fr]">
-                      <div className={`rounded-[1.8rem] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.12)] ${slide.cardClass}`}>
-                        <div className="flex h-full flex-col justify-between">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="space-y-2">
-                              <div className="h-3 w-20 rounded-full bg-slate-300/70" />
-                              <div className="h-3 w-14 rounded-full bg-slate-200/90" />
-                            </div>
-                            <span className={`h-9 w-9 rounded-full ${slide.accentClass}`} />
-                          </div>
-
-                          <div className="mt-4 rounded-[1.2rem] border border-slate-200/70 bg-white/75 p-3">
-                            <div className="h-20 rounded-[0.9rem] border border-slate-200/70 bg-white" />
-                          </div>
-
-                          <div className="mt-4 space-y-2">
-                            <div className="h-2.5 w-16 rounded-full bg-slate-300/70" />
-                            <div className="h-2.5 w-20 rounded-full bg-slate-200/90" />
-                          </div>
-                        </div>
-                      </div>
-
+                    <div className="grid h-full w-full gap-4 xl:grid-cols-[1fr]">
                       <div className="rounded-[1.9rem] border border-white/16 bg-white p-4 text-slate-950 shadow-[0_24px_45px_rgba(0,0,0,0.18)] sm:p-5">
                         <div className="flex h-full flex-col justify-between">
                           <div>
@@ -153,18 +132,22 @@ export function StorefrontHero() {
                               Imagen principal
                             </p>
                             <div className="mt-4 rounded-[1.5rem] bg-slate-100 p-4">
-                              <div className="grid gap-4 xl:grid-cols-[1.12fr_0.88fr]">
-                                <div className="flex min-h-[260px] items-center justify-center rounded-[1.3rem] border border-slate-200 bg-white xl:min-h-[300px]">
+                              <div className="grid gap-4 xl:grid-cols-[1.32fr_0.68fr]">
+                                <div className={`flex min-h-[280px] items-center justify-center rounded-[1.3rem] border border-slate-200 xl:min-h-[330px] ${slide.cardClass}`}>
                                   <span className="text-sm font-semibold text-slate-400">
                                     {slide.imageLabel}
                                   </span>
                                 </div>
                                 <div className="grid gap-3">
                                   <div className="rounded-[1rem] border border-slate-200 bg-white p-3">
-                                    <div className="h-24 rounded-[0.9rem] bg-slate-100" />
+                                    <div className="flex h-28 items-center justify-center rounded-[0.9rem] bg-slate-100">
+                                      <span className={`h-10 w-10 rounded-full ${slide.accentClass}`} />
+                                    </div>
                                   </div>
                                   <div className="rounded-[1rem] border border-slate-200 bg-white p-3">
-                                    <div className="h-24 rounded-[0.9rem] bg-slate-100" />
+                                    <div className="flex h-28 items-center justify-center rounded-[0.9rem] bg-slate-100 px-4 text-center text-sm font-semibold text-slate-500">
+                                      Promocion web
+                                    </div>
                                   </div>
                                 </div>
                               </div>
