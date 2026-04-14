@@ -8,6 +8,7 @@ import {
   type ActivePersonnelItem,
 } from "@/app/dashboard/active-personnel-card";
 import { AdminNotificationsPanel } from "@/app/dashboard/admin-notifications-panel";
+import { ClientDetailsModal } from "@/app/dashboard/client-details-modal";
 import { ClientModal } from "@/app/dashboard/client-modal";
 import { DeleteClientButton } from "@/app/dashboard/delete-client-button";
 import { DashboardLiveRefresh } from "@/app/dashboard/dashboard-live-refresh";
@@ -225,6 +226,7 @@ async function createClientAction(formData: FormData) {
       email: String(formData.get("email") ?? ""),
       documentId: String(formData.get("documentId") ?? ""),
       address: String(formData.get("address") ?? ""),
+      preferredBranch: String(formData.get("preferredBranch") ?? ""),
       notes: String(formData.get("notes") ?? ""),
       createdBy: session.userId,
     });
@@ -257,6 +259,7 @@ async function updateClientAction(formData: FormData) {
       email: String(formData.get("email") ?? ""),
       documentId: String(formData.get("documentId") ?? ""),
       address: String(formData.get("address") ?? ""),
+      preferredBranch: String(formData.get("preferredBranch") ?? ""),
       notes: String(formData.get("notes") ?? ""),
     });
   } catch (error) {
@@ -825,13 +828,6 @@ export default async function DashboardPage({
   const selectedClientOrders = selectedClient
     ? orders.filter((order) => order.client_id === selectedClient.id)
     : [];
-  const selectedClientPayments = selectedClientOrders.filter(
-    (order) => order.total_amount !== null,
-  );
-  const selectedClientBilled = selectedClientPayments.reduce(
-    (sum, order) => sum + (order.total_amount ?? 0),
-    0,
-  );
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
@@ -1125,7 +1121,7 @@ export default async function DashboardPage({
                           <td className="px-4 py-3">
                             <div>{client.document_id ?? "Sin cedula / RIF"}</div>
                             <div className="text-xs text-slate-400">
-                              {client.address ?? "Sin direccion"}
+                              {client.preferred_branch ?? client.address ?? "Sin direccion"}
                             </div>
                           </td>
                           {session.role === "admin" ? (
@@ -1152,142 +1148,6 @@ export default async function DashboardPage({
               </table>
             </div>
 
-            <div className="mt-6 border-t border-slate-100 pt-6">
-              {selectedClient ? (
-                <>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h2 className="text-xl font-semibold">{selectedClient.name}</h2>
-                      <p className="mt-2 text-sm text-slate-500">
-                        Ficha del cliente, pedidos anteriores, pagos e historial.
-                      </p>
-                    </div>
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                      {selectedClientOrders.length} pedidos
-                    </span>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Telefono</p>
-                      <p className="mt-2 text-sm font-medium text-slate-800">
-                        {selectedClient.phone ?? "Sin telefono"}
-                      </p>
-                    </div>
-                    <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Email</p>
-                      <p className="mt-2 text-sm font-medium text-slate-800">
-                        {selectedClient.email ?? "Sin email"}
-                      </p>
-                    </div>
-                    <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Cedula / RIF</p>
-                      <p className="mt-2 text-sm font-medium text-slate-800">
-                        {selectedClient.document_id ?? "Sin documento"}
-                      </p>
-                    </div>
-                    <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Direccion</p>
-                      <p className="mt-2 text-sm font-medium text-slate-800">
-                        {selectedClient.address ?? "Sin direccion"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                      Observaciones del cliente
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-700">
-                      {selectedClient.notes ?? "Sin observaciones"}
-                    </p>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-[1.4rem] border border-slate-200 bg-white px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Pedidos anteriores</p>
-                      <p className="mt-2 text-2xl font-semibold">{selectedClientOrders.length}</p>
-                    </div>
-                    <div className="rounded-[1.4rem] border border-slate-200 bg-white px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Pagos</p>
-                      <p className="mt-2 text-2xl font-semibold">
-                        {selectedClientPayments.length}
-                      </p>
-                    </div>
-                    <div className="rounded-[1.4rem] border border-slate-200 bg-white px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Facturado</p>
-                      <p className="mt-2 text-2xl font-semibold">
-                        {formatCurrency(selectedClientBilled)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid gap-6 xl:grid-cols-2">
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-                      <h3 className="text-lg font-semibold">Pagos</h3>
-                      <div className="mt-4 space-y-3">
-                        {selectedClientPayments.length === 0 ? (
-                          <div className="rounded-[1.25rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                            Aun no hay pagos registrados desde pedidos.
-                          </div>
-                        ) : (
-                          selectedClientPayments.map((order) => (
-                            <div
-                              key={`payment-${order.id}`}
-                              className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-4"
-                            >
-                              <div className="flex items-center justify-between gap-3">
-                                <p className="text-sm font-semibold text-slate-900">
-                                  {order.title}
-                                </p>
-                                <p className="text-sm font-semibold text-slate-900">
-                                  {formatCurrency(order.total_amount)}
-                                </p>
-                              </div>
-                              <p className="mt-2 text-xs text-slate-500">
-                                {formatDateTime(order.created_at)}
-                              </p>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-                      <h3 className="text-lg font-semibold">Historial</h3>
-                      <div className="mt-4 space-y-3">
-                        {selectedClientOrders.length === 0 ? (
-                          <div className="rounded-[1.25rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                            Este cliente aun no tiene historial de pedidos.
-                          </div>
-                        ) : (
-                          selectedClientOrders.map((order) => (
-                            <div
-                              key={`history-${order.id}`}
-                              className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-4"
-                            >
-                              <p className="text-sm font-semibold text-slate-900">
-                                {order.title}
-                              </p>
-                              <p className="mt-2 text-sm text-slate-600">
-                                Estado: {orderStatusLabels[order.status]}
-                              </p>
-                              <p className="mt-1 text-xs text-slate-500">
-                                {formatDateTime(order.created_at)}
-                              </p>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500">
-                  Selecciona un cliente para ver su informacion, pagos e historial.
-                </div>
-              )}
-            </div>
             </article>
             ) : null}
 
@@ -1578,8 +1438,19 @@ export default async function DashboardPage({
                 email: selectedClient.email ?? "",
                 documentId: selectedClient.document_id ?? "",
                 address: selectedClient.address ?? "",
+                preferredBranch: selectedClient.preferred_branch ?? "",
                 notes: selectedClient.notes ?? "",
               }}
+            />
+          ) : null}
+
+          {activeView === "clientes" &&
+          clientMode === "lista" &&
+          selectedClient ? (
+            <ClientDetailsModal
+              client={selectedClient}
+              orders={selectedClientOrders}
+              closeHref={buildClientUrl("lista", undefined, undefined, clientQuery)}
             />
           ) : null}
 

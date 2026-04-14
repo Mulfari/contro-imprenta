@@ -14,9 +14,12 @@ type ClientModalProps = {
     email: string;
     documentId: string;
     address: string;
+    preferredBranch: string;
     notes: string;
   };
 };
+
+const branchOptions = ["", "5 de julio", "las americas"] as const;
 
 function SubmitButton({ mode }: { mode: "create" | "edit" }) {
   const { pending } = useFormStatus();
@@ -142,18 +145,36 @@ export function ClientModal({
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm text-slate-600" htmlFor="clientAddress">
-                Direccion si aplica delivery
+              <label className="mb-2 block text-sm text-slate-600" htmlFor="clientBranch">
+                Sucursal de preferencia
               </label>
-              <input
-                id="clientAddress"
-                name="address"
-                type="text"
-                defaultValue={initialData?.address ?? ""}
+              <select
+                id="clientBranch"
+                name="preferredBranch"
+                defaultValue={initialData?.preferredBranch ?? ""}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                placeholder="Av. principal, local 4"
-              />
+              >
+                {branchOptions.map((option) => (
+                  <option key={option || "sin-sucursal"} value={option}>
+                    {option ? option : "Sin sucursal preferida"}
+                  </option>
+                ))}
+              </select>
             </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm text-slate-600" htmlFor="clientAddress">
+              Direccion si aplica delivery
+            </label>
+            <input
+              id="clientAddress"
+              name="address"
+              type="text"
+              defaultValue={initialData?.address ?? ""}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              placeholder="Av. principal, local 4"
+            />
           </div>
 
           <div>

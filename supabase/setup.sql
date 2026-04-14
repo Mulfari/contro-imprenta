@@ -137,6 +137,7 @@ create table if not exists public.clients (
   email text null,
   document_id text null,
   address text null,
+  preferred_branch text null,
   notes text null,
   created_at timestamptz not null default now(),
   created_by uuid null references public.app_users(id) on delete set null
@@ -152,6 +153,7 @@ alter table public.clients add column if not exists phone text null;
 alter table public.clients add column if not exists email text null;
 alter table public.clients add column if not exists document_id text null;
 alter table public.clients add column if not exists address text null;
+alter table public.clients add column if not exists preferred_branch text null;
 alter table public.clients add column if not exists notes text null;
 alter table public.clients add column if not exists created_at timestamptz default now();
 alter table public.clients add column if not exists created_by uuid null;
