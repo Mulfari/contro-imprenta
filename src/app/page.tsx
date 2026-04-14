@@ -231,56 +231,116 @@ export default async function Home() {
 
           <div className="grid gap-6">
             <section className="grid gap-6 2xl:grid-cols-[1.28fr_0.72fr]">
-              <article className="overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#11243d_0%,#1f4e79_48%,#2d6ea4_100%)] p-7 text-white shadow-[0_28px_70px_rgba(15,23,42,0.24)]">
-                <p className="text-xs uppercase tracking-[0.34em] text-sky-100/75">
-                  Buscar impresiones
-                </p>
-                <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Escoge el producto ideal para tu marca, negocio o evento.
-                </h1>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-100/88">
-                  Esta web sera la tienda online de Express Printer para recibir
-                  pedidos, cotizaciones y solicitudes de impresion desde internet.
-                </p>
+              <article className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#11243d_0%,#1f4e79_48%,#2d6ea4_100%)] p-7 text-white shadow-[0_28px_70px_rgba(15,23,42,0.24)]">
+                <div className="absolute left-10 top-10 h-44 w-44 rounded-full bg-sky-300/18 blur-3xl" />
+                <div className="absolute right-8 top-8 h-56 w-56 rounded-full bg-[#ffcf33]/16 blur-3xl" />
 
-                <div className="mt-7 rounded-[1.6rem] bg-white/10 p-4 backdrop-blur-sm">
-                  <p className="text-sm font-semibold text-white">Buscar por producto</p>
-                  <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-                    <select className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none">
-                      <option className="text-slate-900">Selecciona categoria</option>
-                      {heroCategories.map((item) => (
-                        <option key={item} className="text-slate-900">
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      placeholder="Describe lo que necesitas"
-                      className="flex-1 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-200/70"
-                    />
-                    <button
-                      type="button"
-                      className="cursor-pointer rounded-xl bg-[#ffcf33] px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-[#f5c61f]"
-                    >
-                      Buscar
-                    </button>
+                <div className="relative grid gap-8 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.34em] text-sky-100/75">
+                      Buscar impresiones
+                    </p>
+                    <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
+                      Escoge el producto ideal para tu marca, negocio o evento.
+                    </h1>
+                    <p className="mt-4 max-w-2xl text-base leading-7 text-slate-100/88">
+                      Esta web sera la tienda online de Express Printer para recibir
+                      pedidos, cotizaciones y solicitudes de impresion desde internet.
+                    </p>
+
+                    <div className="mt-7 rounded-[1.6rem] bg-white/10 p-4 backdrop-blur-sm">
+                      <p className="text-sm font-semibold text-white">Buscar por producto</p>
+                      <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                        <select className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none">
+                          <option className="text-slate-900">Selecciona categoria</option>
+                          {heroCategories.map((item) => (
+                            <option key={item} className="text-slate-900">
+                              {item}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          placeholder="Describe lo que necesitas"
+                          className="flex-1 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-200/70"
+                        />
+                        <button
+                          type="button"
+                          className="cursor-pointer rounded-xl bg-[#ffcf33] px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-[#f5c61f]"
+                        >
+                          Buscar
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-7 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        className="cursor-pointer rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                      >
+                        Comprar ahora
+                      </button>
+                      <button
+                        type="button"
+                        className="cursor-pointer rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                      >
+                        Solicitar cotizacion
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    className="cursor-pointer rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
-                  >
-                    Comprar ahora
-                  </button>
-                  <button
-                    type="button"
-                    className="cursor-pointer rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                  >
-                    Solicitar cotizacion
-                  </button>
+                  <div className="relative hidden xl:flex xl:justify-end">
+                    <div className="relative w-full max-w-[34rem]">
+                      <div className="absolute -left-8 top-8 h-36 w-36 rounded-[2rem] border border-white/10 bg-white/10 backdrop-blur-sm" />
+                      <div className="absolute right-4 top-0 h-24 w-24 rounded-[1.5rem] border border-white/10 bg-[#ffcf33]/90 shadow-[0_18px_35px_rgba(0,0,0,0.18)]" />
+
+                      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] p-5 shadow-[0_24px_50px_rgba(0,0,0,0.2)] backdrop-blur-md">
+                        <div className="rounded-[1.6rem] bg-white p-5 text-slate-950">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700">
+                                Producto destacado
+                              </p>
+                              <h3 className="mt-3 text-2xl font-semibold tracking-tight">
+                                Tarjetas Premium
+                              </h3>
+                            </div>
+                            <span className="rounded-full bg-[#fff4c6] px-3 py-1 text-xs font-semibold text-[#8a6a00]">
+                              Oferta
+                            </span>
+                          </div>
+
+                          <div className="mt-5 rounded-[1.6rem] bg-[linear-gradient(135deg,#e0f2fe_0%,#eff6ff_45%,#ffffff_100%)] p-5">
+                            <div className="rounded-[1.3rem] border border-white/70 bg-white/90 p-4 shadow-sm">
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="space-y-2">
+                                  <div className="h-3 w-24 rounded-full bg-slate-200" />
+                                  <div className="h-3 w-20 rounded-full bg-slate-100" />
+                                  <div className="h-3 w-28 rounded-full bg-slate-100" />
+                                </div>
+                                <div className="flex h-24 w-24 items-center justify-center rounded-[1.2rem] border border-slate-200 bg-white text-xs font-semibold text-slate-400">
+                                  Vista
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-5 flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-slate-500">Desde</p>
+                              <p className="text-3xl font-semibold tracking-tight">$18</p>
+                            </div>
+                            <button
+                              type="button"
+                              className="cursor-pointer rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                            >
+                              Pedir ahora
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </article>
 
