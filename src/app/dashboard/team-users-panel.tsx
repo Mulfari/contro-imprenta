@@ -106,24 +106,59 @@ export function TeamUsersPanel({
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((user) => (
-                <tr key={user.id}>
-                  <td className="px-4 py-3">{user.display_name}</td>
-                  <td className="px-4 py-3">{user.national_id}</td>
-                  <td className="px-4 py-3">
-                    <div>{user.phone}</div>
-                    <div className="text-xs text-slate-400">{user.email}</div>
+              filteredUsers.map((user) => {
+                const editHref = `${editHrefBase}${user.id}`;
+
+                return (
+                <tr
+                  key={user.id}
+                  className="transition hover:bg-slate-50/90"
+                >
+                  <td className="p-0">
+                    <Link
+                      href={editHref}
+                      className="block cursor-pointer px-4 py-3"
+                    >
+                      {user.display_name}
+                    </Link>
                   </td>
-                  <td className="px-4 py-3">
-                    {getRoleLabel(user.role, user.secondary_role)}
+                  <td className="p-0">
+                    <Link
+                      href={editHref}
+                      className="block cursor-pointer px-4 py-3"
+                    >
+                      {user.national_id}
+                    </Link>
                   </td>
-                  <td className="px-4 py-3">
-                    {user.branch ? capitalizeLabel(user.branch) : "Sin sucursal"}
+                  <td className="p-0">
+                    <Link
+                      href={editHref}
+                      className="block cursor-pointer px-4 py-3"
+                    >
+                      <div>{user.phone}</div>
+                      <div className="text-xs text-slate-400">{user.email}</div>
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link
+                      href={editHref}
+                      className="block cursor-pointer px-4 py-3"
+                    >
+                      {getRoleLabel(user.role, user.secondary_role)}
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link
+                      href={editHref}
+                      className="block cursor-pointer px-4 py-3"
+                    >
+                      {user.branch ? capitalizeLabel(user.branch) : "Sin sucursal"}
+                    </Link>
                   </td>
                   <td className="px-4 py-3 align-middle">
                     <div className="flex items-center gap-3">
                       <Link
-                        href={`${editHrefBase}${user.id}`}
+                        href={editHref}
                         className="inline-flex cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
                       >
                         Editar
@@ -135,7 +170,7 @@ export function TeamUsersPanel({
                     </div>
                   </td>
                 </tr>
-              ))
+              )})
             )}
           </tbody>
         </table>
