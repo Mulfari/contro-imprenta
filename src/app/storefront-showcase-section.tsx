@@ -59,7 +59,7 @@ function ShowcaseHero({ theme, title, items }: { theme: "dark" | "light"; title:
             isDark ? "text-white" : "text-slate-950"
           }`}
         >
-          Ver todo ›
+          Ver todo {"›"}
         </button>
       </div>
 
@@ -143,6 +143,11 @@ export function StorefrontShowcaseSection() {
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-16 sm:px-6 lg:px-8 2xl:px-10">
       <div className="space-y-8">
+        <div className="border-b border-slate-200 pb-4">
+          <h2 className="text-[2rem] font-black tracking-tight text-slate-950">
+            Acabados premium
+          </h2>
+        </div>
         {showcaseRows.map((row) => (
           <div key={row.title} className="grid gap-0 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white xl:grid-cols-[420px_1fr]">
             <ShowcaseHero theme={row.theme as "dark" | "light"} title={row.title} items={row.items} />

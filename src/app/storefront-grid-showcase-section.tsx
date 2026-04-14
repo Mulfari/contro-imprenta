@@ -15,16 +15,16 @@ const gridShowcaseRows = [
     ],
   },
   {
-    title: "Publicidad visual",
+    title: "Gran formato",
     theme: "photo",
-    items: ["Vinil", "Afiches", "Pendones", "Lonas", "Roll up", "Señaletica"],
+    items: ["Vinil", "Afiches", "Pendones", "Lonas", "Roll up", "Senaletica"],
     products: [
       { title: "Vinil adhesivo", category: "Vinil", price: "$28", previousPrice: "$35", discount: "-$7" },
       { title: "Pendones express", category: "Pendones", price: "$32", previousPrice: "$39", discount: "-$7" },
       { title: "Afiches full color", category: "Afiches", price: "$15", previousPrice: "$19", discount: "-$4" },
       { title: "Lonas publicitarias", category: "Lonas", price: "$41", previousPrice: "$49", discount: "-$8" },
       { title: "Roll up display", category: "Display", price: "$55", previousPrice: "$64", discount: "-$9" },
-      { title: "Señaletica interna", category: "Señaletica", price: "$24", previousPrice: "$29", discount: "-$5" },
+      { title: "Senaletica interna", category: "Senaletica", price: "$24", previousPrice: "$29", discount: "-$5" },
     ],
   },
 ];
@@ -71,7 +71,7 @@ function VerticalFeature({
           type="button"
           className="mt-8 cursor-pointer text-base font-semibold text-white"
         >
-          Ver todo ›
+          Ver todo {"›"}
         </button>
       </div>
 
