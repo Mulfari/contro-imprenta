@@ -73,14 +73,14 @@ export function StorefrontHero() {
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="relative overflow-hidden rounded-[2.25rem] shadow-[0_28px_70px_rgba(15,23,42,0.24)]">
+      <div className="relative h-[430px] overflow-hidden rounded-[2.25rem] shadow-[0_28px_70px_rgba(15,23,42,0.24)] sm:h-[500px] xl:h-[560px]">
         {slides.map((slide, index) => {
           const isActive = index === activeIndex;
 
           return (
             <article
               key={slide.id}
-              className={`absolute inset-0 px-6 py-6 text-white transition-all duration-700 sm:px-8 sm:py-8 ${
+              className={`absolute inset-0 px-6 py-6 text-white transition-all duration-700 sm:px-8 sm:py-8 xl:px-10 xl:py-10 ${
                 slide.bgClass
               } ${
                 isActive
@@ -91,16 +91,18 @@ export function StorefrontHero() {
               <div className="absolute left-8 top-8 h-44 w-44 rounded-full bg-white/8 blur-3xl" />
               <div className="absolute right-10 top-10 h-56 w-56 rounded-full bg-white/8 blur-3xl" />
 
-              <div className="relative grid min-h-[360px] gap-6 xl:grid-cols-[0.38fr_1.62fr] xl:items-stretch">
-                <div className="flex max-w-sm flex-col justify-between gap-4 xl:py-3">
+              <div className="relative grid h-full gap-6 xl:grid-cols-[0.34fr_1.66fr] xl:items-stretch">
+                <div className="flex max-w-sm flex-col justify-between gap-4 xl:py-4">
                   <div>
                     <span className="text-[11px] font-semibold uppercase tracking-[0.34em] text-white/68">
-                    {slide.eyebrow}
+                      {slide.eyebrow}
                     </span>
                     <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-                    {slide.title}
+                      {slide.title}
                     </h1>
-                    <p className="mt-3 text-sm leading-6 text-white/76">{slide.subtitle}</p>
+                    <p className="mt-3 max-w-xs text-sm leading-6 text-white/76">
+                      {slide.subtitle}
+                    </p>
                   </div>
 
                   <div className="space-y-4">
@@ -116,13 +118,13 @@ export function StorefrontHero() {
                   </div>
                 </div>
 
-                <div className="relative min-h-[300px] sm:min-h-[380px]">
+                <div className="relative min-h-[250px] sm:min-h-[340px] xl:min-h-0">
                   <div className="absolute inset-0 rounded-[2rem] border border-white/10 bg-white/8 backdrop-blur-sm" />
                   <div className="absolute left-6 top-6 h-24 w-24 rounded-[1.6rem] border border-white/15 bg-white/10" />
                   <div className="absolute right-8 top-8 h-20 w-20 rounded-[1.4rem] border border-white/15 bg-white/10" />
 
                   <div className="relative flex h-full items-center justify-center p-5 sm:p-6">
-                    <div className="grid h-full w-full gap-4 xl:grid-cols-[0.42fr_1.58fr]">
+                    <div className="grid h-full w-full gap-4 xl:grid-cols-[0.34fr_1.66fr]">
                       <div className={`rounded-[1.8rem] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.12)] ${slide.cardClass}`}>
                         <div className="flex h-full flex-col justify-between">
                           <div className="flex items-center justify-between gap-3">
@@ -152,7 +154,7 @@ export function StorefrontHero() {
                             </p>
                             <div className="mt-4 rounded-[1.5rem] bg-slate-100 p-4">
                               <div className="grid gap-4 xl:grid-cols-[1.12fr_0.88fr]">
-                                <div className="flex min-h-[220px] items-center justify-center rounded-[1.3rem] border border-slate-200 bg-white">
+                                <div className="flex min-h-[260px] items-center justify-center rounded-[1.3rem] border border-slate-200 bg-white xl:min-h-[300px]">
                                   <span className="text-sm font-semibold text-slate-400">
                                     {slide.imageLabel}
                                   </span>
@@ -191,7 +193,7 @@ export function StorefrontHero() {
           );
         })}
 
-        <div className="relative z-10 flex min-h-[360px] items-end justify-between px-6 pb-5 sm:px-8 sm:pb-6">
+        <div className="relative z-10 flex h-full items-end justify-between px-6 pb-5 sm:px-8 sm:pb-6 xl:px-10 xl:pb-8">
           <div className="flex items-center gap-2">
             {slides.map((slide, index) => {
               const isActive = index === activeIndex;
