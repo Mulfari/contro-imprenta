@@ -122,7 +122,7 @@ export function StorefrontCategoryStrip() {
                 type="button"
                 className="cursor-pointer px-3 py-4 text-center transition hover:opacity-85"
               >
-                <div className="mx-auto flex h-28 w-full max-w-[8.4rem] items-center justify-center rounded-[1.5rem] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
+                <div className="mx-auto flex h-28 w-full max-w-[8.4rem] items-center justify-center">
                   <CategoryArt art={item.art} />
                 </div>
                 <p className="mt-4 text-[1.05rem] font-semibold tracking-tight text-slate-950">
