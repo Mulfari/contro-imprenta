@@ -78,7 +78,7 @@ a:hover {
 }
 
 .storefront-marquee {
-  animation: storefront-marquee 26s linear infinite;
+  animation: storefront-marquee 34s linear infinite;
 }
 
 @keyframes storefront-marquee {

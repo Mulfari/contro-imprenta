@@ -133,16 +133,18 @@ export default async function Home() {
         </div>
       </header>
 
-      <section className="border-b border-slate-200 bg-white">
+      <section className="border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfe_100%)]">
         <div className="overflow-hidden">
-          <div className="storefront-marquee flex min-w-max items-center gap-8 px-4 py-3 sm:px-6 lg:px-8 2xl:px-10">
+          <div className="storefront-marquee flex min-w-max items-center gap-10 px-4 py-3.5 sm:px-6 lg:px-8 2xl:px-10">
             {[...promoTickerItems, ...promoTickerItems].map((item, index) => (
               <div
                 key={`${item}-${index}`}
-                className="flex items-center gap-8 text-sm font-medium text-slate-700"
+                className="flex items-center gap-10 text-sm font-medium tracking-[0.02em] text-slate-700"
               >
-                <span className="whitespace-nowrap">{item}</span>
-                <span className="h-2 w-2 rounded-full bg-[#ffcf33]" />
+                <span className="whitespace-nowrap rounded-full border border-slate-200/80 bg-white px-4 py-2 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+                  {item}
+                </span>
+                <span className="h-2.5 w-2.5 rounded-full bg-[#ffcf33]" />
               </div>
             ))}
           </div>
