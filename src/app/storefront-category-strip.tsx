@@ -93,16 +93,20 @@ function CategoryArt({ art }: { art: string }) {
 }
 
 export function StorefrontCategoryStrip() {
-  const [page, setPage] = useState(0);
+  const [startIndex, setStartIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const pageSize = 6;
-  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
   const visibleItems = useMemo(
-    () => items.slice(page * pageSize, page * pageSize + pageSize),
-    [page],
+    () =>
+      Array.from({ length: Math.min(pageSize, items.length) }, (_, index) => {
+        const itemIndex = (startIndex + index) % items.length;
+        return items[itemIndex];
+      }),
+    [startIndex],
   );
-  const goPrev = () => setPage((current) => (current === 0 ? totalPages - 1 : current - 1));
-  const goNext = () => setPage((current) => (current + 1) % totalPages);
+  const goPrev = () =>
+    setStartIndex((current) => (current === 0 ? items.length - 1 : current - 1));
+  const goNext = () => setStartIndex((current) => (current + 1) % items.length);
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
@@ -172,19 +176,19 @@ export function StorefrontCategoryStrip() {
           </button>
         </div>
 
-        {totalPages > 1 ? (
+        {items.length > pageSize ? (
           <div className="flex items-center justify-center gap-2">
-            {Array.from({ length: totalPages }).map((_, index) => (
+            {items.map((item, index) => (
               <button
-                key={index}
+                key={item.title}
                 type="button"
-                onClick={() => setPage(index)}
+                onClick={() => setStartIndex(index)}
                 className={`h-2.5 rounded-full transition ${
-                  page === index
+                  startIndex === index
                     ? "w-8 bg-slate-900"
                     : "w-2.5 bg-slate-300 hover:bg-slate-400"
                 }`}
-                aria-label={`Ir a pagina ${index + 1}`}
+                aria-label={`Ir a posicion ${index + 1}`}
               />
             ))}
           </div>
