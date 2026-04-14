@@ -91,7 +91,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-[#f3f5f8] text-slate-950">
       <div className="border-b border-slate-800 bg-slate-950 text-white">
-        <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-2 px-5 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
+        <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 2xl:px-10">
           <p>Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.</p>
           <div className="flex flex-wrap items-center gap-4 text-slate-300">
             {quickLinks.map((item) => (
@@ -107,7 +107,7 @@ export default async function Home() {
       </div>
 
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-5 px-5 py-5 sm:px-8 lg:px-10">
+        <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffcf33] text-lg font-bold text-slate-950">
@@ -202,8 +202,8 @@ export default async function Home() {
         </div>
       </header>
 
-      <section className="mx-auto w-full max-w-[92rem] px-5 py-5 sm:px-8 lg:px-10">
-        <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
+      <section className="mx-auto w-full max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
+        <div className="grid gap-6 xl:grid-cols-[360px_1fr] 2xl:grid-cols-[390px_1fr]">
           <aside
             id="catalogo"
             className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
@@ -230,7 +230,7 @@ export default async function Home() {
           </aside>
 
           <div className="grid gap-6">
-            <section className="grid gap-6 lg:grid-cols-[1.18fr_0.82fr]">
+            <section className="grid gap-6 2xl:grid-cols-[1.28fr_0.72fr]">
               <article className="overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#11243d_0%,#1f4e79_48%,#2d6ea4_100%)] p-7 text-white shadow-[0_28px_70px_rgba(15,23,42,0.24)]">
                 <p className="text-xs uppercase tracking-[0.34em] text-sky-100/75">
                   Buscar impresiones
@@ -318,7 +318,7 @@ export default async function Home() {
                 </button>
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
                 {featuredProducts.map((product) => (
                   <article
                     key={product.name}
