@@ -6,6 +6,7 @@ import { storefrontProducts } from "@/app/storefront-data";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
 import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
+import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
 
 const RECENT_SEARCHES_KEY = "express-printer-recent-searches";
 const categoryGroups = [
@@ -221,6 +222,7 @@ export function StorefrontShell() {
         <>
           <StorefrontHero />
           <StorefrontCategoryStrip />
+          <StorefrontPromoPanels />
         </>
       )}
     </main>
