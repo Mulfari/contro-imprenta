@@ -146,6 +146,19 @@ export function StorefrontCategoryStrip() {
     };
   }, []);
 
+  const snapToNearestItem = () => {
+    const track = trackRef.current;
+    if (!track) {
+      return;
+    }
+
+    const target = Math.round(track.scrollLeft / ITEM_STRIDE) * ITEM_STRIDE;
+    track.scrollTo({
+      left: target,
+      behavior: "smooth",
+    });
+  };
+
   const slideBy = (direction: "prev" | "next") => {
     const track = trackRef.current;
     if (!track) {
@@ -177,89 +190,96 @@ export function StorefrontCategoryStrip() {
           </svg>
         </button>
 
-        <div
-          ref={trackRef}
-          className={`storefront-strip-scrollbar storefront-strip-track flex gap-[18px] overflow-x-auto ${
-            isDragging ? "cursor-grabbing" : "cursor-grab scroll-smooth"
-          }`}
-          onPointerDown={(event) => {
-            const track = trackRef.current;
-            if (!track) {
-              return;
-            }
+        <div className="relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-[#f5f5f7] to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-[#f5f5f7] to-transparent" />
 
-            dragState.current.pointerId = event.pointerId;
-            dragState.current.startX = event.clientX;
-            dragState.current.startScrollLeft = track.scrollLeft;
-            dragState.current.hasMoved = false;
-            dragState.current.pendingScrollLeft = null;
-            setIsDragging(true);
-            track.setPointerCapture(event.pointerId);
-          }}
-          onPointerMove={(event) => {
-            const track = trackRef.current;
-            if (!track || dragState.current.pointerId !== event.pointerId) {
-              return;
-            }
-
-            const deltaX = (event.clientX - dragState.current.startX) * 1.08;
-            const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
-            dragState.current.pendingScrollLeft = Math.min(
-              Math.max(dragState.current.startScrollLeft - deltaX, 0),
-              maxScrollLeft,
-            );
-            dragState.current.hasMoved ||= Math.abs(deltaX) > 6;
-
-            if (dragState.current.frame !== null) {
-              return;
-            }
-
-            dragState.current.frame = requestAnimationFrame(() => {
-              if (trackRef.current && dragState.current.pendingScrollLeft !== null) {
-                trackRef.current.scrollLeft = dragState.current.pendingScrollLeft;
+          <div
+            ref={trackRef}
+            className={`storefront-strip-scrollbar storefront-strip-track flex gap-[18px] overflow-x-auto px-1 ${
+              isDragging ? "cursor-grabbing" : "cursor-grab scroll-smooth"
+            }`}
+            onPointerDown={(event) => {
+              const track = trackRef.current;
+              if (!track) {
+                return;
               }
 
-              dragState.current.frame = null;
-            });
-          }}
-          onPointerUp={(event) => {
-            const track = trackRef.current;
-            if (!track || dragState.current.pointerId !== event.pointerId) {
-              return;
-            }
+              dragState.current.pointerId = event.pointerId;
+              dragState.current.startX = event.clientX;
+              dragState.current.startScrollLeft = track.scrollLeft;
+              dragState.current.hasMoved = false;
+              dragState.current.pendingScrollLeft = null;
+              setIsDragging(true);
+              track.setPointerCapture(event.pointerId);
+            }}
+            onPointerMove={(event) => {
+              const track = trackRef.current;
+              if (!track || dragState.current.pointerId !== event.pointerId) {
+                return;
+              }
 
-            track.releasePointerCapture(event.pointerId);
-            dragState.current.pointerId = null;
-            setIsDragging(false);
-          }}
-          onPointerCancel={() => {
-            dragState.current.pointerId = null;
-            setIsDragging(false);
-          }}
-        >
-          {items.map((item) => (
-            <button
-              key={item.title}
-              type="button"
-              draggable={false}
-              className="w-[188px] shrink-0 cursor-pointer px-2 py-4 text-center transition hover:opacity-85"
-              onClick={(event) => {
-                if (dragState.current.hasMoved) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  dragState.current.hasMoved = false;
+              const deltaX = (event.clientX - dragState.current.startX) * 1.08;
+              const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
+              dragState.current.pendingScrollLeft = Math.min(
+                Math.max(dragState.current.startScrollLeft - deltaX, 0),
+                maxScrollLeft,
+              );
+              dragState.current.hasMoved ||= Math.abs(deltaX) > 6;
+
+              if (dragState.current.frame !== null) {
+                return;
+              }
+
+              dragState.current.frame = requestAnimationFrame(() => {
+                if (trackRef.current && dragState.current.pendingScrollLeft !== null) {
+                  trackRef.current.scrollLeft = dragState.current.pendingScrollLeft;
                 }
-              }}
-            >
-              <div className="mx-auto flex h-32 w-full items-center justify-center">
-                <CategoryArt art={item.art} />
-              </div>
-              <p className="mt-5 text-[1.02rem] font-semibold leading-6 tracking-tight text-slate-950">
-                {item.title}
-              </p>
-              <p className="mt-1 text-[0.95rem] text-slate-400">{item.count}</p>
-            </button>
-          ))}
+
+                dragState.current.frame = null;
+              });
+            }}
+            onPointerUp={(event) => {
+              const track = trackRef.current;
+              if (!track || dragState.current.pointerId !== event.pointerId) {
+                return;
+              }
+
+              track.releasePointerCapture(event.pointerId);
+              dragState.current.pointerId = null;
+              setIsDragging(false);
+              snapToNearestItem();
+            }}
+            onPointerCancel={() => {
+              dragState.current.pointerId = null;
+              setIsDragging(false);
+              snapToNearestItem();
+            }}
+          >
+            {items.map((item) => (
+              <button
+                key={item.title}
+                type="button"
+                draggable={false}
+                className="w-[188px] shrink-0 cursor-pointer px-2 py-4 text-center transition hover:opacity-85"
+                onClick={(event) => {
+                  if (dragState.current.hasMoved) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    dragState.current.hasMoved = false;
+                  }
+                }}
+              >
+                <div className="mx-auto flex h-32 w-full items-center justify-center">
+                  <CategoryArt art={item.art} />
+                </div>
+                <p className="mt-5 text-[1.02rem] font-semibold leading-6 tracking-tight text-slate-950">
+                  {item.title}
+                </p>
+                <p className="mt-1 text-[0.95rem] text-slate-400">{item.count}</p>
+              </button>
+            ))}
+          </div>
         </div>
 
         <button
