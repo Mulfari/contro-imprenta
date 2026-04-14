@@ -1093,16 +1093,24 @@ export default async function DashboardPage({
                   ) : (
                     filteredClients.map((client) => {
                       const isSelected = selectedClient?.id === client.id;
+                      const detailHref = buildClientUrl(
+                        "detalle",
+                        client.id,
+                        undefined,
+                        clientQuery,
+                      );
 
                       return (
                         <tr
                           key={client.id}
-                          className={isSelected ? "bg-blue-50/60" : undefined}
+                          className={`transition hover:bg-slate-50/90 ${
+                            isSelected ? "bg-blue-50/60" : ""
+                          }`}
                         >
-                          <td className="px-4 py-3">
+                          <td className="p-0">
                             <Link
-                              href={buildClientUrl("detalle", client.id, undefined, clientQuery)}
-                              className="block cursor-pointer"
+                              href={detailHref}
+                              className="block cursor-pointer px-4 py-3"
                             >
                               <div className="font-medium">{client.name}</div>
                               {client.notes ? (
@@ -1112,23 +1120,38 @@ export default async function DashboardPage({
                               ) : null}
                             </Link>
                           </td>
-                          <td className="px-4 py-3">
-                            <div>{client.phone ?? "Sin telefono"}</div>
-                            <div className="text-xs text-slate-400">
-                              {client.email ?? "Sin email"}
-                            </div>
+                          <td className="p-0">
+                            <Link
+                              href={detailHref}
+                              className="block cursor-pointer px-4 py-3"
+                            >
+                              <div>{client.phone ?? "Sin telefono"}</div>
+                              <div className="text-xs text-slate-400">
+                                {client.email ?? "Sin email"}
+                              </div>
+                            </Link>
                           </td>
-                          <td className="px-4 py-3">
-                            <div>{client.document_id ?? "Sin cedula / RIF"}</div>
-                            <div className="text-xs text-slate-400">
-                              {client.preferred_branch ?? client.address ?? "Sin direccion"}
-                            </div>
+                          <td className="p-0">
+                            <Link
+                              href={detailHref}
+                              className="block cursor-pointer px-4 py-3"
+                            >
+                              <div>{client.document_id ?? "Sin cedula / RIF"}</div>
+                              <div className="text-xs text-slate-400">
+                                {client.preferred_branch ?? client.address ?? "Sin direccion"}
+                              </div>
+                            </Link>
                           </td>
                           {session.role === "admin" ? (
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
                                 <Link
-                                  href={buildClientUrl("editar", client.id, undefined, clientQuery)}
+                                  href={buildClientUrl(
+                                    "editar",
+                                    client.id,
+                                    undefined,
+                                    clientQuery,
+                                  )}
                                   className="inline-flex cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
                                 >
                                   Editar
