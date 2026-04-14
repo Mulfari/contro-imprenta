@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/lib/auth/session";
+import { StorefrontHero } from "@/app/storefront-hero";
 
 const quickLinks = ["Catalogo", "FAQ", "Contactanos"];
 
@@ -126,74 +127,7 @@ export default async function Home() {
         </div>
       </header>
 
-      <section className="mx-auto w-full max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
-        <article className="relative overflow-hidden rounded-[2.2rem] bg-[linear-gradient(120deg,#0f1f35_0%,#1d4f79_42%,#3b88c8_100%)] px-8 py-10 text-white shadow-[0_28px_70px_rgba(15,23,42,0.24)] sm:px-10 sm:py-12">
-          <div className="absolute left-8 top-8 h-44 w-44 rounded-full bg-sky-300/14 blur-3xl" />
-          <div className="absolute right-10 top-10 h-56 w-56 rounded-full bg-[#ffcf33]/12 blur-3xl" />
-
-          <div className="relative grid gap-8 xl:grid-cols-[0.92fr_1.08fr] xl:items-center">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-100/75">
-                Banner principal
-              </p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-                Impresion online para marcas, negocios y eventos.
-              </h1>
-              <p className="mt-4 max-w-xl text-base leading-7 text-slate-100/88">
-                Este banner será el espacio principal para promociones,
-                campañas, productos destacados o llamados a pedir online.
-              </p>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  className="cursor-pointer rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
-                >
-                  Comprar ahora
-                </button>
-                <button
-                  type="button"
-                  className="cursor-pointer rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                >
-                  Solicitar cotizacion
-                </button>
-              </div>
-            </div>
-
-            <div className="relative min-h-[280px] rounded-[2rem] border border-white/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.14),rgba(255,255,255,0.04))] p-5 backdrop-blur-sm sm:min-h-[360px]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_36%)]" />
-              <div className="relative flex h-full items-center justify-center rounded-[1.6rem] border border-white/12 bg-[linear-gradient(140deg,rgba(255,255,255,0.12),rgba(255,255,255,0.03))] p-6">
-                <div className="grid w-full gap-4 sm:grid-cols-[1.05fr_0.95fr]">
-                  <div className="rounded-[1.5rem] border border-white/14 bg-white/8 p-4">
-                    <div className="rounded-[1.2rem] border border-white/12 bg-white/10 p-4">
-                      <div className="space-y-3">
-                        <div className="h-3 w-24 rounded-full bg-white/35" />
-                        <div className="h-3 w-32 rounded-full bg-white/20" />
-                        <div className="h-3 w-20 rounded-full bg-white/20" />
-                      </div>
-                      <div className="mt-6 grid grid-cols-2 gap-3">
-                        <div className="h-20 rounded-[1rem] border border-white/12 bg-white/12" />
-                        <div className="h-20 rounded-[1rem] border border-white/12 bg-white/8" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center rounded-[1.5rem] border border-white/14 bg-white p-4 shadow-[0_18px_40px_rgba(0,0,0,0.18)]">
-                    <div className="text-center">
-                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        Imagen principal
-                      </p>
-                      <p className="mt-3 text-lg font-semibold text-slate-700">
-                        Banner de producto o promocion
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
-      </section>
+      <StorefrontHero />
     </main>
   );
 }
