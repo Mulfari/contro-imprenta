@@ -4,10 +4,6 @@ import { useEffect, useState } from "react";
 
 type HeroSlide = {
   id: string;
-  eyebrow: string;
-  title: string;
-  cta: string;
-  price: string;
   shellClass: string;
   imageClass: string;
   accentClass: string;
@@ -16,10 +12,6 @@ type HeroSlide = {
 const slides: HeroSlide[] = [
   {
     id: "tarjetas",
-    eyebrow: "Tarjetas premium",
-    title: "Presentacion profesional para tu marca",
-    cta: "Comprar tarjetas",
-    price: "Desde $18",
     shellClass:
       "bg-[linear-gradient(135deg,#0f1f35_0%,#19426a_40%,#2d78b8_100%)]",
     imageClass:
@@ -28,10 +20,6 @@ const slides: HeroSlide[] = [
   },
   {
     id: "stickers",
-    eyebrow: "Stickers y etiquetas",
-    title: "Identidad visual para empaques y productos",
-    cta: "Ver stickers",
-    price: "Desde $14",
     shellClass:
       "bg-[linear-gradient(135deg,#2b153f_0%,#5b21b6_42%,#8b5cf6_100%)]",
     imageClass:
@@ -40,10 +28,6 @@ const slides: HeroSlide[] = [
   },
   {
     id: "pendones",
-    eyebrow: "Gran formato",
-    title: "Pendones listos para promociones y eventos",
-    cta: "Pedir pendones",
-    price: "Desde $35",
     shellClass:
       "bg-[linear-gradient(135deg,#0f2d28_0%,#0f766e_46%,#14b8a6_100%)]",
     imageClass:
@@ -65,7 +49,7 @@ export function StorefrontHero() {
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="relative h-[420px] overflow-hidden rounded-[2.35rem] shadow-[0_30px_80px_rgba(15,23,42,0.22)] sm:h-[500px] xl:h-[600px]">
+      <div className="relative h-[420px] overflow-hidden rounded-[2.35rem] shadow-[0_30px_80px_rgba(15,23,42,0.22)] sm:h-[500px] xl:h-[620px]">
         {slides.map((slide, index) => {
           const isActive = index === activeIndex;
 
@@ -73,97 +57,30 @@ export function StorefrontHero() {
             <article
               key={slide.id}
               className={`absolute inset-0 transition-all duration-700 ${
-                isActive ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+                isActive ? "opacity-100" : "pointer-events-none opacity-0"
               } ${slide.shellClass}`}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_30%)]" />
-              <div className="absolute left-0 top-0 h-full w-full bg-[linear-gradient(90deg,rgba(7,12,20,0.58)_0%,rgba(7,12,20,0.2)_38%,rgba(7,12,20,0)_70%)]" />
 
-              <div className="relative grid h-full grid-cols-1 xl:grid-cols-[0.42fr_1.58fr]">
-                <div className="flex h-full flex-col justify-end px-6 py-6 sm:px-8 sm:py-8 xl:px-10 xl:py-10">
-                  <div className="max-w-md">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-white/72">
-                      {slide.eyebrow}
-                    </p>
-                    <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl xl:text-[2.9rem]">
-                      {slide.title}
-                    </h1>
-                    <div className="mt-6 flex flex-wrap items-center gap-3">
-                      <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm">
-                        {slide.price}
-                      </span>
-                      <button
-                        type="button"
-                        className="cursor-pointer rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
-                      >
-                        {slide.cta}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex h-full items-center justify-center p-4 sm:p-6 xl:p-8">
+                <div className={`relative h-full w-full overflow-hidden rounded-[2rem] border border-white/14 shadow-[0_24px_60px_rgba(0,0,0,0.18)] ${slide.imageClass}`}>
+                  <div className="absolute left-[6%] top-[10%] h-[22%] w-[14%] rounded-[2rem] bg-white/90 shadow-[0_12px_30px_rgba(15,23,42,0.08)]" />
+                  <div className="absolute left-[10%] top-[42%] h-[18%] w-[24%] rounded-[1.8rem] border border-slate-200/80 bg-white/88 shadow-[0_12px_30px_rgba(15,23,42,0.08)]" />
+                  <div className="absolute left-[38%] top-[18%] h-[54%] w-[36%] rounded-[2.2rem] border border-slate-200/80 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]" />
+                  <div className="absolute right-[8%] top-[12%] h-[22%] w-[12%] rounded-[1.8rem] border border-white/40 bg-white/60 shadow-[0_16px_36px_rgba(15,23,42,0.08)]" />
+                  <div className="absolute right-[10%] bottom-[12%] h-[28%] w-[20%] rounded-[1.8rem] border border-slate-200/80 bg-white/94 shadow-[0_16px_36px_rgba(15,23,42,0.08)]" />
+                  <div className={`absolute right-[16%] top-[20%] h-[9%] w-[5%] rounded-full ${slide.accentClass} shadow-[0_14px_30px_rgba(0,0,0,0.1)]`} />
 
-                <div className="relative hidden h-full xl:block">
-                  <div className="absolute inset-y-8 left-0 right-8 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur-sm">
-                    <div className={`relative h-full rounded-[1.7rem] border border-white/40 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.18)] ${slide.imageClass}`}>
-                      <div className="absolute left-6 top-6 h-24 w-24 rounded-[1.5rem] bg-white/80 shadow-sm" />
-                      <div className={`absolute right-6 top-6 h-16 w-16 rounded-full ${slide.accentClass} shadow-[0_12px_30px_rgba(0,0,0,0.12)]`} />
-                      <div className="absolute bottom-6 left-6 right-6 rounded-[1.3rem] bg-white/92 p-5 shadow-[0_18px_40px_rgba(0,0,0,0.1)]">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="space-y-2">
-                            <div className="h-3 w-24 rounded-full bg-slate-300" />
-                            <div className="h-3 w-16 rounded-full bg-slate-200" />
-                          </div>
-                          <div className="flex h-20 w-20 items-center justify-center rounded-[1rem] border border-slate-200 bg-white text-xs font-semibold text-slate-400">
-                            Imagen
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <div className="absolute left-[42%] top-[24%] h-[6%] w-[18%] rounded-full bg-slate-200" />
+                  <div className="absolute left-[42%] top-[34%] h-[5%] w-[12%] rounded-full bg-slate-100" />
+                  <div className="absolute left-[42%] top-[46%] h-[18%] w-[28%] rounded-[1.5rem] bg-slate-100" />
+                  <div className="absolute left-[14%] bottom-[14%] h-[10%] w-[28%] rounded-[1.5rem] bg-white/78 shadow-[0_10px_24px_rgba(15,23,42,0.06)]" />
+                  <div className="absolute left-[48%] bottom-[14%] h-[10%] w-[18%] rounded-[1.5rem] bg-white/92 shadow-[0_10px_24px_rgba(15,23,42,0.08)]" />
                 </div>
               </div>
             </article>
           );
         })}
-
-        <div className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-between px-6 pb-5 sm:px-8 sm:pb-6 xl:px-10 xl:pb-8">
-          <div className="flex items-center gap-2">
-            {slides.map((slide, index) => {
-              const isActive = index === activeIndex;
-
-              return (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => setActiveIndex(index)}
-                  className={`h-2.5 rounded-full transition-all ${
-                    isActive ? "w-10 bg-white" : "w-2.5 bg-white/40"
-                  }`}
-                  aria-label={`Mostrar banner ${index + 1}`}
-                />
-              );
-            })}
-          </div>
-
-          <div className="hidden items-center gap-2 sm:flex">
-            <button
-              type="button"
-              onClick={() =>
-                setActiveIndex((current) => (current - 1 + slides.length) % slides.length)
-              }
-              className="cursor-pointer rounded-full border border-white/18 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveIndex((current) => (current + 1) % slides.length)}
-              className="cursor-pointer rounded-full border border-white/18 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   );
