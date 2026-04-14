@@ -101,23 +101,14 @@ export function StorefrontShell() {
                     <h3 className="text-sm font-semibold text-slate-500">{group.title}</h3>
                     <div className="mt-3 space-y-2">
                       {group.items.map((item) => {
-                        const categoryMatches = storefrontProducts.filter((product) =>
-                          `${product.title} ${product.note} ${product.category}`
-                            .toLowerCase()
-                            .includes(item.toLowerCase()),
-                        ).length;
-
                         return (
                           <button
                             key={item}
                             type="button"
                             onClick={() => setSearchQuery(item)}
-                            className="flex w-full cursor-pointer items-center justify-between text-left text-sm text-slate-700 transition hover:text-slate-950"
+                            className="block w-full cursor-pointer text-left text-sm text-slate-700 transition hover:text-slate-950"
                           >
-                            <span>{item}</span>
-                            <span className="text-xs font-semibold text-slate-400">
-                              {categoryMatches}
-                            </span>
+                            {item}
                           </button>
                         );
                       })}
