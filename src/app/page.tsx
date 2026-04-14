@@ -122,20 +122,25 @@ export default async function Home() {
         </div>
       </div>
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-5 sm:px-8 lg:px-10">
-        <header className="rounded-[2rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_22px_55px_rgba(15,23,42,0.05)]">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-700">
-                Express Printer
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-                Tienda online de impresion y papeleria personalizada
-              </h1>
+      <header className="border-b border-slate-200 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.04)]">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-5 py-5 sm:px-8 lg:px-10">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(135deg,#0f172a_0%,#0f4d87_100%)] text-lg font-semibold text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)]">
+                EP
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-sky-700">
+                  Express Printer
+                </p>
+                <p className="mt-1 text-lg font-semibold tracking-tight text-slate-950">
+                  Tienda online de impresion
+                </p>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex min-w-[280px] items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="flex flex-1 flex-col gap-4 xl:mx-8 xl:max-w-3xl xl:flex-row xl:items-center">
+              <div className="flex flex-1 items-center rounded-full border border-slate-200 bg-slate-50 px-5 py-3.5">
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 24 24"
@@ -151,32 +156,57 @@ export default async function Home() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Buscar tarjetas, stickers, pendones..."
+                  placeholder="Buscar tarjetas, flyers, stickers, pendones..."
                   className="ml-3 w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
                 />
               </div>
+              <button
+                type="button"
+                className="cursor-pointer rounded-full bg-sky-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-sky-500"
+              >
+                Buscar
+              </button>
+            </div>
 
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href="#catalogo"
+                className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                Categorias
+              </a>
+              <a
+                href="#destacados"
+                className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                Destacados
+              </a>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                Ingresar al panel
+                Panel administrativo
               </Link>
             </div>
           </div>
+        </div>
 
-          <div className="mt-5 flex flex-wrap gap-3">
+        <div className="border-t border-slate-100 bg-slate-50/80">
+          <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-5 py-3 sm:px-8 lg:px-10">
             {categories.map((category) => (
               <button
                 key={category}
                 type="button"
-                className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
               >
                 {category}
               </button>
             ))}
           </div>
-        </header>
+        </div>
+      </header>
+
+      <section className="mx-auto w-full max-w-7xl px-5 py-5 sm:px-8 lg:px-10">
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[290px_1fr]">
           <aside
