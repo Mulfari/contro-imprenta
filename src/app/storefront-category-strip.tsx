@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const items = [
   { title: "Tarjetas premium", count: "18 productos", art: "cards" },
@@ -99,14 +99,21 @@ function CategoryArt({ art }: { art: string }) {
 
 export function StorefrontCategoryStrip() {
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const dragState = useRef<{
     pointerId: number | null;
     startX: number;
     startScrollLeft: number;
+    hasMoved: boolean;
+    frame: number | null;
+    pendingScrollLeft: number | null;
   }>({
     pointerId: null,
     startX: 0,
     startScrollLeft: 0,
+    hasMoved: false,
+    frame: null,
+    pendingScrollLeft: null,
   });
   const repeatedItems = useMemo(
     () =>
@@ -118,6 +125,25 @@ export function StorefrontCategoryStrip() {
       ).flat(),
     [],
   );
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) {
+      return;
+    }
+
+    track.scrollLeft = items.length * ITEM_STRIDE;
+  }, []);
+
+  useEffect(() => {
+    const dragRef = dragState.current;
+
+    return () => {
+      if (dragRef.frame !== null) {
+        cancelAnimationFrame(dragRef.frame);
+      }
+    };
+  }, []);
 
   const slideBy = (direction: "prev" | "next") => {
     const track = trackRef.current;
@@ -147,7 +173,9 @@ export function StorefrontCategoryStrip() {
 
         <div
           ref={trackRef}
-          className="storefront-strip-scrollbar storefront-strip-track flex gap-[18px] overflow-x-auto scroll-smooth"
+          className={`storefront-strip-scrollbar storefront-strip-track flex gap-[18px] overflow-x-auto ${
+            isDragging ? "cursor-grabbing" : "cursor-grab scroll-smooth"
+          }`}
           onPointerDown={(event) => {
             const track = trackRef.current;
             if (!track) {
@@ -157,6 +185,9 @@ export function StorefrontCategoryStrip() {
             dragState.current.pointerId = event.pointerId;
             dragState.current.startX = event.clientX;
             dragState.current.startScrollLeft = track.scrollLeft;
+            dragState.current.hasMoved = false;
+            dragState.current.pendingScrollLeft = null;
+            setIsDragging(true);
             track.setPointerCapture(event.pointerId);
           }}
           onPointerMove={(event) => {
@@ -165,8 +196,21 @@ export function StorefrontCategoryStrip() {
               return;
             }
 
-            const deltaX = event.clientX - dragState.current.startX;
-            track.scrollLeft = dragState.current.startScrollLeft - deltaX;
+            const deltaX = (event.clientX - dragState.current.startX) * 1.08;
+            dragState.current.pendingScrollLeft = dragState.current.startScrollLeft - deltaX;
+            dragState.current.hasMoved ||= Math.abs(deltaX) > 6;
+
+            if (dragState.current.frame !== null) {
+              return;
+            }
+
+            dragState.current.frame = requestAnimationFrame(() => {
+              if (trackRef.current && dragState.current.pendingScrollLeft !== null) {
+                trackRef.current.scrollLeft = dragState.current.pendingScrollLeft;
+              }
+
+              dragState.current.frame = null;
+            });
           }}
           onPointerUp={(event) => {
             const track = trackRef.current;
@@ -176,9 +220,11 @@ export function StorefrontCategoryStrip() {
 
             track.releasePointerCapture(event.pointerId);
             dragState.current.pointerId = null;
+            setIsDragging(false);
           }}
           onPointerCancel={() => {
             dragState.current.pointerId = null;
+            setIsDragging(false);
           }}
         >
           {repeatedItems.map((item) => (
@@ -187,6 +233,13 @@ export function StorefrontCategoryStrip() {
               type="button"
               draggable={false}
               className="w-[188px] shrink-0 cursor-pointer px-2 py-4 text-center transition hover:opacity-85"
+              onClick={(event) => {
+                if (dragState.current.hasMoved) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  dragState.current.hasMoved = false;
+                }
+              }}
             >
               <div className="mx-auto flex h-32 w-full items-center justify-center">
                 <CategoryArt art={item.art} />
