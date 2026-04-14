@@ -46,7 +46,7 @@ export function StorefrontHeader({
 }: StorefrontHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
   const searchAreaRef = useRef<HTMLDivElement | null>(null);
   const searchPanelRef = useRef<HTMLDivElement | null>(null);
   const categoryAreaRef = useRef<HTMLDivElement | null>(null);
@@ -126,7 +126,17 @@ export function StorefrontHeader({
               <div ref={categoryAreaRef} className="relative">
                 <button
                   type="button"
-                  onClick={() => setCategoryOpen((current) => !current)}
+                  onClick={() =>
+                    setCategoryOpen((current) => {
+                      const next = !current;
+
+                      if (!next) {
+                        setActiveCategoryIndex(null);
+                      }
+
+                      return next;
+                    })
+                  }
                   className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${
                     categoryOpen
                       ? "border-slate-950 bg-white text-slate-950"
@@ -193,39 +203,50 @@ export function StorefrontHeader({
                     </div>
 
                     <div className="bg-white p-6">
-                      <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
-                        Subcategorias
-                      </p>
-                      <p className="mt-2 text-base font-semibold text-slate-950">
-                        {categoryMenu[activeCategoryIndex]?.title}
-                      </p>
-                      <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
-                        {categoryMenu[activeCategoryIndex]?.items.map((item) => (
-                          <button
-                            key={item}
-                            type="button"
-                            onClick={() => {
-                              onSearchQueryChange(item);
-                              setCategoryOpen(false);
-                            }}
-                            className="flex cursor-pointer items-center justify-between rounded-lg border border-transparent px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-950"
-                          >
-                            <span>{item}</span>
-                            <svg
-                              aria-hidden="true"
-                              viewBox="0 0 24 24"
-                              className="h-4 w-4 text-slate-300"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="m9 6 6 6-6 6" />
-                            </svg>
-                          </button>
-                        ))}
-                      </div>
+                      {activeCategoryIndex !== null ? (
+                        <>
+                          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
+                            Subcategorias
+                          </p>
+                          <p className="mt-2 text-base font-semibold text-slate-950">
+                            {categoryMenu[activeCategoryIndex]?.title}
+                          </p>
+                          <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+                            {categoryMenu[activeCategoryIndex]?.items.map((item) => (
+                              <button
+                                key={item}
+                                type="button"
+                                onClick={() => {
+                                  onSearchQueryChange(item);
+                                  setCategoryOpen(false);
+                                  setActiveCategoryIndex(null);
+                                }}
+                                className="flex cursor-pointer items-center justify-between rounded-lg border border-transparent px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-950"
+                              >
+                                <span>{item}</span>
+                                <svg
+                                  aria-hidden="true"
+                                  viewBox="0 0 24 24"
+                                  className="h-4 w-4 text-slate-300"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.8"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="m9 6 6 6-6 6" />
+                                </svg>
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex h-full min-h-[16rem] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-6 text-center">
+                          <p className="max-w-xs text-sm leading-6 text-slate-500">
+                            Selecciona una categoria para ver sus subcategorias.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
