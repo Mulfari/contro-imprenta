@@ -4,119 +4,124 @@ import { useMemo, useState } from "react";
 
 const categoryHighlights = [
   {
-    title: "Tarjetas premium",
-    subtitle: "18 productos",
+    title: "Tarjetas",
+    subtitle: "18 modelos",
     tint: "from-sky-100 via-white to-cyan-50",
     shape: "card",
   },
   {
     title: "Stickers",
-    subtitle: "16 productos",
+    subtitle: "16 opciones",
     tint: "from-yellow-100 via-white to-amber-50",
-    shape: "roll",
+    shape: "sticker",
   },
   {
-    title: "Árbol de levas",
-    subtitle: "104 productos",
+    title: "Folletos",
+    subtitle: "12 formatos",
     tint: "from-zinc-100 via-white to-slate-50",
-    shape: "bar",
+    shape: "booklet",
   },
   {
     title: "Pendones",
-    subtitle: "57 productos",
+    subtitle: "9 formatos",
     tint: "from-violet-100 via-white to-fuchsia-50",
-    shape: "pivot",
+    shape: "banner",
   },
   {
-    title: "Barras telescópicas",
-    subtitle: "1 producto",
+    title: "Talonarios",
+    subtitle: "7 modelos",
     tint: "from-cyan-100 via-white to-sky-50",
-    shape: "tube",
+    shape: "invoice",
   },
   {
-    title: "Facturas",
-    subtitle: "117 productos",
+    title: "Etiquetas",
+    subtitle: "21 opciones",
     tint: "from-stone-100 via-white to-neutral-50",
-    shape: "sheet",
+    shape: "labels",
   },
   {
-    title: "Bomba de aceite",
-    subtitle: "1 producto",
+    title: "Packaging",
+    subtitle: "11 opciones",
     tint: "from-slate-100 via-white to-zinc-50",
-    shape: "gear",
+    shape: "packaging",
   },
   {
-    title: "Cables y guayas",
-    subtitle: "1 producto",
+    title: "Invitaciones",
+    subtitle: "14 disenos",
     tint: "from-neutral-100 via-white to-slate-50",
-    shape: "cable",
+    shape: "invitation",
   },
 ];
 
 function CategoryVisual({ shape }: { shape: string }) {
-  if (shape === "roll") {
+  if (shape === "sticker") {
     return (
       <div className="relative h-20 w-20">
-        <div className="absolute inset-x-5 top-2 h-16 rounded-full bg-yellow-400 shadow-[0_10px_18px_rgba(234,179,8,0.28)]" />
-        <div className="absolute inset-x-4 top-6 h-8 rounded-full border border-slate-400/20 bg-white/70" />
+        <div className="absolute left-3 top-4 h-9 w-9 rounded-[1rem] bg-yellow-300 shadow-[0_8px_18px_rgba(234,179,8,0.24)]" />
+        <div className="absolute right-4 top-8 h-8 w-8 rounded-full bg-pink-300 shadow-[0_8px_18px_rgba(244,114,182,0.2)]" />
+        <div className="absolute left-8 bottom-2 h-6 w-10 rounded-full bg-cyan-300 shadow-[0_8px_18px_rgba(34,211,238,0.2)]" />
       </div>
     );
   }
 
-  if (shape === "bar") {
+  if (shape === "booklet") {
     return (
       <div className="relative h-20 w-20">
-        <div className="absolute left-8 top-1 h-16 w-4 rounded-full bg-slate-500" />
-        <div className="absolute left-6 top-0 h-5 w-8 rounded-full bg-slate-300" />
-        <div className="absolute left-6 bottom-0 h-5 w-8 rounded-full bg-slate-300" />
+        <div className="absolute left-5 top-4 h-12 w-10 rounded-[1rem] border border-slate-300 bg-white shadow-sm" />
+        <div className="absolute left-9 top-2 h-12 w-10 rounded-[1rem] border border-slate-300 bg-white/92 shadow-sm" />
       </div>
     );
   }
 
-  if (shape === "pivot") {
+  if (shape === "banner") {
     return (
       <div className="relative h-20 w-20">
-        <div className="absolute left-6 top-5 h-10 w-8 rotate-[-18deg] rounded-[1rem] bg-slate-500" />
-        <div className="absolute left-3 top-7 h-4 w-4 rounded-full bg-slate-300" />
-        <div className="absolute right-4 top-3 h-5 w-5 rounded-full bg-slate-300" />
+        <div className="absolute left-8 top-2 h-16 w-2 rounded-full bg-slate-400" />
+        <div className="absolute left-10 top-4 h-12 w-9 rounded-r-[0.9rem] rounded-tl-[0.3rem] rounded-bl-[0.3rem] bg-violet-300 shadow-[0_10px_18px_rgba(167,139,250,0.22)]" />
       </div>
     );
   }
 
-  if (shape === "tube") {
-    return (
-      <div className="relative h-20 w-20">
-        <div className="absolute left-5 top-2 h-16 w-2 rotate-[28deg] rounded-full bg-slate-400" />
-        <div className="absolute left-10 top-2 h-16 w-2 rotate-[28deg] rounded-full bg-slate-500" />
-      </div>
-    );
-  }
-
-  if (shape === "sheet") {
+  if (shape === "invoice") {
     return (
       <div className="relative h-20 w-20">
         <div className="absolute left-5 top-4 h-12 w-10 rounded-xl border border-slate-300 bg-white shadow-sm" />
-        <div className="absolute left-8 top-9 h-1.5 w-4 rounded-full bg-slate-200" />
-        <div className="absolute left-8 top-13 h-1.5 w-6 rounded-full bg-slate-200" />
+        <div className="absolute left-9 top-8 h-1.5 w-12 rounded-full bg-slate-200" />
+        <div className="absolute left-9 top-12 h-1.5 w-10 rounded-full bg-slate-200" />
+        <div className="absolute left-9 top-16 h-1.5 w-8 rounded-full bg-slate-200" />
       </div>
     );
   }
 
-  if (shape === "gear") {
+  if (shape === "labels") {
     return (
       <div className="relative h-20 w-20">
-        <div className="absolute left-5 top-3 h-11 w-11 rounded-full border-[6px] border-slate-400 bg-slate-200" />
-        <div className="absolute right-3 bottom-4 h-6 w-6 rounded-lg bg-slate-500" />
+        <div className="absolute left-4 top-4 grid grid-cols-2 gap-2">
+          <div className="h-6 w-6 rounded-lg bg-emerald-300" />
+          <div className="h-6 w-6 rounded-lg bg-cyan-300" />
+          <div className="h-6 w-6 rounded-lg bg-amber-300" />
+          <div className="h-6 w-6 rounded-lg bg-pink-300" />
+        </div>
       </div>
     );
   }
 
-  if (shape === "cable") {
+  if (shape === "packaging") {
     return (
       <div className="relative h-20 w-20">
-        <div className="absolute left-3 top-5 h-9 w-14 rounded-full border-[3px] border-slate-500" />
-        <div className="absolute left-0 top-3 h-4 w-4 rounded-full bg-slate-600" />
-        <div className="absolute right-0 bottom-2 h-4 w-4 rounded-full bg-slate-600" />
+        <div className="absolute left-4 top-5 h-10 w-12 rounded-[0.9rem] border border-slate-300 bg-white shadow-sm" />
+        <div className="absolute left-8 top-2 h-8 w-4 rounded-md bg-slate-300" />
+        <div className="absolute left-8 bottom-2 h-2 w-4 rounded-full bg-amber-300" />
+      </div>
+    );
+  }
+
+  if (shape === "invitation") {
+    return (
+      <div className="relative h-20 w-20">
+        <div className="absolute left-4 top-4 h-11 w-12 rotate-[-10deg] rounded-[1rem] border border-slate-300 bg-white shadow-sm" />
+        <div className="absolute left-8 top-1 h-11 w-12 rotate-[8deg] rounded-[1rem] border border-slate-300 bg-white/92 shadow-sm" />
+        <div className="absolute left-10 top-9 h-3 w-6 rounded-full bg-rose-300" />
       </div>
     );
   }
@@ -124,7 +129,7 @@ function CategoryVisual({ shape }: { shape: string }) {
   return (
     <div className="relative h-20 w-20">
       <div className="absolute left-5 top-4 h-12 w-10 rotate-[-18deg] rounded-xl border border-slate-300 bg-white shadow-sm" />
-      <div className="absolute left-9 top-2 h-12 w-10 rotate-[12deg] rounded-xl border border-slate-300 bg-white/90 shadow-sm" />
+      <div className="absolute left-9 top-2 h-12 w-10 rotate-[12deg] rounded-xl border border-slate-300 bg-white/92 shadow-sm" />
     </div>
   );
 }
