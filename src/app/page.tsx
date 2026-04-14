@@ -122,11 +122,11 @@ export default async function Home() {
         </div>
       </div>
 
-      <header className="border-b border-slate-200 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.04)]">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-5 py-5 sm:px-8 lg:px-10">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+      <header className="w-full border-b border-slate-200 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.04)]">
+        <div className="border-b border-slate-100 bg-white">
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-5 sm:px-8 lg:px-10 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(135deg,#0f172a_0%,#0f4d87_100%)] text-lg font-semibold text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,#0f172a_0%,#0f4d87_100%)] text-lg font-semibold text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)]">
                 EP
               </div>
               <div>
@@ -134,13 +134,34 @@ export default async function Home() {
                   Express Printer
                 </p>
                 <p className="mt-1 text-lg font-semibold tracking-tight text-slate-950">
-                  Tienda online de impresion
+                  Impresion online para negocios y marcas
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col gap-4 xl:mx-8 xl:max-w-3xl xl:flex-row xl:items-center">
-              <div className="flex flex-1 items-center rounded-full border border-slate-200 bg-slate-50 px-5 py-3.5">
+            <div className="flex flex-1 flex-col gap-4 xl:mx-10 xl:max-w-4xl xl:flex-row xl:items-center">
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M3 12h18" />
+                  <path d="M3 18h18" />
+                </svg>
+                Todas las categorias
+              </button>
+
+              <div className="flex flex-1 items-center rounded-full border-2 border-slate-200 bg-slate-50 px-5 py-3.5 focus-within:border-sky-400 focus-within:bg-white">
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 24 24"
@@ -156,31 +177,58 @@ export default async function Home() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Buscar tarjetas, flyers, stickers, pendones..."
+                  placeholder="Busca tarjetas, stickers, volantes, pendones..."
                   className="ml-3 w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
                 />
+                <button
+                  type="button"
+                  className="cursor-pointer rounded-full bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-500"
+                >
+                  Buscar
+                </button>
               </div>
-              <button
-                type="button"
-                className="cursor-pointer rounded-full bg-sky-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-sky-500"
-              >
-                Buscar
-              </button>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <a
-                href="#catalogo"
-                className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
-                Categorias
-              </a>
-              <a
-                href="#destacados"
-                className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M12 4h9" />
+                  <path d="M4 9h16" />
+                  <path d="M4 15h16" />
+                </svg>
+                Cotizar
+              </button>
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
-                Destacados
-              </a>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M22 12c0 5.523-4.925 10-11 10a11.77 11.77 0 0 1-4.68-.95L2 22l1.06-4.03A9.78 9.78 0 0 1 1 12C1 6.477 5.925 2 12 2s10 4.477 10 10Z" />
+                </svg>
+                WhatsApp
+              </button>
               <Link
                 href="/login"
                 className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
@@ -191,17 +239,37 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="border-t border-slate-100 bg-slate-50/80">
-          <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-5 py-3 sm:px-8 lg:px-10">
-            {categories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-              >
-                {category}
+        <div className="border-b border-slate-100 bg-slate-50/75">
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-5 py-3 sm:px-8 lg:px-10 lg:flex-row lg:items-center lg:justify-between">
+            <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-slate-700">
+              <a href="#catalogo" className="transition hover:text-sky-700">
+                Catalogo
+              </a>
+              <a href="#destacados" className="transition hover:text-sky-700">
+                Productos destacados
+              </a>
+              <button type="button" className="cursor-pointer transition hover:text-sky-700">
+                Nuevos ingresos
               </button>
-            ))}
+              <button type="button" className="cursor-pointer transition hover:text-sky-700">
+                Mas vendidos
+              </button>
+              <button type="button" className="cursor-pointer transition hover:text-sky-700">
+                Empresas
+              </button>
+            </nav>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600 transition hover:border-slate-300 hover:bg-slate-100"
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </header>
