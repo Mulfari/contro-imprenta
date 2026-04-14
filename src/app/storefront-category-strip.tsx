@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 
 const items = [
   { title: "Tarjetas premium", count: "18 productos", art: "cards" },
@@ -16,7 +16,7 @@ const items = [
 const ITEM_WIDTH = 188;
 const ITEM_GAP = 18;
 const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
-const LOOP_MULTIPLIER = 4;
+const LOOP_MULTIPLIER = 5;
 
 function CategoryArt({ art }: { art: string }) {
   if (art === "stickers") {
@@ -118,31 +118,6 @@ export function StorefrontCategoryStrip() {
       ).flat(),
     [],
   );
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) {
-      return;
-    }
-
-    const centerOffset = items.length * ITEM_STRIDE;
-    track.scrollLeft = centerOffset;
-
-    const handleScroll = () => {
-      const loopWidth = items.length * ITEM_STRIDE;
-
-      if (track.scrollLeft < loopWidth * 0.5) {
-        track.scrollLeft += loopWidth;
-      } else if (track.scrollLeft > loopWidth * 2.5) {
-        track.scrollLeft -= loopWidth;
-      }
-    };
-
-    track.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      track.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   const slideBy = (direction: "prev" | "next") => {
     const track = trackRef.current;
