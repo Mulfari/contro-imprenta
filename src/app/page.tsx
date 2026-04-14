@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/lib/auth/session";
-import { StorefrontHeader } from "@/app/storefront-header";
-import { StorefrontHero } from "@/app/storefront-hero";
+import { StorefrontShell } from "@/app/storefront-shell";
 
 export default async function Home() {
   const session = await getCurrentSession();
@@ -11,11 +10,5 @@ export default async function Home() {
     redirect("/dashboard");
   }
 
-  return (
-    <main className="min-h-screen bg-[#f3f5f8] text-slate-950">
-      <StorefrontHeader />
-
-      <StorefrontHero />
-    </main>
-  );
+  return <StorefrontShell />;
 }

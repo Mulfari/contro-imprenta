@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { storefrontCategories, storefrontProducts } from "@/app/storefront-data";
+
 const quickLinks = ["Catalogo", "FAQ", "Contactanos"];
 const promoTickerItems = [
   "Impresion express para tarjetas, stickers y pendones",
@@ -11,51 +13,26 @@ const promoTickerItems = [
   "Produccion publicitaria, corporativa y gran formato",
 ];
 
-const searchCategories = [
-  "Tarjetas de presentacion",
-  "Stickers y etiquetas",
-  "Pendones y gran formato",
-  "Facturas y talonarios",
-  "Invitaciones y papeleria",
-];
+type StorefrontHeaderProps = {
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
+  recentSearches: string[];
+};
 
-const searchProducts = [
-  {
-    title: "Tarjetas premium",
-    price: "Desde $18",
-    note: "Mate o brillante",
-    tint: "from-amber-100 via-white to-orange-50",
-  },
-  {
-    title: "Stickers troquelados",
-    price: "Desde $12",
-    note: "Personalizados",
-    tint: "from-sky-100 via-white to-cyan-50",
-  },
-  {
-    title: "Pendon publicitario",
-    price: "Desde $25",
-    note: "Gran formato",
-    tint: "from-violet-100 via-white to-fuchsia-50",
-  },
-  {
-    title: "Talonarios fiscales",
-    price: "Desde $14",
-    note: "Autocopiativos",
-    tint: "from-emerald-100 via-white to-lime-50",
-  },
-];
-
-const recentSearches = [
-  "Tarjetas mate",
-  "Stickers para packaging",
-  "Pendones promocionales",
-];
-
-export function StorefrontHeader() {
+export function StorefrontHeader({
+  searchQuery,
+  onSearchQueryChange,
+  recentSearches,
+}: StorefrontHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchAreaRef = useRef<HTMLDivElement | null>(null);
   const searchPanelRef = useRef<HTMLDivElement | null>(null);
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const suggestedProducts = normalizedQuery
+    ? storefrontProducts.filter((item) =>
+        `${item.title} ${item.note} ${item.category}`.toLowerCase().includes(normalizedQuery),
+      )
+    : storefrontProducts;
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -151,6 +128,8 @@ export function StorefrontHeader() {
                 <input
                   type="text"
                   placeholder="Buscar productos de impresion..."
+                  value={searchQuery}
+                  onChange={(event) => onSearchQueryChange(event.target.value)}
                   onFocus={() => setSearchOpen(true)}
                   className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
                 />
@@ -251,15 +230,20 @@ export function StorefrontHeader() {
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <p className="text-sm font-semibold text-slate-950">Busquedas recientes</p>
                 <div className="flex flex-wrap gap-2.5">
-                  {recentSearches.map((item) => (
+                  {recentSearches.length > 0 ? recentSearches.map((item) => (
                     <button
                       key={item}
                       type="button"
+                      onClick={() => onSearchQueryChange(item)}
                       className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
                     >
                       {item}
                     </button>
-                  ))}
+                  )) : (
+                    <span className="text-sm text-slate-500">
+                      Empieza a buscar y aqui veras tus ultimas consultas.
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -268,10 +252,11 @@ export function StorefrontHeader() {
               <div>
                 <p className="text-sm font-semibold text-slate-950">Categorias</p>
                 <div className="mt-3 space-y-2">
-                  {searchCategories.map((item) => (
+                  {storefrontCategories.map((item) => (
                     <button
                       key={item}
                       type="button"
+                      onClick={() => onSearchQueryChange(item)}
                       className="flex w-full cursor-pointer items-center justify-between rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white"
                     >
                       <span>{item}</span>
@@ -303,10 +288,11 @@ export function StorefrontHeader() {
                   </button>
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {searchProducts.map((item) => (
+                  {suggestedProducts.slice(0, 4).map((item) => (
                     <button
                       key={item.title}
                       type="button"
+                      onClick={() => onSearchQueryChange(item.title)}
                       className="cursor-pointer overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white text-left shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_34px_rgba(15,23,42,0.1)]"
                     >
                       <div
@@ -319,7 +305,9 @@ export function StorefrontHeader() {
                       <div className="space-y-1 px-4 py-4">
                         <p className="text-sm font-semibold text-slate-950">{item.title}</p>
                         <p className="text-xs text-slate-500">{item.note}</p>
-                        <p className="pt-1 text-sm font-semibold text-slate-700">{item.price}</p>
+                        <p className="pt-1 text-sm font-semibold text-slate-700">
+                          Desde {item.price}
+                        </p>
                       </div>
                     </button>
                   ))}
