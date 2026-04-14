@@ -48,7 +48,7 @@ export function StorefrontHeader() {
   return (
     <>
       {searchOpen ? (
-        <div className="fixed inset-0 z-30 bg-slate-950/12 backdrop-blur-[6px]" />
+        <div className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-[4px]" />
       ) : null}
 
       <div className="border-b border-slate-800 bg-slate-950 text-white">
@@ -181,39 +181,43 @@ export function StorefrontHeader() {
       </header>
 
       <div
-        className={`fixed inset-x-0 top-[7.9rem] z-50 px-4 transition-all duration-300 sm:px-6 lg:px-8 2xl:px-10 ${
+        className={`fixed inset-x-0 top-[7.2rem] z-50 px-4 transition-all duration-300 sm:px-6 lg:px-8 2xl:px-10 ${
           searchOpen
             ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-8 opacity-0"
+            : "pointer-events-none -translate-y-6 opacity-0"
         }`}
       >
         <div ref={searchPanelRef} className="mx-auto w-full max-w-[112rem]">
-          <div className="rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_30px_70px_rgba(15,23,42,0.14)]">
-            <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-              <div className="max-w-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                  Busqueda rapida
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                  Encuentra productos y categorias al instante
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Selecciona una sugerencia o una categoria destacada para entrar directo a la parte de la tienda que necesitas.
-                </p>
-              </div>
-
+          <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-[0_30px_70px_rgba(15,23,42,0.14)]">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm font-semibold text-slate-950">
+                Busqueda rapida
+              </p>
               <button
                 type="button"
                 onClick={() => setSearchOpen(false)}
-                className="inline-flex w-fit cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                aria-label="Cerrar busqueda"
               >
-                Cerrar
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6L6 18" />
+                  <path d="M6 6l12 12" />
+                </svg>
               </button>
             </div>
 
-            <div className="mt-5 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <div className="mt-5 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
               <div>
-                <p className="text-sm font-semibold text-slate-950">Busquedas sugeridas</p>
+                <p className="text-sm font-semibold text-slate-950">Sugerencias</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {searchSuggestions.map((item) => (
                     <button
@@ -228,7 +232,7 @@ export function StorefrontHeader() {
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-slate-950">Categorias destacadas</p>
+                <p className="text-sm font-semibold text-slate-950">Categorias</p>
                 <div className="mt-3 flex flex-wrap gap-3">
                   {searchTags.map((item) => (
                     <button
