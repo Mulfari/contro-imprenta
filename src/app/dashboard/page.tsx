@@ -10,13 +10,13 @@ import {
 import { AdminNotificationsPanel } from "@/app/dashboard/admin-notifications-panel";
 import { ClientModal } from "@/app/dashboard/client-modal";
 import { DeleteClientButton } from "@/app/dashboard/delete-client-button";
-import { DeleteUserButton } from "@/app/dashboard/delete-user-button";
 import { DashboardLiveRefresh } from "@/app/dashboard/dashboard-live-refresh";
 import {
   NotificationCenterButton,
   type DashboardNotificationItem,
 } from "@/app/dashboard/notification-center-button";
 import { TeamUserModal } from "@/app/dashboard/team-user-modal";
+import { TeamUsersPanel } from "@/app/dashboard/team-users-panel";
 import { signOutAction } from "@/app/login/actions";
 import { FloatingToast } from "@/components/floating-toast";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -614,18 +614,6 @@ function getAdminNotificationTitle(detail: string) {
   }
 
   return "Actividad del panel";
-}
-
-function getRoleLabel(role: string, secondaryRole?: string | null) {
-  if (role === "admin") {
-    return "Admin";
-  }
-
-  if (!secondaryRole) {
-    return "Staff";
-  }
-
-  return `Staff / ${capitalizeLabel(secondaryRole)}`;
 }
 
 function getViewLabel(view: DashboardView) {
@@ -1598,63 +1586,12 @@ export default async function DashboardPage({
 
           {activeView === "equipo" && session.role === "admin" ? (
             <section id="equipo" className="grid gap-6">
-              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <h3 className="text-xl font-semibold">Usuarios registrados</h3>
-                  <Link
-                    href={buildTeamUrl("nuevo")}
-                    className="inline-flex cursor-pointer items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-                  >
-                    Nuevo usuario
-                  </Link>
-                </div>
-                <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
-                  <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                    <thead className="bg-slate-50 text-slate-500">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Nombre</th>
-                        <th className="px-4 py-3 font-medium">Cedula</th>
-                        <th className="px-4 py-3 font-medium">Contacto</th>
-                        <th className="px-4 py-3 font-medium">Rol</th>
-                        <th className="px-4 py-3 font-medium">Sucursal</th>
-                        <th className="px-4 py-3 font-medium">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
-                      {users.map((user) => (
-                        <tr key={user.id}>
-                          <td className="px-4 py-3">{user.display_name}</td>
-                          <td className="px-4 py-3">{user.national_id}</td>
-                          <td className="px-4 py-3">
-                            <div>{user.phone}</div>
-                            <div className="text-xs text-slate-400">{user.email}</div>
-                          </td>
-                          <td className="px-4 py-3">
-                            {getRoleLabel(user.role, user.secondary_role)}
-                          </td>
-                          <td className="px-4 py-3">
-                            {user.branch ? capitalizeLabel(user.branch) : "Sin sucursal"}
-                          </td>
-                          <td className="px-4 py-3 align-middle">
-                            <div className="flex items-center gap-3">
-                              <Link
-                                href={buildTeamEditUrl(user.id)}
-                                className="inline-flex cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-                              >
-                                Editar
-                              </Link>
-                              <DeleteUserButton
-                                action={deleteUserAction}
-                                userId={user.id}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </article>
+              <TeamUsersPanel
+                users={users}
+                createHref={buildTeamUrl("nuevo")}
+                editHrefBase="/dashboard?view=equipo&team=editar&user="
+                deleteAction={deleteUserAction}
+              />
 
               {teamMode === "nuevo" ? (
                 <TeamUserModal
