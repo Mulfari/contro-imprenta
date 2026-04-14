@@ -19,8 +19,26 @@ type NotificationCenterButtonProps = {
   scopeKey: string;
 };
 
-function getSeenNotificationsKey(scopeKey: string) {
-  return `dashboard_seen_notifications_${scopeKey}`;
+const notificationLimit = 8;
+const dashboardTimeZone = "America/Caracas";
+
+function getDateKey(value: string | Date) {
+  const parsed = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: dashboardTimeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(parsed);
+}
+
+function getSeenNotificationsKey(scopeKey: string, dateKey: string) {
+  return `dashboard_seen_notifications_${scopeKey}_${dateKey}`;
 }
 
 const notificationTone: Record<
@@ -41,6 +59,7 @@ export function NotificationCenterButton({
 }: NotificationCenterButtonProps) {
   const [open, setOpen] = useState(false);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
+  const todayKey = getDateKey(new Date());
   const [displayItems, setDisplayItems] = useState<DashboardNotificationItem[]>([]);
   const [seenIds, setSeenIds] = useState<string[]>(() => {
     if (typeof window === "undefined") {
@@ -48,7 +67,7 @@ export function NotificationCenterButton({
     }
 
     try {
-      const storageKey = getSeenNotificationsKey(scopeKey);
+      const storageKey = getSeenNotificationsKey(scopeKey, getDateKey(new Date()));
       const raw = window.localStorage.getItem(storageKey);
 
       if (!raw) {
@@ -62,9 +81,16 @@ export function NotificationCenterButton({
     }
   });
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const todayItems = useMemo(
+    () =>
+      items
+        .filter((item) => getDateKey(item.createdAt) === todayKey)
+        .slice(0, notificationLimit),
+    [items, todayKey],
+  );
   const unseenItems = useMemo(
-    () => items.filter((item) => !seenIds.includes(item.id)),
-    [items, seenIds],
+    () => todayItems.filter((item) => !seenIds.includes(item.id)),
+    [todayItems, seenIds],
   );
   const activeItem = useMemo(
     () => displayItems.find((item) => item.id === activeItemId) ?? null,
@@ -77,9 +103,9 @@ export function NotificationCenterButton({
       return;
     }
 
-    const storageKey = getSeenNotificationsKey(scopeKey);
+    const storageKey = getSeenNotificationsKey(scopeKey, todayKey);
     window.localStorage.setItem(storageKey, JSON.stringify(seenIds));
-  }, [scopeKey, seenIds]);
+  }, [scopeKey, seenIds, todayKey]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -113,11 +139,11 @@ export function NotificationCenterButton({
             return;
           }
 
-          setDisplayItems(unseenItems);
+          setDisplayItems(todayItems);
 
-          if (unseenItems.length > 0) {
+          if (todayItems.length > 0) {
             setSeenIds((current) => [
-              ...new Set([...current, ...unseenItems.map((item) => item.id)]),
+              ...new Set([...current, ...todayItems.map((item) => item.id)]),
             ]);
           }
 
@@ -183,19 +209,24 @@ export function NotificationCenterButton({
           <div className="max-h-[420px] overflow-y-auto p-3">
             {displayItems.length === 0 ? (
               <div className="rounded-[1.25rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-                No hay notificaciones nuevas.
+                No hay notificaciones para hoy.
               </div>
             ) : (
               <div className="space-y-2">
                 {displayItems.map((item) => {
                   const tone = notificationTone[item.type];
+                  const isSeen = seenIds.includes(item.id);
 
                   return (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => setActiveItemId(item.id)}
-                      className="w-full cursor-pointer rounded-[1.25rem] border border-slate-200 bg-slate-50/70 px-4 py-4 text-left transition hover:border-slate-300 hover:bg-white"
+                      className={`w-full cursor-pointer rounded-[1.25rem] border px-4 py-4 text-left transition hover:border-slate-300 hover:bg-white ${
+                        isSeen
+                          ? "border-slate-200 bg-slate-50/50 opacity-75"
+                          : "border-slate-200 bg-slate-50/70"
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2">
