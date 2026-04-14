@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 const items = [
   { title: "Tarjetas premium", count: "18 productos", art: "cards" },
@@ -12,6 +12,11 @@ const items = [
   { title: "Invitaciones", count: "14 productos", art: "invite" },
   { title: "Packaging", count: "11 productos", art: "packaging" },
 ];
+
+const ITEM_WIDTH = 188;
+const ITEM_GAP = 18;
+const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
+const LOOP_MULTIPLIER = 4;
 
 function CategoryArt({ art }: { art: string }) {
   if (art === "stickers") {
@@ -93,145 +98,194 @@ function CategoryArt({ art }: { art: string }) {
 }
 
 export function StorefrontCategoryStrip() {
-  const [startIndex, setStartIndex] = useState(0);
-  const [direction, setDirection] = useState<"left" | "right">("right");
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartX = useRef<number | null>(null);
-  const dragLastX = useRef<number | null>(null);
-  const dragLastTime = useRef<number | null>(null);
-  const dragVelocity = useRef(0);
-  const activePointerId = useRef<number | null>(null);
-  const pageSize = 6;
-  const visibleItems = useMemo(
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const dragState = useRef<{
+    pointerId: number | null;
+    startX: number;
+    startScrollLeft: number;
+    lastX: number;
+    lastTime: number;
+    velocity: number;
+    raf: number | null;
+  }>({
+    pointerId: null,
+    startX: 0,
+    startScrollLeft: 0,
+    lastX: 0,
+    lastTime: 0,
+    velocity: 0,
+    raf: null,
+  });
+  const repeatedItems = useMemo(
     () =>
-      Array.from({ length: Math.min(pageSize, items.length) }, (_, index) => {
-        const itemIndex = (startIndex + index) % items.length;
-        return items[itemIndex];
-      }),
-    [startIndex],
+      Array.from({ length: LOOP_MULTIPLIER }, (_, copyIndex) =>
+        items.map((item, itemIndex) => ({
+          ...item,
+          key: `${copyIndex}-${itemIndex}-${item.title}`,
+        })),
+      ).flat(),
+    [],
   );
-  const goPrev = () => {
-    setDirection("left");
-    setStartIndex((current) => (current === 0 ? items.length - 1 : current - 1));
-  };
-  const goNext = () => {
-    setDirection("right");
-    setStartIndex((current) => (current + 1) % items.length);
-  };
-  const finishDrag = () => {
-    const offset = dragOffset;
-    const velocity = dragVelocity.current;
 
-    setIsDragging(false);
-    setDragOffset(0);
-    dragStartX.current = null;
-    dragLastX.current = null;
-    dragLastTime.current = null;
-    dragVelocity.current = 0;
-    activePointerId.current = null;
-
-    if (Math.abs(offset) > 64 || Math.abs(velocity) > 0.45) {
-      if (offset < 0 || velocity < -0.45) {
-        goNext();
-      } else {
-        goPrev();
-      }
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) {
+      return;
     }
+
+    const centerOffset = items.length * ITEM_STRIDE;
+    track.scrollLeft = centerOffset;
+
+    const handleScroll = () => {
+      const loopWidth = items.length * ITEM_STRIDE;
+
+      if (track.scrollLeft < loopWidth * 0.5) {
+        track.scrollLeft += loopWidth;
+      } else if (track.scrollLeft > loopWidth * 2.5) {
+        track.scrollLeft -= loopWidth;
+      }
+    };
+
+    track.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const stopMomentum = () => {
+    if (dragState.current.raf !== null) {
+      cancelAnimationFrame(dragState.current.raf);
+      dragState.current.raf = null;
+    }
+  };
+
+  const startMomentum = () => {
+    const track = trackRef.current;
+    if (!track) {
+      return;
+    }
+
+    stopMomentum();
+
+    const tick = () => {
+      dragState.current.velocity *= 0.94;
+
+      if (Math.abs(dragState.current.velocity) < 0.02) {
+        dragState.current.raf = null;
+        return;
+      }
+
+      track.scrollLeft -= dragState.current.velocity * 18;
+      dragState.current.raf = requestAnimationFrame(tick);
+    };
+
+    dragState.current.raf = requestAnimationFrame(tick);
+  };
+
+  const slideBy = (direction: "prev" | "next") => {
+    const track = trackRef.current;
+    if (!track) {
+      return;
+    }
+
+    stopMomentum();
+    track.scrollBy({
+      left: direction === "next" ? ITEM_STRIDE : -ITEM_STRIDE,
+      behavior: "smooth",
+    });
   };
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="grid grid-cols-[2.8rem_1fr_2.8rem] items-center gap-4">
-          <button
-            type="button"
-            onClick={goPrev}
-            className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_14px_30px_rgba(15,23,42,0.07)] transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
-            aria-label="Anterior"
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </button>
+      <div className="grid grid-cols-[2.9rem_minmax(0,1fr)_2.9rem] items-center gap-4">
+        <button
+          type="button"
+          onClick={() => slideBy("prev")}
+          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
+          aria-label="Anterior"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
 
-          <div className="overflow-hidden">
-            <div
-              key={`${direction}-${startIndex}`}
-              className={`grid gap-4 sm:grid-cols-3 xl:grid-cols-6 ${
-                direction === "right" ? "storefront-strip-enter-right" : "storefront-strip-enter-left"
-              } ${isDragging ? "cursor-grabbing" : "cursor-grab"} storefront-strip-track`}
-              style={{
-                transform: `translateX(${dragOffset}px)`,
-                transition: isDragging ? "none" : undefined,
-              }}
-              onPointerDown={(event) => {
-                activePointerId.current = event.pointerId;
-                dragStartX.current = event.clientX;
-                dragLastX.current = event.clientX;
-                dragLastTime.current = performance.now();
-                dragVelocity.current = 0;
-                setIsDragging(true);
-                event.currentTarget.setPointerCapture(event.pointerId);
-              }}
-              onPointerMove={(event) => {
-                if (activePointerId.current !== event.pointerId || dragStartX.current === null) {
-                  return;
-                }
+        <div
+          ref={trackRef}
+          className="storefront-strip-scrollbar storefront-strip-track flex gap-[18px] overflow-x-auto scroll-smooth"
+          onPointerDown={(event) => {
+            const track = trackRef.current;
+            if (!track) {
+              return;
+            }
 
-                const now = performance.now();
-                const nextOffset = event.clientX - dragStartX.current;
-                setDragOffset(nextOffset);
+            stopMomentum();
+            dragState.current.pointerId = event.pointerId;
+            dragState.current.startX = event.clientX;
+            dragState.current.startScrollLeft = track.scrollLeft;
+            dragState.current.lastX = event.clientX;
+            dragState.current.lastTime = performance.now();
+            dragState.current.velocity = 0;
+            track.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={(event) => {
+            const track = trackRef.current;
+            if (!track || dragState.current.pointerId !== event.pointerId) {
+              return;
+            }
 
-                if (dragLastX.current !== null && dragLastTime.current !== null) {
-                  const deltaX = event.clientX - dragLastX.current;
-                  const deltaTime = Math.max(now - dragLastTime.current, 1);
-                  dragVelocity.current = deltaX / deltaTime;
-                }
+            const now = performance.now();
+            const deltaX = event.clientX - dragState.current.startX;
+            track.scrollLeft = dragState.current.startScrollLeft - deltaX;
 
-                dragLastX.current = event.clientX;
-                dragLastTime.current = now;
-              }}
-              onPointerUp={(event) => {
-                if (activePointerId.current !== event.pointerId) {
-                  return;
-                }
+            const stepX = event.clientX - dragState.current.lastX;
+            const stepTime = Math.max(now - dragState.current.lastTime, 1);
+            dragState.current.velocity = stepX / stepTime;
+            dragState.current.lastX = event.clientX;
+            dragState.current.lastTime = now;
+          }}
+          onPointerUp={(event) => {
+            const track = trackRef.current;
+            if (!track || dragState.current.pointerId !== event.pointerId) {
+              return;
+            }
 
-                event.currentTarget.releasePointerCapture(event.pointerId);
-                finishDrag();
-              }}
-              onPointerCancel={() => {
-                finishDrag();
-              }}
+            track.releasePointerCapture(event.pointerId);
+            dragState.current.pointerId = null;
+            startMomentum();
+          }}
+          onPointerCancel={() => {
+            dragState.current.pointerId = null;
+            startMomentum();
+          }}
+        >
+          {repeatedItems.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              draggable={false}
+              className="w-[188px] shrink-0 cursor-pointer px-2 py-4 text-center transition hover:opacity-85"
             >
-              {visibleItems.map((item) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  draggable={false}
-                  className="cursor-pointer px-2 py-4 text-center transition hover:opacity-85"
-                >
-                  <div className="mx-auto flex h-32 w-full max-w-[8.8rem] items-center justify-center">
-                    <CategoryArt art={item.art} />
-                  </div>
-                  <p className="mt-5 text-[1.02rem] font-semibold leading-6 tracking-tight text-slate-950">
-                    {item.title}
-                  </p>
-                  <p className="mt-1 text-[0.95rem] text-slate-400">{item.count}</p>
-                </button>
-              ))}
-            </div>
-          </div>
+              <div className="mx-auto flex h-32 w-full items-center justify-center">
+                <CategoryArt art={item.art} />
+              </div>
+              <p className="mt-5 text-[1.02rem] font-semibold leading-6 tracking-tight text-slate-950">
+                {item.title}
+              </p>
+              <p className="mt-1 text-[0.95rem] text-slate-400">{item.count}</p>
+            </button>
+          ))}
+        </div>
 
-          <button
-            type="button"
-            onClick={goNext}
-            className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_14px_30px_rgba(15,23,42,0.07)] transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
-            aria-label="Siguiente"
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m9 6 6 6-6 6" />
-            </svg>
-          </button>
+        <button
+          type="button"
+          onClick={() => slideBy("next")}
+          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
+          aria-label="Siguiente"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m9 6 6 6-6 6" />
+          </svg>
+        </button>
       </div>
     </section>
   );
