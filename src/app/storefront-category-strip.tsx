@@ -191,9 +191,6 @@ export function StorefrontCategoryStrip() {
         </button>
 
         <div className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-[#f5f5f7] to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-[#f5f5f7] to-transparent" />
-
           <div
             ref={trackRef}
             className={`storefront-strip-scrollbar storefront-strip-track flex gap-[18px] overflow-x-auto px-1 ${
