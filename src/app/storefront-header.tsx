@@ -46,6 +46,12 @@ const searchProducts = [
   },
 ];
 
+const recentSearches = [
+  "Tarjetas mate",
+  "Stickers para packaging",
+  "Pendones promocionales",
+];
+
 export function StorefrontHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchAreaRef = useRef<HTMLDivElement | null>(null);
@@ -241,7 +247,24 @@ export function StorefrontHeader() {
               </button>
             </div>
 
-            <div className="mt-5 grid gap-5 xl:grid-cols-[0.72fr_1.28fr]">
+            <div className="mt-4 rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <p className="text-sm font-semibold text-slate-950">Busquedas recientes</p>
+                <div className="flex flex-wrap gap-2.5">
+                  {recentSearches.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-5 xl:grid-cols-[0.68fr_1.32fr]">
               <div>
                 <p className="text-sm font-semibold text-slate-950">Categorias</p>
                 <div className="mt-3 space-y-2">
@@ -287,9 +310,11 @@ export function StorefrontHeader() {
                       className="cursor-pointer overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white text-left shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_34px_rgba(15,23,42,0.1)]"
                     >
                       <div
-                        className={`flex h-32 items-end rounded-b-[1.8rem] rounded-t-[1.35rem] bg-gradient-to-br ${item.tint} p-4`}
+                        className={`flex h-36 items-end rounded-b-[1.8rem] rounded-t-[1.35rem] bg-gradient-to-br ${item.tint} p-4`}
                       >
-                        <div className="h-14 w-20 rounded-2xl border border-white/80 bg-white/80 shadow-sm" />
+                        <div className="flex h-16 w-24 items-center justify-center rounded-[1.25rem] border border-white/80 bg-white/80 shadow-sm">
+                          <div className="h-7 w-14 rounded-lg bg-slate-200/80" />
+                        </div>
                       </div>
                       <div className="space-y-1 px-4 py-4">
                         <p className="text-sm font-semibold text-slate-950">{item.title}</p>
