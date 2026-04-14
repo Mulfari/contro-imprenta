@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -105,19 +106,16 @@ export function StorefrontHeader({
       <header className="relative z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffcf33] text-lg font-bold text-slate-950">
-                EP
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-slate-500">
-                  Express Printer
-                </p>
-                <p className="mt-1 text-xl font-semibold tracking-tight">
-                  Tienda online de impresion
-                </p>
-              </div>
-            </div>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/express-printer-logo.svg"
+                alt="Express Printer"
+                width={210}
+                height={50}
+                className="h-auto w-[11.5rem] sm:w-[13rem]"
+                priority
+              />
+            </Link>
 
             <div
               ref={searchAreaRef}
