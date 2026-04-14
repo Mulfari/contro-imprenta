@@ -11,6 +11,9 @@ const items = [
   { title: "Etiquetas", count: "21 productos", art: "labels" },
   { title: "Invitaciones", count: "14 productos", art: "invite" },
   { title: "Packaging", count: "11 productos", art: "packaging" },
+  { title: "Cuadernos", count: "10 productos", art: "booklet" },
+  { title: "Acrilicos", count: "6 productos", art: "banner" },
+  { title: "Sellos", count: "8 productos", art: "invoice" },
 ];
 
 const ITEM_WIDTH = 188;
