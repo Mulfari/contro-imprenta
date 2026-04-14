@@ -96,8 +96,6 @@ export function StorefrontCategoryStrip() {
   const [startIndex, setStartIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const pageSize = 6;
-  const progressWidth = Math.max(22, (pageSize / items.length) * 100);
-  const progressOffset = (startIndex / items.length) * 100;
   const visibleItems = useMemo(
     () =>
       Array.from({ length: Math.min(pageSize, items.length) }, (_, index) => {
@@ -112,8 +110,7 @@ export function StorefrontCategoryStrip() {
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="space-y-4">
-        <div className="grid grid-cols-[2.8rem_1fr_2.8rem] items-center gap-4">
+      <div className="grid grid-cols-[2.8rem_1fr_2.8rem] items-center gap-4">
           <button
             type="button"
             onClick={goPrev}
@@ -176,24 +173,6 @@ export function StorefrontCategoryStrip() {
               <path d="m9 6 6 6-6 6" />
             </svg>
           </button>
-        </div>
-
-        {items.length > pageSize ? (
-          <div className="flex items-center justify-center gap-4">
-            <span className="text-sm text-slate-400">
-              {startIndex + 1}-{Math.min(startIndex + pageSize, items.length)} de {items.length}
-            </span>
-            <div className="relative h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="absolute inset-y-0 rounded-full bg-slate-900 transition-all duration-300"
-                style={{
-                  width: `${progressWidth}%`,
-                  transform: `translateX(${progressOffset}%)`,
-                }}
-              />
-            </div>
-          </div>
-        ) : null}
       </div>
     </section>
   );
