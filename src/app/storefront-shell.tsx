@@ -56,7 +56,22 @@ export function StorefrontShell() {
       }
 
       setRecentSearches((current) => {
-        const next = normalizeSearchList([trimmedQuery, ...current]);
+        const latestSearch = current[0]?.trim().toLowerCase();
+        const nextSearch = trimmedQuery.toLowerCase();
+
+        if (latestSearch === nextSearch) {
+          return current;
+        }
+
+        let next: string[];
+
+        if (latestSearch && nextSearch.startsWith(latestSearch)) {
+          next = normalizeSearchList([trimmedQuery, ...current.slice(1)]);
+        } else if (latestSearch && latestSearch.startsWith(nextSearch)) {
+          return current;
+        } else {
+          next = normalizeSearchList([trimmedQuery, ...current]);
+        }
 
         try {
           window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
