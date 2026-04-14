@@ -5,11 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { storefrontProducts } from "@/app/storefront-data";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
 import { StorefrontDealsSection } from "@/app/storefront-deals-section";
-import { StorefrontGridShowcaseSection } from "@/app/storefront-grid-showcase-section";
 import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
 import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
-import { StorefrontShowcaseSection } from "@/app/storefront-showcase-section";
 
 const RECENT_SEARCHES_KEY = "express-printer-recent-searches";
 const categoryGroups = [
@@ -227,8 +225,6 @@ export function StorefrontShell() {
           <StorefrontCategoryStrip />
           <StorefrontPromoPanels />
           <StorefrontDealsSection />
-          <StorefrontShowcaseSection />
-          <StorefrontGridShowcaseSection />
         </>
       )}
     </main>
