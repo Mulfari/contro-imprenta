@@ -102,19 +102,16 @@ export function StorefrontShell() {
               </h2>
               <div className="mt-5 space-y-5">
                 {categoryGroups.map((group) => (
-                  <div
-                    key={group.title}
-                    className="rounded-[1.3rem] border border-slate-200 bg-slate-50/75 p-4"
-                  >
+                  <div key={group.title} className="border-b border-slate-100 pb-5 last:border-b-0 last:pb-0">
                     <h3 className="text-sm font-semibold text-slate-500">{group.title}</h3>
-                    <div className="mt-3 space-y-2.5">
+                    <div className="mt-3 space-y-1.5">
                       {group.items.map((item) => {
                         return (
                           <button
                             key={item}
                             type="button"
                             onClick={() => setSearchQuery(item)}
-                            className="block w-full cursor-pointer rounded-xl bg-white px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-950 hover:text-white"
+                            className="block w-full cursor-pointer rounded-lg px-2 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
                           >
                             {item}
                           </button>
@@ -172,24 +169,16 @@ export function StorefrontShell() {
                       <div className="space-y-3 p-5">
                         <h3 className="text-lg font-semibold tracking-tight">{item.title}</h3>
                         <p className="text-sm leading-6 text-slate-600">{item.note}</p>
-                        <div className="flex items-center justify-between gap-3 pt-1">
+                        <div className="flex items-end justify-between gap-3 pt-1">
                           <p className="text-lg font-semibold text-slate-950">
                             Desde {item.price}
                           </p>
-                          <div className="flex gap-3">
-                            <button
-                              type="button"
-                              className="cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-                            >
-                              Pedir
-                            </button>
-                            <button
-                              type="button"
-                              className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                            >
-                              Ver
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            className="cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                          >
+                            Ver
+                          </button>
                         </div>
                         <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs font-medium text-slate-400">
                           <span>Entrega express</span>
