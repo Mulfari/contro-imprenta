@@ -2,69 +2,86 @@
 
 function PromoTile({
   title,
+  eyebrow,
   theme,
   compact = false,
 }: {
   title: string;
-  theme: "yellow" | "blue" | "dark" | "light";
+  eyebrow: string;
+  theme: "sun" | "sky" | "ink" | "paper";
   compact?: boolean;
 }) {
   const palette =
-    theme === "yellow"
+    theme === "sun"
       ? {
-          wrapper: "bg-[#facc15] text-slate-950",
+          wrapper: "bg-gradient-to-br from-[#ffd94d] via-[#ffc423] to-[#ffb000] text-slate-950",
           shapeA: "bg-white",
-          shapeB: "bg-slate-950",
+          shapeB: "bg-[#101828]",
           shapeC: "bg-[#38bdf8]",
-          line: "bg-slate-900/10",
+          line: "bg-black/10",
+          eyebrow: "text-slate-900/60",
         }
-      : theme === "blue"
+      : theme === "sky"
         ? {
-            wrapper: "bg-[#3b5bfd] text-white",
+            wrapper: "bg-gradient-to-br from-[#4d6bff] via-[#3558ff] to-[#1937d9] text-white",
             shapeA: "bg-white",
-            shapeB: "bg-[#facc15]",
-            shapeC: "bg-[#111827]",
-            line: "bg-white/16",
+            shapeB: "bg-[#ffd84c]",
+            shapeC: "bg-[#0f172a]",
+            line: "bg-white/14",
+            eyebrow: "text-white/72",
           }
-        : theme === "dark"
+        : theme === "ink"
           ? {
-              wrapper: "bg-[#101010] text-white",
+              wrapper: "bg-gradient-to-br from-[#111111] via-[#171717] to-[#050505] text-white",
               shapeA: "bg-white",
-              shapeB: "bg-[#facc15]",
-              shapeC: "bg-white/14",
+              shapeB: "bg-[#fb7185]",
+              shapeC: "bg-[#facc15]",
               line: "bg-white/10",
+              eyebrow: "text-white/62",
             }
           : {
-              wrapper: "border border-slate-200 bg-white text-slate-950",
-              shapeA: "bg-white",
-              shapeB: "bg-slate-950",
+              wrapper: "bg-gradient-to-br from-white via-[#f8fafc] to-[#eef2ff] text-slate-950 border border-slate-200",
+              shapeA: "bg-[#111827]",
+              shapeB: "bg-white",
               shapeC: "bg-[#facc15]",
-              line: "bg-slate-100",
+              line: "bg-slate-200/90",
+              eyebrow: "text-slate-500",
             };
 
   return (
     <article
-      className={`group overflow-hidden rounded-[2rem] ${palette.wrapper} shadow-[0_18px_40px_rgba(15,23,42,0.05)]`}
+      className={`group overflow-hidden rounded-[2rem] ${palette.wrapper} shadow-[0_22px_48px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(15,23,42,0.12)]`}
     >
       <div className={`grid h-full gap-6 p-8 ${compact ? "lg:grid-cols-[1fr_0.9fr]" : "lg:grid-cols-[0.95fr_1.05fr]"}`}>
-        <div className="flex items-end">
-          <h2
-            className={`whitespace-pre-line font-black leading-none tracking-tight ${
-              compact ? "text-3xl xl:text-[2.55rem]" : "text-4xl xl:text-[3.2rem]"
-            }`}
-          >
-            {title}
-          </h2>
+        <div className="flex flex-col justify-between">
+          <div>
+            <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${palette.eyebrow}`}>
+              {eyebrow}
+            </p>
+            <h2
+              className={`mt-4 whitespace-pre-line font-black leading-none tracking-tight ${
+                compact ? "text-3xl xl:text-[2.55rem]" : "text-4xl xl:text-[3.2rem]"
+              }`}
+            >
+              {title}
+            </h2>
+          </div>
+
+          <span className="mt-8 inline-flex w-fit items-center gap-2 rounded-2xl bg-white/88 px-5 py-3 text-sm font-semibold text-slate-950 shadow-sm backdrop-blur-sm">
+            Ver mas
+            <span aria-hidden="true">›</span>
+          </span>
         </div>
 
         <div className={`relative ${compact ? "min-h-[12rem]" : "min-h-[19rem]"}`}>
           <div className={`absolute left-2 top-0 h-20 w-44 -rotate-12 rounded-full ${palette.line}`} />
           <div className={`absolute right-0 top-4 h-16 w-28 rounded-full ${palette.line}`} />
-          <div className={`absolute right-14 top-8 h-44 w-32 rotate-[6deg] rounded-[1.9rem] ${palette.shapeA} shadow-[0_22px_44px_rgba(15,23,42,0.12)] transition duration-300 group-hover:-translate-y-1`} />
-          <div className={`absolute right-30 top-16 h-40 w-28 -rotate-[8deg] rounded-[1.5rem] ${palette.shapeB} shadow-[0_22px_44px_rgba(15,23,42,0.12)] transition duration-300 group-hover:translate-x-1 group-hover:translate-y-1`} />
-          <div className={`absolute right-16 top-14 h-5 w-22 rounded-full ${palette.shapeC} transition duration-300 group-hover:scale-105`} />
-          <div className={`absolute right-18 top-27 h-3 w-16 rounded-full ${theme === "dark" ? "bg-white/28" : "bg-slate-200"}`} />
-          <div className={`absolute right-18 top-34 h-3 w-12 rounded-full ${theme === "dark" ? "bg-white/18" : "bg-slate-200"}`} />
+          <div className={`absolute right-16 top-8 h-44 w-32 rotate-[7deg] rounded-[1.9rem] ${palette.shapeA} shadow-[0_26px_50px_rgba(15,23,42,0.15)] transition duration-300 group-hover:-translate-y-2 group-hover:rotate-[10deg]`} />
+          <div className={`absolute right-34 top-18 h-40 w-28 -rotate-[9deg] rounded-[1.5rem] ${palette.shapeB} shadow-[0_22px_44px_rgba(15,23,42,0.14)] transition duration-300 group-hover:translate-x-2 group-hover:translate-y-2`} />
+          <div className={`absolute right-22 top-18 h-5 w-22 rounded-full ${palette.shapeC} transition duration-300 group-hover:scale-110`} />
+          <div className={`absolute right-22 top-30 h-3 w-18 rounded-full ${theme === "ink" ? "bg-white/24" : "bg-slate-200/90"}`} />
+          <div className={`absolute right-20 top-37 h-3 w-12 rounded-full ${theme === "ink" ? "bg-white/18" : "bg-slate-200/90"}`} />
+          <div className={`absolute right-40 top-28 h-14 w-14 rounded-full ${theme === "paper" ? "bg-[#38bdf8]" : "bg-white/18"} transition duration-300 group-hover:-translate-y-1 group-hover:scale-105`} />
         </div>
       </div>
     </article>
@@ -75,12 +92,30 @@ export function StorefrontPromoPanels() {
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-10 sm:px-6 lg:px-8 2xl:px-10">
       <div className="grid gap-4 xl:grid-cols-[1.02fr_1.22fr_1fr]">
-        <PromoTile title={"Tarjetas\nPremium"} theme="yellow" />
-        <PromoTile title={"Stickers y\nEtiquetas"} theme="blue" />
+        <PromoTile
+          title={"Tarjetas\nPremium"}
+          eyebrow="Acabados destacados"
+          theme="sun"
+        />
+        <PromoTile
+          title={"Stickers y\nEtiquetas"}
+          eyebrow="Marca y packaging"
+          theme="sky"
+        />
 
         <div className="grid gap-4">
-          <PromoTile title={"Pendones,\nafiches"} theme="dark" compact />
-          <PromoTile title={"Talonarios,\nrecibos"} theme="light" compact />
+          <PromoTile
+            title={"Pendones,\nafiches"}
+            eyebrow="Gran formato"
+            theme="ink"
+            compact
+          />
+          <PromoTile
+            title={"Talonarios,\nrecibos"}
+            eyebrow="Impresion diaria"
+            theme="paper"
+            compact
+          />
         </div>
       </div>
     </section>
