@@ -821,7 +821,6 @@ export default async function DashboardPage({
   const selectedClient =
     filteredClients.find((client) => client.id === selectedClientId) ??
     clients.find((client) => client.id === selectedClientId) ??
-    filteredClients[0] ??
     null;
   const selectedClientOrders = selectedClient
     ? orders.filter((order) => order.client_id === selectedClient.id)
