@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const quickLinks = ["Catalogo", "FAQ", "Contactanos"];
 const promoTickerItems = [
@@ -22,6 +22,23 @@ const searchTags = ["Tarjetas", "Stickers", "Pendones", "Etiquetas", "Facturas"]
 
 export function StorefrontHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
+  const searchAreaRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (!searchAreaRef.current) {
+        return;
+      }
+
+      if (!searchAreaRef.current.contains(event.target as Node)) {
+        setSearchOpen(false);
+      }
+    }
+
+    window.addEventListener("mousedown", handlePointerDown);
+
+    return () => window.removeEventListener("mousedown", handlePointerDown);
+  }, []);
 
   return (
     <>
@@ -58,7 +75,10 @@ export function StorefrontHeader() {
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col gap-3 xl:mx-10 xl:max-w-4xl xl:flex-row xl:items-center">
+            <div
+              ref={searchAreaRef}
+              className="flex flex-1 flex-col gap-3 xl:mx-10 xl:max-w-4xl xl:flex-row xl:items-center"
+            >
               <button
                 type="button"
                 className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
@@ -80,23 +100,32 @@ export function StorefrontHeader() {
                 Todas las categorias
               </button>
 
-              <div className="flex flex-1 items-center rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <div
+                className={`flex flex-1 items-center rounded-xl border bg-white px-4 py-3 shadow-sm transition ${
+                  searchOpen
+                    ? "border-slate-950"
+                    : "border-slate-200"
+                }`}
+              >
                 <input
                   type="text"
                   placeholder="Buscar productos de impresion..."
+                  onFocus={() => setSearchOpen(true)}
                   className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
                 />
-                <button
-                  type="button"
-                  onClick={() => setSearchOpen((current) => !current)}
-                  className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                    searchOpen
-                      ? "bg-slate-950 text-white hover:bg-slate-800"
-                      : "bg-[#ffcf33] text-slate-950 hover:bg-[#f5c61f]"
-                  }`}
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  Buscar
-                </button>
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
               </div>
             </div>
 
@@ -142,13 +171,9 @@ export function StorefrontHeader() {
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setSearchOpen(false)}
-                    className="inline-flex w-fit cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                  >
-                    Cerrar
-                  </button>
+                  <div className="inline-flex w-fit items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">
+                    Resultados
+                  </div>
                 </div>
 
                 <div className="mt-5 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
