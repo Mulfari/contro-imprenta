@@ -953,8 +953,18 @@ export default async function DashboardPage({
 
         </aside>
 
-        <div className="flex min-w-0 flex-col gap-6 px-4 py-4 sm:px-6 lg:px-5 lg:py-5">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_280px]">
+        <div
+          className={`flex min-w-0 flex-col px-4 py-4 sm:px-6 lg:px-5 lg:py-5 ${
+            isClientDetailView ? "gap-4" : "gap-6"
+          }`}
+        >
+          <div
+            className={`grid gap-4 ${
+              isClientDetailView
+                ? "lg:grid-cols-[minmax(0,1fr)]"
+                : "lg:grid-cols-[minmax(0,1fr)_220px_280px]"
+            }`}
+          >
             <header className="rounded-[1.7rem] border border-slate-200/80 bg-white/88 px-6 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
               <div className="flex items-center gap-4">
                 <div className="h-11 w-1.5 rounded-full bg-slate-900" />
@@ -981,50 +991,54 @@ export default async function DashboardPage({
               </div>
             </header>
 
-            <NotificationCenterButton
-              items={adminNotificationItems}
-              scopeKey={session.userId}
-            />
+            {!isClientDetailView ? (
+              <NotificationCenterButton
+                items={adminNotificationItems}
+                scopeKey={session.userId}
+              />
+            ) : null}
 
-            <aside className="rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
-                    {sessionInitial}
+            {!isClientDetailView ? (
+              <aside className="rounded-[1.5rem] border border-slate-200/80 bg-white/88 px-5 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                      {sessionInitial}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {capitalizeLabel(session.displayName)}
+                      </p>
+                      <p className="mt-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+                        {capitalizeLabel(session.role)}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {capitalizeLabel(session.displayName)}
-                    </p>
-                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-                      {capitalizeLabel(session.role)}
-                    </p>
-                  </div>
-                </div>
-                <form action={signOutAction}>
-                  <button
-                    type="submit"
-                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
-                    aria-label="Cerrar sesion"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                  <form action={signOutAction}>
+                    <button
+                      type="submit"
+                      className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
+                      aria-label="Cerrar sesion"
                     >
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                      <path d="M16 17l5-5-5-5" />
-                      <path d="M21 12H9" />
-                    </svg>
-                  </button>
-                </form>
-              </div>
-            </aside>
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <path d="M16 17l5-5-5-5" />
+                        <path d="M21 12H9" />
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </aside>
+            ) : null}
           </div>
 
           {activeView === "resumen" ? (

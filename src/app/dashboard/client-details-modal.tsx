@@ -93,7 +93,7 @@ export function ClientDetailsPanel({
   const billed = payments.reduce((sum, order) => sum + (order.total_amount ?? 0), 0);
 
   return (
-    <aside className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,249,252,0.98))] shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+    <aside className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,249,252,0.98))] shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <div className="border-b border-slate-200 bg-white/88 px-6 py-5 backdrop-blur sm:px-7">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -123,7 +123,7 @@ export function ClientDetailsPanel({
         </div>
       </div>
 
-      <div className="max-h-[calc(100vh-16rem)] overflow-y-auto px-6 py-6 sm:px-7">
+      <div className="px-6 py-6 sm:px-7">
         <div className="grid gap-6">
           <section className="space-y-6">
             <div className="rounded-[1.8rem] border border-slate-200 bg-slate-50/85 p-5">
