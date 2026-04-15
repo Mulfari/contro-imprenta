@@ -295,28 +295,7 @@ export function StorefrontHeader({
                   <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
                   <path d="M5 20a7 7 0 0 1 14 0" />
                 </svg>
-                Ingresar
-              </button>
-              <button
-                type="button"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-              >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M4 7h16" />
-                  <path d="M4 12h10" />
-                  <path d="M4 17h7" />
-                  <path d="m16 15 4-3-4-3" />
-                </svg>
-                Mis pedidos
+                Mi cuenta
               </button>
               <button
                 type="button"
