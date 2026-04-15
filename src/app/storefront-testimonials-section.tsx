@@ -99,12 +99,8 @@ export function StorefrontTestimonialsSection() {
 
   return (
     <section className="w-full pb-18">
-      <div className="relative overflow-hidden border-y border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_30%,#ffffff_100%)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[radial-gradient(circle_at_top,rgba(53,88,255,0.08),transparent_58%)]" />
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-[linear-gradient(90deg,rgba(53,88,255,0.035),transparent)]" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-[linear-gradient(270deg,rgba(255,182,29,0.05),transparent)]" />
-
-        <div className="relative flex items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
+      <div className="border-y border-slate-200 bg-white">
+        <div className="flex items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
           <div className="h-px flex-1 bg-slate-200" />
           <h2 className="text-center text-[1.95rem] font-semibold tracking-tight text-slate-950">
             Lo que nuestros clientes estan diciendo
@@ -201,7 +197,7 @@ export function StorefrontTestimonialsSection() {
           </div>
         </div>
 
-        <div className="relative grid gap-5 border-t border-slate-200/90 bg-white/72 px-3 py-10 backdrop-blur-[2px] sm:px-5 md:grid-cols-2 lg:grid-cols-5 lg:px-6 2xl:px-10">
+        <div className="grid gap-5 border-t border-slate-200 px-3 py-10 sm:px-5 md:grid-cols-2 lg:grid-cols-5 lg:px-6 2xl:px-10">
           {benefits.map((item, index) => (
             <article key={item.title} className="flex items-start gap-4">
               <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-slate-200 text-[#3558ff]">
