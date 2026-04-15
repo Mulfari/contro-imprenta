@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+
 const products = [
   {
     title: "Tarjetas soft touch",
@@ -33,7 +35,51 @@ const products = [
     discount: "-$6",
     tint: "from-[#ffe0ea] via-white to-[#ffd2df]",
   },
+  {
+    title: "Sobres membretados",
+    category: "Sobres",
+    price: "$18",
+    previousPrice: "$22",
+    discount: "-$4",
+    tint: "from-[#f3f4f6] via-white to-[#e5e7eb]",
+  },
+  {
+    title: "Etiquetas metalizadas",
+    category: "Etiquetas",
+    price: "$18",
+    previousPrice: "$22",
+    discount: "-$4",
+    tint: "from-[#eef2ff] via-white to-[#e4e9ff]",
+  },
+  {
+    title: "Talonarios autocopiativos",
+    category: "Talonarios",
+    price: "$24",
+    previousPrice: "$31",
+    discount: "-$7",
+    tint: "from-[#e8ffe7] via-white to-[#d8ffd5]",
+  },
+  {
+    title: "Vinil adhesivo",
+    category: "Vinil",
+    price: "$28",
+    previousPrice: "$35",
+    discount: "-$7",
+    tint: "from-[#fff3cf] via-white to-[#ffe7af]",
+  },
 ];
+
+function getVisibleCount(width: number) {
+  if (width >= 1280) {
+    return 4;
+  }
+
+  if (width >= 768) {
+    return 2;
+  }
+
+  return 1;
+}
 
 function SideFeature() {
   return (
@@ -136,14 +182,70 @@ function ProductCard({
 }
 
 export function StorefrontFeatureGridSection() {
+  const [startIndex, setStartIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(4);
+
+  useEffect(() => {
+    const updateVisibleCount = () => {
+      const nextVisibleCount = getVisibleCount(window.innerWidth);
+      setVisibleCount(nextVisibleCount);
+      setStartIndex((current) => Math.min(current, Math.max(products.length - nextVisibleCount, 0)));
+    };
+
+    updateVisibleCount();
+    window.addEventListener("resize", updateVisibleCount);
+    return () => window.removeEventListener("resize", updateVisibleCount);
+  }, []);
+
+  const visibleProducts = useMemo(
+    () => products.slice(startIndex, startIndex + visibleCount),
+    [startIndex, visibleCount],
+  );
+  const canGoPrev = startIndex > 0;
+  const canGoNext = startIndex + visibleCount < products.length;
+
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-16 sm:px-6 lg:px-8 2xl:px-10">
       <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_16px_36px_rgba(15,23,42,0.04)] xl:grid xl:grid-cols-[430px_1fr]">
         <SideFeature />
-        <div className="grid md:grid-cols-2 xl:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard key={product.title} {...product} />
-          ))}
+
+        <div>
+          <div className="flex items-center justify-end gap-2 border-b border-slate-200 px-5 py-4">
+            <button
+              type="button"
+              onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
+              disabled={!canGoPrev}
+              className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
+                canGoPrev
+                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
+                  : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
+              }`}
+              aria-label="Anterior"
+            >
+              <span aria-hidden="true">‹</span>
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setStartIndex((current) => Math.min(current + 1, Math.max(products.length - visibleCount, 0)))
+              }
+              disabled={!canGoNext}
+              className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
+                canGoNext
+                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
+                  : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
+              }`}
+              aria-label="Siguiente"
+            >
+              <span aria-hidden="true">›</span>
+            </button>
+          </div>
+
+          <div className={`grid ${visibleCount === 1 ? "grid-cols-1" : visibleCount === 2 ? "md:grid-cols-2" : "xl:grid-cols-4"}`}>
+            {visibleProducts.map((product) => (
+              <ProductCard key={product.title} {...product} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
