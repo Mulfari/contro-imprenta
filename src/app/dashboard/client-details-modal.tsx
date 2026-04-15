@@ -155,10 +155,6 @@ export function ClientDetailsPanel({
                   value={client.address ?? "Sin direccion registrada"}
                 />
                 <DataCard
-                  label="Archivos del cliente"
-                  value={client.reference_files ?? "Sin archivos guardados"}
-                />
-                <DataCard
                   label="Observaciones"
                   value={client.notes ?? "Sin observaciones registradas"}
                 />
@@ -200,6 +196,22 @@ export function ClientDetailsPanel({
                     </div>
                   ))
                 )}
+              </div>
+            </div>
+
+            <div className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
+              <div>
+                <h4 className="text-lg font-semibold text-slate-950">Archivos del cliente</h4>
+                <p className="mt-1 text-sm text-slate-500">
+                  Artes, enlaces o referencias que este cliente utiliza con frecuencia.
+                </p>
+              </div>
+
+              <div className="mt-5">
+                <DataCard
+                  label="Referencias guardadas"
+                  value={client.reference_files ?? "Sin archivos guardados"}
+                />
               </div>
             </div>
 
