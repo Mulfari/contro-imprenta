@@ -19,34 +19,25 @@ function FooterLogo() {
 export function StorefrontFooter() {
   return (
     <footer className="bg-[#0b1220] text-slate-200">
-      <div className="h-px w-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)]" />
+      <div className="mx-auto flex w-full max-w-[118rem] flex-col gap-8 px-4 py-12 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 2xl:px-10">
+        <FooterLogo />
 
-      <div className="mx-auto flex w-full max-w-[118rem] flex-col gap-8 px-4 py-14 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 2xl:px-10">
-        <div>
-          <FooterLogo />
-        </div>
-
-        <div className="rounded-[1.4rem] border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-slate-300 lg:min-w-[23rem] lg:text-right">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-            Contacto
+        <div className="space-y-2 text-sm text-slate-300 lg:text-right">
+          <p>
+            WhatsApp:
+            {" "}
+            <a href="#" className="font-medium text-white transition hover:text-slate-100">
+              +58 000-0000000
+            </a>
           </p>
-          <div className="mt-3 space-y-2.5">
-            <p>
-              WhatsApp:
-              {" "}
-              <a href="#" className="font-medium text-white transition hover:text-slate-100">
-                +58 000-0000000
-              </a>
-            </p>
-            <p>
-              Correo:
-              {" "}
-              <a href="#" className="font-medium text-white transition hover:text-slate-100">
-                hola@expressprinter.com
-              </a>
-            </p>
-            <p>Lunes a Sabado, 8:00 AM - 6:00 PM</p>
-          </div>
+          <p>
+            Correo:
+            {" "}
+            <a href="#" className="font-medium text-white transition hover:text-slate-100">
+              hola@expressprinter.com
+            </a>
+          </p>
+          <p>Lunes a Sabado, 8:00 AM - 6:00 PM</p>
         </div>
       </div>
 
