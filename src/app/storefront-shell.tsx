@@ -9,6 +9,7 @@ import { StorefrontFeatureGridSection } from "@/app/storefront-feature-grid-sect
 import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
 import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
+import { StorefrontTestimonialsSection } from "@/app/storefront-testimonials-section";
 
 const RECENT_SEARCHES_KEY = "express-printer-recent-searches";
 const categoryGroups = [
@@ -227,6 +228,7 @@ export function StorefrontShell() {
           <StorefrontPromoPanels />
           <StorefrontDealsSection />
           <StorefrontFeatureGridSection />
+          <StorefrontTestimonialsSection />
         </>
       )}
     </main>
