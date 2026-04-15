@@ -955,7 +955,7 @@ export default async function DashboardPage({
 
         <div
           className={`flex min-w-0 flex-col px-4 py-4 sm:px-6 lg:px-5 lg:py-5 ${
-            isClientDetailView ? "gap-4" : "gap-6"
+            isClientDetailView ? "gap-3" : "gap-6"
           }`}
         >
           <div
