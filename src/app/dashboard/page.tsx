@@ -36,7 +36,6 @@ import {
 import {
   deleteClientFile,
   listClientFiles,
-  uploadClientFile,
   type ClientFile,
 } from "@/lib/client-files";
 import {
@@ -301,38 +300,6 @@ async function deleteClientAction(formData: FormData) {
 
   revalidatePath("/dashboard");
   redirect(buildDashboardUrl("clientes", "Cliente eliminado"));
-}
-
-async function uploadClientFileAction(formData: FormData) {
-  "use server";
-
-  const session = await getCurrentSession();
-
-  if (!session) {
-    redirect("/login?message=Inicia%20sesion%20para%20continuar");
-  }
-
-  const clientId = String(formData.get("clientId") ?? "");
-  const file = formData.get("file");
-
-  try {
-    if (!(file instanceof File)) {
-      throw new Error("Selecciona un archivo valido.");
-    }
-
-    await uploadClientFile({
-      clientId,
-      file,
-      uploadedBy: session.userId,
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "No se pudo cargar el archivo.";
-    redirect(buildClientUrl("detalle", clientId, message));
-  }
-
-  revalidatePath("/dashboard");
-  redirect(buildClientUrl("detalle", clientId, "Archivo cargado"));
 }
 
 async function deleteClientFileAction(formData: FormData) {
@@ -1654,7 +1621,6 @@ export default async function DashboardPage({
               orders={selectedClientOrders}
               files={clientFiles}
               closeHref={buildClientUrl("lista", undefined, undefined, clientQuery)}
-              uploadAction={uploadClientFileAction}
               deleteAction={deleteClientFileAction}
               isAdmin={session.role === "admin"}
             />

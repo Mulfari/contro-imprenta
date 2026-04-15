@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useFormStatus } from "react-dom";
 
+import { ClientFilesPanel } from "@/app/dashboard/client-files-panel";
 import type { Client, OrderWithClient } from "@/lib/business";
 import type { ClientFile } from "@/lib/client-files";
 
@@ -11,7 +11,6 @@ type ClientDetailsModalProps = {
   orders: OrderWithClient[];
   files: ClientFile[];
   closeHref: string;
-  uploadAction: (formData: FormData) => void;
   deleteAction: (formData: FormData) => void;
   isAdmin: boolean;
 };
@@ -92,38 +91,11 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
-function formatFileSize(value: number | null) {
-  if (!value || value <= 0) {
-    return "Sin tamano";
-  }
-
-  if (value < 1024 * 1024) {
-    return `${Math.max(1, Math.round(value / 1024))} KB`;
-  }
-
-  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function UploadButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <button
-      type="submit"
-      className="inline-flex cursor-pointer items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-      disabled={pending}
-    >
-      {pending ? "Subiendo..." : "Subir archivo"}
-    </button>
-  );
-}
-
 export function ClientDetailsPanel({
   client,
   orders,
   files,
   closeHref,
-  uploadAction,
   deleteAction,
   isAdmin,
 }: ClientDetailsModalProps) {
@@ -235,84 +207,12 @@ export function ClientDetailsPanel({
               </div>
             </div>
 
-            <div className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
-              <div>
-                <h4 className="text-lg font-semibold text-slate-950">Archivos adjuntos</h4>
-                <p className="mt-1 text-sm text-slate-500">
-                  PDFs, imagenes y piezas listas para reutilizar en futuros pedidos.
-                </p>
-              </div>
-
-              <form action={uploadAction} className="mt-5 flex flex-col gap-3 rounded-[1.3rem] border border-slate-200 bg-slate-50 px-4 py-4">
-                <input type="hidden" name="clientId" value={client.id} />
-                <input
-                  name="file"
-                  type="file"
-                  className="block w-full cursor-pointer rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-slate-700"
-                  accept=".pdf,.png,.jpg,.jpeg,.webp,.svg,.ai,.psd,.zip,.rar"
-                  required
-                />
-                <p className="text-xs text-slate-500">
-                  Puedes cargar artes, PDFs, imagenes o empaquetados de trabajo de hasta 20 MB.
-                </p>
-                <div className="flex justify-end">
-                  <UploadButton />
-                </div>
-              </form>
-
-              <div className="mt-5 space-y-3">
-                {files.length === 0 ? (
-                  <EmptyState message="Aun no hay archivos cargados para este cliente." />
-                ) : (
-                  files.map((file) => (
-                    <div
-                      key={file.id}
-                      className="rounded-[1.3rem] border border-slate-200 bg-slate-50 px-4 py-4"
-                    >
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-slate-900">
-                            {file.file_name}
-                          </p>
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                            <span>{file.file_type ?? "Archivo"}</span>
-                            <span>•</span>
-                            <span>{formatFileSize(file.file_size)}</span>
-                            <span>•</span>
-                            <span>{formatDateTime(file.created_at)}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2">
-                          {file.signed_url ? (
-                            <a
-                              href={file.signed_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-                            >
-                              Abrir
-                            </a>
-                          ) : null}
-                          {isAdmin ? (
-                            <form action={deleteAction}>
-                              <input type="hidden" name="clientId" value={client.id} />
-                              <input type="hidden" name="fileId" value={file.id} />
-                              <button
-                                type="submit"
-                                className="inline-flex cursor-pointer items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
-                              >
-                                Eliminar
-                              </button>
-                            </form>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <ClientFilesPanel
+              clientId={client.id}
+              files={files}
+              isAdmin={isAdmin}
+              deleteAction={deleteAction}
+            />
 
             <div className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
               <div>
