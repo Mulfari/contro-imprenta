@@ -15,6 +15,7 @@ type ClientModalProps = {
     documentId: string;
     address: string;
     preferredBranch: string;
+    referenceFiles: string;
     notes: string;
   };
 };
@@ -174,6 +175,19 @@ export function ClientModal({
               defaultValue={initialData?.address ?? ""}
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               placeholder="Av. principal, local 4"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm text-slate-600" htmlFor="clientReferenceFiles">
+              Archivos del cliente
+            </label>
+            <textarea
+              id="clientReferenceFiles"
+              name="referenceFiles"
+              defaultValue={initialData?.referenceFiles ?? ""}
+              className="min-h-24 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              placeholder="Links de Drive, nombres de artes, carpetas o referencias que este cliente usa"
             />
           </div>
 

@@ -8,6 +8,7 @@ export type Client = {
   document_id: string | null;
   address: string | null;
   preferred_branch: string | null;
+  reference_files: string | null;
   notes: string | null;
   created_at: string;
   created_by: string | null;
@@ -67,6 +68,7 @@ export async function createClient(input: {
   documentId: string;
   address: string;
   preferredBranch: string;
+  referenceFiles: string;
   notes: string;
   createdBy: string;
 }) {
@@ -91,6 +93,7 @@ export async function createClient(input: {
       document_id: normalizeText(input.documentId) || null,
       address: normalizeText(input.address) || null,
       preferred_branch: normalizeText(input.preferredBranch) || null,
+      reference_files: normalizeText(input.referenceFiles) || null,
       notes: normalizeText(input.notes) || null,
       created_by: input.createdBy,
     })
@@ -112,6 +115,7 @@ export async function updateClient(input: {
   documentId: string;
   address: string;
   preferredBranch: string;
+  referenceFiles: string;
   notes: string;
 }) {
   const supabase = createSupabaseAdminClient();
@@ -139,6 +143,7 @@ export async function updateClient(input: {
       document_id: normalizeText(input.documentId) || null,
       address: normalizeText(input.address) || null,
       preferred_branch: normalizeText(input.preferredBranch) || null,
+      reference_files: normalizeText(input.referenceFiles) || null,
       notes: normalizeText(input.notes) || null,
     })
     .eq("id", input.clientId)

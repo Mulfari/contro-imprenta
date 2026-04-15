@@ -56,7 +56,9 @@ function DataCard({
   return (
     <div className="rounded-[1.4rem] border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">{label}</p>
-      <p className="mt-2 text-sm font-medium leading-6 text-slate-800">{value}</p>
+      <p className="mt-2 whitespace-pre-line break-words text-sm font-medium leading-6 text-slate-800">
+        {value}
+      </p>
     </div>
   );
 }
@@ -151,6 +153,10 @@ export function ClientDetailsPanel({
                 <DataCard
                   label="Direccion"
                   value={client.address ?? "Sin direccion registrada"}
+                />
+                <DataCard
+                  label="Archivos del cliente"
+                  value={client.reference_files ?? "Sin archivos guardados"}
                 />
                 <DataCard
                   label="Observaciones"

@@ -227,6 +227,7 @@ async function createClientAction(formData: FormData) {
       documentId: String(formData.get("documentId") ?? ""),
       address: String(formData.get("address") ?? ""),
       preferredBranch: String(formData.get("preferredBranch") ?? ""),
+      referenceFiles: String(formData.get("referenceFiles") ?? ""),
       notes: String(formData.get("notes") ?? ""),
       createdBy: session.userId,
     });
@@ -260,6 +261,7 @@ async function updateClientAction(formData: FormData) {
       documentId: String(formData.get("documentId") ?? ""),
       address: String(formData.get("address") ?? ""),
       preferredBranch: String(formData.get("preferredBranch") ?? ""),
+      referenceFiles: String(formData.get("referenceFiles") ?? ""),
       notes: String(formData.get("notes") ?? ""),
     });
   } catch (error) {
@@ -827,6 +829,7 @@ export default async function DashboardPage({
       client.email ?? "",
       client.document_id ?? "",
       client.address ?? "",
+      client.reference_files ?? "",
     ]
       .join(" ")
       .toLowerCase();
@@ -1575,6 +1578,7 @@ export default async function DashboardPage({
                 documentId: selectedClient.document_id ?? "",
                 address: selectedClient.address ?? "",
                 preferredBranch: selectedClient.preferred_branch ?? "",
+                referenceFiles: selectedClient.reference_files ?? "",
                 notes: selectedClient.notes ?? "",
               }}
             />
