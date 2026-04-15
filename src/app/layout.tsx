@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Imprenta Atlas",
-  description: "Control de tienda de imprenta con Next.js y Supabase.",
+  title: "Express Printer",
+  description: "Tienda online y panel administrativo para Express Printer.",
 };
 
 export default function RootLayout({
