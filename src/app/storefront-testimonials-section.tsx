@@ -19,7 +19,7 @@ const testimonials = [
     name: "Fabiana Rivas",
     time: "Hace 3 semanas",
     quote:
-      "Quede muy satisfecha con mis invitaciones. El acabado se ve premium y el equipo resolvio cada detalle del diseño.",
+      "Quede muy satisfecha con mis invitaciones. El acabado se ve premium y el equipo resolvio cada detalle del diseno.",
   },
   {
     name: "Josue Perez",
@@ -100,12 +100,10 @@ export function StorefrontTestimonialsSection() {
   return (
     <section className="w-full">
       <div className="border-y border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-[104rem] items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
-          <div className="h-px flex-1 bg-slate-200" />
-          <h2 className="text-center text-[1.95rem] font-semibold tracking-tight text-slate-950">
+        <div className="mx-auto w-full max-w-[104rem] px-3 py-7 text-center sm:px-5 lg:px-6">
+          <h2 className="text-[1.95rem] font-semibold tracking-tight text-slate-950">
             Lo que nuestros clientes estan diciendo
           </h2>
-          <div className="h-px flex-1 bg-slate-200" />
         </div>
 
         <div className="relative mx-auto w-full max-w-[104rem] px-7 pb-10 sm:px-9 lg:px-12 2xl:px-14">
@@ -159,7 +157,7 @@ export function StorefrontTestimonialsSection() {
                   </div>
                 </div>
                 <p className="mx-auto mt-8 max-w-[30rem] text-[1.15rem] leading-10 tracking-tight text-slate-800">
-                  “{item.quote}”
+                  &quot;{item.quote}&quot;
                 </p>
               </article>
             ))}
