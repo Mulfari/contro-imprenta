@@ -11,9 +11,9 @@ export function StorefrontBusinessSection() {
   return (
     <section className="w-full bg-white">
       <div className="mx-auto grid w-full max-w-[104rem] gap-8 px-3 py-14 sm:px-5 lg:grid-cols-[1.02fr_0.98fr] lg:px-6">
-        <div className="relative min-h-[25rem] overflow-hidden rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#edf4ff_48%,#fff3c4_100%)]">
-          <div className="absolute inset-y-0 left-0 w-[72%] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.78),transparent_48%)]" />
-          <div className="absolute bottom-0 right-0 h-36 w-36 rounded-full bg-[#fbbf24]/20 blur-3xl" />
+        <div className="relative min-h-[25rem] overflow-hidden rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(140deg,#f8fafc_0%,#eef4ff_54%,#fff4cf_100%)]">
+          <div className="absolute inset-y-0 left-0 w-[72%] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.82),transparent_48%)]" />
+          <div className="absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#fbbf24]/18 blur-3xl" />
 
           <div className="absolute left-7 top-7 max-w-[15rem] text-slate-950">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -27,9 +27,36 @@ export function StorefrontBusinessSection() {
             </p>
           </div>
 
-          <div className="absolute bottom-7 left-10 h-56 w-44 rotate-[-8deg] rounded-[1.9rem] bg-white shadow-[0_26px_42px_rgba(15,23,42,0.16)]" />
-          <div className="absolute bottom-11 left-30 h-46 w-34 rotate-[8deg] rounded-[1.6rem] bg-[#dbeafe] shadow-[0_22px_34px_rgba(15,23,42,0.14)]" />
-          <div className="absolute bottom-16 left-52 h-38 w-28 rotate-[-4deg] rounded-[1.35rem] bg-[#0f172a] shadow-[0_20px_34px_rgba(15,23,42,0.18)]" />
+          <div className="absolute bottom-7 left-10 h-56 w-44 rotate-[-8deg] rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_26px_42px_rgba(15,23,42,0.14)]">
+            <div className="h-full w-full rounded-[1.9rem] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
+              <div className="h-4 w-20 rounded-full bg-[#3558ff]" />
+              <div className="mt-5 space-y-2">
+                <div className="h-3 w-24 rounded-full bg-slate-200" />
+                <div className="h-3 w-20 rounded-full bg-slate-200" />
+                <div className="h-20 rounded-[1.2rem] bg-[#eff6ff]" />
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <div className="h-10 rounded-xl bg-slate-100" />
+                <div className="h-10 rounded-xl bg-slate-100" />
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute bottom-12 left-36 h-40 w-32 rotate-[8deg] rounded-[1.6rem] border border-slate-200 bg-white shadow-[0_22px_34px_rgba(15,23,42,0.12)]">
+            <div className="p-4">
+              <div className="h-3 w-16 rounded-full bg-[#fbbf24]" />
+              <div className="mt-4 h-16 rounded-[1rem] bg-[#e0ecff]" />
+              <div className="mt-4 h-3 w-20 rounded-full bg-slate-200" />
+              <div className="mt-2 h-3 w-14 rounded-full bg-slate-200" />
+            </div>
+          </div>
+
+          <div className="absolute bottom-16 left-56 h-32 w-24 rotate-[-4deg] rounded-[1.35rem] bg-[#0f172a] shadow-[0_20px_34px_rgba(15,23,42,0.18)]">
+            <div className="p-4">
+              <div className="h-2.5 w-10 rounded-full bg-white/70" />
+              <div className="mt-4 h-14 rounded-[0.9rem] bg-white/10" />
+            </div>
+          </div>
 
           <div className="absolute right-10 top-8 flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-950 backdrop-blur-sm">
             <svg
@@ -47,7 +74,7 @@ export function StorefrontBusinessSection() {
             </svg>
           </div>
 
-          <div className="absolute bottom-8 right-8 rounded-[1.2rem] border border-white/70 bg-white/75 px-4 py-3 backdrop-blur-sm">
+          <div className="absolute bottom-8 right-8 rounded-[1.2rem] border border-white/70 bg-white/78 px-4 py-3 backdrop-blur-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
               Corporativo
             </p>
