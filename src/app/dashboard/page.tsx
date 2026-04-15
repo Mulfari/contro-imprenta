@@ -34,6 +34,12 @@ import {
   updateOrderStatus,
 } from "@/lib/business";
 import {
+  deleteClientFile,
+  listClientFiles,
+  uploadClientFile,
+  type ClientFile,
+} from "@/lib/client-files";
+import {
   listActivePasswordRecoveryRequests,
   type PasswordRecoveryRequest,
 } from "@/lib/password-recovery";
@@ -295,6 +301,62 @@ async function deleteClientAction(formData: FormData) {
 
   revalidatePath("/dashboard");
   redirect(buildDashboardUrl("clientes", "Cliente eliminado"));
+}
+
+async function uploadClientFileAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  const clientId = String(formData.get("clientId") ?? "");
+  const file = formData.get("file");
+
+  try {
+    if (!(file instanceof File)) {
+      throw new Error("Selecciona un archivo valido.");
+    }
+
+    await uploadClientFile({
+      clientId,
+      file,
+      uploadedBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo cargar el archivo.";
+    redirect(buildClientUrl("detalle", clientId, message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildClientUrl("detalle", clientId, "Archivo cargado"));
+}
+
+async function deleteClientFileAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const clientId = String(formData.get("clientId") ?? "");
+  const fileId = String(formData.get("fileId") ?? "");
+
+  try {
+    await deleteClientFile(fileId);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo eliminar el archivo.";
+    redirect(buildClientUrl("detalle", clientId, message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildClientUrl("detalle", clientId, "Archivo eliminado"));
 }
 
 async function deleteUserAction(formData: FormData) {
@@ -714,6 +776,7 @@ export default async function DashboardPage({
   let recoveryRequests: PasswordRecoveryRequest[] = [];
   let clients: Client[] = [];
   let orders: OrderWithClient[] = [];
+  let clientFiles: ClientFile[] = [];
   let activeStaffCount = 0;
   let activeSessions: Awaited<ReturnType<typeof listActivePanelSessions>> = [];
   let schemaMessage = "";
@@ -725,6 +788,7 @@ export default async function DashboardPage({
       session.role === "admin" ? await listActivePasswordRecoveryRequests(10) : [];
     clients = await listClients();
     orders = await listOrders();
+    clientFiles = selectedClientId ? await listClientFiles(selectedClientId) : [];
     activeStaffCount =
       session.role === "admin"
         ? await countActivePanelSessions(activePresenceWindowMs)
@@ -1588,7 +1652,11 @@ export default async function DashboardPage({
             <ClientDetailsPanel
               client={selectedClient}
               orders={selectedClientOrders}
+              files={clientFiles}
               closeHref={buildClientUrl("lista", undefined, undefined, clientQuery)}
+              uploadAction={uploadClientFileAction}
+              deleteAction={deleteClientFileAction}
+              isAdmin={session.role === "admin"}
             />
           ) : null}
 

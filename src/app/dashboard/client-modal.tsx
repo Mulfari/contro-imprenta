@@ -180,7 +180,7 @@ export function ClientModal({
 
           <div>
             <label className="mb-2 block text-sm text-slate-600" htmlFor="clientReferenceFiles">
-              Archivos del cliente
+              Referencias o enlaces del cliente
             </label>
             <textarea
               id="clientReferenceFiles"

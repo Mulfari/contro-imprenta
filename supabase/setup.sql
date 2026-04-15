@@ -130,6 +130,12 @@ alter table public.password_recovery_requests add column if not exists created_a
 alter table public.password_recovery_requests add column if not exists used_at timestamptz null;
 alter table public.password_recovery_requests alter column expires_at drop not null;
 
+insert into storage.buckets (id, name, public, file_size_limit)
+select 'client-files', 'client-files', false, 20971520
+where not exists (
+  select 1 from storage.buckets where id = 'client-files'
+);
+
 create table if not exists public.clients (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -159,6 +165,33 @@ alter table public.clients add column if not exists reference_files text null;
 alter table public.clients add column if not exists notes text null;
 alter table public.clients add column if not exists created_at timestamptz default now();
 alter table public.clients add column if not exists created_by uuid null;
+
+create table if not exists public.client_files (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null references public.clients(id) on delete cascade,
+  file_name text not null,
+  storage_path text not null unique,
+  file_type text null,
+  file_size bigint null,
+  created_at timestamptz not null default now(),
+  uploaded_by uuid null references public.app_users(id) on delete set null
+);
+
+create index if not exists client_files_client_id_idx
+  on public.client_files (client_id);
+
+create index if not exists client_files_created_at_idx
+  on public.client_files (created_at desc);
+
+alter table public.client_files enable row level security;
+
+alter table public.client_files add column if not exists client_id uuid null;
+alter table public.client_files add column if not exists file_name text;
+alter table public.client_files add column if not exists storage_path text;
+alter table public.client_files add column if not exists file_type text null;
+alter table public.client_files add column if not exists file_size bigint null;
+alter table public.client_files add column if not exists created_at timestamptz default now();
+alter table public.client_files add column if not exists uploaded_by uuid null;
 
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
@@ -213,6 +246,24 @@ begin
     alter table public.orders
       add constraint orders_client_id_fkey
       foreign key (client_id) references public.clients(id) on delete restrict;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'client_files_client_id_fkey'
+  ) then
+    alter table public.client_files
+      add constraint client_files_client_id_fkey
+      foreign key (client_id) references public.clients(id) on delete cascade;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'client_files_uploaded_by_fkey'
+  ) then
+    alter table public.client_files
+      add constraint client_files_uploaded_by_fkey
+      foreign key (uploaded_by) references public.app_users(id) on delete set null;
   end if;
 
   if not exists (
