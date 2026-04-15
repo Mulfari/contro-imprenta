@@ -1609,7 +1609,6 @@ export default async function DashboardPage({
                 documentId: selectedClient.document_id ?? "",
                 address: selectedClient.address ?? "",
                 preferredBranch: selectedClient.preferred_branch ?? "",
-                referenceFiles: selectedClient.reference_files ?? "",
                 notes: selectedClient.notes ?? "",
               }}
             />
