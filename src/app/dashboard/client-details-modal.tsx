@@ -112,7 +112,7 @@ export function ClientDetailsPanel({
             href={closeHref}
             className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800"
           >
-            Volver
+            Volver a clientes
           </Link>
         </div>
 

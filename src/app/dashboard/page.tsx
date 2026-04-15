@@ -638,6 +638,18 @@ function getViewLabel(view: DashboardView) {
   }
 }
 
+function getDashboardHeaderLabel(
+  view: DashboardView,
+  selectedClient: Client | null,
+  clientMode: "lista" | "nuevo" | "editar",
+) {
+  if (view === "clientes" && clientMode === "lista" && selectedClient) {
+    return selectedClient.name;
+  }
+
+  return getViewLabel(view);
+}
+
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
@@ -825,6 +837,8 @@ export default async function DashboardPage({
     filteredClients.find((client) => client.id === selectedClientId) ??
     clients.find((client) => client.id === selectedClientId) ??
     null;
+  const isClientDetailView =
+    activeView === "clientes" && clientMode === "lista" && selectedClient !== null;
   const selectedClientOrders = selectedClient
     ? orders.filter((order) => order.client_id === selectedClient.id)
     : [];
@@ -944,9 +958,26 @@ export default async function DashboardPage({
             <header className="rounded-[1.7rem] border border-slate-200/80 bg-white/88 px-6 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
               <div className="flex items-center gap-4">
                 <div className="h-11 w-1.5 rounded-full bg-slate-900" />
-                <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-                  {getViewLabel(activeView)}
-                </h2>
+                <div className="min-w-0">
+                  {isClientDetailView && selectedClient ? (
+                    <div className="flex flex-wrap items-center gap-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+                      <Link
+                        href={buildDashboardUrl("clientes")}
+                        className="cursor-pointer text-slate-500 transition hover:text-slate-900"
+                      >
+                        Clientes
+                      </Link>
+                      <span className="text-slate-300">/</span>
+                      <span className="truncate">
+                        {getDashboardHeaderLabel(activeView, selectedClient, clientMode)}
+                      </span>
+                    </div>
+                  ) : (
+                    <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+                      {getDashboardHeaderLabel(activeView, selectedClient, clientMode)}
+                    </h2>
+                  )}
+                </div>
               </div>
             </header>
 
@@ -1036,13 +1067,11 @@ export default async function DashboardPage({
           <section
             className={
               activeView === "clientes"
-                ? selectedClient && clientMode === "lista"
-                  ? "grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(22rem,0.92fr)]"
-                  : "grid gap-6"
+                ? "grid gap-6"
                 : "grid gap-6 xl:grid-cols-[0.9fr_1.1fr]"
             }
           >
-            {activeView === "clientes" ? (
+            {activeView === "clientes" && !isClientDetailView ? (
             <article
               id="clientes"
               className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
@@ -1541,9 +1570,7 @@ export default async function DashboardPage({
             />
           ) : null}
 
-          {activeView === "clientes" &&
-          clientMode === "lista" &&
-          selectedClient ? (
+          {isClientDetailView && selectedClient ? (
             <ClientDetailsPanel
               client={selectedClient}
               orders={selectedClientOrders}
