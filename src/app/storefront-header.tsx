@@ -88,15 +88,17 @@ export function StorefrontHeader({
       ) : null}
 
       <div className="border-b border-slate-800 bg-slate-950 text-white">
-        <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 2xl:px-10">
-          <p>Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.</p>
+        <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-2 px-4 py-2.5 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 2xl:px-10">
+          <p className="text-sm font-medium text-slate-200">
+            Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.
+          </p>
           <div className="flex flex-wrap items-center gap-4 text-slate-300">
             {quickLinks.map((item) => (
-              <button key={item} type="button" className="cursor-pointer hover:text-white">
+              <button key={item} type="button" className="cursor-pointer transition hover:text-white">
                 {item}
               </button>
             ))}
-            <Link href="/login" className="hover:text-white">
+            <Link href="/login" className="font-medium transition hover:text-white">
               Panel administrativo
             </Link>
           </div>
@@ -104,7 +106,7 @@ export function StorefrontHeader({
       </div>
 
       <header className="relative z-40 border-b border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
+        <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8 2xl:px-10">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <Link href="/" className="flex items-center">
               <Image
@@ -112,14 +114,14 @@ export function StorefrontHeader({
                 alt="Express Printer"
                 width={210}
                 height={50}
-                className="h-auto w-[11.5rem] sm:w-[13rem]"
+                className="h-auto w-[11rem] sm:w-[12.4rem]"
                 priority
               />
             </Link>
 
             <div
               ref={searchAreaRef}
-              className="flex flex-1 flex-col gap-3 xl:mx-10 xl:max-w-4xl xl:flex-row xl:items-center"
+              className="flex flex-1 flex-col gap-3 xl:mx-8 xl:max-w-[62rem] xl:flex-row xl:items-center"
             >
               <div ref={categoryAreaRef} className="relative">
                 <button
@@ -135,7 +137,7 @@ export function StorefrontHeader({
                       return next;
                     })
                   }
-                  className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${
+                  className={`inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border px-5 text-sm font-semibold transition ${
                     categoryOpen
                       ? "border-slate-950 bg-white text-slate-950"
                       : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100"
@@ -247,9 +249,9 @@ export function StorefrontHeader({
               </div>
 
               <div
-                className={`flex flex-1 items-center rounded-xl border bg-white px-4 py-3 shadow-sm transition ${
+                className={`flex h-12 flex-1 items-center rounded-xl border bg-white px-4 shadow-sm transition ${
                   searchOpen
-                    ? "border-slate-950"
+                    ? "border-slate-950 shadow-[0_10px_26px_rgba(15,23,42,0.08)]"
                     : "border-slate-200"
                 }`}
               >
@@ -259,7 +261,7 @@ export function StorefrontHeader({
                   value={searchQuery}
                   onChange={(event) => onSearchQueryChange(event.target.value)}
                   onFocus={() => setSearchOpen(true)}
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                  className="w-full bg-transparent text-sm font-medium outline-none placeholder:font-normal placeholder:text-slate-400"
                 />
                 <svg
                   aria-hidden="true"
@@ -277,29 +279,29 @@ export function StorefrontHeader({
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
               <button
                 type="button"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 Mi cuenta
               </button>
               <button
                 type="button"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 Cotizar
               </button>
               <button
                 type="button"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 Carrito $0
               </button>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 text-sm font-medium text-slate-700">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-3.5 text-sm font-medium text-slate-700">
             <a href="#catalogo" className="transition hover:text-slate-950">
               Catalogo
             </a>
