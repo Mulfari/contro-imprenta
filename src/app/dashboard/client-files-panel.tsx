@@ -352,53 +352,49 @@ export function ClientFilesPanel({
           </div>
         ) : null}
 
-        <div className="mt-4 space-y-2.5">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {files.length === 0 ? (
             <EmptyState message="Aun no hay archivos cargados para este cliente." />
           ) : (
             files.map((file) => (
               <div
                 key={file.id}
-                className="rounded-[1.15rem] border border-slate-200 bg-slate-50 px-3 py-3"
+                className="overflow-hidden rounded-[1.2rem] border border-slate-200 bg-slate-50"
               >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[0.95rem] border border-slate-200 bg-white">
-                      {file.signed_url && isImageFile(file) ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={file.signed_url}
-                          alt={file.file_name}
-                          className="h-full w-full object-cover"
-                          draggable={false}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100 px-2 text-center">
-                          <span className="text-xs font-semibold text-slate-700">
-                            {isPdfFile(file) ? "PDF" : "FILE"}
-                          </span>
-                          <span className="mt-0.5 text-[8px] uppercase tracking-[0.18em] text-slate-400">
-                            {file.file_type?.split("/")[1] ?? "archivo"}
-                          </span>
-                        </div>
-                      )}
+                <div className="aspect-square border-b border-slate-200 bg-white">
+                  {file.signed_url && isImageFile(file) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={file.signed_url}
+                      alt={file.file_name}
+                      className="h-full w-full object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.95),_rgba(241,245,249,0.92)_70%)] px-4 text-center">
+                      <span className="text-2xl font-semibold tracking-[0.2em] text-slate-700">
+                        {isPdfFile(file) ? "PDF" : "FILE"}
+                      </span>
+                      <span className="mt-2 text-[10px] uppercase tracking-[0.22em] text-slate-400">
+                        {file.file_type?.split("/")[1] ?? "archivo"}
+                      </span>
                     </div>
+                  )}
+                </div>
 
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold leading-5 text-slate-900">
-                        {file.file_name}
-                      </p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span>{file.file_type ?? "Archivo"}</span>
-                        <span>•</span>
-                        <span>{formatFileSize(file.file_size)}</span>
-                        <span>•</span>
-                        <span>{formatDateTime(file.created_at)}</span>
-                      </div>
+                <div className="space-y-3 px-4 py-4">
+                  <div className="min-w-0">
+                    <p className="line-clamp-2 text-sm font-semibold leading-5 text-slate-900">
+                      {file.file_name}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      <span>{formatFileSize(file.file_size)}</span>
+                      <span>•</span>
+                      <span>{formatDateTime(file.created_at)}</span>
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     {file.signed_url ? (
                       <a
                         href={file.signed_url}
