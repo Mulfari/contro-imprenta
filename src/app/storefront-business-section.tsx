@@ -58,42 +58,12 @@ export function StorefrontBusinessSection() {
         </div>
 
         <div className="flex flex-col justify-center px-2 py-2 lg:px-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
-            Empresas
-          </p>
-          <h2 className="mt-4 text-[2.25rem] font-semibold tracking-tight text-slate-950">
+          <h2 className="text-[2.25rem] font-semibold tracking-tight text-slate-950">
             ¿Buscas impresion para tu empresa?
           </h2>
           <p className="mt-4 max-w-[34rem] text-[1.02rem] leading-8 text-slate-600">
             Trabajamos con negocios, marcas, equipos comerciales y organizadores de eventos que necesitan produccion constante y buena presentacion.
           </p>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Volumen
-              </p>
-              <p className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                Pedidos recurrentes
-              </p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Formatos
-              </p>
-              <p className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                Piezas corporativas
-              </p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Respuesta
-              </p>
-              <p className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                Atencion prioritaria
-              </p>
-            </div>
-          </div>
 
           <div className="mt-6 space-y-3">
             {businessBenefits.map((item) => (
