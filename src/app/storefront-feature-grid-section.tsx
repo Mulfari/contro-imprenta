@@ -70,15 +70,55 @@ const products = [
 ];
 
 function getVisibleCount(width: number) {
-  if (width >= 1280) {
-    return 4;
-  }
-
-  if (width >= 768) {
-    return 2;
-  }
-
+  if (width >= 1280) return 4;
+  if (width >= 768) return 2;
   return 1;
+}
+
+function ArrowIcon({ direction }: { direction: "left" | "right" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {direction === "left" ? <path d="M12.5 4.5 7 10l5.5 5.5" /> : <path d="M7.5 4.5 13 10l-5.5 5.5" />}
+    </svg>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 16.2 3.7 9.9a3.8 3.8 0 0 1 5.4-5.4L10 5.4l.9-.9a3.8 3.8 0 1 1 5.4 5.4Z" />
+    </svg>
+  );
+}
+
+function StarRow() {
+  return (
+    <div className="mt-4 flex gap-1 text-slate-300">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <svg key={index} aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 fill-current">
+          <path d="m10 2.4 2.3 4.7 5.2.8-3.7 3.6.9 5.1L10 14.2 5.3 16.6l.9-5.1L2.5 7.9l5.2-.8Z" />
+        </svg>
+      ))}
+    </div>
+  );
 }
 
 function SideFeature() {
@@ -107,7 +147,7 @@ function SideFeature() {
           className="mt-8 inline-flex cursor-pointer items-center gap-2 text-base font-semibold text-white"
         >
           Ver todo
-          <span aria-hidden="true">›</span>
+          <ArrowIcon direction="right" />
         </button>
       </div>
 
@@ -147,7 +187,7 @@ function ProductCard({
         aria-label="Guardar"
         className="absolute right-5 top-5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
       >
-        ♡
+        <HeartIcon />
       </button>
 
       <div className={`flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br ${tint}`}>
@@ -156,7 +196,7 @@ function ProductCard({
           <div className="absolute left-[-1rem] top-7 h-28 w-24 -rotate-[9deg] rounded-[1.3rem] bg-slate-950 shadow-[0_20px_40px_rgba(15,23,42,0.14)] transition duration-300 group-hover:translate-x-1 group-hover:translate-y-1" />
           <div className="absolute left-4 top-4 h-4 w-14 rounded-full bg-[#facc15]" />
           <div className="absolute left-6 top-12 h-2.5 w-10 rounded-full bg-slate-200" />
-          <div className="absolute left-6 top-17 h-2.5 w-7 rounded-full bg-slate-200" />
+          <div className="absolute left-6 top-[4.45rem] h-2.5 w-7 rounded-full bg-slate-200" />
         </div>
       </div>
 
@@ -170,13 +210,7 @@ function ProductCard({
       <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-slate-400">
         {category}
       </p>
-      <div className="mt-4 flex gap-1 text-slate-300">
-        <span>★</span>
-        <span>★</span>
-        <span>★</span>
-        <span>★</span>
-        <span>★</span>
-      </div>
+      <StarRow />
     </article>
   );
 }
@@ -209,8 +243,37 @@ export function StorefrontFeatureGridSection() {
       <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_16px_36px_rgba(15,23,42,0.04)] xl:grid xl:grid-cols-[430px_1fr]">
         <SideFeature />
 
-        <div>
-          <div className="flex items-center justify-end gap-2 border-b border-slate-200 px-5 py-4">
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
+            disabled={!canGoPrev}
+            className={`absolute left-4 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition xl:flex ${
+              canGoPrev
+                ? "cursor-pointer border-slate-200 bg-white/96 text-slate-500 hover:border-slate-300 hover:text-slate-900"
+                : "cursor-default border-slate-100 bg-white/92 text-slate-300"
+            }`}
+            aria-label="Anterior"
+          >
+            <ArrowIcon direction="left" />
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setStartIndex((current) => Math.min(current + 1, Math.max(products.length - visibleCount, 0)))
+            }
+            disabled={!canGoNext}
+            className={`absolute right-4 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition xl:flex ${
+              canGoNext
+                ? "cursor-pointer border-slate-200 bg-white/96 text-slate-500 hover:border-slate-300 hover:text-slate-900"
+                : "cursor-default border-slate-100 bg-white/92 text-slate-300"
+            }`}
+            aria-label="Siguiente"
+          >
+            <ArrowIcon direction="right" />
+          </button>
+
+          <div className="flex items-center justify-end gap-2 border-b border-slate-200 px-5 py-4 xl:hidden">
             <button
               type="button"
               onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
@@ -222,7 +285,7 @@ export function StorefrontFeatureGridSection() {
               }`}
               aria-label="Anterior"
             >
-              <span aria-hidden="true">‹</span>
+              <ArrowIcon direction="left" />
             </button>
             <button
               type="button"
@@ -237,11 +300,19 @@ export function StorefrontFeatureGridSection() {
               }`}
               aria-label="Siguiente"
             >
-              <span aria-hidden="true">›</span>
+              <ArrowIcon direction="right" />
             </button>
           </div>
 
-          <div className={`grid ${visibleCount === 1 ? "grid-cols-1" : visibleCount === 2 ? "md:grid-cols-2" : "xl:grid-cols-4"}`}>
+          <div
+            className={`grid ${
+              visibleCount === 1
+                ? "grid-cols-1"
+                : visibleCount === 2
+                  ? "md:grid-cols-2"
+                  : "xl:grid-cols-4"
+            }`}
+          >
             {visibleProducts.map((product) => (
               <ProductCard key={product.title} {...product} />
             ))}
