@@ -21,7 +21,7 @@ const serviceLinks = ["Diseno e impresion", "Stickers y etiquetas", "Pendones", 
 
 export function StorefrontFooter() {
   return (
-    <footer className="mt-8 bg-[#0b1220] text-slate-200">
+    <footer className="bg-[#0b1220] text-slate-200">
       <div className="mx-auto grid w-full max-w-[118rem] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr] lg:px-8 2xl:px-10">
         <div>
           <FooterLogo />
