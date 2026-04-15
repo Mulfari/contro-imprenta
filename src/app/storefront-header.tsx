@@ -107,14 +107,16 @@ export function StorefrontHeader({
         <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <Link href="/" className="flex items-center">
-              <Image
-                src="/express-printer-logo.svg"
-                alt="Express Printer"
-                width={210}
-                height={50}
-                className="h-auto w-[11.5rem] sm:w-[13rem]"
-                priority
-              />
+              <div className="relative h-[3.15rem] w-[10.75rem] overflow-hidden sm:h-[3.5rem] sm:w-[12rem]">
+                <Image
+                  src="/express-printer-logo.png"
+                  alt="Express Printer"
+                  fill
+                  sizes="(min-width: 640px) 12rem, 10.75rem"
+                  className="object-cover object-center scale-[1.5]"
+                  priority
+                />
+              </div>
             </Link>
 
             <div
