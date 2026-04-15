@@ -100,7 +100,7 @@ export function StorefrontTestimonialsSection() {
   return (
     <section className="w-full pb-18">
       <div className="border-y border-slate-200 bg-white">
-        <div className="flex items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
+        <div className="mx-auto flex w-full max-w-[104rem] items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
           <div className="h-px flex-1 bg-slate-200" />
           <h2 className="text-center text-[1.95rem] font-semibold tracking-tight text-slate-950">
             Lo que nuestros clientes estan diciendo
@@ -108,7 +108,7 @@ export function StorefrontTestimonialsSection() {
           <div className="h-px flex-1 bg-slate-200" />
         </div>
 
-        <div className="relative px-7 pb-10 sm:px-9 lg:px-12 2xl:px-14">
+        <div className="relative mx-auto w-full max-w-[104rem] px-7 pb-10 sm:px-9 lg:px-12 2xl:px-14">
           <button
             type="button"
             onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
@@ -197,7 +197,7 @@ export function StorefrontTestimonialsSection() {
           </div>
         </div>
 
-        <div className="grid gap-5 border-t border-slate-200 px-3 py-10 sm:px-5 md:grid-cols-2 lg:grid-cols-5 lg:px-6 2xl:px-10">
+        <div className="mx-auto grid w-full max-w-[104rem] gap-5 border-t border-slate-200 px-3 py-10 sm:px-5 md:grid-cols-2 lg:grid-cols-5 lg:px-6 2xl:px-10">
           {benefits.map((item, index) => (
             <article key={item.title} className="flex items-start gap-4">
               <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-slate-200 text-[#3558ff]">
