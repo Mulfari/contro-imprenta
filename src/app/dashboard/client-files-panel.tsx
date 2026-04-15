@@ -352,7 +352,7 @@ export function ClientFilesPanel({
           </div>
         ) : null}
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {files.length === 0 ? (
             <EmptyState message="Aun no hay archivos cargados para este cliente." />
           ) : (
@@ -361,7 +361,7 @@ export function ClientFilesPanel({
                 key={file.id}
                 className="overflow-hidden rounded-[1.2rem] border border-slate-200 bg-slate-50"
               >
-                <div className="aspect-square border-b border-slate-200 bg-white">
+                <div className="h-40 border-b border-slate-200 bg-white">
                   {file.signed_url && isImageFile(file) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
