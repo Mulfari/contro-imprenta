@@ -81,14 +81,14 @@ type DashboardView = (typeof dashboardViews)[number];
 
 const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Resumen", view: "resumen" },
-  { label: "Clientes", view: "clientes" },
   { label: "Pedidos", view: "pedidos" },
+  { label: "Clientes", view: "clientes" },
   { label: "Inventario", view: "inventario" },
   { label: "Proveedores", view: "proveedores" },
   { label: "Equipo", view: "equipo" },
 ];
 
-const userSideNavViews: DashboardView[] = ["resumen", "clientes", "pedidos"];
+const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "clientes"];
 const adminSideNavViews: DashboardView[] = [
   "inventario",
   "proveedores",
