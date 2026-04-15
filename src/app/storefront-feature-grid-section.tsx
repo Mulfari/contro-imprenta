@@ -244,43 +244,14 @@ export function StorefrontFeatureGridSection() {
         <SideFeature />
 
         <div className="relative">
-          <button
-            type="button"
-            onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
-            disabled={!canGoPrev}
-            className={`absolute left-4 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition xl:flex ${
-              canGoPrev
-                ? "cursor-pointer border-slate-200 bg-white/96 text-slate-500 hover:border-slate-300 hover:text-slate-900"
-                : "cursor-default border-slate-100 bg-white/92 text-slate-300"
-            }`}
-            aria-label="Anterior"
-          >
-            <ArrowIcon direction="left" />
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              setStartIndex((current) => Math.min(current + 1, Math.max(products.length - visibleCount, 0)))
-            }
-            disabled={!canGoNext}
-            className={`absolute right-4 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition xl:flex ${
-              canGoNext
-                ? "cursor-pointer border-slate-200 bg-white/96 text-slate-500 hover:border-slate-300 hover:text-slate-900"
-                : "cursor-default border-slate-100 bg-white/92 text-slate-300"
-            }`}
-            aria-label="Siguiente"
-          >
-            <ArrowIcon direction="right" />
-          </button>
-
-          <div className="flex items-center justify-end gap-2 border-b border-slate-200 px-5 py-4 xl:hidden">
+          <div className="flex items-center justify-end gap-2 border-b border-slate-200 px-5 py-4">
             <button
               type="button"
               onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
               disabled={!canGoPrev}
-              className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
                 canGoPrev
-                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
+                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
               }`}
               aria-label="Anterior"
@@ -293,9 +264,9 @@ export function StorefrontFeatureGridSection() {
                 setStartIndex((current) => Math.min(current + 1, Math.max(products.length - visibleCount, 0)))
               }
               disabled={!canGoNext}
-              className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
                 canGoNext
-                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
+                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
               }`}
               aria-label="Siguiente"
