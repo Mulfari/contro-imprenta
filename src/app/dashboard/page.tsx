@@ -16,6 +16,7 @@ import {
   NotificationCenterButton,
   type DashboardNotificationItem,
 } from "@/app/dashboard/notification-center-button";
+import { OrdersPanel } from "@/app/dashboard/orders-panel";
 import { TeamUserModal } from "@/app/dashboard/team-user-modal";
 import { TeamUsersPanel } from "@/app/dashboard/team-users-panel";
 import { signOutAction } from "@/app/login/actions";
@@ -25,11 +26,17 @@ import {
   type Client,
   createClient,
   createOrder,
+  createOrderHistoryEntry,
   deleteClient,
   listClients,
+  listOrderHistory,
   listOrders,
+  type OrderHistoryEntry,
+  type OrderPriority,
   type OrderWithClient,
   type OrderStatus,
+  type OrderUrgency,
+  type PaymentStatus,
   updateClient,
   updateOrderStatus,
 } from "@/lib/business";
@@ -38,6 +45,11 @@ import {
   listClientFiles,
   type ClientFile,
 } from "@/lib/client-files";
+import {
+  deleteOrderFile,
+  listOrderFiles,
+  type OrderFile,
+} from "@/lib/order-files";
 import {
   listActivePasswordRecoveryRequests,
   type PasswordRecoveryRequest,
@@ -370,14 +382,29 @@ async function createOrderAction(formData: FormData) {
   try {
     await createOrder({
       clientId: String(formData.get("clientId") ?? ""),
-      title: String(formData.get("title") ?? ""),
+      productType: String(formData.get("productType") ?? ""),
       description: String(formData.get("description") ?? ""),
       quantity: String(formData.get("quantity") ?? ""),
+      measurements: String(formData.get("measurements") ?? ""),
       material: String(formData.get("material") ?? ""),
-      size: String(formData.get("size") ?? ""),
-      dueDate: String(formData.get("dueDate") ?? ""),
+      laminationFinish: String(formData.get("laminationFinish") ?? ""),
+      colorProfile: String(formData.get("colorProfile") ?? ""),
+      includesDesign: formData.get("includesDesign") === "on",
+      includesInstallation: formData.get("includesInstallation") === "on",
+      urgency: String(formData.get("urgency") ?? "normal") as OrderUrgency,
+      branch: String(formData.get("branch") ?? ""),
+      quotedPrice: String(formData.get("quotedPrice") ?? ""),
+      discountAmount: String(formData.get("discountAmount") ?? ""),
       status: (String(formData.get("status") ?? "recibido") as OrderStatus),
+      paymentMethod: String(formData.get("paymentMethod") ?? ""),
+      paymentStatus: String(formData.get("paymentStatus") ?? "pendiente") as PaymentStatus,
+      promisedDeliveryAt: String(formData.get("promisedDeliveryAt") ?? ""),
+      priority: String(formData.get("priority") ?? "media") as OrderPriority,
+      currentOwner: String(formData.get("currentOwner") ?? ""),
+      currentArea: String(formData.get("currentArea") ?? ""),
       totalAmount: String(formData.get("totalAmount") ?? ""),
+      depositAmount: String(formData.get("depositAmount") ?? ""),
+      internalNotes: String(formData.get("internalNotes") ?? ""),
       createdBy: session.userId,
     });
   } catch (error) {
@@ -407,6 +434,7 @@ async function updateOrderStatusAction(formData: FormData) {
     await updateOrderStatus({
       orderId,
       status,
+      changedBy: session.userId,
     });
   } catch (error) {
     const message =
@@ -421,6 +449,36 @@ async function updateOrderStatusAction(formData: FormData) {
   redirect(
     buildDashboardUrl("pedidos", "Estado actualizado") + `&status=${activeStatus}`,
   );
+}
+
+async function deleteOrderFileAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const orderId = String(formData.get("orderId") ?? "");
+  const fileId = String(formData.get("fileId") ?? "");
+
+  try {
+    await deleteOrderFile(fileId);
+    await createOrderHistoryEntry({
+      orderId,
+      detail: "Adjunto eliminado de la orden.",
+      eventType: "adjunto",
+      changedBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo eliminar el adjunto.";
+    redirect(buildDashboardUrl("pedidos", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("pedidos", "Adjunto eliminado"));
 }
 
 type DashboardPageProps = {
@@ -722,6 +780,7 @@ export default async function DashboardPage({
   const params = await searchParams;
   const message = resolveValue(params.message);
   const activeStatus = resolveValue(params.status) || "todos";
+  const orderQuery = resolveValue(params.orderQuery).trim();
   const clientModeParam = resolveValue(params.clientMode);
   const clientMode =
     clientModeParam === "nuevo" || clientModeParam === "editar"
@@ -744,6 +803,8 @@ export default async function DashboardPage({
   let clients: Client[] = [];
   let orders: OrderWithClient[] = [];
   let clientFiles: ClientFile[] = [];
+  let orderFiles: OrderFile[] = [];
+  let orderHistory: OrderHistoryEntry[] = [];
   let activeStaffCount = 0;
   let activeSessions: Awaited<ReturnType<typeof listActivePanelSessions>> = [];
   let schemaMessage = "";
@@ -756,6 +817,8 @@ export default async function DashboardPage({
     clients = await listClients();
     orders = await listOrders();
     clientFiles = selectedClientId ? await listClientFiles(selectedClientId) : [];
+    orderFiles = await listOrderFiles(orders.map((order) => order.id));
+    orderHistory = await listOrderHistory(orders.map((order) => order.id));
     activeStaffCount =
       session.role === "admin"
         ? await countActivePanelSessions(activePresenceWindowMs)
@@ -782,9 +845,26 @@ export default async function DashboardPage({
       ? sideNavItems.filter((item) => adminSideNavViews.includes(item.view))
       : [];
   const filteredOrders =
-    activeStatus === "todos"
+    (activeStatus === "todos"
       ? orders
-      : orders.filter((order) => order.status === activeStatus);
+      : orders.filter((order) => order.status === activeStatus)).filter((order) => {
+      if (!orderQuery) {
+        return true;
+      }
+
+      const haystack = [
+        order.order_number,
+        order.product_type,
+        order.description ?? "",
+        order.client?.name ?? "",
+        order.current_owner ?? "",
+        order.current_area ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(orderQuery.toLowerCase());
+    });
   const orderSummary = {
     total: orders.length,
     active: orders.filter((order) => order.status !== "entregado").length,
@@ -877,6 +957,8 @@ export default async function DashboardPage({
     ? orders.filter((order) => order.client_id === selectedClient.id)
     : [];
   const clientPendingTotals = new Map<string, number>();
+  const orderFilesByOrderId = new Map<string, OrderFile[]>();
+  const orderHistoryByOrderId = new Map<string, OrderHistoryEntry[]>();
 
   for (const order of orders) {
     if (!order.client_id || order.total_amount === null || order.status === "entregado") {
@@ -887,6 +969,18 @@ export default async function DashboardPage({
       order.client_id,
       (clientPendingTotals.get(order.client_id) ?? 0) + order.total_amount,
     );
+  }
+
+  for (const file of orderFiles) {
+    const current = orderFilesByOrderId.get(file.order_id) ?? [];
+    current.push(file);
+    orderFilesByOrderId.set(file.order_id, current);
+  }
+
+  for (const historyEntry of orderHistory) {
+    const current = orderHistoryByOrderId.get(historyEntry.order_id) ?? [];
+    current.push(historyEntry);
+    orderHistoryByOrderId.set(historyEntry.order_id, current);
   }
 
   return (
@@ -1321,7 +1415,7 @@ export default async function DashboardPage({
             </article>
             ) : null}
 
-            {activeView === "pedidos" ? (
+            {activeView === "pedidos" && false ? (
             <article
               id="pedidos"
               className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
@@ -1458,7 +1552,7 @@ export default async function DashboardPage({
           </section>
           ) : null}
 
-          {activeView === "pedidos" ? (
+          {activeView === "pedidos" && false ? (
           <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
             {activeView === "pedidos" ? (
             <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
@@ -1584,6 +1678,23 @@ export default async function DashboardPage({
             ) : null}
 
           </section>
+          ) : null}
+
+          {activeView === "pedidos" ? (
+            <OrdersPanel
+              clients={clients.map((client) => ({ id: client.id, name: client.name }))}
+              users={users}
+              activeStatus={activeStatus}
+              orderQuery={orderQuery}
+              filteredOrders={filteredOrders}
+              orderSummary={orderSummary}
+              orderFilesByOrderId={orderFilesByOrderId}
+              orderHistoryByOrderId={orderHistoryByOrderId}
+              createAction={createOrderAction}
+              updateStatusAction={updateOrderStatusAction}
+              deleteOrderFileAction={deleteOrderFileAction}
+              isAdmin={session.role === "admin"}
+            />
           ) : null}
 
           {activeView === "clientes" && clientMode === "nuevo" && session.role === "admin" ? (

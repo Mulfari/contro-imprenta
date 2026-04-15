@@ -136,6 +136,12 @@ where not exists (
   select 1 from storage.buckets where id = 'client-files'
 );
 
+insert into storage.buckets (id, name, public, file_size_limit)
+select 'order-files', 'order-files', false, 20971520
+where not exists (
+  select 1 from storage.buckets where id = 'order-files'
+);
+
 create table if not exists public.clients (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -196,14 +202,34 @@ alter table public.client_files add column if not exists uploaded_by uuid null;
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   client_id uuid not null references public.clients(id) on delete restrict,
+  order_number text null,
   title text not null,
+  product_type text null,
   description text null,
   quantity integer not null check (quantity > 0),
+  measurements text null,
   material text null,
   size text null,
-  due_date date null,
+  lamination_finish text null,
+  color_profile text null,
+  includes_design boolean not null default false,
+  includes_installation boolean not null default false,
+  urgency text not null default 'normal' check (urgency in ('normal', 'prioritaria', 'express')),
+  branch text null,
+  quoted_price numeric(12,2) null,
+  discount_amount numeric(12,2) null,
   status text not null check (status in ('recibido', 'disenando', 'imprimiendo', 'listo', 'entregado')),
   total_amount numeric(12,2) null,
+  deposit_amount numeric(12,2) null,
+  pending_amount numeric(12,2) null,
+  payment_method text null,
+  payment_status text not null default 'pendiente' check (payment_status in ('pendiente', 'anticipo', 'pagado', 'credito')),
+  promised_delivery_at date null,
+  priority text not null default 'media' check (priority in ('baja', 'media', 'alta', 'urgente')),
+  current_owner text null,
+  current_area text null,
+  due_date date null,
+  internal_notes text null,
   created_at timestamptz not null default now(),
   created_by uuid null references public.app_users(id) on delete set null
 );
@@ -217,16 +243,92 @@ create index if not exists orders_status_idx
 alter table public.orders enable row level security;
 
 alter table public.orders add column if not exists client_id uuid null;
+alter table public.orders add column if not exists order_number text null;
 alter table public.orders add column if not exists title text;
+alter table public.orders add column if not exists product_type text null;
 alter table public.orders add column if not exists description text null;
 alter table public.orders add column if not exists quantity integer;
+alter table public.orders add column if not exists measurements text null;
 alter table public.orders add column if not exists material text null;
 alter table public.orders add column if not exists size text null;
+alter table public.orders add column if not exists lamination_finish text null;
+alter table public.orders add column if not exists color_profile text null;
+alter table public.orders add column if not exists includes_design boolean default false;
+alter table public.orders add column if not exists includes_installation boolean default false;
+alter table public.orders add column if not exists urgency text default 'normal';
+alter table public.orders add column if not exists branch text null;
+alter table public.orders add column if not exists quoted_price numeric(12,2) null;
+alter table public.orders add column if not exists discount_amount numeric(12,2) null;
 alter table public.orders add column if not exists due_date date null;
 alter table public.orders add column if not exists status text;
 alter table public.orders add column if not exists total_amount numeric(12,2) null;
+alter table public.orders add column if not exists deposit_amount numeric(12,2) null;
+alter table public.orders add column if not exists pending_amount numeric(12,2) null;
+alter table public.orders add column if not exists payment_method text null;
+alter table public.orders add column if not exists payment_status text default 'pendiente';
+alter table public.orders add column if not exists promised_delivery_at date null;
+alter table public.orders add column if not exists priority text default 'media';
+alter table public.orders add column if not exists current_owner text null;
+alter table public.orders add column if not exists current_area text null;
+alter table public.orders add column if not exists internal_notes text null;
 alter table public.orders add column if not exists created_at timestamptz default now();
 alter table public.orders add column if not exists created_by uuid null;
+
+create unique index if not exists orders_order_number_idx
+  on public.orders (order_number)
+  where order_number is not null;
+
+create table if not exists public.order_history (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  event_type text not null,
+  detail text not null,
+  created_at timestamptz not null default now(),
+  changed_by uuid null references public.app_users(id) on delete set null
+);
+
+create index if not exists order_history_order_id_idx
+  on public.order_history (order_id);
+
+create index if not exists order_history_created_at_idx
+  on public.order_history (created_at desc);
+
+alter table public.order_history enable row level security;
+
+alter table public.order_history add column if not exists order_id uuid null;
+alter table public.order_history add column if not exists event_type text;
+alter table public.order_history add column if not exists detail text;
+alter table public.order_history add column if not exists created_at timestamptz default now();
+alter table public.order_history add column if not exists changed_by uuid null;
+
+create table if not exists public.order_files (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  attachment_type text not null check (attachment_type in ('arte_cliente', 'prueba_aprobada', 'imagen_referencia', 'comprobante_pago')),
+  file_name text not null,
+  storage_path text not null unique,
+  file_type text null,
+  file_size bigint null,
+  created_at timestamptz not null default now(),
+  uploaded_by uuid null references public.app_users(id) on delete set null
+);
+
+create index if not exists order_files_order_id_idx
+  on public.order_files (order_id);
+
+create index if not exists order_files_created_at_idx
+  on public.order_files (created_at desc);
+
+alter table public.order_files enable row level security;
+
+alter table public.order_files add column if not exists order_id uuid null;
+alter table public.order_files add column if not exists attachment_type text;
+alter table public.order_files add column if not exists file_name text;
+alter table public.order_files add column if not exists storage_path text;
+alter table public.order_files add column if not exists file_type text null;
+alter table public.order_files add column if not exists file_size bigint null;
+alter table public.order_files add column if not exists created_at timestamptz default now();
+alter table public.order_files add column if not exists uploaded_by uuid null;
 
 do $$
 begin
@@ -273,6 +375,78 @@ begin
     alter table public.orders
       add constraint orders_created_by_fkey
       foreign key (created_by) references public.app_users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'orders_urgency_check'
+  ) then
+    alter table public.orders
+      add constraint orders_urgency_check
+      check (urgency in ('normal', 'prioritaria', 'express'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'orders_payment_status_check'
+  ) then
+    alter table public.orders
+      add constraint orders_payment_status_check
+      check (payment_status in ('pendiente', 'anticipo', 'pagado', 'credito'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'orders_priority_check'
+  ) then
+    alter table public.orders
+      add constraint orders_priority_check
+      check (priority in ('baja', 'media', 'alta', 'urgente'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_history_order_id_fkey'
+  ) then
+    alter table public.order_history
+      add constraint order_history_order_id_fkey
+      foreign key (order_id) references public.orders(id) on delete cascade;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_history_changed_by_fkey'
+  ) then
+    alter table public.order_history
+      add constraint order_history_changed_by_fkey
+      foreign key (changed_by) references public.app_users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_files_order_id_fkey'
+  ) then
+    alter table public.order_files
+      add constraint order_files_order_id_fkey
+      foreign key (order_id) references public.orders(id) on delete cascade;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_files_uploaded_by_fkey'
+  ) then
+    alter table public.order_files
+      add constraint order_files_uploaded_by_fkey
+      foreign key (uploaded_by) references public.app_users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_files_attachment_type_check'
+  ) then
+    alter table public.order_files
+      add constraint order_files_attachment_type_check
+      check (attachment_type in ('arte_cliente', 'prueba_aprobada', 'imagen_referencia', 'comprobante_pago'));
   end if;
 
   if not exists (
