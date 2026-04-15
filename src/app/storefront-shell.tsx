@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { storefrontProducts } from "@/app/storefront-data";
+import { StorefrontBusinessSection } from "@/app/storefront-business-section";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
 import { StorefrontDealsSection } from "@/app/storefront-deals-section";
 import { StorefrontFooter } from "@/app/storefront-footer";
@@ -232,6 +233,7 @@ export function StorefrontShell() {
           <StorefrontPromoPanels />
           <StorefrontDealsSection />
           <StorefrontFeatureGridSection />
+          <StorefrontBusinessSection />
           <StorefrontTestimonialsSection />
           <StorefrontFooter />
         </>
