@@ -108,12 +108,12 @@ export function StorefrontTestimonialsSection() {
           <div className="h-px flex-1 bg-slate-200" />
         </div>
 
-        <div className="relative px-6 pb-10 sm:px-8 lg:px-10 2xl:px-12">
+        <div className="relative px-7 pb-10 sm:px-9 lg:px-12 2xl:px-14">
           <button
             type="button"
             onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
             disabled={!canGoPrev}
-            className={`absolute left-3 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border transition lg:flex xl:left-4 2xl:left-5 ${
+            className={`absolute left-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border transition lg:flex xl:left-5 2xl:left-6 ${
               canGoPrev
                 ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
                 : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
@@ -128,7 +128,7 @@ export function StorefrontTestimonialsSection() {
               setStartIndex((current) => Math.min(current + 1, testimonials.length - 3))
             }
             disabled={!canGoNext}
-            className={`absolute right-3 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border transition lg:flex xl:right-4 2xl:right-5 ${
+            className={`absolute right-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border transition lg:flex xl:right-5 2xl:right-6 ${
               canGoNext
                 ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
                 : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
