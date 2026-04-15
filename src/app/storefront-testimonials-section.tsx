@@ -98,9 +98,9 @@ export function StorefrontTestimonialsSection() {
   const canGoNext = startIndex + 3 < testimonials.length;
 
   return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 pb-18 sm:px-6 lg:px-8 2xl:px-10">
+    <section className="mx-auto w-full max-w-[118rem] px-3 pb-18 sm:px-5 lg:px-6 2xl:px-8">
       <div className="border-y border-slate-200 bg-white">
-        <div className="flex items-center justify-between gap-4 px-4 py-7 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
           <div className="h-px flex-1 bg-slate-200" />
           <h2 className="text-center text-[1.95rem] font-semibold tracking-tight text-slate-950">
             Lo que nuestros clientes estan diciendo
@@ -108,7 +108,7 @@ export function StorefrontTestimonialsSection() {
           <div className="h-px flex-1 bg-slate-200" />
         </div>
 
-        <div className="relative px-4 pb-10 sm:px-6 lg:px-8">
+        <div className="relative px-3 pb-10 sm:px-5 lg:px-6">
           <button
             type="button"
             onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
@@ -142,7 +142,7 @@ export function StorefrontTestimonialsSection() {
             {visibleTestimonials.map((item, index) => (
               <article
                 key={`${item.name}-${item.time}`}
-                className={`px-6 py-8 text-center lg:px-12 ${
+                className={`px-5 py-8 text-center lg:px-10 2xl:px-12 ${
                   index < visibleTestimonials.length - 1 ? "lg:border-r lg:border-slate-200" : ""
                 }`}
               >
@@ -158,7 +158,7 @@ export function StorefrontTestimonialsSection() {
                     <RatingStars />
                   </div>
                 </div>
-                <p className="mx-auto mt-8 max-w-[28rem] text-[1.15rem] leading-10 tracking-tight text-slate-800">
+                <p className="mx-auto mt-8 max-w-[30rem] text-[1.15rem] leading-10 tracking-tight text-slate-800">
                   “{item.quote}”
                 </p>
               </article>
@@ -197,7 +197,7 @@ export function StorefrontTestimonialsSection() {
           </div>
         </div>
 
-        <div className="grid gap-5 border-t border-slate-200 px-4 py-10 sm:px-6 md:grid-cols-2 lg:grid-cols-5 lg:px-8">
+        <div className="grid gap-5 border-t border-slate-200 px-3 py-10 sm:px-5 md:grid-cols-2 lg:grid-cols-5 lg:px-6">
           {benefits.map((item, index) => (
             <article key={item.title} className="flex items-start gap-4">
               <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-slate-200 text-[#3558ff]">
