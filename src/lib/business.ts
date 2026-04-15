@@ -3,7 +3,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 export type Client = {
   id: string;
   name: string;
-  full_name: string | null;
   phone: string | null;
   email: string | null;
   document_id: string | null;
@@ -64,7 +63,6 @@ export async function listClients() {
 
 export async function createClient(input: {
   name: string;
-  fullName: string;
   phone: string;
   email: string;
   documentId: string;
@@ -90,7 +88,6 @@ export async function createClient(input: {
     .from("clients")
     .insert({
       name,
-      full_name: normalizeText(input.fullName) || null,
       phone,
       email: normalizeText(input.email) || null,
       document_id: normalizeText(input.documentId) || null,
@@ -113,7 +110,6 @@ export async function createClient(input: {
 export async function updateClient(input: {
   clientId: string;
   name: string;
-  fullName: string;
   phone: string;
   email: string;
   documentId: string;
@@ -142,7 +138,6 @@ export async function updateClient(input: {
     .from("clients")
     .update({
       name,
-      full_name: normalizeText(input.fullName) || null,
       phone,
       email: normalizeText(input.email) || null,
       document_id: normalizeText(input.documentId) || null,

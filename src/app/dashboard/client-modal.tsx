@@ -10,7 +10,6 @@ type ClientModalProps = {
   initialData?: {
     clientId: string;
     name: string;
-    fullName: string;
     phone: string;
     email: string;
     documentId: string;
@@ -99,20 +98,6 @@ export function ClientModal({
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               placeholder="Papeleria Central"
               required
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-slate-600" htmlFor="clientFullName">
-              Nombre completo de empresa o usuario
-            </label>
-            <input
-              id="clientFullName"
-              name="fullName"
-              type="text"
-              defaultValue={initialData?.fullName ?? ""}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-              placeholder="Nombre legal, completo o de registro"
             />
           </div>
 

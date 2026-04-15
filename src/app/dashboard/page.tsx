@@ -222,7 +222,6 @@ async function createClientAction(formData: FormData) {
   try {
     await createClient({
       name: String(formData.get("name") ?? ""),
-      fullName: String(formData.get("fullName") ?? ""),
       phone: String(formData.get("phone") ?? ""),
       email: String(formData.get("email") ?? ""),
       documentId: String(formData.get("documentId") ?? ""),
@@ -257,7 +256,6 @@ async function updateClientAction(formData: FormData) {
     await updateClient({
       clientId,
       name: String(formData.get("name") ?? ""),
-      fullName: String(formData.get("fullName") ?? ""),
       phone: String(formData.get("phone") ?? ""),
       email: String(formData.get("email") ?? ""),
       documentId: String(formData.get("documentId") ?? ""),
@@ -827,7 +825,6 @@ export default async function DashboardPage({
 
     const haystack = [
       client.name,
-      client.full_name ?? "",
       client.phone ?? "",
       client.email ?? "",
       client.document_id ?? "",
@@ -1576,7 +1573,6 @@ export default async function DashboardPage({
               initialData={{
                 clientId: selectedClient.id,
                 name: selectedClient.name,
-                fullName: selectedClient.full_name ?? "",
                 phone: selectedClient.phone ?? "",
                 email: selectedClient.email ?? "",
                 documentId: selectedClient.document_id ?? "",
