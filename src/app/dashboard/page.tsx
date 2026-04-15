@@ -905,7 +905,7 @@ export default async function DashboardPage({
           </div>
 
           <div className="mt-6 space-y-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
-            <div>
+            <div className="pt-1">
               <nav className="space-y-2">
                 {userSideItems.map((item) => {
                   const isActive = item.view === activeView;
@@ -914,7 +914,7 @@ export default async function DashboardPage({
                     <Link
                       key={item.view}
                       href={buildDashboardUrl(item.view)}
-                      className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
+                      className={`flex translate-y-0 transform-none items-center justify-between rounded-2xl border px-4 py-3 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:translate-y-0 ${
                         isActive
                           ? "border-blue-200 bg-blue-50 text-slate-900 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.1)]"
                           : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white"
@@ -941,7 +941,7 @@ export default async function DashboardPage({
                       <Link
                         key={item.view}
                         href={buildDashboardUrl(item.view)}
-                        className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
+                        className={`flex translate-y-0 transform-none items-center justify-between rounded-2xl border px-4 py-3 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:translate-y-0 ${
                           isActive
                             ? "border-blue-200 bg-blue-50 text-slate-900 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.1)]"
                             : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white"
