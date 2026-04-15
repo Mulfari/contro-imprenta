@@ -99,11 +99,13 @@ export function StorefrontTestimonialsSection() {
 
   return (
     <section className="w-full">
-      <div className="border-y border-slate-200 bg-white">
-        <div className="mx-auto w-full max-w-[104rem] px-3 py-7 text-center sm:px-5 lg:px-6">
-          <h2 className="text-[1.95rem] font-semibold tracking-tight text-slate-950">
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex w-full max-w-[104rem] items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
+          <div className="h-px flex-1 bg-slate-200" />
+          <h2 className="text-center text-[1.95rem] font-semibold tracking-tight text-slate-950">
             Lo que nuestros clientes estan diciendo
           </h2>
+          <div className="h-px flex-1 bg-slate-200" />
         </div>
 
         <div className="relative mx-auto w-full max-w-[104rem] px-7 pb-10 sm:px-9 lg:px-12 2xl:px-14">
