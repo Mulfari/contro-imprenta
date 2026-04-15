@@ -137,6 +137,10 @@ export function ClientDetailsPanel({
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <DataCard
+                  label="Nombre completo"
+                  value={client.full_name ?? "Sin nombre completo registrado"}
+                />
                 <DataCard label="Telefono" value={client.phone ?? "Sin telefono"} />
                 <DataCard label="Email" value={client.email ?? "Sin email"} />
                 <DataCard
