@@ -9,29 +9,26 @@ const businessBenefits = [
 
 export function StorefrontBusinessSection() {
   return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 py-14 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="grid gap-8 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_16px_36px_rgba(15,23,42,0.04)] lg:grid-cols-[1.05fr_0.95fr] lg:p-6">
-        <div className="relative overflow-hidden rounded-[1.8rem] bg-[linear-gradient(135deg,#111827_0%,#1f2937_55%,#fbbf24_55%,#fbbf24_100%)] min-h-[24rem]">
-          <div className="absolute inset-y-0 left-0 w-[74%] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_48%)]" />
-          <div className="absolute bottom-0 left-0 h-28 w-full bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.18))]" />
-
-          <div className="absolute left-7 top-7 max-w-[15rem] text-white">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/65">
+    <section className="w-full bg-white">
+      <div className="mx-auto grid w-full max-w-[104rem] gap-8 px-3 py-14 sm:px-5 lg:grid-cols-[1.05fr_0.95fr] lg:px-6">
+        <div className="relative min-h-[24rem] overflow-hidden rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#eef4ff_58%,#fff3c4_100%)]">
+          <div className="absolute inset-y-0 left-0 w-[72%] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.7),transparent_48%)]" />
+          <div className="absolute left-7 top-7 max-w-[15rem] text-slate-950">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
               Soluciones B2B
             </p>
             <h3 className="mt-4 text-[2.2rem] font-black leading-tight tracking-tight">
               Impresion para empresas y marcas
             </h3>
-            <p className="mt-4 text-sm leading-7 text-white/78">
+            <p className="mt-4 text-sm leading-7 text-slate-600">
               Material corporativo, piezas publicitarias y produccion continua para equipos comerciales.
             </p>
           </div>
 
-          <div className="absolute bottom-0 left-0 h-[74%] w-[68%] bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0))]" />
-          <div className="absolute bottom-6 left-10 h-52 w-40 rotate-[-8deg] rounded-[1.8rem] bg-white shadow-[0_30px_50px_rgba(15,23,42,0.28)]" />
-          <div className="absolute bottom-10 left-28 h-44 w-32 rotate-[8deg] rounded-[1.5rem] bg-[#e0ecff] shadow-[0_24px_40px_rgba(15,23,42,0.18)]" />
-          <div className="absolute bottom-18 left-48 h-36 w-28 rotate-[-4deg] rounded-[1.35rem] bg-[#0f172a] shadow-[0_22px_40px_rgba(15,23,42,0.24)]" />
-          <div className="absolute right-10 top-8 flex h-14 w-14 items-center justify-center rounded-full border border-black/10 bg-white/20 text-slate-950 backdrop-blur-sm">
+          <div className="absolute bottom-6 left-10 h-52 w-40 rotate-[-8deg] rounded-[1.8rem] bg-white shadow-[0_26px_42px_rgba(15,23,42,0.16)]" />
+          <div className="absolute bottom-10 left-28 h-44 w-32 rotate-[8deg] rounded-[1.5rem] bg-[#e0ecff] shadow-[0_22px_34px_rgba(15,23,42,0.14)]" />
+          <div className="absolute bottom-18 left-48 h-36 w-28 rotate-[-4deg] rounded-[1.35rem] bg-[#0f172a] shadow-[0_20px_34px_rgba(15,23,42,0.18)]" />
+          <div className="absolute right-10 top-8 flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-950 backdrop-blur-sm">
             <svg
               aria-hidden="true"
               viewBox="0 0 24 24"
@@ -48,7 +45,7 @@ export function StorefrontBusinessSection() {
           </div>
         </div>
 
-        <div className="flex flex-col justify-center px-2 py-2 lg:px-6">
+        <div className="flex flex-col justify-center px-2 py-2 lg:px-4">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
             Empresas
           </p>
