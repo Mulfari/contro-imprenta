@@ -98,7 +98,7 @@ export function StorefrontTestimonialsSection() {
   const canGoNext = startIndex + 3 < testimonials.length;
 
   return (
-    <section className="w-full pb-18">
+    <section className="w-full">
       <div className="border-y border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[104rem] items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
           <div className="h-px flex-1 bg-slate-200" />
