@@ -8,7 +8,7 @@ import {
   type ActivePersonnelItem,
 } from "@/app/dashboard/active-personnel-card";
 import { AdminNotificationsPanel } from "@/app/dashboard/admin-notifications-panel";
-import { ClientDetailsModal } from "@/app/dashboard/client-details-modal";
+import { ClientDetailsPanel } from "@/app/dashboard/client-details-modal";
 import { ClientModal } from "@/app/dashboard/client-modal";
 import { DeleteClientButton } from "@/app/dashboard/delete-client-button";
 import { DashboardLiveRefresh } from "@/app/dashboard/dashboard-live-refresh";
@@ -1036,7 +1036,9 @@ export default async function DashboardPage({
           <section
             className={
               activeView === "clientes"
-                ? "grid gap-6"
+                ? selectedClient && clientMode === "lista"
+                  ? "grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(22rem,0.92fr)]"
+                  : "grid gap-6"
                 : "grid gap-6 xl:grid-cols-[0.9fr_1.1fr]"
             }
           >
@@ -1542,7 +1544,7 @@ export default async function DashboardPage({
           {activeView === "clientes" &&
           clientMode === "lista" &&
           selectedClient ? (
-            <ClientDetailsModal
+            <ClientDetailsPanel
               client={selectedClient}
               orders={selectedClientOrders}
               closeHref={buildClientUrl("lista", undefined, undefined, clientQuery)}
