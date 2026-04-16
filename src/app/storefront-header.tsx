@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { storefrontCategories, storefrontProducts } from "@/app/storefront-data";
 
-const quickLinks = ["Catalogo", "FAQ", "Contactanos"];
 const promoTickerItems = [
   "Impresion express para tarjetas, stickers y pendones",
   "Pedidos online conectados al panel administrativo",
@@ -88,31 +87,21 @@ export function StorefrontHeader({
       ) : null}
 
       <div className="border-b border-slate-800 bg-slate-950 text-white">
-        <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 2xl:px-10">
+        <div className="mx-auto flex w-full max-w-[112rem] px-4 py-3 text-sm sm:px-6 lg:px-8 2xl:px-10">
           <p>Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.</p>
-          <div className="flex flex-wrap items-center gap-4 text-slate-300">
-            {quickLinks.map((item) => (
-              <button key={item} type="button" className="cursor-pointer hover:text-white">
-                {item}
-              </button>
-            ))}
-            <Link href="/login" className="hover:text-white">
-              Panel administrativo
-            </Link>
-          </div>
         </div>
       </div>
 
       <header className="relative z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <Link href="/" className="relative flex items-center">
-              <div className="relative h-[2.9rem] w-[9.75rem] sm:h-[3.2rem] sm:w-[10.5rem]">
+            <Link href="/" className="relative ml-2 flex items-center sm:ml-3">
+              <div className="relative h-[2.9rem] w-[10.4rem] sm:h-[3.25rem] sm:w-[11.2rem]">
                 <Image
                   src="/express-printer-logo.webp"
                   alt="Express Printer"
                   fill
-                  sizes="(min-width: 640px) 10.5rem, 9.75rem"
+                  sizes="(min-width: 640px) 11.2rem, 10.4rem"
                   className="object-contain object-left"
                   priority
                 />
