@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
@@ -16,6 +15,7 @@ type CustomerProfile = {
 
 type CustomerAccountClientProps = {
   hasPublicAuth: boolean;
+  onClose?: () => void;
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -74,6 +74,7 @@ function InfoCard({
 
 export function CustomerAccountClient({
   hasPublicAuth,
+  onClose,
 }: CustomerAccountClientProps) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [session, setSession] = useState<Session | null>(null);
@@ -264,11 +265,43 @@ export function CustomerAccountClient({
     "Cliente Express Printer";
 
   return (
-    <section className="mx-auto w-full max-w-[118rem] px-4 pb-10 pt-4 sm:px-6 sm:pb-12 lg:px-8 2xl:px-10">
-      <div className="ml-auto w-full max-w-[34rem] sm:max-w-[36rem]">
-        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+    <section className="fixed inset-0 z-[80] flex items-start justify-center px-4 pb-6 pt-[8.5rem] sm:px-6 sm:pt-[9.25rem] lg:px-8">
+      <button
+        type="button"
+        aria-label="Cerrar mi cuenta"
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-950/18 backdrop-blur-[8px]"
+      />
+
+      <div className="relative w-full max-w-[36rem]">
+        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
           {!hasPublicAuth ? (
             <div className="p-6 sm:p-7">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                  Mi cuenta
+                </p>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+              </div>
+
               <div className="rounded-[1.55rem] border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
                 Configura <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> para activar el acceso de clientes.
               </div>
@@ -279,10 +312,35 @@ export function CustomerAccountClient({
             </div>
           ) : session ? (
             <div className="space-y-5 p-6 sm:p-7">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                  Mi cuenta
+                </p>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+              </div>
+
               <div className="rounded-[1.7rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
                 <div className="space-y-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                    Mi cuenta
+                    Sesion activa
                   </p>
                   <div>
                     <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
@@ -353,6 +411,31 @@ export function CustomerAccountClient({
             </div>
           ) : (
             <div className="space-y-5 p-6 sm:p-7">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                  Mi cuenta
+                </p>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+              </div>
+
               <div className="rounded-[1.7rem] border border-slate-200 bg-[linear-gradient(180deg,#fcfdff_0%,#f6f8fb_100%)] p-5">
                 <div className="space-y-2">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
@@ -542,17 +625,6 @@ export function CustomerAccountClient({
                   )}
                 </div>
               </div>
-
-              <p className="text-center text-sm text-slate-500">
-                Volver a la{" "}
-                <Link
-                  href="/"
-                  className="font-semibold text-slate-900 transition hover:text-slate-700"
-                >
-                  tienda
-                </Link>
-                .
-              </p>
             </div>
           )}
         </div>

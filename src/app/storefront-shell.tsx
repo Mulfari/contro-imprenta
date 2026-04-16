@@ -116,18 +116,10 @@ export function StorefrontShell() {
         recentSearches={recentSearches}
         hasActiveSearch={Boolean(debouncedQuery)}
         isAccountActive={accountOpen}
-        onAccountClick={() => {
-          setAccountOpen((current) => !current);
-          setSearchQuery("");
-        }}
+        onAccountClick={() => setAccountOpen((current) => !current)}
       />
 
-      {accountOpen ? (
-        <>
-          <CustomerAccountClient hasPublicAuth={publicAuthEnabled} />
-          <StorefrontFooter />
-        </>
-      ) : debouncedQuery ? (
+      {debouncedQuery ? (
         <>
           <section className="mx-auto w-full max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8 2xl:px-10">
             <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
@@ -253,6 +245,13 @@ export function StorefrontShell() {
           <StorefrontFooter />
         </>
       )}
+
+      {accountOpen ? (
+        <CustomerAccountClient
+          hasPublicAuth={publicAuthEnabled}
+          onClose={() => setAccountOpen(false)}
+        />
+      ) : null}
     </main>
   );
 }
