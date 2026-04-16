@@ -516,8 +516,10 @@ export function StorefrontHeader({
         </div>
       </section>
 
-      <button
-        type="button"
+      <a
+        href="https://wa.me/351922250664"
+        target="_blank"
+        rel="noreferrer"
         aria-label="WhatsApp"
         className="group fixed bottom-5 right-5 z-[60] inline-flex cursor-pointer items-center gap-3 rounded-full border border-emerald-200 bg-white px-3 py-3 text-left text-slate-800 shadow-[0_18px_38px_rgba(15,23,42,0.14)] transition-all duration-300 hover:border-emerald-300 hover:shadow-[0_24px_52px_rgba(15,23,42,0.2)] sm:bottom-6 sm:right-6 sm:px-4"
       >
@@ -537,7 +539,7 @@ export function StorefrontHeader({
           </span>
           <span className="text-sm font-semibold text-slate-800 transition-colors duration-300 group-hover:text-slate-950">WhatsApp</span>
         </span>
-      </button>
+      </a>
     </>
   );
 }
