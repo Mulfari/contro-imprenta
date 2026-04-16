@@ -214,8 +214,8 @@ export function CustomerAccountClient({
 
   return (
     <section className="mx-auto w-full max-w-[118rem] px-4 py-10 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[38rem] sm:p-9">
+      <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr] xl:items-start">
+        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
             Express Printer
           </p>
@@ -226,7 +226,7 @@ export function CustomerAccountClient({
             Accede a tu cuenta de cliente para consultar tu informacion y gestionar tus pedidos con Express Printer.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
             <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-5">
               <p className="text-sm font-semibold text-slate-900">Registro rapido</p>
               <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -242,13 +242,13 @@ export function CustomerAccountClient({
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[38rem] sm:p-9">
+        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:p-10">
           {!hasPublicAuth ? (
             <div className="rounded-[1.6rem] border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
               Configura <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> para activar el acceso de clientes.
             </div>
           ) : isLoading ? (
-            <div className="flex min-h-[18rem] items-center justify-center text-sm font-medium text-slate-500">
+            <div className="flex min-h-[22rem] items-center justify-center text-sm font-medium text-slate-500">
               Cargando cuenta...
             </div>
           ) : session ? (
