@@ -215,7 +215,7 @@ export function CustomerAccountClient({
   return (
     <section className="mx-auto w-full max-w-[118rem] px-4 py-10 sm:px-6 lg:px-8 2xl:px-10">
       <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr] xl:items-stretch">
-        <div className="flex min-h-[38rem] flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[42rem] sm:p-10">
+        <div className="flex min-h-[34rem] flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[38rem] sm:p-10 xl:min-h-[40rem]">
           <div className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
               Express Printer
@@ -228,29 +228,29 @@ export function CustomerAccountClient({
             </p>
           </div>
 
-          <div className="mt-12 grid flex-1 gap-4 sm:grid-cols-2">
-            <div className="flex h-full flex-col rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
+          <div className="mt-auto grid gap-4 pt-12 sm:grid-cols-2">
+            <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
               <p className="text-sm font-semibold text-slate-900">Registro rapido</p>
               <p className="mt-3 text-sm leading-6 text-slate-500">
                 Crea tu cuenta con correo y clave para centralizar futuros pedidos.
               </p>
-              <div className="mt-auto pt-8 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+              <div className="pt-8 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
                 Nuevo cliente
               </div>
             </div>
-            <div className="flex h-full flex-col rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
+            <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
               <p className="text-sm font-semibold text-slate-900">Atencion comercial</p>
               <p className="mt-3 text-sm leading-6 text-slate-500">
                 Si necesitas ayuda con una orden, puedes escribirnos por WhatsApp directamente.
               </p>
-              <div className="mt-auto pt-8 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+              <div className="pt-8 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
                 Soporte directo
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex min-h-[38rem] flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[42rem] sm:p-10">
+        <div className="flex min-h-[34rem] flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[38rem] sm:p-10 xl:min-h-[40rem]">
           {!hasPublicAuth ? (
             <div className="my-auto rounded-[1.6rem] border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
               Configura <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> para activar el acceso de clientes.
@@ -341,8 +341,8 @@ export function CustomerAccountClient({
               </div>
             </div>
           ) : (
-            <div className="flex h-full flex-col">
-              <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
+            <div className="mx-auto flex h-full w-full max-w-[32rem] flex-col justify-center">
+              <div className="inline-flex self-start rounded-2xl border border-slate-200 bg-slate-50 p-1">
                 <button
                   type="button"
                   onClick={() => setMode("login")}
@@ -380,7 +380,7 @@ export function CustomerAccountClient({
               ) : null}
 
               {mode === "login" ? (
-                <form className="mt-8 flex flex-1 flex-col space-y-5" onSubmit={handleLogin}>
+                <form className="mt-8 space-y-5" onSubmit={handleLogin}>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-700" htmlFor="customer-login-email">
                       Correo
@@ -412,13 +412,13 @@ export function CustomerAccountClient({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="mt-auto inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSubmitting ? "Entrando..." : "Entrar"}
                   </button>
                 </form>
               ) : (
-                <form className="mt-8 flex flex-1 flex-col space-y-5" onSubmit={handleRegister}>
+                <form className="mt-8 space-y-5" onSubmit={handleRegister}>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2 sm:col-span-2">
                       <label className="text-sm font-semibold text-slate-700" htmlFor="customer-register-name">
@@ -481,14 +481,14 @@ export function CustomerAccountClient({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="mt-auto inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
                   </button>
                 </form>
               )}
 
-              <p className="mt-6 text-sm text-slate-500">
+              <p className="mt-8 text-sm text-slate-500">
                 Volver a la
                 {" "}
                 <Link href="/" className="font-semibold text-slate-900 transition hover:text-slate-700">
