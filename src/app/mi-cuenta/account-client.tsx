@@ -51,28 +51,6 @@ function MessageBox({
   );
 }
 
-function InfoCard({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-[1.6rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-400">
-        {eyebrow}
-      </p>
-      <p className="mt-3 text-base font-semibold tracking-tight text-slate-950">
-        {title}
-      </p>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
-    </div>
-  );
-}
-
 export function CustomerAccountClient({
   hasPublicAuth,
   onClose,
@@ -279,7 +257,7 @@ export function CustomerAccountClient({
         <div
           className={`overflow-hidden border border-slate-200 bg-white ${
             isDropdown
-              ? "rounded-[1.8rem] shadow-[0_26px_60px_rgba(15,23,42,0.16)]"
+              ? "rounded-[1.7rem] shadow-[0_24px_52px_rgba(15,23,42,0.12)]"
               : "rounded-[2rem] shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
           }`}
         >
@@ -319,7 +297,7 @@ export function CustomerAccountClient({
               Cargando cuenta...
             </div>
           ) : session ? (
-            <div className="space-y-5 p-6 sm:p-7">
+            <div className="space-y-4 p-5 sm:p-6">
               <div className="flex items-center justify-between gap-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
                   Mi cuenta
@@ -345,27 +323,21 @@ export function CustomerAccountClient({
                 </button>
               </div>
 
-              <div className="rounded-[1.7rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
+              <div className="rounded-[1.45rem] border border-slate-200 bg-slate-50/70 p-5">
                 <div className="space-y-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                    Sesion activa
-                  </p>
                   <div>
-                    <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
+                    <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-[1.7rem]">
                       {displayName}
                     </h2>
                     <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
                   </div>
-                  <p className="text-sm leading-6 text-slate-500">
-                    Acceso activo para seguir tus datos y tus futuros pedidos.
-                  </p>
                 </div>
               </div>
 
               {message ? <MessageBox message={message} tone={messageTone} /> : null}
 
-              <div className="grid gap-4">
-                <div className="rounded-[1.7rem] border border-slate-200 bg-white p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)]">
+              <div className="grid gap-3">
+                <div className="rounded-[1.45rem] border border-slate-200 bg-white p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-400">
                     Datos de contacto
                   </p>
@@ -397,15 +369,13 @@ export function CustomerAccountClient({
                   </div>
                 </div>
 
-                <InfoCard
-                  eyebrow="Cuenta"
-                  title="Lista para crecer"
-                  description={`Cuenta creada ${
-                    profile?.created_at
-                      ? new Date(profile.created_at).toLocaleDateString("es-VE")
-                      : "recientemente"
-                  }. Pronto veras aqui tu historial y seguimiento.`}
-                />
+                <div className="rounded-[1.45rem] border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-500">
+                  Cuenta creada{" "}
+                  {profile?.created_at
+                    ? new Date(profile.created_at).toLocaleDateString("es-VE")
+                    : "recientemente"}
+                  . Pronto verás aquí tu historial y seguimiento.
+                </div>
 
                 <button
                   type="button"
@@ -418,7 +388,7 @@ export function CustomerAccountClient({
               </div>
             </div>
           ) : (
-            <div className="space-y-5 p-6 sm:p-7">
+            <div className="space-y-4 p-5 sm:p-6">
               <div className="flex items-center justify-between gap-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
                   Mi cuenta
@@ -444,19 +414,8 @@ export function CustomerAccountClient({
                 </button>
               </div>
 
-              <div className="rounded-[1.7rem] border border-slate-200 bg-[linear-gradient(180deg,#fcfdff_0%,#f6f8fb_100%)] p-5">
-                <div className="space-y-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                    Mi cuenta
-                  </p>
-                  <p className="text-sm leading-6 text-slate-500">
-                    {mode === "login"
-                      ? "Accede a tu cuenta para consultar y gestionar tus pedidos."
-                      : "Registra tus datos para comenzar a trabajar con Express Printer."}
-                  </p>
-                </div>
-
-                <div className="mt-4 inline-flex w-full rounded-[1.45rem] border border-slate-200 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+              <div className="rounded-[1.45rem] border border-slate-200 bg-slate-50/70 p-4">
+                <div className="inline-flex w-full rounded-[1.25rem] border border-slate-200 bg-white p-1">
                   <button
                     type="button"
                     onClick={() => setMode("login")}
@@ -482,18 +441,16 @@ export function CustomerAccountClient({
                 </div>
               </div>
 
-              <div className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.04)] sm:p-6">
-                <InfoCard
-                  eyebrow="Acceso"
-                  title={mode === "login" ? "Entra a tu cuenta" : "Crea tu acceso"}
-                  description={
-                    mode === "login"
-                      ? "Ingresa con tu correo y clave sin salir de la tienda."
-                      : "Deja lista tu cuenta para futuros pedidos y seguimiento."
-                  }
-                />
+              <div className="rounded-[1.45rem] border border-slate-200 bg-white p-5">
+                <div className="mb-4">
+                  <p className="text-sm leading-6 text-slate-500">
+                    {mode === "login"
+                      ? "Ingresa con tu correo y clave."
+                      : "Crea tu acceso de cliente."}
+                  </p>
+                </div>
 
-                <div className="mt-5">
+                <div>
                   {message ? (
                     <div className="mb-5">
                       <MessageBox message={message} tone={messageTone} />
