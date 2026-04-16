@@ -535,7 +535,10 @@ export function StorefrontHeader({
             <path d="M8.5 10.5c.3 2 2 3.7 4 4" />
           </svg>
         </span>
-        <span className="hidden sm:block">¿Necesitas ayuda? WhatsApp</span>
+        <span className="hidden sm:flex sm:flex-col sm:leading-tight">
+          <span>¿Necesitas ayuda?</span>
+          <span>WhatsApp</span>
+        </span>
       </button>
     </>
   );
