@@ -9,11 +9,16 @@ import { StorefrontHeader } from "@/app/storefront-header";
 type StorefrontAuthShellProps = {
   hasPublicAuth: boolean;
   initialMode: "login" | "register";
+  initialNotice?: {
+    message: string;
+    tone: "error" | "success";
+  } | null;
 };
 
 export function StorefrontAuthShell({
   hasPublicAuth,
   initialMode,
+  initialNotice = null,
 }: StorefrontAuthShellProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -33,6 +38,7 @@ export function StorefrontAuthShell({
         initialMode={initialMode}
         showModeSwitch={false}
         variant="page"
+        initialNotice={initialNotice}
       />
 
       <StorefrontFooter />

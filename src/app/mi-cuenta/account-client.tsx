@@ -20,6 +20,10 @@ type CustomerAccountClientProps = {
   variant?: "page" | "dropdown";
   initialMode?: "login" | "register";
   showModeSwitch?: boolean;
+  initialNotice?: {
+    message: string;
+    tone: "error" | "success";
+  } | null;
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -60,14 +64,17 @@ export function CustomerAccountClient({
   variant = "page",
   initialMode = "login",
   showModeSwitch,
+  initialNotice = null,
 }: CustomerAccountClientProps) {
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageTone, setMessageTone] = useState<"error" | "success">("success");
+  const [message, setMessage] = useState(initialNotice?.message ?? "");
+  const [messageTone, setMessageTone] = useState<"error" | "success">(
+    initialNotice?.tone ?? "success",
+  );
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -84,6 +91,15 @@ export function CustomerAccountClient({
   useEffect(() => {
     setMode(initialMode);
   }, [initialMode]);
+
+  useEffect(() => {
+    if (!initialNotice) {
+      return;
+    }
+
+    setMessage(initialNotice.message);
+    setMessageTone(initialNotice.tone);
+  }, [initialNotice]);
 
   useEffect(() => {
     if (!hasPublicAuth) {
@@ -188,6 +204,10 @@ export function CustomerAccountClient({
         email: registerEmail.trim(),
         password: registerPassword,
         options: {
+          emailRedirectTo:
+            typeof window !== "undefined"
+              ? `${window.location.origin}/auth/confirm`
+              : undefined,
           data: {
             full_name: registerFullName.trim(),
             phone: registerPhone.trim(),
