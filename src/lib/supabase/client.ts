@@ -1,5 +1,9 @@
+import { createBrowserClient } from "@supabase/ssr";
+
+import { getSupabasePublicCredentials } from "@/lib/supabase/config";
+
 export function createBrowserSupabaseClient() {
-  throw new Error(
-    "Browser Supabase auth client is not used in the username-based panel setup.",
-  );
+  const { url, anonKey } = getSupabasePublicCredentials();
+
+  return createBrowserClient(url, anonKey);
 }

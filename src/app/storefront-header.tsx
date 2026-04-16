@@ -291,8 +291,8 @@ export function StorefrontHeader({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
+              <Link
+                href="/mi-cuenta"
                 className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 <svg
@@ -309,7 +309,7 @@ export function StorefrontHeader({
                   <path d="M5 20a7 7 0 0 1 14 0" />
                 </svg>
                 Mi cuenta
-              </button>
+              </Link>
               <button
                 type="button"
                 className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
