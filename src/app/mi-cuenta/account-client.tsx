@@ -30,6 +30,48 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function MessageBox({
+  message,
+  tone,
+}: {
+  message: string;
+  tone: "error" | "success";
+}) {
+  return (
+    <div
+      className={`rounded-[1.35rem] border px-4 py-3 text-sm font-medium ${
+        tone === "error"
+          ? "border-rose-200 bg-rose-50 text-rose-700"
+          : "border-emerald-200 bg-emerald-50 text-emerald-700"
+      }`}
+    >
+      {message}
+    </div>
+  );
+}
+
+function InfoCard({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-[1.6rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-400">
+        {eyebrow}
+      </p>
+      <p className="mt-3 text-base font-semibold tracking-tight text-slate-950">
+        {title}
+      </p>
+      <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+    </div>
+  );
+}
+
 export function CustomerAccountClient({
   hasPublicAuth,
 }: CustomerAccountClientProps) {
@@ -48,6 +90,10 @@ export function CustomerAccountClient({
   const [registerPhone, setRegisterPhone] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
+
+  useEffect(() => {
+    setMessage("");
+  }, [mode]);
 
   useEffect(() => {
     if (!hasPublicAuth) {
@@ -212,273 +258,326 @@ export function CustomerAccountClient({
     }
   }
 
+  const displayName =
+    profile?.full_name?.trim() ||
+    session?.user.user_metadata.full_name ||
+    "Cliente Express Printer";
+
   return (
-    <section className="mx-auto w-full max-w-[118rem] px-4 py-10 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="mx-auto w-full max-w-[48rem]">
+    <section className="mx-auto w-full max-w-[118rem] px-4 py-8 sm:px-6 lg:px-8 2xl:px-10">
+      <div className="mx-auto w-full max-w-[62rem]">
         <div className="space-y-4 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
             Express Printer
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.65rem]">
             Mi cuenta
           </h1>
-          <p className="mx-auto max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-            Accede a tu cuenta de cliente para consultar tus datos y mantener centralizados tus pedidos con Express Printer.
+          <p className="mx-auto max-w-[42rem] text-sm leading-7 text-slate-600 sm:text-base">
+            Gestiona tu acceso, consulta tus datos y prepárate para seguir tus pedidos desde un solo lugar.
           </p>
         </div>
 
-        <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[40rem] sm:p-10 xl:min-h-[42rem] xl:p-12">
+        <div className="mt-8 overflow-hidden rounded-[2.4rem] border border-slate-200 bg-white shadow-[0_30px_70px_rgba(15,23,42,0.06)]">
           {!hasPublicAuth ? (
-            <div className="mx-auto my-auto w-full max-w-[34rem] rounded-[1.6rem] border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
-              Configura <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> para activar el acceso de clientes.
+            <div className="p-8 sm:p-10">
+              <div className="mx-auto max-w-[40rem] rounded-[1.8rem] border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
+                Configura <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> para activar el acceso de clientes.
+              </div>
             </div>
           ) : isLoading ? (
-            <div className="flex min-h-[24rem] items-center justify-center text-sm font-medium text-slate-500">
+            <div className="flex min-h-[28rem] items-center justify-center p-8 text-sm font-medium text-slate-500 sm:min-h-[32rem]">
               Cargando cuenta...
             </div>
           ) : session ? (
-            <div className="mx-auto flex h-full w-full max-w-[38rem] flex-col justify-center space-y-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+            <div className="space-y-8 p-7 sm:p-9 lg:p-10">
+              <div className="flex flex-col gap-4 rounded-[1.9rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
                     Sesion activa
                   </p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                    {profile?.full_name?.trim() || session.user.user_metadata.full_name || "Cliente Express Printer"}
-                  </h2>
-                  <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
+                  <div>
+                    <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
+                      {displayName}
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
+                  </div>
+                  <p className="max-w-[36rem] text-sm leading-6 text-slate-500">
+                    Este espacio quedará listo para que pronto puedas consultar pedidos, aprobaciones y seguimiento de impresión.
+                  </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleSignOut}
                   disabled={isSubmitting}
-                  className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Cerrar sesion
                 </button>
               </div>
 
-              {message ? (
-                <div
-                  className={`rounded-[1.3rem] border px-4 py-3 text-sm font-medium ${
-                    messageTone === "error"
-                      ? "border-rose-200 bg-rose-50 text-rose-700"
-                      : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                  }`}
-                >
-                  {message}
-                </div>
-              ) : null}
+              {message ? <MessageBox message={message} tone={messageTone} /> : null}
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
+              <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+                <div className="rounded-[1.9rem] border border-slate-200 bg-white p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-400">
                     Datos de contacto
                   </p>
-                  <div className="mt-4 space-y-3 text-sm text-slate-600">
-                    <p>
-                      <span className="font-semibold text-slate-900">Nombre:</span>{" "}
-                      {profile?.full_name?.trim() || "Pendiente"}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-slate-900">Correo:</span>{" "}
-                      {session.user.email}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-slate-900">Telefono:</span>{" "}
-                      {profile?.phone?.trim() || "Pendiente"}
-                    </p>
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                        Nombre
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-slate-900">
+                        {profile?.full_name?.trim() || "Pendiente"}
+                      </p>
+                    </div>
+                    <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                        Correo
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-slate-900">
+                        {session.user.email}
+                      </p>
+                    </div>
+                    <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                        Telefono
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-slate-900">
+                        {profile?.phone?.trim() || "Pendiente"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
-                    Cuenta
-                  </p>
-                  <div className="mt-4 space-y-3 text-sm text-slate-600">
-                    <p>
-                      <span className="font-semibold text-slate-900">Estado:</span> Activa
-                    </p>
-                    <p>
-                      <span className="font-semibold text-slate-900">Creada:</span>{" "}
-                      {profile?.created_at
+                <div className="grid gap-4">
+                  <InfoCard
+                    eyebrow="Cuenta"
+                    title="Acceso activo"
+                    description={`Cuenta creada ${
+                      profile?.created_at
                         ? new Date(profile.created_at).toLocaleDateString("es-VE")
-                        : "Reciente"}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-slate-900">Pedidos:</span> Muy pronto aqui veras tu historial.
-                    </p>
-                  </div>
+                        : "recientemente"
+                    }.`}
+                  />
+                  <InfoCard
+                    eyebrow="Pedidos"
+                    title="Seguimiento muy pronto"
+                    description="Aquí verás el estado, aprobaciones y movimiento de tus pedidos cuando conectemos el flujo completo."
+                  />
                 </div>
               </div>
 
-              <div className="rounded-[1.6rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-sm leading-6 text-slate-500">
-                Esta es la primera base de acceso para clientes. El siguiente paso natural es conectar aqui el historial y seguimiento de pedidos.
+              <div className="rounded-[1.8rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-5 text-sm leading-6 text-slate-500">
+                Tu cuenta ya está lista. El siguiente paso natural es enlazar aquí el historial de pedidos y sus estados de producción.
               </div>
             </div>
           ) : (
-            <div className="mx-auto flex h-full w-full max-w-[34rem] flex-col justify-center">
-              <div className="inline-flex self-center rounded-2xl border border-slate-200 bg-slate-50 p-1">
-                <button
-                  type="button"
-                  onClick={() => setMode("login")}
-                  className={`cursor-pointer rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                    mode === "login"
-                      ? "bg-white text-slate-950 shadow-sm"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  Iniciar sesion
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode("register")}
-                  className={`cursor-pointer rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                    mode === "register"
-                      ? "bg-white text-slate-950 shadow-sm"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  Registrarme
-                </button>
-              </div>
+            <div className="space-y-8 p-7 sm:p-9 lg:p-10">
+              <div className="rounded-[1.9rem] border border-slate-200 bg-[linear-gradient(180deg,#fcfdff_0%,#f6f8fb_100%)] p-4 sm:p-5">
+                <div className="space-y-4 text-center">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                    Acceso de clientes
+                  </p>
+                  <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
+                    {mode === "login" ? "Inicia sesion" : "Crea tu cuenta"}
+                  </h2>
+                  <p className="mx-auto max-w-[38rem] text-sm leading-6 text-slate-500">
+                    {mode === "login"
+                      ? "Entra con tu correo y clave para acceder a tu cuenta de cliente."
+                      : "Registra tus datos para comenzar a gestionar tus pedidos con Express Printer."}
+                  </p>
+                </div>
 
-              <div className="mt-8 rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-                  {mode === "login" ? "Inicia sesion" : "Crea tu cuenta"}
-                </h2>
-                <p className="mt-3 text-sm leading-6 text-slate-500">
-                  {mode === "login"
-                    ? "Accede con tu correo y clave para entrar a tu cuenta."
-                    : "Registra tus datos para comenzar a gestionar tus pedidos."}
-                </p>
-
-                {message ? (
-                  <div
-                    className={`mt-6 rounded-[1.3rem] border px-4 py-3 text-sm font-medium ${
-                      messageTone === "error"
-                        ? "border-rose-200 bg-rose-50 text-rose-700"
-                        : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                <div className="mt-5 inline-flex w-full rounded-[1.55rem] border border-slate-200 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+                  <button
+                    type="button"
+                    onClick={() => setMode("login")}
+                    className={`flex-1 cursor-pointer rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
+                      mode === "login"
+                        ? "bg-slate-950 text-white shadow-sm"
+                        : "text-slate-500 hover:text-slate-800"
                     }`}
                   >
-                    {message}
-                  </div>
-                ) : null}
+                    Iniciar sesion
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("register")}
+                    className={`flex-1 cursor-pointer rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
+                      mode === "register"
+                        ? "bg-slate-950 text-white shadow-sm"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    Registrarme
+                  </button>
+                </div>
+              </div>
 
-                {mode === "login" ? (
-                  <form className="mt-8 space-y-5" onSubmit={handleLogin}>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-700" htmlFor="customer-login-email">
-                        Correo
-                      </label>
-                      <input
-                        id="customer-login-email"
-                        type="email"
-                        value={loginEmail}
-                        onChange={(event) => setLoginEmail(event.target.value)}
-                        required
-                        autoComplete="email"
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
-                      />
+              <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+                <div className="rounded-[1.9rem] border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)] sm:p-7">
+                  {message ? (
+                    <div className="mb-5">
+                      <MessageBox message={message} tone={messageTone} />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-700" htmlFor="customer-login-password">
-                        Clave
-                      </label>
-                      <input
-                        id="customer-login-password"
-                        type="password"
-                        value={loginPassword}
-                        onChange={(event) => setLoginPassword(event.target.value)}
-                        required
-                        autoComplete="current-password"
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSubmitting ? "Entrando..." : "Entrar"}
-                    </button>
-                  </form>
-                ) : (
-                  <form className="mt-8 space-y-5" onSubmit={handleRegister}>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2 sm:col-span-2">
-                        <label className="text-sm font-semibold text-slate-700" htmlFor="customer-register-name">
-                          Nombre completo
-                        </label>
-                        <input
-                          id="customer-register-name"
-                          type="text"
-                          value={registerFullName}
-                          onChange={(event) => setRegisterFullName(event.target.value)}
-                          required
-                          autoComplete="name"
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
-                        />
-                      </div>
+                  ) : null}
+
+                  {mode === "login" ? (
+                    <form className="space-y-5" onSubmit={handleLogin}>
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700" htmlFor="customer-register-phone">
-                          Telefono
-                        </label>
-                        <input
-                          id="customer-register-phone"
-                          type="tel"
-                          value={registerPhone}
-                          onChange={(event) => setRegisterPhone(event.target.value)}
-                          autoComplete="tel"
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700" htmlFor="customer-register-email">
+                        <label
+                          className="text-sm font-semibold text-slate-700"
+                          htmlFor="customer-login-email"
+                        >
                           Correo
                         </label>
                         <input
-                          id="customer-register-email"
+                          id="customer-login-email"
                           type="email"
-                          value={registerEmail}
-                          onChange={(event) => setRegisterEmail(event.target.value)}
+                          value={loginEmail}
+                          onChange={(event) => setLoginEmail(event.target.value)}
                           required
                           autoComplete="email"
                           className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
                         />
                       </div>
-                      <div className="space-y-2 sm:col-span-2">
-                        <label className="text-sm font-semibold text-slate-700" htmlFor="customer-register-password">
+
+                      <div className="space-y-2">
+                        <label
+                          className="text-sm font-semibold text-slate-700"
+                          htmlFor="customer-login-password"
+                        >
                           Clave
                         </label>
                         <input
-                          id="customer-register-password"
+                          id="customer-login-password"
                           type="password"
-                          value={registerPassword}
-                          onChange={(event) => setRegisterPassword(event.target.value)}
+                          value={loginPassword}
+                          onChange={(event) => setLoginPassword(event.target.value)}
                           required
-                          minLength={6}
-                          autoComplete="new-password"
+                          autoComplete="current-password"
                           className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
                         />
                       </div>
-                    </div>
 
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
-                    </button>
-                  </form>
-                )}
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isSubmitting ? "Entrando..." : "Entrar"}
+                      </button>
+                    </form>
+                  ) : (
+                    <form className="space-y-5" onSubmit={handleRegister}>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2 sm:col-span-2">
+                          <label
+                            className="text-sm font-semibold text-slate-700"
+                            htmlFor="customer-register-name"
+                          >
+                            Nombre completo
+                          </label>
+                          <input
+                            id="customer-register-name"
+                            type="text"
+                            value={registerFullName}
+                            onChange={(event) => setRegisterFullName(event.target.value)}
+                            required
+                            autoComplete="name"
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label
+                            className="text-sm font-semibold text-slate-700"
+                            htmlFor="customer-register-phone"
+                          >
+                            Telefono
+                          </label>
+                          <input
+                            id="customer-register-phone"
+                            type="tel"
+                            value={registerPhone}
+                            onChange={(event) => setRegisterPhone(event.target.value)}
+                            autoComplete="tel"
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label
+                            className="text-sm font-semibold text-slate-700"
+                            htmlFor="customer-register-email"
+                          >
+                            Correo
+                          </label>
+                          <input
+                            id="customer-register-email"
+                            type="email"
+                            value={registerEmail}
+                            onChange={(event) => setRegisterEmail(event.target.value)}
+                            required
+                            autoComplete="email"
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
+                          />
+                        </div>
+
+                        <div className="space-y-2 sm:col-span-2">
+                          <label
+                            className="text-sm font-semibold text-slate-700"
+                            htmlFor="customer-register-password"
+                          >
+                            Clave
+                          </label>
+                          <input
+                            id="customer-register-password"
+                            type="password"
+                            value={registerPassword}
+                            onChange={(event) => setRegisterPassword(event.target.value)}
+                            required
+                            minLength={6}
+                            autoComplete="new-password"
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-300"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
+                      </button>
+                    </form>
+                  )}
+                </div>
+
+                <div className="grid gap-4">
+                  <InfoCard
+                    eyebrow="Tu cuenta"
+                    title="Acceso centralizado"
+                    description="Mantén tus datos listos para revisar pedidos, aprobaciones y futuras entregas en un solo punto."
+                  />
+                  <InfoCard
+                    eyebrow="Soporte"
+                    title="Preparado para crecer"
+                    description="Este acceso quedará conectado con seguimiento de pedidos, historial y soporte cuando completemos el flujo del ecommerce."
+                  />
+                </div>
               </div>
 
-              <p className="mt-8 text-center text-sm text-slate-500">
+              <p className="text-center text-sm text-slate-500">
                 Volver a la{" "}
-                <Link href="/" className="font-semibold text-slate-900 transition hover:text-slate-700">
+                <Link
+                  href="/"
+                  className="font-semibold text-slate-900 transition hover:text-slate-700"
+                >
                   tienda
                 </Link>
                 .
