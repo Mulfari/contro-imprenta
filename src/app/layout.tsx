@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Express Printer",
   description: "Tienda online y panel administrativo para Express Printer.",
+  icons: {
+    icon: "/favicon-x.webp",
+    shortcut: "/favicon-x.webp",
+    apple: "/favicon-x.webp",
+  },
 };
 
 export default function RootLayout({
