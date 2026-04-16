@@ -518,13 +518,13 @@ export function StorefrontHeader({
 
       <button
         type="button"
-        className="fixed bottom-5 right-5 z-[60] inline-flex cursor-pointer items-center gap-3 rounded-full border border-emerald-200 bg-emerald-500 px-4 py-3 text-left text-sm font-semibold text-white shadow-[0_18px_40px_rgba(16,185,129,0.34)] transition hover:bg-emerald-600 sm:bottom-6 sm:right-6"
+        className="fixed bottom-5 right-5 z-[60] inline-flex cursor-pointer items-center gap-2 rounded-full border border-emerald-300/80 bg-white px-3 py-3 text-sm font-semibold text-slate-800 shadow-[0_18px_38px_rgba(15,23,42,0.14)] transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-[0_22px_46px_rgba(15,23,42,0.18)] sm:bottom-6 sm:right-6 sm:px-4"
       >
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/18">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_10px_22px_rgba(16,185,129,0.32)]">
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            className="h-5 w-5"
+            className="h-4 w-4"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.8"
@@ -535,12 +535,7 @@ export function StorefrontHeader({
             <path d="M8.5 10.5c.3 2 2 3.7 4 4" />
           </svg>
         </span>
-        <span className="hidden sm:flex sm:flex-col">
-          <span className="text-[10px] uppercase tracking-[0.18em] text-emerald-100">
-            Necesitas ayuda?
-          </span>
-          <span>WhatsApp en linea</span>
-        </span>
+        <span className="hidden sm:block">WhatsApp</span>
       </button>
     </>
   );
