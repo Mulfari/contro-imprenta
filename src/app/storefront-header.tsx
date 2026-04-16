@@ -124,7 +124,7 @@ export function StorefrontHeader({
               >
                 <div
                   ref={categoryAreaRef}
-                  className="relative shrink-0 border-b border-slate-200 bg-white xl:border-b-0 xl:border-r"
+                  className="relative shrink-0 overflow-hidden rounded-t-[1.35rem] border-b border-slate-200 bg-slate-50 xl:rounded-l-[1.35rem] xl:rounded-tr-none xl:border-b-0 xl:border-r"
                 >
                   <button
                     type="button"
@@ -139,10 +139,10 @@ export function StorefrontHeader({
                         return next;
                       })
                     }
-                    className={`inline-flex w-full cursor-pointer items-center justify-between gap-3 bg-white px-5 py-4 text-sm font-semibold transition xl:min-w-[15.5rem] xl:rounded-l-[1.35rem] ${
+                    className={`inline-flex w-full cursor-pointer items-center justify-between gap-3 bg-slate-50 px-5 py-4 text-sm font-semibold transition xl:min-w-[15.5rem] ${
                       categoryOpen
                         ? "text-slate-950"
-                        : "text-slate-700 hover:bg-slate-50"
+                        : "text-slate-700 hover:bg-slate-100"
                     }`}
                   >
                     <span className="inline-flex items-center gap-2">
