@@ -36,6 +36,8 @@ type StorefrontHeaderProps = {
   onSearchQueryChange: (value: string) => void;
   recentSearches: string[];
   hasActiveSearch: boolean;
+  isAccountActive: boolean;
+  onAccountClick: () => void;
 };
 
 export function StorefrontHeader({
@@ -43,6 +45,8 @@ export function StorefrontHeader({
   onSearchQueryChange,
   recentSearches,
   hasActiveSearch,
+  isAccountActive,
+  onAccountClick,
 }: StorefrontHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -291,9 +295,14 @@ export function StorefrontHeader({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/mi-cuenta"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              <button
+                type="button"
+                onClick={onAccountClick}
+                className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                  isAccountActive
+                    ? "border-slate-950 bg-slate-950 text-white"
+                    : "border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                }`}
               >
                 <svg
                   aria-hidden="true"
@@ -309,7 +318,7 @@ export function StorefrontHeader({
                   <path d="M5 20a7 7 0 0 1 14 0" />
                 </svg>
                 Mi cuenta
-              </Link>
+              </button>
               <button
                 type="button"
                 className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"

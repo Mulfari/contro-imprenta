@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import { storefrontProducts } from "@/app/storefront-data";
 import { StorefrontBusinessSection } from "@/app/storefront-business-section";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
@@ -12,6 +13,7 @@ import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
 import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
 import { StorefrontTestimonialsSection } from "@/app/storefront-testimonials-section";
+import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 const RECENT_SEARCHES_KEY = "express-printer-recent-searches";
 const categoryGroups = [
@@ -40,6 +42,7 @@ function normalizeSearchList(items: string[]) {
 export function StorefrontShell() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [accountOpen, setAccountOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     if (typeof window === "undefined") {
       return [];
@@ -103,6 +106,8 @@ export function StorefrontShell() {
     );
   }, [debouncedQuery]);
 
+  const publicAuthEnabled = hasSupabasePublicConfig();
+
   return (
     <main className="min-h-screen bg-[#f3f5f8] text-slate-950">
       <StorefrontHeader
@@ -110,9 +115,19 @@ export function StorefrontShell() {
         onSearchQueryChange={setSearchQuery}
         recentSearches={recentSearches}
         hasActiveSearch={Boolean(debouncedQuery)}
+        isAccountActive={accountOpen}
+        onAccountClick={() => {
+          setAccountOpen((current) => !current);
+          setSearchQuery("");
+        }}
       />
 
-      {debouncedQuery ? (
+      {accountOpen ? (
+        <>
+          <CustomerAccountClient hasPublicAuth={publicAuthEnabled} />
+          <StorefrontFooter />
+        </>
+      ) : debouncedQuery ? (
         <>
           <section className="mx-auto w-full max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8 2xl:px-10">
             <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
