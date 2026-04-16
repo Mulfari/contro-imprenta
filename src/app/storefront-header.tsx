@@ -139,10 +139,10 @@ export function StorefrontHeader({
                         return next;
                       })
                     }
-                    className={`inline-flex w-full cursor-pointer items-center justify-between gap-3 rounded-[1rem] bg-slate-50 px-5 py-4 text-sm font-semibold transition-[background-color,color,box-shadow] duration-200 xl:min-w-[15.5rem] xl:rounded-l-[1rem] xl:rounded-r-[0.75rem] ${
+                    className={`inline-flex w-full cursor-pointer items-center justify-between gap-3 rounded-[1.05rem] border border-transparent bg-slate-50 px-5 py-4 text-sm font-semibold transition-[background-color,color,border-color,box-shadow] duration-200 xl:min-w-[15.5rem] ${
                       categoryOpen
-                        ? "bg-slate-100 text-slate-950 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]"
-                        : "text-slate-700 hover:bg-slate-100 hover:shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]"
+                        ? "border-slate-200 bg-slate-100 text-slate-950 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]"
+                        : "text-slate-700 hover:border-slate-200 hover:bg-slate-100 hover:shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]"
                     }`}
                   >
                     <span className="inline-flex items-center gap-2">
