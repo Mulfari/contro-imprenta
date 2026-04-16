@@ -293,6 +293,32 @@ export function StorefrontHeader({
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
+                className="inline-flex cursor-pointer items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left text-sm font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
+              >
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm">
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.1A8.5 8.5 0 1 1 21 11.5Z" />
+                    <path d="M8.5 10.5c.3 2 2 3.7 4 4" />
+                  </svg>
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-[11px] uppercase tracking-[0.16em] text-emerald-600">
+                    Necesitas ayuda?
+                  </span>
+                  <span>WhatsApp en linea</span>
+                </span>
+              </button>
+              <button
+                type="button"
                 className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 <svg
