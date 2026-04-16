@@ -119,6 +119,18 @@ export function StorefrontShell() {
         onAccountClick={() => setAccountOpen((current) => !current)}
       />
 
+      {accountOpen ? (
+        <div className="relative z-[70]">
+          <div className="mx-auto flex w-full max-w-[112rem] justify-end px-4 pt-4 sm:px-6 lg:px-8 2xl:px-10">
+            <CustomerAccountClient
+              hasPublicAuth={publicAuthEnabled}
+              onClose={() => setAccountOpen(false)}
+              variant="dropdown"
+            />
+          </div>
+        </div>
+      ) : null}
+
       {debouncedQuery ? (
         <>
           <section className="mx-auto w-full max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8 2xl:px-10">
@@ -245,13 +257,6 @@ export function StorefrontShell() {
           <StorefrontFooter />
         </>
       )}
-
-      {accountOpen ? (
-        <CustomerAccountClient
-          hasPublicAuth={publicAuthEnabled}
-          onClose={() => setAccountOpen(false)}
-        />
-      ) : null}
     </main>
   );
 }

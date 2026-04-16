@@ -16,6 +16,7 @@ type CustomerProfile = {
 type CustomerAccountClientProps = {
   hasPublicAuth: boolean;
   onClose?: () => void;
+  variant?: "page" | "dropdown";
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -75,6 +76,7 @@ function InfoCard({
 export function CustomerAccountClient({
   hasPublicAuth,
   onClose,
+  variant = "page",
 }: CustomerAccountClientProps) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [session, setSession] = useState<Session | null>(null);
@@ -263,18 +265,24 @@ export function CustomerAccountClient({
     profile?.full_name?.trim() ||
     session?.user.user_metadata.full_name ||
     "Cliente Express Printer";
+  const isDropdown = variant === "dropdown";
 
   return (
-    <section className="fixed inset-0 z-[80] flex items-start justify-center px-4 pb-6 pt-[8.5rem] sm:px-6 sm:pt-[9.25rem] lg:px-8">
-      <button
-        type="button"
-        aria-label="Cerrar mi cuenta"
-        onClick={onClose}
-        className="absolute inset-0 bg-slate-950/18 backdrop-blur-[8px]"
-      />
-
-      <div className="relative w-full max-w-[36rem]">
-        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
+    <section
+      className={
+        isDropdown
+          ? "w-full max-w-[34rem] sm:max-w-[36rem]"
+          : "mx-auto w-full max-w-[118rem] px-4 pb-10 pt-4 sm:px-6 sm:pb-12 lg:px-8 2xl:px-10"
+      }
+    >
+      <div className={isDropdown ? "" : "mx-auto w-full max-w-[36rem]"}>
+        <div
+          className={`overflow-hidden border border-slate-200 bg-white ${
+            isDropdown
+              ? "rounded-[1.8rem] shadow-[0_26px_60px_rgba(15,23,42,0.16)]"
+              : "rounded-[2rem] shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
+          }`}
+        >
           {!hasPublicAuth ? (
             <div className="p-6 sm:p-7">
               <div className="mb-5 flex items-center justify-between gap-4">
