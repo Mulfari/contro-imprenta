@@ -117,7 +117,7 @@ export function StorefrontHeader({
                   priority
                 />
               </div>
-              <span className="pointer-events-none absolute left-[6.15rem] top-[1.7rem] text-sm font-black uppercase tracking-[0.1em] text-slate-950 sm:left-[6.7rem] sm:top-[1.85rem] sm:text-base">
+              <span className="pointer-events-none absolute left-[5.8rem] top-[1.72rem] text-[12px] font-black uppercase tracking-[0.08em] text-slate-500 sm:left-[6.3rem] sm:top-[1.86rem] sm:text-[13px]">
                 Printer
               </span>
             </Link>
