@@ -126,6 +126,8 @@ export function StorefrontShell() {
               hasPublicAuth={publicAuthEnabled}
               onClose={() => setAccountOpen(false)}
               variant="dropdown"
+              initialMode="login"
+              showModeSwitch={false}
             />
           </div>
         </div>

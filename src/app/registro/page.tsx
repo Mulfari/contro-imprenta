@@ -4,16 +4,16 @@ import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
-  title: "Mi cuenta | Express Printer",
-  description: "Acceso de clientes para Express Printer.",
+  title: "Registro | Express Printer",
+  description: "Registro de clientes para Express Printer.",
 };
 
-export default function CustomerAccountPage() {
+export default function CustomerRegisterPage() {
   return (
     <CustomerAccountClient
       hasPublicAuth={hasSupabasePublicConfig()}
-      initialMode="login"
-      showModeSwitch
+      initialMode="register"
+      showModeSwitch={false}
     />
   );
 }

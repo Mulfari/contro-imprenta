@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
@@ -17,6 +18,8 @@ type CustomerAccountClientProps = {
   hasPublicAuth: boolean;
   onClose?: () => void;
   variant?: "page" | "dropdown";
+  initialMode?: "login" | "register";
+  showModeSwitch?: boolean;
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -55,8 +58,10 @@ export function CustomerAccountClient({
   hasPublicAuth,
   onClose,
   variant = "page",
+  initialMode = "login",
+  showModeSwitch,
 }: CustomerAccountClientProps) {
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +80,10 @@ export function CustomerAccountClient({
   useEffect(() => {
     setMessage("");
   }, [mode]);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   useEffect(() => {
     if (!hasPublicAuth) {
@@ -244,6 +253,7 @@ export function CustomerAccountClient({
     session?.user.user_metadata.full_name ||
     "Cliente Express Printer";
   const isDropdown = variant === "dropdown";
+  const canSwitchMode = showModeSwitch ?? !isDropdown;
 
   return (
     <section
@@ -414,32 +424,34 @@ export function CustomerAccountClient({
                 </button>
               </div>
 
-              <div className="rounded-[1.45rem] border border-slate-200 bg-slate-50/70 p-4">
-                <div className="inline-flex w-full rounded-[1.25rem] border border-slate-200 bg-white p-1">
-                  <button
-                    type="button"
-                    onClick={() => setMode("login")}
-                    className={`flex-1 cursor-pointer rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
-                      mode === "login"
-                        ? "bg-slate-950 text-white shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Iniciar sesion
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMode("register")}
-                    className={`flex-1 cursor-pointer rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
-                      mode === "register"
-                        ? "bg-slate-950 text-white shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Registrarme
-                  </button>
+              {canSwitchMode ? (
+                <div className="rounded-[1.45rem] border border-slate-200 bg-slate-50/70 p-4">
+                  <div className="inline-flex w-full rounded-[1.25rem] border border-slate-200 bg-white p-1">
+                    <button
+                      type="button"
+                      onClick={() => setMode("login")}
+                      className={`flex-1 cursor-pointer rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
+                        mode === "login"
+                          ? "bg-slate-950 text-white shadow-sm"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      Iniciar sesion
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMode("register")}
+                      className={`flex-1 cursor-pointer rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
+                        mode === "register"
+                          ? "bg-slate-950 text-white shadow-sm"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      Registrarme
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               <div className="rounded-[1.45rem] border border-slate-200 bg-white p-5">
                 <div className="mb-4">
@@ -502,6 +514,18 @@ export function CustomerAccountClient({
                       >
                         {isSubmitting ? "Entrando..." : "Entrar"}
                       </button>
+
+                      {!canSwitchMode ? (
+                        <p className="text-center text-sm text-slate-500">
+                          ¿No tienes cuenta?{" "}
+                          <Link
+                            href="/registro"
+                            className="font-semibold text-slate-900 transition hover:text-slate-700"
+                          >
+                            Registrar
+                          </Link>
+                        </p>
+                      ) : null}
                     </form>
                   ) : (
                     <form className="space-y-5" onSubmit={handleRegister}>
@@ -586,6 +610,18 @@ export function CustomerAccountClient({
                       >
                         {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
                       </button>
+
+                      {!canSwitchMode ? (
+                        <p className="text-center text-sm text-slate-500">
+                          ¿Ya tienes cuenta?{" "}
+                          <Link
+                            href="/mi-cuenta"
+                            className="font-semibold text-slate-900 transition hover:text-slate-700"
+                          >
+                            Iniciar sesion
+                          </Link>
+                        </p>
+                      ) : null}
                     </form>
                   )}
                 </div>
