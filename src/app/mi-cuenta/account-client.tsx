@@ -214,46 +214,22 @@ export function CustomerAccountClient({
 
   return (
     <section className="mx-auto w-full max-w-[118rem] px-4 py-10 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="grid gap-8 xl:grid-cols-[1.02fr_0.98fr] xl:items-stretch">
-        <div className="flex min-h-[36rem] flex-col rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[40rem] sm:p-10 xl:min-h-[42rem] xl:p-12">
-          <div className="space-y-4">
+      <div className="mx-auto flex w-full max-w-[44rem] flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[40rem] sm:p-10 xl:min-h-[42rem] xl:p-12">
+        {!session || !hasPublicAuth ? (
+          <div className="mx-auto w-full max-w-[32rem] space-y-4 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
               Express Printer
             </p>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
               Mi cuenta
             </h1>
-            <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-              Accede a tu cuenta de cliente para centralizar tus datos, consultar el estado de tus pedidos y mantener tu historial conectado con Express Printer.
+            <p className="text-sm leading-7 text-slate-600 sm:text-base">
+              Accede a tu cuenta de cliente para consultar tus datos y mantener centralizados tus pedidos con Express Printer.
             </p>
           </div>
+        ) : null}
 
-          <div className="mt-12 rounded-[1.8rem] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:p-7">
-            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
-              Lo que podras hacer aqui
-            </p>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-900">Registrar tu cuenta</p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Guarda tus datos para futuras solicitudes y pedidos.
-                </p>
-              </div>
-              <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-900">Dar seguimiento</p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Muy pronto tendras aqui tu historial y el estado de produccion.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-auto rounded-[1.8rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-6 text-sm leading-6 text-slate-500">
-            Si necesitas ayuda comercial inmediata, puedes escribirnos por WhatsApp desde la tienda en cualquier momento.
-          </div>
-        </div>
-
-        <div className="flex min-h-[36rem] flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_60px_rgba(15,23,42,0.05)] sm:min-h-[40rem] sm:p-10 xl:min-h-[42rem] xl:p-12">
+        <div className="mx-auto flex h-full w-full max-w-[36rem] flex-col justify-center">
           {!hasPublicAuth ? (
             <div className="mx-auto my-auto w-full max-w-[32rem] rounded-[1.6rem] border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
               Configura <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> para activar el acceso de clientes.
@@ -263,7 +239,7 @@ export function CustomerAccountClient({
               Cargando cuenta...
             </div>
           ) : session ? (
-            <div className="mx-auto flex h-full w-full max-w-[36rem] flex-col justify-center space-y-6">
+            <div className="flex h-full flex-col justify-center space-y-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
@@ -344,8 +320,8 @@ export function CustomerAccountClient({
               </div>
             </div>
           ) : (
-            <div className="mx-auto flex h-full w-full max-w-[32rem] flex-col justify-center">
-              <div className="space-y-3">
+            <div className="flex h-full flex-col justify-center">
+              <div className="space-y-3 text-center">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
                   Acceso de clientes
                 </p>
@@ -359,7 +335,7 @@ export function CustomerAccountClient({
                 </p>
               </div>
 
-              <div className="inline-flex self-start rounded-2xl border border-slate-200 bg-slate-50 p-1">
+              <div className="mt-6 inline-flex self-center rounded-2xl border border-slate-200 bg-slate-50 p-1">
                 <button
                   type="button"
                   onClick={() => setMode("login")}
@@ -505,7 +481,7 @@ export function CustomerAccountClient({
                 </form>
               )}
 
-              <p className="mt-8 text-sm text-slate-500">
+              <p className="mt-8 text-center text-sm text-slate-500">
                 Volver a la
                 {" "}
                 <Link href="/" className="font-semibold text-slate-900 transition hover:text-slate-700">
