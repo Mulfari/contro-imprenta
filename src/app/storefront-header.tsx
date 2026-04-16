@@ -106,7 +106,7 @@ export function StorefrontHeader({
       <header className="relative z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/" className="flex items-end gap-1.5">
               <div className="relative h-[2.9rem] w-[9.75rem] sm:h-[3.2rem] sm:w-[10.5rem]">
                 <Image
                   src="/express-printer-logo.webp"
@@ -117,14 +117,9 @@ export function StorefrontHeader({
                   priority
                 />
               </div>
-              <div className="min-w-0">
-                <p className="text-lg font-black uppercase tracking-[0.08em] text-slate-950 sm:text-xl">
-                  Express Printer
-                </p>
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">
-                  Tienda online
-                </p>
-              </div>
+              <span className="pb-1 text-sm font-black uppercase tracking-[0.1em] text-slate-950 sm:pb-[0.32rem] sm:text-base">
+                Printer
+              </span>
             </Link>
 
             <div
