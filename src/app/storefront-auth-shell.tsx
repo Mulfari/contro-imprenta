@@ -6,11 +6,15 @@ import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import { StorefrontFooter } from "@/app/storefront-footer";
 import { StorefrontHeader } from "@/app/storefront-header";
 
-type RegisterShellProps = {
+type StorefrontAuthShellProps = {
   hasPublicAuth: boolean;
+  initialMode: "login" | "register";
 };
 
-export function RegisterShell({ hasPublicAuth }: RegisterShellProps) {
+export function StorefrontAuthShell({
+  hasPublicAuth,
+  initialMode,
+}: StorefrontAuthShellProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
@@ -26,7 +30,7 @@ export function RegisterShell({ hasPublicAuth }: RegisterShellProps) {
 
       <CustomerAccountClient
         hasPublicAuth={hasPublicAuth}
-        initialMode="register"
+        initialMode={initialMode}
         showModeSwitch={false}
         variant="page"
       />

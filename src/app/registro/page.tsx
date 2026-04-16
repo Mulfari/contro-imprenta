@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { RegisterShell } from "@/app/registro/register-shell";
+import { StorefrontAuthShell } from "@/app/storefront-auth-shell";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -9,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function CustomerRegisterPage() {
-  return <RegisterShell hasPublicAuth={hasSupabasePublicConfig()} />;
+  return (
+    <StorefrontAuthShell
+      hasPublicAuth={hasSupabasePublicConfig()}
+      initialMode="register"
+    />
+  );
 }

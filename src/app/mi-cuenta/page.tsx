@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
+import { StorefrontAuthShell } from "@/app/storefront-auth-shell";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -10,10 +10,9 @@ export const metadata: Metadata = {
 
 export default function CustomerAccountPage() {
   return (
-    <CustomerAccountClient
+    <StorefrontAuthShell
       hasPublicAuth={hasSupabasePublicConfig()}
       initialMode="login"
-      showModeSwitch
     />
   );
 }
