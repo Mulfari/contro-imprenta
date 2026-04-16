@@ -271,7 +271,7 @@ export function CustomerAccountClient({
     <section
       className={
         isDropdown
-          ? "w-full max-w-[34rem] sm:max-w-[36rem]"
+          ? "pointer-events-auto w-full max-w-[34rem] sm:max-w-[36rem]"
           : "mx-auto w-full max-w-[118rem] px-4 pb-10 pt-4 sm:px-6 sm:pb-12 lg:px-8 2xl:px-10"
       }
     >

@@ -120,8 +120,8 @@ export function StorefrontShell() {
       />
 
       {accountOpen ? (
-        <div className="relative z-[70]">
-          <div className="mx-auto flex w-full max-w-[112rem] justify-end px-4 pt-4 sm:px-6 lg:px-8 2xl:px-10">
+        <div className="pointer-events-none fixed inset-x-0 top-[7.35rem] z-[70] px-4 sm:px-6 lg:px-8 2xl:px-10">
+          <div className="mx-auto flex w-full max-w-[112rem] justify-end">
             <CustomerAccountClient
               hasPublicAuth={publicAuthEnabled}
               onClose={() => setAccountOpen(false)}
