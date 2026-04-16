@@ -113,161 +113,180 @@ export function StorefrontHeader({
 
             <div
               ref={searchAreaRef}
-              className="flex flex-1 flex-col gap-3 xl:mx-10 xl:max-w-4xl xl:flex-row xl:items-center"
+              className="flex flex-1 xl:mx-8 xl:max-w-[62rem]"
             >
-              <div ref={categoryAreaRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCategoryOpen((current) => {
-                      const next = !current;
-
-                      if (!next) {
-                        setActiveCategoryIndex(null);
-                      }
-
-                      return next;
-                    })
-                  }
-                  className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${
-                    categoryOpen
-                      ? "border-slate-950 bg-white text-slate-950"
-                      : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100"
-                  }`}
+              <div
+                className={`flex w-full flex-col overflow-visible rounded-[1.35rem] border bg-white shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition xl:flex-row ${
+                  searchOpen || categoryOpen
+                    ? "border-slate-950"
+                    : "border-slate-200"
+                }`}
+              >
+                <div
+                  ref={categoryAreaRef}
+                  className="relative shrink-0 border-b border-slate-200 xl:border-b-0 xl:border-r"
                 >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCategoryOpen((current) => {
+                        const next = !current;
+
+                        if (!next) {
+                          setActiveCategoryIndex(null);
+                        }
+
+                        return next;
+                      })
+                    }
+                    className={`inline-flex w-full cursor-pointer items-center justify-between gap-3 bg-slate-50 px-5 py-4 text-sm font-semibold transition xl:min-w-[15.5rem] xl:rounded-l-[1.35rem] ${
+                      categoryOpen
+                        ? "text-slate-950"
+                        : "text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M3 12h18" />
+                        <path d="M3 18h18" />
+                      </svg>
+                      Todas las categorias
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className={`h-4 w-4 transition ${categoryOpen ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+
+                  <div
+                    className={`absolute left-0 top-[calc(100%+0.9rem)] z-50 transition-all duration-200 ${
+                      categoryOpen
+                        ? "pointer-events-auto translate-y-0 opacity-100"
+                        : "pointer-events-none -translate-y-2 opacity-0"
+                    }`}
+                  >
+                    <div
+                      ref={categoryPanelRef}
+                      className={`grid overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_26px_60px_rgba(15,23,42,0.18)] transition-all duration-200 ${
+                        activeCategoryIndex !== null
+                          ? "w-[44rem] grid-cols-[17rem_1fr]"
+                          : "w-[17rem] grid-cols-[17rem]"
+                      }`}
+                    >
+                      <div className="border-r border-slate-200 bg-slate-50/65">
+                        {categoryMenu.map((group, index) => (
+                          <button
+                            key={group.title}
+                            type="button"
+                            onMouseEnter={() => setActiveCategoryIndex(index)}
+                            onFocus={() => setActiveCategoryIndex(index)}
+                            onClick={() => setActiveCategoryIndex(index)}
+                            className={`flex w-full cursor-pointer items-center justify-between border-b border-slate-200 px-5 py-4 text-left text-[15px] font-medium transition last:border-b-0 ${
+                              activeCategoryIndex === index
+                                ? "bg-white text-slate-950"
+                                : "bg-transparent text-slate-700 hover:bg-white hover:text-slate-950"
+                            }`}
+                          >
+                            <span>{group.title}</span>
+                            <svg
+                              aria-hidden="true"
+                              viewBox="0 0 24 24"
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="m9 6 6 6-6 6" />
+                            </svg>
+                          </button>
+                        ))}
+                      </div>
+
+                      {activeCategoryIndex !== null ? (
+                        <div className="bg-white p-6">
+                          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
+                            Subcategorias
+                          </p>
+                          <p className="mt-2 text-base font-semibold text-slate-950">
+                            {categoryMenu[activeCategoryIndex]?.title}
+                          </p>
+                          <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+                            {categoryMenu[activeCategoryIndex]?.items.map((item) => (
+                              <button
+                                key={item}
+                                type="button"
+                                onClick={() => {
+                                  onSearchQueryChange(item);
+                                  setCategoryOpen(false);
+                                  setActiveCategoryIndex(null);
+                                }}
+                                className="flex cursor-pointer items-center justify-between rounded-lg border border-transparent px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-950"
+                              >
+                                <span>{item}</span>
+                                <svg
+                                  aria-hidden="true"
+                                  viewBox="0 0 24 24"
+                                  className="h-4 w-4 text-slate-300"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.8"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="m9 6 6 6-6 6" />
+                                </svg>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex min-h-[3.75rem] flex-1 items-center gap-3 px-5 py-3">
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 24 24"
-                    className="h-4 w-4"
+                    className="h-5 w-5 text-slate-400"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.8"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M3 6h18" />
-                    <path d="M3 12h18" />
-                    <path d="M3 18h18" />
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.5-3.5" />
                   </svg>
-                  Todas las categorias
-                </button>
-
-                <div
-                  className={`absolute left-0 top-[calc(100%+0.9rem)] z-50 transition-all duration-200 ${
-                    categoryOpen
-                      ? "pointer-events-auto translate-y-0 opacity-100"
-                      : "pointer-events-none -translate-y-2 opacity-0"
-                  }`}
-                >
-                  <div
-                    ref={categoryPanelRef}
-                    className={`grid overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_26px_60px_rgba(15,23,42,0.18)] transition-all duration-200 ${
-                      activeCategoryIndex !== null
-                        ? "w-[44rem] grid-cols-[17rem_1fr]"
-                        : "w-[17rem] grid-cols-[17rem]"
-                    }`}
-                  >
-                    <div className="border-r border-slate-200 bg-slate-50/65">
-                      {categoryMenu.map((group, index) => (
-                        <button
-                          key={group.title}
-                          type="button"
-                          onMouseEnter={() => setActiveCategoryIndex(index)}
-                          onFocus={() => setActiveCategoryIndex(index)}
-                          onClick={() => setActiveCategoryIndex(index)}
-                          className={`flex w-full cursor-pointer items-center justify-between border-b border-slate-200 px-5 py-4 text-left text-[15px] font-medium transition last:border-b-0 ${
-                            activeCategoryIndex === index
-                              ? "bg-white text-slate-950"
-                              : "bg-transparent text-slate-700 hover:bg-white hover:text-slate-950"
-                          }`}
-                        >
-                          <span>{group.title}</span>
-                          <svg
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="m9 6 6 6-6 6" />
-                          </svg>
-                        </button>
-                      ))}
-                    </div>
-
-                    {activeCategoryIndex !== null ? (
-                      <div className="bg-white p-6">
-                        <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
-                          Subcategorias
-                        </p>
-                        <p className="mt-2 text-base font-semibold text-slate-950">
-                          {categoryMenu[activeCategoryIndex]?.title}
-                        </p>
-                        <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
-                          {categoryMenu[activeCategoryIndex]?.items.map((item) => (
-                            <button
-                              key={item}
-                              type="button"
-                              onClick={() => {
-                                onSearchQueryChange(item);
-                                setCategoryOpen(false);
-                                setActiveCategoryIndex(null);
-                              }}
-                              className="flex cursor-pointer items-center justify-between rounded-lg border border-transparent px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-950"
-                            >
-                              <span>{item}</span>
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 24 24"
-                                className="h-4 w-4 text-slate-300"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.8"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="m9 6 6 6-6 6" />
-                              </svg>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="Buscar productos de impresion, materiales, medidas o acabados..."
+                    value={searchQuery}
+                    onChange={(event) => onSearchQueryChange(event.target.value)}
+                    onFocus={() => setSearchOpen(true)}
+                    className="w-full bg-transparent text-[15px] outline-none placeholder:text-slate-400"
+                  />
                 </div>
-              </div>
-
-              <div
-                className={`flex flex-1 items-center rounded-xl border bg-white px-4 py-3 shadow-sm transition ${
-                  searchOpen
-                    ? "border-slate-950"
-                    : "border-slate-200"
-                }`}
-              >
-                <input
-                  type="text"
-                  placeholder="Buscar productos de impresion..."
-                  value={searchQuery}
-                  onChange={(event) => onSearchQueryChange(event.target.value)}
-                  onFocus={() => setSearchOpen(true)}
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-                />
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-3.5-3.5" />
-                </svg>
               </div>
             </div>
 
