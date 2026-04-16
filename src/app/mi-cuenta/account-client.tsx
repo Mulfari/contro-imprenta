@@ -264,21 +264,9 @@ export function CustomerAccountClient({
     "Cliente Express Printer";
 
   return (
-    <section className="mx-auto w-full max-w-[118rem] px-4 py-8 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="mx-auto w-full max-w-[62rem]">
-        <div className="space-y-4 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
-            Express Printer
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.65rem]">
-            Mi cuenta
-          </h1>
-          <p className="mx-auto max-w-[42rem] text-sm leading-7 text-slate-600 sm:text-base">
-            Gestiona tu acceso, consulta tus datos y prepárate para seguir tus pedidos desde un solo lugar.
-          </p>
-        </div>
-
-        <div className="mt-8 overflow-hidden rounded-[2.4rem] border border-slate-200 bg-white shadow-[0_30px_70px_rgba(15,23,42,0.06)]">
+    <section className="mx-auto w-full max-w-[118rem] px-4 pb-10 pt-4 sm:px-6 sm:pb-12 lg:px-8 2xl:px-10">
+      <div className="mx-auto w-full max-w-[74rem]">
+        <div className="overflow-hidden rounded-[2.15rem] border border-slate-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.07)]">
           {!hasPublicAuth ? (
             <div className="p-8 sm:p-10">
               <div className="mx-auto max-w-[40rem] rounded-[1.8rem] border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
@@ -290,11 +278,11 @@ export function CustomerAccountClient({
               Cargando cuenta...
             </div>
           ) : session ? (
-            <div className="space-y-8 p-7 sm:p-9 lg:p-10">
-              <div className="flex flex-col gap-4 rounded-[1.9rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-7 p-6 sm:p-8 lg:p-9">
+              <div className="flex flex-col gap-4 rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                    Sesion activa
+                    Mi cuenta
                   </p>
                   <div>
                     <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
@@ -375,23 +363,20 @@ export function CustomerAccountClient({
               </div>
             </div>
           ) : (
-            <div className="space-y-8 p-7 sm:p-9 lg:p-10">
-              <div className="rounded-[1.9rem] border border-slate-200 bg-[linear-gradient(180deg,#fcfdff_0%,#f6f8fb_100%)] p-4 sm:p-5">
-                <div className="space-y-4 text-center">
+            <div className="space-y-6 p-6 sm:p-8 lg:p-9">
+              <div className="flex flex-col gap-4 rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(180deg,#fcfdff_0%,#f6f8fb_100%)] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div className="space-y-2">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                    Acceso de clientes
+                    Mi cuenta
                   </p>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
-                    {mode === "login" ? "Inicia sesion" : "Crea tu cuenta"}
-                  </h2>
-                  <p className="mx-auto max-w-[38rem] text-sm leading-6 text-slate-500">
+                  <p className="text-sm leading-6 text-slate-500">
                     {mode === "login"
-                      ? "Entra con tu correo y clave para acceder a tu cuenta de cliente."
-                      : "Registra tus datos para comenzar a gestionar tus pedidos con Express Printer."}
+                      ? "Accede a tu cuenta para consultar y gestionar tus pedidos."
+                      : "Registra tus datos para comenzar a trabajar con Express Printer."}
                   </p>
                 </div>
 
-                <div className="mt-5 inline-flex w-full rounded-[1.55rem] border border-slate-200 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+                <div className="inline-flex w-full rounded-[1.45rem] border border-slate-200 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.04)] sm:w-auto sm:min-w-[21rem]">
                   <button
                     type="button"
                     onClick={() => setMode("login")}
@@ -417,8 +402,8 @@ export function CustomerAccountClient({
                 </div>
               </div>
 
-              <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-                <div className="rounded-[1.9rem] border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)] sm:p-7">
+              <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+                <div className="rounded-[1.9rem] border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)] sm:min-h-[29rem] sm:p-7">
                   {message ? (
                     <div className="mb-5">
                       <MessageBox message={message} tone={messageTone} />
@@ -558,16 +543,20 @@ export function CustomerAccountClient({
                   )}
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid gap-4 lg:auto-rows-fr">
                   <InfoCard
                     eyebrow="Tu cuenta"
-                    title="Acceso centralizado"
-                    description="Mantén tus datos listos para revisar pedidos, aprobaciones y futuras entregas en un solo punto."
+                    title={mode === "login" ? "Acceso rapido" : "Registro sencillo"}
+                    description={
+                      mode === "login"
+                        ? "Ingresa con tu correo y clave para volver a tu cuenta sin salir de la tienda."
+                        : "Crea tu acceso de cliente y deja tus datos listos para tus próximos pedidos."
+                    }
                   />
                   <InfoCard
                     eyebrow="Soporte"
-                    title="Preparado para crecer"
-                    description="Este acceso quedará conectado con seguimiento de pedidos, historial y soporte cuando completemos el flujo del ecommerce."
+                    title="Preparado para pedidos"
+                    description="Este panel quedará conectado con historial, seguimiento y aprobaciones cuando completemos el flujo del ecommerce."
                   />
                 </div>
               </div>
