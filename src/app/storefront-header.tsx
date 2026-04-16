@@ -517,7 +517,7 @@ export function StorefrontHeader({
       </section>
 
       <a
-        href="https://wa.me/351922250664"
+        href="https://wa.me/351922250664?text=Necesito%20ayuda%20con%20mi%20pedido%20en%20Express%20Printer"
         target="_blank"
         rel="noreferrer"
         aria-label="WhatsApp"
