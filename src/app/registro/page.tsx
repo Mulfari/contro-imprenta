@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
+import { RegisterShell } from "@/app/registro/register-shell";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -9,11 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function CustomerRegisterPage() {
-  return (
-    <CustomerAccountClient
-      hasPublicAuth={hasSupabasePublicConfig()}
-      initialMode="register"
-      showModeSwitch={false}
-    />
-  );
+  return <RegisterShell hasPublicAuth={hasSupabasePublicConfig()} />;
 }
