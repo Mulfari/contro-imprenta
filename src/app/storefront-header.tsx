@@ -519,7 +519,7 @@ export function StorefrontHeader({
       <button
         type="button"
         aria-label="WhatsApp"
-        className="group fixed bottom-5 right-5 z-[60] inline-flex cursor-pointer items-center gap-3 rounded-full border border-emerald-200 bg-white px-3 py-3 text-left text-slate-800 shadow-[0_18px_38px_rgba(15,23,42,0.14)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:bg-emerald-50/60 hover:shadow-[0_24px_52px_rgba(15,23,42,0.18)] sm:bottom-6 sm:right-6 sm:px-4"
+        className="group fixed bottom-5 right-5 z-[60] inline-flex cursor-pointer items-center gap-3 rounded-full border border-emerald-200 bg-white px-3 py-3 text-left text-slate-800 shadow-[0_18px_38px_rgba(15,23,42,0.14)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_24px_52px_rgba(15,23,42,0.2)] sm:bottom-6 sm:right-6 sm:px-4"
       >
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_22px_rgba(37,211,102,0.32)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_14px_28px_rgba(37,211,102,0.38)]">
           <svg
