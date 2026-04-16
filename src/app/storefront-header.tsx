@@ -518,27 +518,22 @@ export function StorefrontHeader({
 
       <button
         type="button"
-        className="fixed bottom-5 right-5 z-[60] inline-flex cursor-pointer items-center gap-2 rounded-full border border-emerald-300/80 bg-white px-3 py-3 text-sm font-semibold text-slate-800 shadow-[0_18px_38px_rgba(15,23,42,0.14)] transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-[0_22px_46px_rgba(15,23,42,0.18)] sm:bottom-6 sm:right-6 sm:px-4"
+        aria-label="WhatsApp"
+        className="fixed bottom-5 right-5 z-[60] inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-full border border-emerald-300/80 bg-white text-emerald-600 shadow-[0_18px_38px_rgba(15,23,42,0.14)] transition hover:-translate-y-0.5 hover:border-emerald-400 hover:bg-emerald-50 hover:shadow-[0_22px_46px_rgba(15,23,42,0.18)] sm:bottom-6 sm:right-6"
       >
-        <span className="hidden sm:flex sm:flex-col sm:leading-tight">
-          <span>¿Necesitas ayuda?</span>
-          <span>WhatsApp</span>
-        </span>
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_10px_22px_rgba(16,185,129,0.32)]">
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.1A8.5 8.5 0 1 1 21 11.5Z" />
-            <path d="M8.5 10.5c.3 2 2 3.7 4 4" />
-          </svg>
-        </span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.1A8.5 8.5 0 1 1 21 11.5Z" />
+          <path d="M8.5 10.5c.3 2 2 3.7 4 4" />
+        </svg>
       </button>
     </>
   );
