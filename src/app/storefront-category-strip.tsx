@@ -10,7 +10,7 @@ const items = [
   { title: "Pendones", count: "9 productos", art: "rollup" },
   { title: "Talonarios", count: "7 productos", art: "notepad" },
   { title: "Etiquetas", count: "21 productos", art: "sticker-labels" },
-  { title: "Invitaciones", count: "14 productos", art: "invite" },
+  { title: "Invitaciones", count: "14 productos", art: "invitations-card" },
   { title: "Packaging", count: "11 productos", art: "packaging" },
   { title: "Cuadernos", count: "10 productos", art: "booklet" },
   { title: "Acrilicos", count: "6 productos", art: "banner" },
@@ -164,6 +164,22 @@ function CategoryArt({ art }: { art: string }) {
         <div className="absolute left-5 top-6 h-11 w-12 rotate-[-8deg] rounded-[1rem] border border-slate-300 bg-white shadow-sm" />
         <div className="absolute left-10 top-3 h-11 w-12 rotate-[8deg] rounded-[1rem] border border-slate-300 bg-white/92 shadow-sm" />
         <div className="absolute left-12 top-11 h-3 w-6 rounded-full bg-rose-300" />
+      </div>
+    );
+  }
+
+  if (art === "invitations-card") {
+    return (
+      <div className="relative flex h-34 w-40 items-center justify-center">
+        <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
+        <Image
+          src="/storefront-invitations.webp"
+          alt="Invitaciones"
+          fill
+          sizes="160px"
+          className="scale-[1.12] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          draggable={false}
+        />
       </div>
     );
   }
