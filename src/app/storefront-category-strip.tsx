@@ -24,14 +24,14 @@ const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
 function CategoryArt({ art }: { art: string }) {
   if (art === "cards") {
     return (
-      <div className="relative flex h-40 w-44 items-center justify-center overflow-hidden">
+      <div className="relative flex h-40 w-44 items-center justify-center">
         <div className="absolute inset-x-3 bottom-1 h-9 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-cards.webp"
           alt="Tarjetas"
           fill
           sizes="176px"
-          className="translate-x-1 scale-[1.28] object-contain [clip-path:inset(0_0_0_9%)] drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)]"
+          className="translate-x-1 scale-[1.28] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_72%_66%_at_52%_52%,black_58%,transparent_84%)]"
           draggable={false}
         />
       </div>
