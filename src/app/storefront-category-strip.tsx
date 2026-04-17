@@ -25,13 +25,15 @@ function CategoryArt({ art }: { art: string }) {
   if (art === "stickers") {
     return (
       <div className="relative flex h-28 w-32 items-center justify-center">
-        <div className="absolute inset-x-3 bottom-3 h-6 rounded-full bg-slate-200/70 blur-xl" />
+        <div className="absolute inset-x-4 bottom-2 h-6 rounded-full bg-slate-300/70 blur-xl" />
+        <div className="absolute left-5 top-6 h-16 w-16 rotate-[-10deg] rounded-[1.4rem] border border-slate-200 bg-white shadow-[0_12px_24px_rgba(15,23,42,0.08)]" />
+        <div className="absolute right-4 top-5 h-15 w-15 rotate-[8deg] rounded-[1.4rem] border border-slate-200 bg-white shadow-[0_12px_24px_rgba(15,23,42,0.08)]" />
         <Image
           src="/storefront-stickers.png"
           alt="Stickers"
           fill
           sizes="128px"
-          className="scale-[1.06] object-contain drop-shadow-[0_16px_22px_rgba(15,23,42,0.18)]"
+          className="scale-[1.1] object-contain drop-shadow-[0_20px_28px_rgba(15,23,42,0.2)]"
           draggable={false}
         />
       </div>
