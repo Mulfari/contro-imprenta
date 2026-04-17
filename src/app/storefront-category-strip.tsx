@@ -9,7 +9,7 @@ const items = [
   { title: "Folletos", count: "12 productos", art: "brochure" },
   { title: "Pendones", count: "9 productos", art: "rollup" },
   { title: "Talonarios", count: "7 productos", art: "notepad" },
-  { title: "Etiquetas", count: "21 productos", art: "labels" },
+  { title: "Etiquetas", count: "21 productos", art: "sticker-labels" },
   { title: "Invitaciones", count: "14 productos", art: "invite" },
   { title: "Packaging", count: "11 productos", art: "packaging" },
   { title: "Cuadernos", count: "10 productos", art: "booklet" },
@@ -138,6 +138,22 @@ function CategoryArt({ art }: { art: string }) {
         <div className="rounded-xl bg-cyan-300" />
         <div className="rounded-xl bg-amber-300" />
         <div className="rounded-xl bg-pink-300" />
+      </div>
+    );
+  }
+
+  if (art === "sticker-labels") {
+    return (
+      <div className="relative flex h-34 w-40 items-center justify-center">
+        <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
+        <Image
+          src="/storefront-labels.webp"
+          alt="Etiquetas"
+          fill
+          sizes="160px"
+          className="scale-[1.12] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          draggable={false}
+        />
       </div>
     );
   }
