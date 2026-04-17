@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const items = [
-  { title: "Tarjetas premium", count: "18 productos", art: "cards" },
+  { title: "Tarjetas", count: "18 productos", art: "cards" },
   { title: "Stickers", count: "16 productos", art: "stickers" },
   { title: "Folletos", count: "12 productos", art: "booklet" },
   { title: "Pendones", count: "9 productos", art: "banner" },
@@ -22,6 +22,22 @@ const ITEM_GAP = 18;
 const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
 
 function CategoryArt({ art }: { art: string }) {
+  if (art === "cards") {
+    return (
+      <div className="relative flex h-32 w-36 items-center justify-center">
+        <div className="absolute inset-x-4 bottom-2 h-7 rounded-full bg-slate-300/65 blur-xl" />
+        <Image
+          src="/storefront-cards.webp"
+          alt="Tarjetas"
+          fill
+          sizes="144px"
+          className="scale-[1.14] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.18)]"
+          draggable={false}
+        />
+      </div>
+    );
+  }
+
   if (art === "stickers") {
     return (
       <div className="relative flex h-32 w-36 items-center justify-center">
@@ -97,13 +113,7 @@ function CategoryArt({ art }: { art: string }) {
       </div>
     );
   }
-
-  return (
-    <div className="relative h-24 w-24">
-      <div className="absolute left-3 top-7 h-13 w-10 rotate-[-14deg] rounded-[1rem] border border-slate-300 bg-white shadow-sm" />
-      <div className="absolute left-10 top-3 h-13 w-10 rotate-[8deg] rounded-[1rem] border border-slate-300 bg-white/92 shadow-sm" />
-    </div>
-  );
+  return null;
 }
 
 export function StorefrontCategoryStrip() {
