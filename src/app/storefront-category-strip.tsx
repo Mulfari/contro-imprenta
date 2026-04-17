@@ -26,14 +26,16 @@ function CategoryArt({ art }: { art: string }) {
     return (
       <div className="relative flex h-40 w-44 items-center justify-center overflow-hidden">
         <div className="absolute inset-x-3 bottom-1 h-9 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
-          src="/storefront-cards.webp"
-          alt="Tarjetas"
-          fill
-          sizes="176px"
-          className="translate-x-3 scale-[1.32] object-contain drop-shadow-[0_24px_36px_rgba(15,23,42,0.22)]"
-          draggable={false}
-        />
+        <div className="relative h-full w-full overflow-hidden rounded-[1.2rem]">
+          <Image
+            src="/storefront-cards.webp"
+            alt="Tarjetas"
+            fill
+            sizes="176px"
+            className="scale-[1.22] object-cover object-[68%_center] drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)]"
+            draggable={false}
+          />
+        </div>
       </div>
     );
   }
