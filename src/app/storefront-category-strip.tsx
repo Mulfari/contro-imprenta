@@ -7,7 +7,7 @@ const items = [
   { title: "Tarjetas", count: "18 productos", art: "cards" },
   { title: "Stickers", count: "16 productos", art: "stickers" },
   { title: "Folletos", count: "12 productos", art: "brochure" },
-  { title: "Pendones", count: "9 productos", art: "banner" },
+  { title: "Pendones", count: "9 productos", art: "rollup" },
   { title: "Talonarios", count: "7 productos", art: "invoice" },
   { title: "Etiquetas", count: "21 productos", art: "labels" },
   { title: "Invitaciones", count: "14 productos", art: "invite" },
@@ -84,6 +84,22 @@ function CategoryArt({ art }: { art: string }) {
       <div className="relative h-24 w-24">
         <div className="absolute left-8 top-1 h-20 w-2 rounded-full bg-slate-400" />
         <div className="absolute left-10 top-7 h-12 w-9 rounded-r-[1rem] rounded-tl-[0.3rem] rounded-bl-[0.3rem] bg-violet-300 shadow-sm" />
+      </div>
+    );
+  }
+
+  if (art === "rollup") {
+    return (
+      <div className="relative flex h-36 w-28 items-center justify-center">
+        <div className="absolute inset-x-2 bottom-1 h-6 rounded-full bg-slate-300/65 blur-xl" />
+        <Image
+          src="/storefront-banners.webp"
+          alt="Pendones"
+          fill
+          sizes="112px"
+          className="scale-[1.14] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_70%_76%_at_50%_52%,black_60%,transparent_86%)]"
+          draggable={false}
+        />
       </div>
     );
   }
