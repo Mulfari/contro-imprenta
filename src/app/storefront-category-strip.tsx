@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const items = [
@@ -23,10 +24,15 @@ const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
 function CategoryArt({ art }: { art: string }) {
   if (art === "stickers") {
     return (
-      <div className="relative h-24 w-24">
-        <div className="absolute left-2 top-5 h-10 w-10 rounded-[1rem] bg-yellow-300 shadow-sm" />
-        <div className="absolute left-11 top-2 h-10 w-10 rounded-full bg-pink-300 shadow-sm" />
-        <div className="absolute right-1 bottom-2 h-7 w-11 rounded-full bg-cyan-300 shadow-sm" />
+      <div className="relative h-28 w-32">
+        <Image
+          src="/storefront-stickers.png"
+          alt="Stickers"
+          fill
+          sizes="128px"
+          className="object-contain"
+          draggable={false}
+        />
       </div>
     );
   }
