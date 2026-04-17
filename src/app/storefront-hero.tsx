@@ -9,6 +9,9 @@ type HeroSlide = {
   imageClass: string;
   accentClass: string;
   imageSrc?: string;
+  imageStageClass?: string;
+  imageObjectClass?: string;
+  imageOverlayClass?: string;
 };
 
 const slides: HeroSlide[] = [
@@ -18,6 +21,10 @@ const slides: HeroSlide[] = [
     imageClass: "bg-[#101828]",
     accentClass: "bg-[#ffcf33]",
     imageSrc: "/storefront-hero-banner-1.webp",
+    imageStageClass: "absolute inset-0 p-2 sm:p-3 xl:p-4",
+    imageObjectClass: "object-contain",
+    imageOverlayClass:
+      "absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),rgba(15,23,42,0.18))]",
   },
   {
     id: "stickers",
@@ -67,15 +74,22 @@ export function StorefrontHero() {
                 <div className={`relative h-full w-full overflow-hidden rounded-[2rem] border border-white/14 shadow-[0_24px_60px_rgba(0,0,0,0.18)] ${slide.imageClass}`}>
                   {slide.imageSrc ? (
                     <>
-                      <Image
-                        src={slide.imageSrc}
-                        alt="Banner Express Printer"
-                        fill
-                        priority={index === 0}
-                        sizes="(min-width: 1280px) 112rem, 100vw"
-                        className="object-cover"
+                      <div className={slide.imageStageClass ?? "absolute inset-0"}>
+                        <Image
+                          src={slide.imageSrc}
+                          alt="Banner Express Printer"
+                          fill
+                          priority={index === 0}
+                          sizes="(min-width: 1280px) 112rem, 100vw"
+                          className={slide.imageObjectClass ?? "object-cover"}
+                        />
+                      </div>
+                      <div
+                        className={
+                          slide.imageOverlayClass ??
+                          "absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04),rgba(15,23,42,0.14))]"
+                        }
                       />
-                      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04),rgba(15,23,42,0.14))]" />
                     </>
                   ) : (
                     <>
