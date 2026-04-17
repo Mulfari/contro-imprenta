@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 const items = [
   { title: "Tarjetas", count: "18 productos", art: "cards" },
   { title: "Stickers", count: "16 productos", art: "stickers" },
-  { title: "Folletos", count: "12 productos", art: "booklet" },
+  { title: "Folletos", count: "12 productos", art: "brochure" },
   { title: "Pendones", count: "9 productos", art: "banner" },
   { title: "Talonarios", count: "7 productos", art: "invoice" },
   { title: "Etiquetas", count: "21 productos", art: "labels" },
@@ -59,6 +59,22 @@ function CategoryArt({ art }: { art: string }) {
       <div className="relative h-24 w-24">
         <div className="absolute left-4 top-5 h-13 w-10 rounded-[1rem] border border-slate-300 bg-white shadow-sm" />
         <div className="absolute left-9 top-2 h-13 w-10 rounded-[1rem] border border-slate-300 bg-white/92 shadow-sm" />
+      </div>
+    );
+  }
+
+  if (art === "brochure") {
+    return (
+      <div className="relative flex h-36 w-40 items-center justify-center">
+        <div className="absolute inset-x-4 bottom-1 h-8 rounded-full bg-slate-300/65 blur-xl" />
+        <Image
+          src="/storefront-brochures.webp"
+          alt="Folletos"
+          fill
+          sizes="160px"
+          className="scale-[1.15] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_52%,black_58%,transparent_84%)]"
+          draggable={false}
+        />
       </div>
     );
   }
