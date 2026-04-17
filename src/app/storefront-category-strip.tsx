@@ -24,13 +24,14 @@ const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
 function CategoryArt({ art }: { art: string }) {
   if (art === "stickers") {
     return (
-      <div className="relative h-28 w-32">
+      <div className="relative flex h-28 w-32 items-center justify-center">
+        <div className="absolute inset-x-3 bottom-3 h-6 rounded-full bg-slate-200/70 blur-xl" />
         <Image
           src="/storefront-stickers.png"
           alt="Stickers"
           fill
           sizes="128px"
-          className="object-contain"
+          className="scale-[1.06] object-contain drop-shadow-[0_16px_22px_rgba(15,23,42,0.18)]"
           draggable={false}
         />
       </div>
