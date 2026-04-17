@@ -1,6 +1,4 @@
 "use client";
-
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type HeroSlide = {
@@ -8,23 +6,16 @@ type HeroSlide = {
   shellClass: string;
   imageClass: string;
   accentClass: string;
-  imageSrc?: string;
-  imageStageClass?: string;
-  imageObjectClass?: string;
-  imageOverlayClass?: string;
 };
 
 const slides: HeroSlide[] = [
   {
     id: "tarjetas",
-    shellClass: "bg-[#101828]",
-    imageClass: "bg-[#101828]",
+    shellClass:
+      "bg-[linear-gradient(135deg,#0f1f35_0%,#19426a_40%,#2d78b8_100%)]",
+    imageClass:
+      "bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_48%,#dbeafe_100%)]",
     accentClass: "bg-[#ffcf33]",
-    imageSrc: "/storefront-hero-banner-1.webp",
-    imageStageClass: "absolute inset-0 p-2 sm:p-3 xl:p-4",
-    imageObjectClass: "object-contain",
-    imageOverlayClass:
-      "absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),rgba(15,23,42,0.18))]",
   },
   {
     id: "stickers",
@@ -72,41 +63,18 @@ export function StorefrontHero() {
 
               <div className="flex h-full items-center justify-center p-4 sm:p-6 xl:p-8">
                 <div className={`relative h-full w-full overflow-hidden rounded-[2rem] border border-white/14 shadow-[0_24px_60px_rgba(0,0,0,0.18)] ${slide.imageClass}`}>
-                  {slide.imageSrc ? (
-                    <>
-                      <div className={slide.imageStageClass ?? "absolute inset-0"}>
-                        <Image
-                          src={slide.imageSrc}
-                          alt="Banner Express Printer"
-                          fill
-                          priority={index === 0}
-                          sizes="(min-width: 1280px) 112rem, 100vw"
-                          className={slide.imageObjectClass ?? "object-cover"}
-                        />
-                      </div>
-                      <div
-                        className={
-                          slide.imageOverlayClass ??
-                          "absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04),rgba(15,23,42,0.14))]"
-                        }
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <div className="absolute left-[6%] top-[10%] h-[22%] w-[14%] rounded-[2rem] bg-white/90 shadow-[0_12px_30px_rgba(15,23,42,0.08)]" />
-                      <div className="absolute left-[10%] top-[42%] h-[18%] w-[24%] rounded-[1.8rem] border border-slate-200/80 bg-white/88 shadow-[0_12px_30px_rgba(15,23,42,0.08)]" />
-                      <div className="absolute left-[38%] top-[18%] h-[54%] w-[36%] rounded-[2.2rem] border border-slate-200/80 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]" />
-                      <div className="absolute right-[8%] top-[12%] h-[22%] w-[12%] rounded-[1.8rem] border border-white/40 bg-white/60 shadow-[0_16px_36px_rgba(15,23,42,0.08)]" />
-                      <div className="absolute right-[10%] bottom-[12%] h-[28%] w-[20%] rounded-[1.8rem] border border-slate-200/80 bg-white/94 shadow-[0_16px_36px_rgba(15,23,42,0.08)]" />
-                      <div className={`absolute right-[16%] top-[20%] h-[9%] w-[5%] rounded-full ${slide.accentClass} shadow-[0_14px_30px_rgba(0,0,0,0.1)]`} />
+                  <div className="absolute left-[6%] top-[10%] h-[22%] w-[14%] rounded-[2rem] bg-white/90 shadow-[0_12px_30px_rgba(15,23,42,0.08)]" />
+                  <div className="absolute left-[10%] top-[42%] h-[18%] w-[24%] rounded-[1.8rem] border border-slate-200/80 bg-white/88 shadow-[0_12px_30px_rgba(15,23,42,0.08)]" />
+                  <div className="absolute left-[38%] top-[18%] h-[54%] w-[36%] rounded-[2.2rem] border border-slate-200/80 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]" />
+                  <div className="absolute right-[8%] top-[12%] h-[22%] w-[12%] rounded-[1.8rem] border border-white/40 bg-white/60 shadow-[0_16px_36px_rgba(15,23,42,0.08)]" />
+                  <div className="absolute right-[10%] bottom-[12%] h-[28%] w-[20%] rounded-[1.8rem] border border-slate-200/80 bg-white/94 shadow-[0_16px_36px_rgba(15,23,42,0.08)]" />
+                  <div className={`absolute right-[16%] top-[20%] h-[9%] w-[5%] rounded-full ${slide.accentClass} shadow-[0_14px_30px_rgba(0,0,0,0.1)]`} />
 
-                      <div className="absolute left-[42%] top-[24%] h-[6%] w-[18%] rounded-full bg-slate-200" />
-                      <div className="absolute left-[42%] top-[34%] h-[5%] w-[12%] rounded-full bg-slate-100" />
-                      <div className="absolute left-[42%] top-[46%] h-[18%] w-[28%] rounded-[1.5rem] bg-slate-100" />
-                      <div className="absolute left-[14%] bottom-[14%] h-[10%] w-[28%] rounded-[1.5rem] bg-white/78 shadow-[0_10px_24px_rgba(15,23,42,0.06)]" />
-                      <div className="absolute left-[48%] bottom-[14%] h-[10%] w-[18%] rounded-[1.5rem] bg-white/92 shadow-[0_10px_24px_rgba(15,23,42,0.08)]" />
-                    </>
-                  )}
+                  <div className="absolute left-[42%] top-[24%] h-[6%] w-[18%] rounded-full bg-slate-200" />
+                  <div className="absolute left-[42%] top-[34%] h-[5%] w-[12%] rounded-full bg-slate-100" />
+                  <div className="absolute left-[42%] top-[46%] h-[18%] w-[28%] rounded-[1.5rem] bg-slate-100" />
+                  <div className="absolute left-[14%] bottom-[14%] h-[10%] w-[28%] rounded-[1.5rem] bg-white/78 shadow-[0_10px_24px_rgba(15,23,42,0.06)]" />
+                  <div className="absolute left-[48%] bottom-[14%] h-[10%] w-[18%] rounded-[1.5rem] bg-white/92 shadow-[0_10px_24px_rgba(15,23,42,0.08)]" />
                 </div>
               </div>
             </article>
