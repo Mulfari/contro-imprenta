@@ -11,7 +11,7 @@ const items = [
   { title: "Talonarios", count: "7 productos", art: "notepad" },
   { title: "Etiquetas", count: "21 productos", art: "sticker-labels" },
   { title: "Invitaciones", count: "14 productos", art: "invitations-card" },
-  { title: "Packaging", count: "11 productos", art: "packaging" },
+  { title: "Packaging", count: "11 productos", art: "packaging-real" },
   { title: "Cuadernos", count: "10 productos", art: "booklet" },
   { title: "Acrilicos", count: "6 productos", art: "banner" },
   { title: "Sellos", count: "8 productos", art: "invoice" },
@@ -190,6 +190,22 @@ function CategoryArt({ art }: { art: string }) {
         <div className="absolute left-5 top-6 h-10 w-12 rounded-[0.9rem] border border-slate-300 bg-white shadow-sm" />
         <div className="absolute left-9 top-2 h-8 w-4 rounded-md bg-slate-300" />
         <div className="absolute left-9 bottom-3 h-2 w-4 rounded-full bg-amber-300" />
+      </div>
+    );
+  }
+
+  if (art === "packaging-real") {
+    return (
+      <div className="relative flex h-34 w-40 items-center justify-center">
+        <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
+        <Image
+          src="/storefront-packaging.webp"
+          alt="Packaging"
+          fill
+          sizes="160px"
+          className="scale-[1.12] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          draggable={false}
+        />
       </div>
     );
   }
