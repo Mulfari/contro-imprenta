@@ -69,11 +69,14 @@ function PromoPanel() {
         </div>
 
         <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
-          <div className="absolute bottom-[10%] left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/30 blur-2xl" />
-          <div className="relative w-[84%] max-w-[23rem] rotate-[-8deg] rounded-[2rem] border border-white/14 bg-[linear-gradient(180deg,#0b1120_0%,#141c2b_100%)] p-5 text-white shadow-[0_34px_70px_rgba(15,23,42,0.5)]">
-            <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.14),transparent_34%)]" />
-            <div className="relative">
-              <div className="flex items-center justify-between">
+          <div className="absolute bottom-[9%] left-1/2 h-12 w-[76%] -translate-x-1/2 rounded-full bg-black/34 blur-2xl" />
+          <div className="relative w-[86%] max-w-[24rem]">
+            <div className="absolute inset-x-[10%] top-[2%] h-[88%] rotate-[-3deg] rounded-[2rem] bg-white/16 shadow-[0_26px_48px_rgba(15,23,42,0.16)]" />
+            <div className="absolute inset-x-[7%] top-[1%] h-[92%] rotate-[4deg] rounded-[2rem] bg-white/22 shadow-[0_28px_54px_rgba(15,23,42,0.18)]" />
+            <div className="relative rotate-[-7deg] rounded-[2rem] border border-white/16 bg-[linear-gradient(180deg,#07111f_0%,#0f1728_100%)] p-5 text-white shadow-[0_34px_70px_rgba(15,23,42,0.5)]">
+              <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.26),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.12),transparent_34%)]" />
+              <div className="relative">
+                <div className="flex items-center justify-between">
                 <Image
                   src="/express-printer-logo.webp"
                   alt="Express Printer"
@@ -84,47 +87,47 @@ function PromoPanel() {
                 <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[0.62rem] font-semibold tracking-[0.18em] text-white/72">
                   EXPRESS
                 </span>
-              </div>
+                </div>
 
-              <div className="mt-5 space-y-1 text-[clamp(1rem,1.8vw,1.72rem)] font-black uppercase leading-[0.95] tracking-[-0.045em]">
-                <div className="text-[#ffe24a]">Impresion laser</div>
-                <div className="flex gap-2">
-                  <span className="text-white">Tarjetas</span>
-                  <span className="text-[#60b8ff]">laminado</span>
+                <div className="mt-5 space-y-3">
+                  <div className="text-[0.78rem] font-semibold uppercase tracking-[0.22em] text-white/52">
+                    Impresion y publicidad
+                  </div>
+                  <div className="space-y-1 text-[clamp(1.02rem,1.7vw,1.9rem)] font-black uppercase leading-[0.92] tracking-[-0.045em]">
+                    <div className="text-[#ffe24a]">Impresion laser</div>
+                    <div className="flex gap-2">
+                      <span className="text-white">Tarjetas</span>
+                      <span className="text-[#60b8ff]">laminado</span>
+                    </div>
+                    <div className="text-[#ff4ea5]">Gigantografia</div>
+                    <div className="text-white">Stickers adhesivos</div>
+                    <div className="flex gap-2">
+                      <span className="text-[#49da83]">Volantes</span>
+                      <span className="text-[#ff4ea5]">Pendones</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-white">Menus</span>
+                      <span className="text-[#60b8ff]">PVC</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[#ff4ea5]">Gigantografia</div>
-                <div className="text-white">Stickers adhesivos</div>
-                <div className="flex gap-2">
-                  <span className="text-[#49da83]">Volantes</span>
-                  <span className="text-[#ff4ea5]">Pendones</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-white">Menus</span>
-                  <span className="text-[#60b8ff]">& catalogos</span>
-                </div>
-              </div>
 
-              <div className="mt-5 rounded-[1.2rem] border border-white/10 bg-white/6 px-4 py-3 text-[0.72rem] leading-4 text-white/78">
-                Mate y brillante, bond, sulfato, adhesivo, PVC y formatos
-                comerciales listos para entregar.
-              </div>
-
-              <div className="mt-5 flex items-end justify-between gap-4">
-                <div className="space-y-1.5 text-[0.75rem] leading-4 text-white/78">
-                  <p>0424-339-0487</p>
-                  <p>Las Americas, PB, local 15</p>
-                  <p>expressprinterpedidos@gmail.com</p>
+                <div className="mt-5 grid grid-cols-2 gap-2 rounded-[1.2rem] border border-white/10 bg-white/6 p-3 text-[0.68rem] font-medium uppercase tracking-[0.12em] text-white/74">
+                  <span>Mate y brillante</span>
+                  <span>Bond y sulfato</span>
+                  <span>Adhesivo</span>
+                  <span>Listo para entregar</span>
                 </div>
-                <div className="h-18 w-18 rounded-[1rem] border border-white/12 bg-white p-1.5">
-                  <div className="grid h-full w-full grid-cols-6 gap-[2px] rounded-[0.75rem] bg-black p-[5px]">
-                    {Array.from({ length: 36 }).map((_, index) => (
-                      <span
-                        key={index}
-                        className={`rounded-[1px] ${
-                          (index + (index % 5)) % 3 === 0 ? "bg-white" : "bg-black"
-                        }`}
-                      />
-                    ))}
+
+                <div className="mt-5 flex items-end justify-between gap-4">
+                  <div className="space-y-1.5 text-[0.75rem] leading-4 text-white/78">
+                    <p>0424-339-0487</p>
+                    <p>Las Americas, PB, local 15</p>
+                    <p>expressprinterpedidos@gmail.com</p>
+                  </div>
+                  <div className="rounded-[1rem] border border-white/12 bg-[#0a0f17] px-3 py-2 text-right text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-white/72">
+                    <p>Escanea</p>
+                    <p className="text-[#ffd23d]">y siguenos</p>
                   </div>
                 </div>
               </div>
