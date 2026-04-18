@@ -61,10 +61,10 @@ function PromoPanel() {
         <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
           <div className="absolute bottom-[11%] left-1/2 h-11 w-[74%] -translate-x-1/2 rounded-full bg-black/34 blur-2xl" />
           <div className="relative -translate-y-3 w-[86%] max-w-[24rem]">
-            <div className="absolute inset-x-[10%] top-[3%] h-[88%] rotate-[-3deg] rounded-[0.9rem] bg-white/16 shadow-[0_26px_48px_rgba(15,23,42,0.16)]" />
-            <div className="absolute inset-x-[7%] top-[2%] h-[92%] rotate-[4deg] rounded-[0.9rem] bg-white/22 shadow-[0_28px_54px_rgba(15,23,42,0.18)]" />
-            <div className="relative rotate-[-7deg] rounded-[0.95rem] border border-white/16 bg-[linear-gradient(180deg,#07111f_0%,#0f1728_100%)] p-5 text-white shadow-[0_34px_70px_rgba(15,23,42,0.5)]">
-              <div className="absolute inset-0 rounded-[0.95rem] bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.26),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.12),transparent_34%)]" />
+            <div className="absolute inset-x-[10%] top-[3%] h-[88%] rotate-[-3deg] bg-white/16 shadow-[0_26px_48px_rgba(15,23,42,0.16)]" />
+            <div className="absolute inset-x-[7%] top-[2%] h-[92%] rotate-[4deg] bg-white/22 shadow-[0_28px_54px_rgba(15,23,42,0.18)]" />
+            <div className="relative rotate-[-7deg] border border-white/16 bg-[linear-gradient(180deg,#07111f_0%,#0f1728_100%)] p-5 text-white shadow-[0_34px_70px_rgba(15,23,42,0.5)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.26),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.12),transparent_34%)]" />
               <div className="relative">
                 <div className="flex items-center justify-between">
                 <Image
