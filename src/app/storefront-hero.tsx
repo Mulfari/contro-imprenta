@@ -55,16 +55,6 @@ function PromoPanel() {
               <span className="block">define tu</span>
               <span className="block">negocio</span>
             </p>
-
-            <div className="mt-8 flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/16 text-3xl backdrop-blur-sm">
-                OK
-              </div>
-              <div className="h-1 w-16 rounded-full bg-[#ffd23d]" />
-              <div className="flex h-16 w-16 items-center justify-center rounded-[1.2rem] bg-white/18 text-3xl text-white backdrop-blur-sm">
-                +
-              </div>
-            </div>
           </div>
         </div>
 
@@ -140,14 +130,6 @@ function PromoPanel() {
             <div className="space-y-5 text-[clamp(1.35rem,2.15vw,2.45rem)] font-bold leading-[1.1] tracking-[-0.04em] text-white">
               <p>No es solo papel, es la primera impresion que dejas en tus clientes.</p>
               <p>Un volante mal impreso puede alejar una venta; uno impecable, la cierra.</p>
-            </div>
-
-            <div className="mt-8 flex items-center justify-end gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/16 text-3xl backdrop-blur-sm">
-                NO
-              </div>
-              <div className="h-1 w-16 rounded-full bg-[#ffd23d]" />
-              <div className="text-[2.6rem] font-black text-red-500">X</div>
             </div>
           </div>
         </div>
