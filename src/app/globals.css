@@ -16,6 +16,11 @@
   box-sizing: border-box;
 }
 
+img {
+  display: block;
+  height: auto;
+}
+
 html {
   scroll-behavior: smooth;
 }

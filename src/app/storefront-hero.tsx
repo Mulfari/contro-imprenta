@@ -70,8 +70,8 @@ function PromoPanel() {
                 <Image
                   src="/express-printer-logo.webp"
                   alt="Express Printer"
-                  width={164}
-                  height={48}
+                  width={128}
+                  height={38}
                   className="h-auto w-32"
                 />
                 <span className="text-[0.62rem] font-semibold tracking-[0.18em] text-white/60">

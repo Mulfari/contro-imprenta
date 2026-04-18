@@ -29,9 +29,10 @@ function CategoryArt({ art }: { art: string }) {
         <Image
           src="/storefront-cards.webp"
           alt="Tarjetas"
-          fill
+          width={186}
+          height={139}
           sizes="176px"
-          className="translate-x-1 scale-[1.28] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_72%_66%_at_52%_52%,black_58%,transparent_84%)]"
+          className="h-auto w-[11.625rem] translate-x-1 object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_72%_66%_at_52%_52%,black_58%,transparent_84%)]"
           draggable={false}
         />
       </div>
@@ -45,9 +46,10 @@ function CategoryArt({ art }: { art: string }) {
         <Image
           src="/storefront-stickers.webp"
           alt="Stickers"
-          fill
+          width={158}
+          height={119}
           sizes="144px"
-          className="scale-[1.18] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.18)]"
+          className="h-auto w-[9.875rem] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.18)]"
           draggable={false}
         />
       </div>
@@ -70,9 +72,10 @@ function CategoryArt({ art }: { art: string }) {
         <Image
           src="/storefront-brochures.webp"
           alt="Folletos"
-          fill
+          width={174}
+          height={133}
           sizes="160px"
-          className="scale-[1.15] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_52%,black_58%,transparent_84%)]"
+          className="h-auto w-[10.875rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_52%,black_58%,transparent_84%)]"
           draggable={false}
         />
       </div>
@@ -95,9 +98,10 @@ function CategoryArt({ art }: { art: string }) {
         <Image
           src="/storefront-banners.webp"
           alt="Pendones"
-          fill
+          width={113}
+          height={161}
           sizes="112px"
-          className="scale-[1.14] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_70%_76%_at_50%_52%,black_60%,transparent_86%)]"
+          className="h-auto w-[7.0625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_70%_76%_at_50%_52%,black_60%,transparent_86%)]"
           draggable={false}
         />
       </div>
@@ -122,9 +126,10 @@ function CategoryArt({ art }: { art: string }) {
         <Image
           src="/storefront-invoices.webp"
           alt="Talonarios"
-          fill
+          width={156}
+          height={125}
           sizes="144px"
-          className="scale-[1.14] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_54%,black_58%,transparent_84%)]"
+          className="h-auto w-[9.75rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_54%,black_58%,transparent_84%)]"
           draggable={false}
         />
       </div>
@@ -149,9 +154,10 @@ function CategoryArt({ art }: { art: string }) {
         <Image
           src="/storefront-labels.webp"
           alt="Etiquetas"
-          fill
+          width={169}
+          height={127}
           sizes="160px"
-          className="scale-[1.12] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
           draggable={false}
         />
       </div>
@@ -175,9 +181,10 @@ function CategoryArt({ art }: { art: string }) {
         <Image
           src="/storefront-invitations.webp"
           alt="Invitaciones"
-          fill
+          width={169}
+          height={127}
           sizes="160px"
-          className="scale-[1.12] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
           draggable={false}
         />
       </div>
@@ -201,9 +208,10 @@ function CategoryArt({ art }: { art: string }) {
         <Image
           src="/storefront-packaging.webp"
           alt="Packaging"
-          fill
+          width={169}
+          height={127}
           sizes="160px"
-          className="scale-[1.12] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
           draggable={false}
         />
       </div>
