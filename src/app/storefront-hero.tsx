@@ -46,9 +46,9 @@ function PromoPanel() {
       <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_right_center,rgba(255,255,255,0.08),transparent_58%)]" />
 
       <div className="relative grid h-full grid-cols-1 lg:grid-cols-[1fr_0.92fr_0.92fr]">
-        <div className="flex items-center px-6 py-10 sm:px-10 lg:px-12">
-          <div className="max-w-[23rem]">
-            <p className="text-[clamp(2.2rem,5vw,4.9rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
+        <div className="flex items-center px-8 py-10 sm:px-12 lg:px-16">
+          <div className="max-w-[20rem]">
+            <p className="text-[clamp(2rem,4.4vw,4.35rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white">
               <span className="block">La </span>
               <span className="text-[#ffd23d]">calidad</span>
               <span className="block">de tu flyer</span>
@@ -69,10 +69,10 @@ function PromoPanel() {
         </div>
 
         <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
-          <div className="absolute bottom-[9%] left-1/2 h-12 w-[76%] -translate-x-1/2 rounded-full bg-black/34 blur-2xl" />
-          <div className="relative w-[86%] max-w-[24rem]">
-            <div className="absolute inset-x-[10%] top-[2%] h-[88%] rotate-[-3deg] rounded-[2rem] bg-white/16 shadow-[0_26px_48px_rgba(15,23,42,0.16)]" />
-            <div className="absolute inset-x-[7%] top-[1%] h-[92%] rotate-[4deg] rounded-[2rem] bg-white/22 shadow-[0_28px_54px_rgba(15,23,42,0.18)]" />
+          <div className="absolute bottom-[11%] left-1/2 h-11 w-[74%] -translate-x-1/2 rounded-full bg-black/34 blur-2xl" />
+          <div className="relative -translate-y-3 w-[86%] max-w-[24rem]">
+            <div className="absolute inset-x-[10%] top-[3%] h-[88%] rotate-[-3deg] rounded-[2rem] bg-white/16 shadow-[0_26px_48px_rgba(15,23,42,0.16)]" />
+            <div className="absolute inset-x-[7%] top-[2%] h-[92%] rotate-[4deg] rounded-[2rem] bg-white/22 shadow-[0_28px_54px_rgba(15,23,42,0.18)]" />
             <div className="relative rotate-[-7deg] rounded-[2rem] border border-white/16 bg-[linear-gradient(180deg,#07111f_0%,#0f1728_100%)] p-5 text-white shadow-[0_34px_70px_rgba(15,23,42,0.5)]">
               <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.26),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.12),transparent_34%)]" />
               <div className="relative">
@@ -135,9 +135,9 @@ function PromoPanel() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end px-6 py-10 sm:px-10 lg:px-12">
-          <div className="max-w-[24rem] text-right">
-            <div className="space-y-5 text-[clamp(1.5rem,2.5vw,3rem)] font-bold leading-[1.08] tracking-[-0.04em] text-white">
+        <div className="flex items-center justify-end px-8 py-10 sm:px-12 lg:px-16">
+          <div className="max-w-[21rem] text-right">
+            <div className="space-y-5 text-[clamp(1.35rem,2.15vw,2.45rem)] font-bold leading-[1.1] tracking-[-0.04em] text-white">
               <p>No es solo papel, es la primera impresion que dejas en tus clientes.</p>
               <p>Un volante mal impreso puede alejar una venta; uno impecable, la cierra.</p>
             </div>
