@@ -24,7 +24,10 @@ const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
 function CategoryArt({ art }: { art: string }) {
   if (art === "cards") {
     return (
-      <div className="relative flex h-40 w-44 items-center justify-center">
+      <div
+        className="relative flex h-40 w-44 items-center justify-center"
+        style={{ width: "11rem", height: "10rem" }}
+      >
         <div className="absolute inset-x-3 bottom-1 h-9 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-cards.webp"
@@ -41,7 +44,10 @@ function CategoryArt({ art }: { art: string }) {
 
   if (art === "stickers") {
     return (
-      <div className="relative flex h-32 w-36 items-center justify-center">
+      <div
+        className="relative flex h-32 w-36 items-center justify-center"
+        style={{ width: "9rem", height: "8rem" }}
+      >
         <div className="absolute inset-x-4 bottom-2 h-7 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-stickers.webp"
@@ -67,7 +73,10 @@ function CategoryArt({ art }: { art: string }) {
 
   if (art === "brochure") {
     return (
-      <div className="relative flex h-36 w-40 items-center justify-center">
+      <div
+        className="relative flex h-36 w-40 items-center justify-center"
+        style={{ width: "10rem", height: "9rem" }}
+      >
         <div className="absolute inset-x-4 bottom-1 h-8 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-brochures.webp"
@@ -93,7 +102,10 @@ function CategoryArt({ art }: { art: string }) {
 
   if (art === "rollup") {
     return (
-      <div className="relative flex h-36 w-28 items-center justify-center">
+      <div
+        className="relative flex h-36 w-28 items-center justify-center"
+        style={{ width: "7rem", height: "9rem" }}
+      >
         <div className="absolute inset-x-2 bottom-1 h-6 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-banners.webp"
@@ -121,7 +133,10 @@ function CategoryArt({ art }: { art: string }) {
 
   if (art === "notepad") {
     return (
-      <div className="relative flex h-34 w-36 items-center justify-center">
+      <div
+        className="relative flex h-34 w-36 items-center justify-center"
+        style={{ width: "9rem", height: "8.5rem" }}
+      >
         <div className="absolute inset-x-3 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-invoices.webp"
@@ -149,7 +164,10 @@ function CategoryArt({ art }: { art: string }) {
 
   if (art === "sticker-labels") {
     return (
-      <div className="relative flex h-34 w-40 items-center justify-center">
+      <div
+        className="relative flex h-34 w-40 items-center justify-center"
+        style={{ width: "10rem", height: "8.5rem" }}
+      >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-labels.webp"
@@ -176,7 +194,10 @@ function CategoryArt({ art }: { art: string }) {
 
   if (art === "invitations-card") {
     return (
-      <div className="relative flex h-34 w-40 items-center justify-center">
+      <div
+        className="relative flex h-34 w-40 items-center justify-center"
+        style={{ width: "10rem", height: "8.5rem" }}
+      >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-invitations.webp"
@@ -203,7 +224,10 @@ function CategoryArt({ art }: { art: string }) {
 
   if (art === "packaging-real") {
     return (
-      <div className="relative flex h-34 w-40 items-center justify-center">
+      <div
+        className="relative flex h-34 w-40 items-center justify-center"
+        style={{ width: "10rem", height: "8.5rem" }}
+      >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
         <Image
           src="/storefront-packaging.webp"
