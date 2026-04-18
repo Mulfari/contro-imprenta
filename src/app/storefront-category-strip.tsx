@@ -1,6 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const items = [
@@ -29,14 +29,15 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "11rem", height: "10rem" }}
       >
         <div className="absolute inset-x-3 bottom-1 h-9 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
+        <img
           src="/storefront-cards.webp"
           alt="Tarjetas"
           width={186}
           height={139}
-          sizes="176px"
           className="h-auto w-[11.625rem] translate-x-1 object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_72%_66%_at_52%_52%,black_58%,transparent_84%)]"
           draggable={false}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );
@@ -49,14 +50,15 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "9rem", height: "8rem" }}
       >
         <div className="absolute inset-x-4 bottom-2 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
+        <img
           src="/storefront-stickers.webp"
           alt="Stickers"
           width={158}
           height={119}
-          sizes="144px"
           className="h-auto w-[9.875rem] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.18)]"
           draggable={false}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );
@@ -78,14 +80,15 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "10rem", height: "9rem" }}
       >
         <div className="absolute inset-x-4 bottom-1 h-8 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
+        <img
           src="/storefront-brochures.webp"
           alt="Folletos"
           width={174}
           height={133}
-          sizes="160px"
           className="h-auto w-[10.875rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_52%,black_58%,transparent_84%)]"
           draggable={false}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );
@@ -107,14 +110,15 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "7rem", height: "9rem" }}
       >
         <div className="absolute inset-x-2 bottom-1 h-6 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
+        <img
           src="/storefront-banners.webp"
           alt="Pendones"
           width={113}
           height={161}
-          sizes="112px"
           className="h-auto w-[7.0625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_70%_76%_at_50%_52%,black_60%,transparent_86%)]"
           draggable={false}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );
@@ -138,14 +142,15 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "9rem", height: "8.5rem" }}
       >
         <div className="absolute inset-x-3 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
+        <img
           src="/storefront-invoices.webp"
           alt="Talonarios"
           width={156}
           height={125}
-          sizes="144px"
           className="h-auto w-[9.75rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_54%,black_58%,transparent_84%)]"
           draggable={false}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );
@@ -169,14 +174,15 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "10rem", height: "8.5rem" }}
       >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
+        <img
           src="/storefront-labels.webp"
           alt="Etiquetas"
           width={169}
           height={127}
-          sizes="160px"
           className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
           draggable={false}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );
@@ -199,14 +205,15 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "10rem", height: "8.5rem" }}
       >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
+        <img
           src="/storefront-invitations.webp"
           alt="Invitaciones"
           width={169}
           height={127}
-          sizes="160px"
           className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
           draggable={false}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );
@@ -229,14 +236,15 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "10rem", height: "8.5rem" }}
       >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <Image
+        <img
           src="/storefront-packaging.webp"
           alt="Packaging"
           width={169}
           height={127}
-          sizes="160px"
           className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
           draggable={false}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );

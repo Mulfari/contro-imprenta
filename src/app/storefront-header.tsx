@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import Image from "next/image";
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -104,14 +104,15 @@ export function StorefrontHeader({
                 className="h-[2.9rem] w-[10.4rem] sm:h-[3.25rem] sm:w-[11.2rem]"
                 style={{ width: "10.4rem", height: "2.9rem" }}
               >
-                <Image
+                <img
                   src="/express-printer-logo.webp"
                   alt="Express Printer"
                   width={166}
                   height={46}
-                  sizes="(min-width: 640px) 11.2rem, 10.4rem"
                   className="h-full w-full object-contain object-left"
-                  priority
+                  loading="eager"
+                  decoding="sync"
+                  fetchPriority="high"
                 />
               </div>
               <span className="pointer-events-none absolute left-[5.45rem] top-[1.9rem] text-[12px] font-black uppercase tracking-[0.08em] text-slate-500 sm:left-[5.95rem] sm:top-[2rem] sm:text-[13px]">
