@@ -63,8 +63,8 @@ function PromoPanel() {
           <div className="relative -translate-y-3 w-[86%] max-w-[24rem]">
             <div className="absolute inset-x-[10%] top-[3%] h-[88%] rotate-[-3deg] bg-white/16 shadow-[0_26px_48px_rgba(15,23,42,0.16)]" />
             <div className="absolute inset-x-[7%] top-[2%] h-[92%] rotate-[4deg] bg-white/22 shadow-[0_28px_54px_rgba(15,23,42,0.18)]" />
-            <div className="relative rotate-[-7deg] border border-white/16 bg-[linear-gradient(180deg,#07111f_0%,#0f1728_100%)] p-5 text-white shadow-[0_34px_70px_rgba(15,23,42,0.5)]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.26),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.12),transparent_34%)]" />
+            <div className="relative rotate-[-7deg] border border-white/14 bg-[linear-gradient(180deg,#07111f_0%,#0f1728_100%)] p-5 text-white shadow-[0_34px_70px_rgba(15,23,42,0.5)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.1),transparent_32%)]" />
               <div className="relative">
                 <div className="flex items-center justify-between">
                 <Image
@@ -74,7 +74,7 @@ function PromoPanel() {
                   height={48}
                   className="h-auto w-32"
                 />
-                <span className="border-b border-white/18 px-1 pb-1 text-[0.62rem] font-semibold tracking-[0.18em] text-white/72">
+                <span className="text-[0.62rem] font-semibold tracking-[0.18em] text-white/60">
                   EXPRESS
                 </span>
                 </div>
@@ -115,7 +115,7 @@ function PromoPanel() {
                     <p>Las Americas, PB, local 15</p>
                     <p>expressprinterpedidos@gmail.com</p>
                   </div>
-                  <div className="border-t border-white/14 pt-2 text-right text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-white/72">
+                  <div className="text-right text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-white/62">
                     <p>Escanea</p>
                     <p className="text-[#ffd23d]">y siguenos</p>
                   </div>
