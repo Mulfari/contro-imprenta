@@ -7,7 +7,6 @@ type HeroSlide = {
   id: string;
   shellClass: string;
   panelClass: string;
-  accentClass: string;
   type: "promo" | "schedule" | "delivery";
 };
 
@@ -19,7 +18,6 @@ const slides: HeroSlide[] = [
       "bg-[linear-gradient(135deg,#141b29_0%,#1a2440_48%,#143253_100%)]",
     panelClass:
       "bg-[linear-gradient(90deg,#eb1687_0%,#ff2d9d_49.8%,#1ebeff_50.2%,#46c8ff_100%)]",
-    accentClass: "bg-[#ffd23d]",
   },
   {
     id: "schedule",
@@ -28,7 +26,6 @@ const slides: HeroSlide[] = [
       "bg-[linear-gradient(135deg,#101827_0%,#172554_46%,#0f3a68_100%)]",
     panelClass:
       "bg-[linear-gradient(135deg,#f8fbff_0%,#eef6ff_46%,#ddefff_100%)]",
-    accentClass: "bg-[#38bdf8]",
   },
   {
     id: "delivery",
@@ -37,77 +34,88 @@ const slides: HeroSlide[] = [
       "bg-[linear-gradient(135deg,#102616_0%,#14532d_45%,#0f766e_100%)]",
     panelClass:
       "bg-[linear-gradient(135deg,#f6fff8_0%,#effdf5_46%,#dcfce7_100%)]",
-    accentClass: "bg-[#22c55e]",
   },
 ];
 
 function PromoPanel() {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.15),transparent_30%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),transparent_28%)]" />
       <div className="absolute inset-y-0 left-1/2 hidden w-px bg-white/18 lg:block" />
+      <div className="absolute inset-y-0 left-0 w-1/2 bg-[radial-gradient(circle_at_left_center,rgba(255,255,255,0.08),transparent_58%)]" />
+      <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_right_center,rgba(255,255,255,0.08),transparent_58%)]" />
 
-      <div className="grid h-full grid-cols-1 lg:grid-cols-[1.05fr_0.9fr_0.95fr]">
+      <div className="relative grid h-full grid-cols-1 lg:grid-cols-[1fr_0.92fr_0.92fr]">
         <div className="flex items-center px-6 py-10 sm:px-10 lg:px-12">
-          <div className="max-w-[22rem]">
-            <p className="text-[clamp(2.2rem,5vw,5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
-              <span className="block">¡La </span>
+          <div className="max-w-[23rem]">
+            <p className="text-[clamp(2.2rem,5vw,4.9rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
+              <span className="block">La </span>
               <span className="text-[#ffd23d]">calidad</span>
               <span className="block">de tu flyer</span>
               <span className="block">define tu</span>
-              <span className="block">negocio!</span>
+              <span className="block">negocio</span>
             </p>
 
-            <div className="mt-8 flex items-center gap-3 text-[2rem] sm:text-[2.4rem]">
-              <span>🤩</span>
-              <span className="text-[#ffd23d]">↘</span>
-              <span className="rounded-[1rem] bg-white/16 px-3 py-2 backdrop-blur-sm">✅</span>
+            <div className="mt-8 flex items-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/16 text-3xl backdrop-blur-sm">
+                OK
+              </div>
+              <div className="h-1 w-16 rounded-full bg-[#ffd23d]" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-[1.2rem] bg-white/18 text-3xl text-white backdrop-blur-sm">
+                +
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="relative hidden items-center justify-center px-3 py-8 lg:flex">
-          <div className="absolute bottom-[11%] left-1/2 h-10 w-[68%] -translate-x-1/2 rounded-full bg-black/28 blur-2xl" />
-          <div className="relative w-[82%] max-w-[24rem] rotate-[-8deg] rounded-[1.9rem] border border-white/12 bg-[linear-gradient(180deg,#0b1120_0%,#121826_100%)] p-5 text-white shadow-[0_30px_65px_rgba(15,23,42,0.45)]">
-            <div className="pointer-events-none absolute inset-0 rounded-[1.9rem] bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.15),transparent_32%)]" />
+        <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
+          <div className="absolute bottom-[10%] left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/30 blur-2xl" />
+          <div className="relative w-[84%] max-w-[23rem] rotate-[-8deg] rounded-[2rem] border border-white/14 bg-[linear-gradient(180deg,#0b1120_0%,#141c2b_100%)] p-5 text-white shadow-[0_34px_70px_rgba(15,23,42,0.5)]">
+            <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.14),transparent_34%)]" />
             <div className="relative">
-              <div className="mb-5 flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <Image
                   src="/express-printer-logo.webp"
                   alt="Express Printer"
-                  width={160}
-                  height={46}
-                  className="h-auto w-30"
+                  width={164}
+                  height={48}
+                  className="h-auto w-32"
                 />
-                <span className="text-[0.7rem] font-semibold tracking-[0.16em] text-white/65">
-                  EP-PRINT
+                <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[0.62rem] font-semibold tracking-[0.18em] text-white/72">
+                  EXPRESS
                 </span>
               </div>
 
-              <div className="space-y-1 text-[clamp(1.18rem,2vw,1.95rem)] font-black uppercase leading-[0.95] tracking-[-0.045em]">
-                <div className="text-[#ffe24a]">Impresión láser</div>
-                <div className="text-white">Tarjetas de</div>
-                <div className="text-white">presentación</div>
-                <div className="text-[#60b8ff]">Laminado</div>
-                <div className="text-[#ff4ea5]">Gigantografía</div>
+              <div className="mt-5 space-y-1 text-[clamp(1rem,1.8vw,1.72rem)] font-black uppercase leading-[0.95] tracking-[-0.045em]">
+                <div className="text-[#ffe24a]">Impresion laser</div>
+                <div className="flex gap-2">
+                  <span className="text-white">Tarjetas</span>
+                  <span className="text-[#60b8ff]">laminado</span>
+                </div>
+                <div className="text-[#ff4ea5]">Gigantografia</div>
                 <div className="text-white">Stickers adhesivos</div>
                 <div className="flex gap-2">
                   <span className="text-[#49da83]">Volantes</span>
                   <span className="text-[#ff4ea5]">Pendones</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-white">Menús y catálogos</span>
-                  <span className="text-[#60b8ff]">PVC</span>
+                  <span className="text-white">Menus</span>
+                  <span className="text-[#60b8ff]">& catalogos</span>
                 </div>
               </div>
 
+              <div className="mt-5 rounded-[1.2rem] border border-white/10 bg-white/6 px-4 py-3 text-[0.72rem] leading-4 text-white/78">
+                Mate y brillante, bond, sulfato, adhesivo, PVC y formatos
+                comerciales listos para entregar.
+              </div>
+
               <div className="mt-5 flex items-end justify-between gap-4">
-                <div className="space-y-1.5 text-[0.76rem] leading-4 text-white/78">
+                <div className="space-y-1.5 text-[0.75rem] leading-4 text-white/78">
                   <p>0424-339-0487</p>
-                  <p>Las Américas, PB, local 15</p>
+                  <p>Las Americas, PB, local 15</p>
                   <p>expressprinterpedidos@gmail.com</p>
                 </div>
-                <div className="h-18 w-18 rounded-[1rem] border border-white/10 bg-white p-1.5">
+                <div className="h-18 w-18 rounded-[1rem] border border-white/12 bg-white p-1.5">
                   <div className="grid h-full w-full grid-cols-6 gap-[2px] rounded-[0.75rem] bg-black p-[5px]">
                     {Array.from({ length: 36 }).map((_, index) => (
                       <span
@@ -125,16 +133,18 @@ function PromoPanel() {
         </div>
 
         <div className="flex items-center justify-end px-6 py-10 sm:px-10 lg:px-12">
-          <div className="max-w-[25rem] text-right">
+          <div className="max-w-[24rem] text-right">
             <div className="space-y-5 text-[clamp(1.5rem,2.5vw,3rem)] font-bold leading-[1.08] tracking-[-0.04em] text-white">
-              <p>No es solo papel, es la primera impresión que dejas en tus clientes.</p>
+              <p>No es solo papel, es la primera impresion que dejas en tus clientes.</p>
               <p>Un volante mal impreso puede alejar una venta; uno impecable, la cierra.</p>
             </div>
 
-            <div className="mt-8 flex items-center justify-end gap-3 text-[2rem] sm:text-[2.4rem]">
-              <span>😖</span>
-              <span className="text-red-500">✕</span>
-              <span className="text-[#ffd23d]">↗</span>
+            <div className="mt-8 flex items-center justify-end gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/16 text-3xl backdrop-blur-sm">
+                NO
+              </div>
+              <div className="h-1 w-16 rounded-full bg-[#ffd23d]" />
+              <div className="text-[2.6rem] font-black text-red-500">X</div>
             </div>
           </div>
         </div>
@@ -147,58 +157,60 @@ function SchedulePanel() {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.12),transparent_28%)]" />
-      <div className="grid h-full grid-cols-1 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="flex items-center px-7 py-10 sm:px-10 lg:px-12">
-          <div className="max-w-[24rem]">
-            <p className="text-[0.78rem] font-semibold uppercase tracking-[0.28em] text-sky-600">
-              Express Printer
+      <div className="absolute left-[4%] top-[9%] h-24 w-24 rounded-full border border-sky-200/80 bg-white/70 shadow-[0_18px_35px_rgba(15,23,42,0.06)]" />
+      <div className="absolute left-[7.3%] top-[12.3%] h-1 w-7 origin-left rotate-[50deg] rounded-full bg-sky-500" />
+      <div className="absolute left-[7.3%] top-[12.3%] h-1 w-5 origin-left rotate-[-42deg] rounded-full bg-slate-500" />
+      <div className="absolute left-[11.2%] top-[15.8%] h-3 w-3 rounded-full bg-slate-900" />
+
+      <div className="absolute right-[5%] top-[10%] h-[72%] w-[28%] rounded-[2rem] bg-[linear-gradient(180deg,#0f172a_0%,#1e3a8a_100%)] shadow-[0_28px_60px_rgba(15,23,42,0.2)]" />
+      <div className="absolute right-[7.5%] top-[16%] h-[54%] w-[23%] rounded-[1.6rem] border border-white/10 bg-white/92 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.12)]">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-sky-600">
+          Horarios
+        </p>
+        <div className="mt-4 space-y-4">
+          <div>
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Lunes a viernes
             </p>
-            <h2 className="mt-3 text-[clamp(2.1rem,4.6vw,4.6rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-slate-950">
-              Horarios de
-              <span className="block text-sky-600">atención</span>
-            </h2>
-            <p className="mt-4 max-w-[20rem] text-[1rem] leading-7 text-slate-600 sm:text-[1.08rem]">
-              Estamos listos para recibir pedidos, imprimir y ayudarte a resolver
-              materiales comerciales durante la semana.
+            <p className="mt-1 text-[1.35rem] font-black tracking-[-0.04em] text-slate-950">
+              8:00 AM
             </p>
+            <p className="text-sm font-semibold text-slate-500">a 6:00 PM</p>
+          </div>
+          <div className="h-px bg-slate-200" />
+          <div>
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Sabados
+            </p>
+            <p className="mt-1 text-[1.35rem] font-black tracking-[-0.04em] text-slate-950">
+              9:00 AM
+            </p>
+            <p className="text-sm font-semibold text-slate-500">a 2:00 PM</p>
           </div>
         </div>
+      </div>
 
-        <div className="flex items-center justify-center px-7 py-10 sm:px-10 lg:px-12">
-          <div className="grid w-full max-w-[34rem] gap-4 sm:grid-cols-2">
-            <div className="rounded-[1.8rem] border border-slate-200 bg-white p-6 shadow-[0_24px_45px_rgba(15,23,42,0.08)]">
-              <p className="text-[0.78rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Lunes a viernes
-              </p>
-              <p className="mt-3 text-[2rem] font-black tracking-[-0.04em] text-slate-950">
-                8:00 AM
-              </p>
-              <p className="text-lg font-semibold text-slate-500">a 6:00 PM</p>
-            </div>
-            <div className="rounded-[1.8rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_24px_45px_rgba(15,23,42,0.12)]">
-              <p className="text-[0.78rem] font-semibold uppercase tracking-[0.24em] text-white/55">
-                Sábados
-              </p>
-              <p className="mt-3 text-[2rem] font-black tracking-[-0.04em]">
-                9:00 AM
-              </p>
-              <p className="text-lg font-semibold text-white/72">a 2:00 PM</p>
-            </div>
-            <div className="rounded-[1.8rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_35px_rgba(15,23,42,0.06)] sm:col-span-2">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-[0.78rem] font-semibold uppercase tracking-[0.24em] text-emerald-600">
-                    Atención rápida
-                  </p>
-                  <p className="mt-2 text-[1.2rem] font-bold tracking-[-0.03em] text-slate-950">
-                    Respuesta por WhatsApp y recepción de artes
-                  </p>
-                </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-emerald-100 text-2xl">
-                  🕒
-                </div>
-              </div>
-            </div>
+      <div className="relative z-10 flex h-full items-center px-7 py-10 sm:px-10 lg:px-12">
+        <div className="max-w-[31rem]">
+          <p className="text-[0.78rem] font-semibold uppercase tracking-[0.28em] text-sky-600">
+            Express Printer
+          </p>
+          <h2 className="mt-3 text-[clamp(2.2rem,4.7vw,4.9rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-slate-950">
+            Horarios de
+            <span className="block text-sky-600">atencion</span>
+          </h2>
+          <p className="mt-5 max-w-[22rem] text-[1rem] leading-7 text-slate-600 sm:text-[1.08rem]">
+            Recibimos pedidos, artes y trabajos comerciales durante toda la
+            semana para que tu negocio no se detenga.
+          </p>
+
+          <div className="mt-8 flex items-center gap-4 text-sm font-semibold text-slate-600">
+            <span className="rounded-full bg-white px-4 py-2 shadow-[0_12px_24px_rgba(15,23,42,0.07)]">
+              WhatsApp activo
+            </span>
+            <span className="rounded-full bg-white px-4 py-2 shadow-[0_12px_24px_rgba(15,23,42,0.07)]">
+              Recepcion de artes
+            </span>
           </div>
         </div>
       </div>
@@ -209,71 +221,42 @@ function SchedulePanel() {
 function DeliveryPanel() {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.14),transparent_30%)]" />
-      <div className="grid h-full grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="flex items-center px-7 py-10 sm:px-10 lg:px-12">
-          <div className="max-w-[25rem]">
-            <p className="text-[0.78rem] font-semibold uppercase tracking-[0.28em] text-emerald-600">
-              Promoción online
-            </p>
-            <h2 className="mt-3 text-[clamp(2.1rem,4.8vw,4.8rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-slate-950">
-              Tus pedidos
-              <span className="block text-emerald-600">con delivery</span>
-              <span className="block">gratis</span>
-            </h2>
-            <p className="mt-4 max-w-[22rem] text-[1rem] leading-7 text-slate-600 sm:text-[1.08rem]">
-              Haz tu pedido desde la tienda online y recibe envío sin costo en
-              zonas seleccionadas. Más rápido, más simple y sin vueltas.
-            </p>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.12),transparent_28%)]" />
+      <div className="absolute right-[8%] top-[18%] h-[34%] w-[22%] rounded-[2rem] border border-emerald-200/80 bg-white/88 shadow-[0_24px_50px_rgba(15,23,42,0.1)]" />
+      <div className="absolute right-[13%] top-[46%] h-16 w-[16%] rounded-[1.4rem] bg-emerald-500 shadow-[0_20px_40px_rgba(34,197,94,0.28)]" />
+      <div className="absolute right-[11%] top-[50%] h-7 w-[5%] rounded-full bg-slate-900" />
+      <div className="absolute right-[25.5%] top-[50%] h-7 w-[5%] rounded-full bg-slate-900" />
+      <div className="absolute right-[15%] top-[33%] h-[9%] w-[12%] rounded-[1rem] bg-emerald-100" />
+      <div className="absolute right-[26.5%] top-[33%] h-[9%] w-[6%] rounded-l-[1rem] rounded-r-[0.4rem] bg-emerald-400" />
 
-            <div className="mt-7 flex flex-wrap gap-3">
-              <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
-                Pedidos web
-              </span>
-              <span className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white">
-                Delivery gratis
-              </span>
-            </div>
-          </div>
-        </div>
+      <div className="absolute left-[50%] top-[58%] h-1.5 w-[18%] rotate-[-15deg] rounded-full bg-[#ffd23d]" />
+      <div className="absolute left-[61%] top-[53%] h-4 w-4 rotate-45 border-r-[4px] border-t-[4px] border-[#ffd23d]" />
 
-        <div className="relative flex items-center justify-center px-7 py-10 sm:px-10 lg:px-12">
-          <div className="absolute bottom-[16%] left-1/2 h-10 w-[62%] -translate-x-1/2 rounded-full bg-emerald-200/70 blur-2xl" />
-          <div className="relative w-full max-w-[32rem] rounded-[2rem] border border-emerald-100 bg-white p-6 shadow-[0_28px_55px_rgba(15,23,42,0.1)]">
-            <div className="absolute -right-4 -top-4 rounded-[1.1rem] bg-emerald-500 px-4 py-3 text-sm font-black uppercase tracking-[0.18em] text-white shadow-[0_18px_35px_rgba(34,197,94,0.34)]">
-              Gratis
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[0.78rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Compra online
-                </p>
-                <p className="mt-2 text-[1.8rem] font-black tracking-[-0.04em] text-slate-950">
-                  Envío incluido
-                </p>
-              </div>
-              <div className="flex h-16 w-16 items-center justify-center rounded-[1.3rem] bg-emerald-100 text-3xl">
-                🚚
-              </div>
-            </div>
+      <div className="relative z-10 flex h-full items-center px-7 py-10 sm:px-10 lg:px-12">
+        <div className="max-w-[31rem]">
+          <p className="text-[0.78rem] font-semibold uppercase tracking-[0.28em] text-emerald-600">
+            Promocion online
+          </p>
+          <h2 className="mt-3 text-[clamp(2.2rem,4.7vw,4.9rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-slate-950">
+            Tus pedidos
+            <span className="block text-emerald-600">en linea</span>
+            <span className="block">con delivery gratis</span>
+          </h2>
+          <p className="mt-5 max-w-[23rem] text-[1rem] leading-7 text-slate-600 sm:text-[1.08rem]">
+            Compra desde la tienda, confirma por WhatsApp y recibe entrega sin
+            costo en zonas seleccionadas.
+          </p>
 
-            <div className="mt-6 grid gap-3">
-              {[
-                "Aplica para pedidos desde la tienda online",
-                "Confirmación rápida por WhatsApp",
-                "Entrega coordinada según zona disponible",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center gap-3 rounded-[1.1rem] bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
-                >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white">
-                    ✓
-                  </span>
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
+              Pedidos web
+            </span>
+            <span className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white">
+              Delivery gratis
+            </span>
+            <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_12px_24px_rgba(15,23,42,0.07)]">
+              Zonas seleccionadas
+            </span>
           </div>
         </div>
       </div>
@@ -281,12 +264,18 @@ function DeliveryPanel() {
   );
 }
 
-function DefaultHeroSlide({ slide }: { slide: HeroSlide }) {
+function HeroPanel({ slide }: { slide: HeroSlide }) {
   return (
     <div className="flex h-full items-center justify-center p-4 sm:p-6 xl:p-8">
       <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-white/14 shadow-[0_24px_60px_rgba(0,0,0,0.18)]">
         <div className={`absolute inset-0 ${slide.panelClass}`} />
-        {slide.type === "promo" ? <PromoPanel /> : slide.type === "schedule" ? <SchedulePanel /> : <DeliveryPanel />}
+        {slide.type === "promo" ? (
+          <PromoPanel />
+        ) : slide.type === "schedule" ? (
+          <SchedulePanel />
+        ) : (
+          <DeliveryPanel />
+        )}
       </div>
     </div>
   );
@@ -317,7 +306,7 @@ export function StorefrontHero() {
               } ${slide.shellClass}`}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_30%)]" />
-              <DefaultHeroSlide slide={slide} />
+              <HeroPanel slide={slide} />
             </article>
           );
         })}
