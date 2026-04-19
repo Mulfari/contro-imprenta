@@ -341,7 +341,6 @@ export function StorefrontHero() {
   }, [activeIndex, isIndicatorHovered, remainingMs]);
 
   const goToSlide = (index: number) => {
-    setIsIndicatorHovered(false);
     setActiveIndex(index);
     setRemainingMs(HERO_AUTOPLAY_MS);
     setProgressSeed((current) => current + 1);
