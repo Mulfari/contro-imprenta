@@ -163,10 +163,10 @@ function SchedulePanel() {
 
         <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
           <div className="absolute bottom-[11%] left-1/2 h-11 w-[74%] -translate-x-1/2 rounded-full bg-black/25 blur-2xl" />
-          <div className="relative -translate-y-3 w-[84%] max-w-[23rem]">
-            <div className="absolute inset-x-[9%] top-[3%] h-[88%] rotate-[-4deg] bg-white/18 shadow-[0_24px_48px_rgba(15,23,42,0.14)]" />
-            <div className="absolute inset-x-[6%] top-[2%] h-[92%] rotate-[5deg] bg-white/24 shadow-[0_28px_54px_rgba(15,23,42,0.16)]" />
-            <div className="relative rotate-[-7deg] border border-white/20 bg-[linear-gradient(180deg,#f8fbff_0%,#edf6ff_100%)] p-5 text-slate-950 shadow-[0_34px_70px_rgba(15,23,42,0.28)]">
+          <div className="relative -translate-y-2 w-[84%] max-w-[23rem]">
+            <div className="absolute inset-x-[10%] top-[4%] h-[88%] rotate-[-2deg] bg-white/18 shadow-[0_24px_48px_rgba(15,23,42,0.14)]" />
+            <div className="absolute inset-x-[7%] top-[2.5%] h-[92%] rotate-[2deg] bg-white/24 shadow-[0_28px_54px_rgba(15,23,42,0.16)]" />
+            <div className="relative rotate-[-1.5deg] border border-white/20 bg-[linear-gradient(180deg,#f8fbff_0%,#edf6ff_100%)] p-5 text-slate-950 shadow-[0_34px_70px_rgba(15,23,42,0.28)]">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.1),transparent_32%)]" />
               <div className="relative">
                 <div className="flex items-center justify-between">
@@ -225,9 +225,9 @@ function SchedulePanel() {
 
         <div className="flex items-center justify-end px-8 py-10 sm:px-12 lg:px-16">
           <div className="max-w-[21rem] text-right">
-            <div className="space-y-5 text-[clamp(1.35rem,2.15vw,2.35rem)] font-bold leading-[1.1] tracking-[-0.04em] text-slate-950">
-              <p>Recibimos pedidos, artes y ajustes durante la semana para que tu marca no se detenga.</p>
-              <p>Si necesitas produccion urgente, escribenos dentro del horario y te confirmamos tiempos reales.</p>
+            <div className="space-y-5 text-[clamp(1.35rem,2.05vw,2.2rem)] font-bold leading-[1.1] tracking-[-0.04em] text-slate-950">
+              <p>Recibimos pedidos y artes durante la semana.</p>
+              <p>Si necesitas produccion urgente, te confirmamos tiempos reales dentro del horario.</p>
             </div>
           </div>
         </div>
