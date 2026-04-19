@@ -27,7 +27,6 @@ export function StorefrontAuthShell({
       <StorefrontHeader
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
-        recentSearches={[]}
         hasActiveSearch={false}
         isAccountActive={false}
         onAccountClick={() => {}}

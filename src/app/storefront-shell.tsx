@@ -15,7 +15,6 @@ import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
 import { StorefrontTestimonialsSection } from "@/app/storefront-testimonials-section";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
-const RECENT_SEARCHES_KEY = "express-printer-recent-searches";
 const categoryGroups = [
   {
     title: "Papeleria comercial",
@@ -35,60 +34,14 @@ const categoryGroups = [
   },
 ];
 
-function normalizeSearchList(items: string[]) {
-  return Array.from(new Set(items.map((item) => item.trim()).filter(Boolean))).slice(0, 6);
-}
-
 export function StorefrontShell() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [accountOpen, setAccountOpen] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
-    if (typeof window === "undefined") {
-      return [];
-    }
-
-    try {
-      const stored = window.localStorage.getItem(RECENT_SEARCHES_KEY);
-      return stored ? normalizeSearchList(JSON.parse(stored) as string[]) : [];
-    } catch {
-      return [];
-    }
-  });
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      const trimmedQuery = searchQuery.trim();
-      setDebouncedQuery(trimmedQuery);
-
-      if (!trimmedQuery) {
-        return;
-      }
-
-      setRecentSearches((current) => {
-        const latestSearch = current[0]?.trim().toLowerCase();
-        const nextSearch = trimmedQuery.toLowerCase();
-
-        if (latestSearch === nextSearch) {
-          return current;
-        }
-
-        let next: string[];
-
-        if (latestSearch && nextSearch.startsWith(latestSearch)) {
-          next = normalizeSearchList([trimmedQuery, ...current.slice(1)]);
-        } else if (latestSearch && latestSearch.startsWith(nextSearch)) {
-          return current;
-        } else {
-          next = normalizeSearchList([trimmedQuery, ...current]);
-        }
-
-        try {
-          window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
-        } catch {}
-
-        return next;
-      });
+      setDebouncedQuery(searchQuery.trim());
     }, 450);
 
     return () => window.clearTimeout(timeout);
@@ -113,7 +66,6 @@ export function StorefrontShell() {
       <StorefrontHeader
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
-        recentSearches={recentSearches}
         hasActiveSearch={Boolean(debouncedQuery)}
         isAccountActive={accountOpen}
         onAccountClick={() => setAccountOpen((current) => !current)}

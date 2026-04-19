@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { storefrontCategories, storefrontProducts } from "@/app/storefront-data";
-
 const promoTickerItems = [
   "Impresion express para tarjetas, stickers y pendones",
   "Pedidos online conectados al panel administrativo",
@@ -33,7 +31,6 @@ const categoryMenu = [
 type StorefrontHeaderProps = {
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
-  recentSearches: string[];
   hasActiveSearch: boolean;
   isAccountActive: boolean;
   onAccountClick: () => void;
@@ -42,37 +39,20 @@ type StorefrontHeaderProps = {
 export function StorefrontHeader({
   searchQuery,
   onSearchQueryChange,
-  recentSearches,
   hasActiveSearch,
   isAccountActive,
   onAccountClick,
 }: StorefrontHeaderProps) {
-  const [searchOpen, setSearchOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
-  const searchAreaRef = useRef<HTMLDivElement | null>(null);
-  const searchPanelRef = useRef<HTMLDivElement | null>(null);
   const categoryAreaRef = useRef<HTMLDivElement | null>(null);
   const categoryPanelRef = useRef<HTMLDivElement | null>(null);
-  const showSearchPanel = searchOpen && !hasActiveSearch;
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  const suggestedProducts = normalizedQuery
-    ? storefrontProducts.filter((item) =>
-        `${item.title} ${item.note} ${item.category}`.toLowerCase().includes(normalizedQuery),
-      )
-    : storefrontProducts;
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
       const target = event.target as Node;
-      const clickedInsideInput = searchAreaRef.current?.contains(target);
-      const clickedInsidePanel = searchPanelRef.current?.contains(target);
       const clickedInsideCategoryButton = categoryAreaRef.current?.contains(target);
       const clickedInsideCategoryPanel = categoryPanelRef.current?.contains(target);
-
-      if (!clickedInsideInput && !clickedInsidePanel) {
-        setSearchOpen(false);
-      }
 
       if (!clickedInsideCategoryButton && !clickedInsideCategoryPanel) {
         setCategoryOpen(false);
@@ -85,10 +65,6 @@ export function StorefrontHeader({
   }, []);
   return (
     <>
-      {showSearchPanel ? (
-        <div className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-[4px]" />
-      ) : null}
-
       <div className="border-b border-slate-800 bg-slate-950 text-white">
         <div className="mx-auto flex w-full max-w-[112rem] px-4 py-3 text-sm sm:px-6 lg:px-8 2xl:px-10">
           <p>Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.</p>
@@ -120,13 +96,10 @@ export function StorefrontHeader({
               </span>
             </Link>
 
-            <div
-              ref={searchAreaRef}
-              className="flex flex-1 xl:mx-8 xl:max-w-[62rem]"
-            >
+            <div className="flex flex-1 xl:mx-8 xl:max-w-[62rem]">
               <div
                 className={`flex w-full flex-col overflow-visible rounded-[1.35rem] border bg-white shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition xl:flex-row ${
-                  searchOpen || categoryOpen
+                  hasActiveSearch || categoryOpen
                     ? "border-slate-950"
                     : "border-slate-200"
                 }`}
@@ -292,7 +265,6 @@ export function StorefrontHeader({
                     placeholder="Buscar productos de impresion, materiales, medidas o acabados..."
                     value={searchQuery}
                     onChange={(event) => onSearchQueryChange(event.target.value)}
-                    onFocus={() => setSearchOpen(true)}
                     className="w-full bg-transparent text-[15px] outline-none placeholder:text-slate-400"
                   />
                 </div>
@@ -384,133 +356,6 @@ export function StorefrontHeader({
           </div>
         </div>
       </header>
-
-      <div
-        className={`fixed inset-x-0 top-[7.2rem] z-50 px-4 transition-all duration-300 sm:px-6 lg:px-8 2xl:px-10 ${
-          showSearchPanel
-            ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-6 opacity-0"
-        }`}
-      >
-        <div ref={searchPanelRef} className="mx-auto w-full max-w-[112rem]">
-          <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-[0_30px_70px_rgba(15,23,42,0.14)]">
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-semibold text-slate-950">
-                Busqueda rapida
-              </p>
-              <button
-                type="button"
-                onClick={() => setSearchOpen(false)}
-                className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
-                aria-label="Cerrar busqueda"
-              >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 6L6 18" />
-                  <path d="M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="mt-4 rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <p className="text-sm font-semibold text-slate-950">Busquedas recientes</p>
-                <div className="flex flex-wrap gap-2.5">
-                  {recentSearches.length > 0 ? recentSearches.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => onSearchQueryChange(item)}
-                      className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-                    >
-                      {item}
-                    </button>
-                  )) : (
-                    <span className="text-sm text-slate-500">
-                      Empieza a buscar y aqui veras tus ultimas consultas.
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-5 xl:grid-cols-[0.68fr_1.32fr]">
-              <div>
-                <p className="text-sm font-semibold text-slate-950">Categorias</p>
-                <div className="mt-3 space-y-2">
-                  {storefrontCategories.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => onSearchQueryChange(item)}
-                      className="flex w-full cursor-pointer items-center justify-between rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white"
-                    >
-                      <span>{item}</span>
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        className="h-4 w-4 text-slate-400"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="m9 6 6 6-6 6" />
-                      </svg>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm font-semibold text-slate-950">Productos sugeridos</p>
-                  <button
-                    type="button"
-                    className="cursor-pointer text-sm font-medium text-slate-500 transition hover:text-slate-950"
-                  >
-                    Ver todo
-                  </button>
-                </div>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {suggestedProducts.slice(0, 4).map((item) => (
-                    <button
-                      key={item.title}
-                      type="button"
-                      onClick={() => onSearchQueryChange(item.title)}
-                      className="cursor-pointer overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white text-left shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_34px_rgba(15,23,42,0.1)]"
-                    >
-                      <div
-                        className={`flex h-36 items-end rounded-b-[1.8rem] rounded-t-[1.35rem] bg-gradient-to-br ${item.tint} p-4`}
-                      >
-                        <div className="flex h-16 w-24 items-center justify-center rounded-[1.25rem] border border-white/80 bg-white/80 shadow-sm">
-                          <div className="h-7 w-14 rounded-lg bg-slate-200/80" />
-                        </div>
-                      </div>
-                      <div className="space-y-1 px-4 py-4">
-                        <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                        <p className="text-xs text-slate-500">{item.note}</p>
-                        <p className="pt-1 text-sm font-semibold text-slate-700">
-                          Desde {item.price}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <section className="border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfe_100%)]">
         <div className="overflow-hidden">
