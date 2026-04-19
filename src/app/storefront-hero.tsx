@@ -282,14 +282,15 @@ function DeliveryPanel() {
               <div className="absolute left-1/2 top-[10%] h-[70%] w-[52%] -translate-x-1/2">
                 <div className="absolute inset-x-[12%] bottom-[6%] h-8 rounded-full bg-black/12 blur-xl" />
 
-                <div className="absolute inset-x-[10%] top-[2%] h-[78%] rounded-[1.8rem] bg-[linear-gradient(180deg,#d1a768_0%,#b78345_100%)] shadow-[0_28px_52px_rgba(15,23,42,0.2)]">
-                  <div className="absolute inset-x-[7%] top-[8%] h-[24%] rounded-[1.1rem] bg-[linear-gradient(180deg,#e7c792_0%,#c89454_100%)]" />
-                  <div className="absolute inset-x-[11%] top-[29%] h-[54%] rounded-[1.15rem] bg-[linear-gradient(180deg,#d8ae73_0%,#bd8a4a_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.26)]">
-                    <div className="absolute inset-x-[10%] top-[16%] h-[10%] rounded-full bg-[#e7c792]/75" />
-                    <div className="absolute inset-y-[11%] left-1/2 w-[7%] -translate-x-1/2 rounded-full bg-[#8e6331]/55" />
-                    <div className="absolute inset-x-[15%] bottom-[20%] h-[13%] rounded-full bg-[#a06f35]/22 blur-sm" />
-                  </div>
-                  <div className="absolute left-1/2 top-[22%] h-[64%] w-[8%] -translate-x-1/2 rounded-full bg-[#8e6331]/6" />
+                <div className="absolute inset-x-[12%] top-[8%] h-[68%]">
+                  <div className="absolute inset-x-[9%] top-0 h-[20%] rounded-t-[1.5rem] rounded-b-[0.7rem] bg-[linear-gradient(180deg,#e5c08a_0%,#c89454_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]" />
+                  <div className="absolute inset-y-[12%] left-[49.5%] w-[7%] -translate-x-1/2 rounded-full bg-[#8e6331]/58" />
+                  <div className="absolute left-[14%] top-[15%] h-[66%] w-[72%] rounded-[1rem] bg-[linear-gradient(180deg,#d8ae73_0%,#b67f42_100%)] shadow-[0_28px_52px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.18)]" />
+                  <div className="absolute right-[10%] top-[19%] h-[60%] w-[9%] rounded-r-[0.9rem] bg-[linear-gradient(180deg,#b37a3e_0%,#98662f_100%)]" />
+                  <div className="absolute left-[18%] top-[24%] h-[10%] w-[26%] rounded-full bg-[#e8c996]/72" />
+                  <div className="absolute left-[18%] top-[40%] h-[2.5%] w-[54%] rounded-full bg-[#9e6d35]/16" />
+                  <div className="absolute left-[18%] top-[48%] h-[2.5%] w-[46%] rounded-full bg-[#9e6d35]/14" />
+                  <div className="absolute left-[20%] bottom-[18%] h-[8%] w-[44%] rounded-full bg-[#8a5f30]/18 blur-[2px]" />
                 </div>
               </div>
             </div>
