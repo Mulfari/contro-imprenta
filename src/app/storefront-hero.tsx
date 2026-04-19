@@ -314,14 +314,6 @@ export function StorefrontHero() {
     setActiveIndex(index);
   };
 
-  const stepSlide = (direction: "prev" | "next") => {
-    setActiveIndex((current) =>
-      direction === "next"
-        ? (current + 1) % slides.length
-        : (current - 1 + slides.length) % slides.length,
-    );
-  };
-
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
       <div className="relative h-[420px] overflow-hidden rounded-[2.35rem] shadow-[0_30px_80px_rgba(15,23,42,0.22)] sm:h-[500px] xl:h-[620px]">
@@ -341,50 +333,26 @@ export function StorefrontHero() {
           );
         })}
 
-        <div className="absolute inset-x-0 bottom-5 z-10 flex justify-center px-4 sm:bottom-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/72 px-2 py-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-md">
-            <button
-              type="button"
-              onClick={() => stepSlide("prev")}
-              aria-label="Banner anterior"
-              className="flex h-9 w-9 translate-y-0 transform-none cursor-pointer items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition-[background-color,border-color,color] duration-200 hover:translate-y-0 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
+        <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-6 sm:bottom-4">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/82 px-3 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-md">
+            {slides.map((slide, index) => {
+              const isActive = index === activeIndex;
 
-            <div className="flex items-center gap-2 px-1">
-              {slides.map((slide, index) => {
-                const isActive = index === activeIndex;
-
-                return (
-                  <button
-                    key={slide.id}
-                    type="button"
-                    onClick={() => goToSlide(index)}
-                    aria-label={`Ir al banner ${index + 1}`}
-                    aria-pressed={isActive}
-                    className={`translate-y-0 transform-none cursor-pointer rounded-full transition-all duration-250 hover:translate-y-0 ${
-                      isActive
-                        ? "h-2.5 w-10 bg-slate-950"
-                        : "h-2.5 w-4 bg-slate-300 hover:bg-slate-400"
-                    }`}
-                  />
-                );
-              })}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => stepSlide("next")}
-              aria-label="Banner siguiente"
-              className="flex h-9 w-9 translate-y-0 transform-none cursor-pointer items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition-[background-color,border-color,color] duration-200 hover:translate-y-0 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m9 6 6 6-6 6" />
-              </svg>
-            </button>
+              return (
+                <button
+                  key={slide.id}
+                  type="button"
+                  onClick={() => goToSlide(index)}
+                  aria-label={`Ir al banner ${index + 1}`}
+                  aria-pressed={isActive}
+                  className={`cursor-pointer rounded-full transition-all duration-250 ${
+                    isActive
+                      ? "h-2.5 w-9 bg-slate-950"
+                      : "h-2.5 w-4 bg-slate-300 hover:bg-slate-400"
+                  }`}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
