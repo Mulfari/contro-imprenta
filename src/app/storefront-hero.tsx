@@ -277,12 +277,14 @@ function DeliveryPanel() {
         <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
           <div className="absolute bottom-[11%] left-1/2 h-11 w-[74%] -translate-x-1/2 rounded-full bg-black/25 blur-2xl" />
           <div className="relative -translate-y-2 w-[88%] max-w-[24.5rem]">
-            <div className="absolute bottom-[8%] left-1/2 h-12 w-[68%] -translate-x-1/2 rounded-full bg-black/18 blur-2xl" />
+            <div className="absolute inset-x-[16%] top-[6%] h-[74%] rounded-[2.2rem] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.8),rgba(255,255,255,0.18)_58%,transparent_78%)] blur-[2px]" />
+            <div className="absolute inset-x-[22%] top-[11%] h-[64%] rounded-[2rem] border border-white/45 bg-white/30 shadow-[0_24px_50px_rgba(255,255,255,0.16)_inset,0_20px_44px_rgba(15,23,42,0.06)] backdrop-blur-[1px]" />
+            <div className="absolute bottom-[9%] left-1/2 h-12 w-[58%] -translate-x-1/2 rounded-full bg-black/14 blur-2xl" />
             <div className="relative mx-auto h-[25rem] w-full max-w-[23rem]">
               <div
                 aria-label="Delivery gratis"
                 role="img"
-                className="absolute left-1/2 top-[4%] h-[86%] w-[78%] -translate-x-1/2 bg-contain bg-center bg-no-repeat drop-shadow-[0_28px_42px_rgba(15,23,42,0.22)]"
+                className="absolute left-1/2 top-[1%] h-[95%] w-[88%] -translate-x-1/2 bg-contain bg-center bg-no-repeat drop-shadow-[0_34px_52px_rgba(15,23,42,0.18)]"
                 style={{
                   backgroundImage: "url('/delivery-banner.webp')",
                 }}
