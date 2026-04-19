@@ -279,21 +279,12 @@ function DeliveryPanel() {
           <div className="relative -translate-y-2 w-[88%] max-w-[24.5rem]">
             <div className="absolute bottom-[8%] left-1/2 h-12 w-[68%] -translate-x-1/2 rounded-full bg-black/18 blur-2xl" />
             <div className="relative mx-auto h-[25rem] w-full max-w-[23rem]">
-              <div className="absolute left-[11%] top-[24%] h-[40%] w-[22%] rounded-[1.8rem] border border-white/55 bg-[linear-gradient(180deg,#ffffff_0%,#f0fdf4_100%)] shadow-[0_28px_50px_rgba(15,23,42,0.14)]" />
-              <div className="absolute left-[15%] top-[31%] h-[24%] w-[14%] rounded-[1.2rem] bg-[linear-gradient(180deg,#dcfce7_0%,#bbf7d0_100%)]" />
-              <div className="absolute left-[18%] top-[35%] h-3 w-8 rounded-full bg-emerald-500/75" />
-              <div className="absolute left-[18%] top-[40.5%] h-2.5 w-12 rounded-full bg-slate-200" />
-              <div className="absolute left-[18%] top-[45.5%] h-2.5 w-9 rounded-full bg-slate-200" />
+              <div className="absolute left-1/2 top-[10%] h-[70%] w-[52%] -translate-x-1/2">
+                <div className="absolute inset-x-[12%] bottom-[6%] h-8 rounded-full bg-black/12 blur-xl" />
 
-              <div className="absolute left-[30%] top-[41%] h-1.5 w-[13%] rounded-full bg-[#ffd23d]" />
-              <div className="absolute left-[40%] top-[38.8%] h-3.5 w-3.5 rotate-45 border-r-[3px] border-t-[3px] border-[#ffd23d]" />
-
-              <div className="absolute right-[7%] top-[10%] h-[60%] w-[56%]">
-                <div className="absolute inset-x-[14%] bottom-[9%] h-8 rounded-full bg-black/12 blur-xl" />
-
-                <div className="absolute left-[18%] top-[10%] h-[68%] w-[58%] rounded-[1.6rem] bg-[linear-gradient(180deg,#d1a768_0%,#b78345_100%)] shadow-[0_28px_52px_rgba(15,23,42,0.2)]">
-                  <div className="absolute inset-x-[7%] top-[8%] h-[26%] rounded-[1.1rem] bg-[linear-gradient(180deg,#e7c792_0%,#c89454_100%)]" />
-                  <div className="absolute left-1/2 top-[34%] h-[52%] w-[70%] -translate-x-1/2 rounded-[1.25rem] border border-white/30 bg-white/88 p-3 shadow-[0_14px_30px_rgba(15,23,42,0.08)]">
+                <div className="absolute inset-x-[10%] top-[2%] h-[78%] rounded-[1.8rem] bg-[linear-gradient(180deg,#d1a768_0%,#b78345_100%)] shadow-[0_28px_52px_rgba(15,23,42,0.2)]">
+                  <div className="absolute inset-x-[7%] top-[8%] h-[24%] rounded-[1.1rem] bg-[linear-gradient(180deg,#e7c792_0%,#c89454_100%)]" />
+                  <div className="absolute left-1/2 top-[27%] h-[60%] w-[72%] -translate-x-1/2 rounded-[1.25rem] border border-white/30 bg-white/88 p-3 shadow-[0_14px_30px_rgba(15,23,42,0.08)]">
                     <div
                       aria-label="Express Printer"
                       role="img"
@@ -309,22 +300,7 @@ function DeliveryPanel() {
                       Delivery gratis
                     </div>
                   </div>
-                  <div className="absolute left-1/2 top-[28%] h-[58%] w-[10%] -translate-x-1/2 rounded-full bg-[#8e6331]/65" />
-                </div>
-
-                <div className="absolute bottom-[18%] right-[4%] h-20 w-24 rounded-[1.25rem] border border-white/20 bg-[linear-gradient(180deg,#f6fff8_0%,#ebfff1_100%)] p-3 shadow-[0_24px_52px_rgba(15,23,42,0.2)]">
-                  <div className="absolute inset-0 rounded-[1.25rem] bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.18),transparent_28%)]" />
-                  <div className="relative">
-                    <p className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-emerald-600">
-                      Pedido web
-                    </p>
-                    <p className="mt-1 text-[0.95rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-slate-950">
-                      Gratis
-                    </p>
-                    <div className="mt-3 rounded-full bg-emerald-50 px-2 py-1.5 text-center text-[0.52rem] font-semibold uppercase tracking-[0.14em] text-emerald-700">
-                      Sin costo extra
-                    </div>
-                  </div>
+                  <div className="absolute left-1/2 top-[22%] h-[64%] w-[8%] -translate-x-1/2 rounded-full bg-[#8e6331]/65" />
                 </div>
               </div>
             </div>
