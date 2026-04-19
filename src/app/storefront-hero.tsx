@@ -144,61 +144,91 @@ function PromoPanel() {
 function SchedulePanel() {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.12),transparent_28%)]" />
-      <div className="absolute left-[4%] top-[9%] h-24 w-24 rounded-full border border-sky-200/80 bg-white/70 shadow-[0_18px_35px_rgba(15,23,42,0.06)]" />
-      <div className="absolute left-[7.3%] top-[12.3%] h-1 w-7 origin-left rotate-[50deg] rounded-full bg-sky-500" />
-      <div className="absolute left-[7.3%] top-[12.3%] h-1 w-5 origin-left rotate-[-42deg] rounded-full bg-slate-500" />
-      <div className="absolute left-[11.2%] top-[15.8%] h-3 w-3 rounded-full bg-slate-900" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),transparent_28%)]" />
+      <div className="absolute inset-y-0 left-1/2 hidden w-px bg-white/18 lg:block" />
+      <div className="absolute inset-y-0 left-0 w-1/2 bg-[radial-gradient(circle_at_left_center,rgba(255,255,255,0.08),transparent_58%)]" />
+      <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_right_center,rgba(255,255,255,0.08),transparent_58%)]" />
 
-      <div className="absolute right-[5%] top-[10%] h-[72%] w-[28%] rounded-[2rem] bg-[linear-gradient(180deg,#0f172a_0%,#1e3a8a_100%)] shadow-[0_28px_60px_rgba(15,23,42,0.2)]" />
-      <div className="absolute right-[7.5%] top-[16%] h-[54%] w-[23%] rounded-[1.6rem] border border-white/10 bg-white/92 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.12)]">
-        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-sky-600">
-          Horarios
-        </p>
-        <div className="mt-4 space-y-4">
-          <div>
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Lunes a viernes
+      <div className="relative grid h-full grid-cols-1 lg:grid-cols-[1fr_0.92fr_0.92fr]">
+        <div className="flex items-center px-8 py-10 sm:px-12 lg:px-16">
+          <div className="max-w-[20rem]">
+            <p className="text-[clamp(2rem,4.4vw,4.1rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-slate-950">
+              <span className="block">Horarios</span>
+              <span className="block text-sky-700">de atencion</span>
+              <span className="block">para tus</span>
+              <span className="block">pedidos</span>
             </p>
-            <p className="mt-1 text-[1.35rem] font-black tracking-[-0.04em] text-slate-950">
-              8:00 AM
-            </p>
-            <p className="text-sm font-semibold text-slate-500">a 6:00 PM</p>
-          </div>
-          <div className="h-px bg-slate-200" />
-          <div>
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Sabados
-            </p>
-            <p className="mt-1 text-[1.35rem] font-black tracking-[-0.04em] text-slate-950">
-              9:00 AM
-            </p>
-            <p className="text-sm font-semibold text-slate-500">a 2:00 PM</p>
           </div>
         </div>
-      </div>
 
-      <div className="relative z-10 flex h-full items-center px-7 py-10 sm:px-10 lg:px-12">
-        <div className="max-w-[31rem]">
-          <p className="text-[0.78rem] font-semibold uppercase tracking-[0.28em] text-sky-600">
-            Express Printer
-          </p>
-          <h2 className="mt-3 text-[clamp(2.2rem,4.7vw,4.9rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-slate-950">
-            Horarios de
-            <span className="block text-sky-600">atencion</span>
-          </h2>
-          <p className="mt-5 max-w-[22rem] text-[1rem] leading-7 text-slate-600 sm:text-[1.08rem]">
-            Recibimos pedidos, artes y trabajos comerciales durante toda la
-            semana para que tu negocio no se detenga.
-          </p>
+        <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
+          <div className="absolute bottom-[11%] left-1/2 h-11 w-[74%] -translate-x-1/2 rounded-full bg-black/25 blur-2xl" />
+          <div className="relative -translate-y-3 w-[84%] max-w-[23rem]">
+            <div className="absolute inset-x-[9%] top-[3%] h-[88%] rotate-[-4deg] bg-white/18 shadow-[0_24px_48px_rgba(15,23,42,0.14)]" />
+            <div className="absolute inset-x-[6%] top-[2%] h-[92%] rotate-[5deg] bg-white/24 shadow-[0_28px_54px_rgba(15,23,42,0.16)]" />
+            <div className="relative rotate-[-7deg] border border-white/20 bg-[linear-gradient(180deg,#f8fbff_0%,#edf6ff_100%)] p-5 text-slate-950 shadow-[0_34px_70px_rgba(15,23,42,0.28)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.1),transparent_32%)]" />
+              <div className="relative">
+                <div className="flex items-center justify-between">
+                  <div
+                    aria-label="Express Printer"
+                    role="img"
+                    className="h-8 w-32"
+                    style={{
+                      backgroundImage: "url('/express-printer-logo.webp')",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "left center",
+                      backgroundSize: "contain",
+                    }}
+                  />
+                  <span className="rounded-full border border-sky-200 bg-white px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-sky-700">
+                    Horarios
+                  </span>
+                </div>
 
-          <div className="mt-8 flex items-center gap-4 text-sm font-semibold text-slate-600">
-            <span className="rounded-full bg-white px-4 py-2 shadow-[0_12px_24px_rgba(15,23,42,0.07)]">
-              WhatsApp activo
-            </span>
-            <span className="rounded-full bg-white px-4 py-2 shadow-[0_12px_24px_rgba(15,23,42,0.07)]">
-              Recepcion de artes
-            </span>
+                <div className="mt-5 rounded-[1.4rem] border border-sky-100 bg-white/85 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                        Lunes a viernes
+                      </p>
+                      <p className="mt-1 text-[1.55rem] font-black tracking-[-0.05em] text-slate-950">
+                        8:00 AM
+                      </p>
+                      <p className="text-sm font-semibold text-slate-500">a 6:00 PM</p>
+                    </div>
+                    <div className="h-12 w-px bg-slate-200" />
+                    <div>
+                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                        Sabados
+                      </p>
+                      <p className="mt-1 text-[1.55rem] font-black tracking-[-0.05em] text-slate-950">
+                        9:00 AM
+                      </p>
+                      <p className="text-sm font-semibold text-slate-500">a 2:00 PM</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                  <span className="rounded-[1rem] border border-sky-100 bg-white/85 px-3 py-3">
+                    WhatsApp activo
+                  </span>
+                  <span className="rounded-[1rem] border border-sky-100 bg-white/85 px-3 py-3">
+                    Recepcion de artes
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end px-8 py-10 sm:px-12 lg:px-16">
+          <div className="max-w-[21rem] text-right">
+            <div className="space-y-5 text-[clamp(1.35rem,2.15vw,2.35rem)] font-bold leading-[1.1] tracking-[-0.04em] text-slate-950">
+              <p>Recibimos pedidos, artes y ajustes durante la semana para que tu marca no se detenga.</p>
+              <p>Si necesitas produccion urgente, escribenos dentro del horario y te confirmamos tiempos reales.</p>
+            </div>
           </div>
         </div>
       </div>
