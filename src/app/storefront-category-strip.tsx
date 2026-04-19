@@ -35,6 +35,7 @@ function CategoryArt({ art }: { art: string }) {
           width={186}
           height={139}
           className="h-auto w-[11.625rem] translate-x-1 object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_72%_66%_at_52%_52%,black_58%,transparent_84%)]"
+          style={{ width: "11.625rem", height: "auto" }}
           draggable={false}
           loading="eager"
           decoding="sync"
@@ -56,6 +57,7 @@ function CategoryArt({ art }: { art: string }) {
           width={158}
           height={119}
           className="h-auto w-[9.875rem] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.18)]"
+          style={{ width: "9.875rem", height: "auto" }}
           draggable={false}
           loading="eager"
           decoding="sync"
@@ -86,6 +88,7 @@ function CategoryArt({ art }: { art: string }) {
           width={174}
           height={133}
           className="h-auto w-[10.875rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_52%,black_58%,transparent_84%)]"
+          style={{ width: "10.875rem", height: "auto" }}
           draggable={false}
           loading="eager"
           decoding="sync"
@@ -116,6 +119,7 @@ function CategoryArt({ art }: { art: string }) {
           width={113}
           height={161}
           className="h-auto w-[7.0625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_70%_76%_at_50%_52%,black_60%,transparent_86%)]"
+          style={{ width: "7.0625rem", height: "auto" }}
           draggable={false}
           loading="eager"
           decoding="sync"
@@ -148,6 +152,7 @@ function CategoryArt({ art }: { art: string }) {
           width={156}
           height={125}
           className="h-auto w-[9.75rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_54%,black_58%,transparent_84%)]"
+          style={{ width: "9.75rem", height: "auto" }}
           draggable={false}
           loading="eager"
           decoding="sync"
@@ -180,6 +185,7 @@ function CategoryArt({ art }: { art: string }) {
           width={169}
           height={127}
           className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          style={{ width: "10.5625rem", height: "auto" }}
           draggable={false}
           loading="eager"
           decoding="sync"
@@ -211,6 +217,7 @@ function CategoryArt({ art }: { art: string }) {
           width={169}
           height={127}
           className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          style={{ width: "10.5625rem", height: "auto" }}
           draggable={false}
           loading="eager"
           decoding="sync"
@@ -242,6 +249,7 @@ function CategoryArt({ art }: { art: string }) {
           width={169}
           height={127}
           className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          style={{ width: "10.5625rem", height: "auto" }}
           draggable={false}
           loading="eager"
           decoding="sync"

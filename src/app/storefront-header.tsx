@@ -110,6 +110,7 @@ export function StorefrontHeader({
                   width={166}
                   height={46}
                   className="h-full w-full object-contain object-left"
+                  style={{ width: "10.4rem", height: "2.9rem" }}
                   loading="eager"
                   decoding="sync"
                   fetchPriority="high"

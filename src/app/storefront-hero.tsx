@@ -73,6 +73,7 @@ function PromoPanel() {
                   width={128}
                   height={38}
                   className="h-auto w-32"
+                  style={{ width: "8rem", height: "auto" }}
                   loading="eager"
                   decoding="sync"
                 />
