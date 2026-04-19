@@ -163,10 +163,10 @@ function SchedulePanel() {
 
         <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
           <div className="absolute bottom-[11%] left-1/2 h-11 w-[74%] -translate-x-1/2 rounded-full bg-black/25 blur-2xl" />
-          <div className="relative -translate-y-2 w-[84%] max-w-[23rem]">
+          <div className="relative -translate-y-1 w-[88%] max-w-[24.5rem]">
             <div className="absolute inset-x-[10%] top-[4%] h-[88%] rotate-[-2deg] bg-white/18 shadow-[0_24px_48px_rgba(15,23,42,0.14)]" />
             <div className="absolute inset-x-[7%] top-[2.5%] h-[92%] rotate-[2deg] bg-white/24 shadow-[0_28px_54px_rgba(15,23,42,0.16)]" />
-            <div className="relative rotate-[-1.5deg] border border-white/20 bg-[linear-gradient(180deg,#f8fbff_0%,#edf6ff_100%)] p-5 text-slate-950 shadow-[0_34px_70px_rgba(15,23,42,0.28)]">
+            <div className="relative rotate-[-1.5deg] border border-white/20 bg-[linear-gradient(180deg,#f8fbff_0%,#edf6ff_100%)] p-6 text-slate-950 shadow-[0_34px_70px_rgba(15,23,42,0.28)]">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.1),transparent_32%)]" />
               <div className="relative">
                 <div className="flex items-center justify-between">
@@ -186,7 +186,24 @@ function SchedulePanel() {
                   </span>
                 </div>
 
-                <div className="mt-5 rounded-[1.4rem] border border-sky-100 bg-white/85 p-4">
+                <div className="mt-5 rounded-[1.55rem] border border-sky-100 bg-white/88 p-5 shadow-[0_16px_34px_rgba(59,130,246,0.08)]">
+                  <div className="mb-4 flex items-center justify-between rounded-[1rem] bg-sky-50 px-4 py-3">
+                    <div>
+                      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-sky-600">
+                        Atencion comercial
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-700">
+                        Produccion, artes y recepcion
+                      </p>
+                    </div>
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-sky-600 shadow-[0_10px_20px_rgba(14,165,233,0.14)]">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="8" />
+                        <path d="M12 7v5l3 2" />
+                      </svg>
+                    </div>
+                  </div>
+
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-400">
@@ -207,6 +224,15 @@ function SchedulePanel() {
                       </p>
                       <p className="text-sm font-semibold text-slate-500">a 2:00 PM</p>
                     </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <span className="rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5">
+                      Respuesta por WhatsApp
+                    </span>
+                    <span className="rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5 text-right">
+                      Confirmacion de entrega
+                    </span>
                   </div>
                 </div>
               </div>
