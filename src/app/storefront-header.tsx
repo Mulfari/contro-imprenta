@@ -101,7 +101,7 @@ export function StorefrontHeader({
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <Link href="/" className="relative ml-8 flex items-center sm:ml-12 xl:ml-16">
               <div
-                className="h-[2.9rem] w-[10.4rem] sm:h-[3.25rem] sm:w-[11.2rem]"
+                className="h-[2.9rem] w-[10.4rem]"
                 style={{ width: "10.4rem", height: "2.9rem" }}
               >
                 <img
@@ -116,7 +116,10 @@ export function StorefrontHeader({
                   fetchPriority="high"
                 />
               </div>
-              <span className="pointer-events-none absolute left-[5.45rem] top-[1.9rem] text-[12px] font-black uppercase tracking-[0.08em] text-slate-500 sm:left-[5.95rem] sm:top-[2rem] sm:text-[13px]">
+              <span
+                className="pointer-events-none absolute text-[12px] font-black uppercase tracking-[0.08em] text-slate-500"
+                style={{ left: "5.45rem", top: "1.9rem" }}
+              >
                 Printer
               </span>
             </Link>
