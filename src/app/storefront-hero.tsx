@@ -329,6 +329,27 @@ export function StorefrontHero() {
           );
         })}
       </div>
+
+      <div className="mt-4 flex items-center justify-center gap-3">
+        {slides.map((slide, index) => {
+          const isActive = index === activeIndex;
+
+          return (
+            <button
+              key={slide.id}
+              type="button"
+              onClick={() => setActiveIndex(index)}
+              aria-label={`Ir al banner ${index + 1}`}
+              aria-pressed={isActive}
+              className={`cursor-pointer rounded-full transition-all duration-200 ${
+                isActive
+                  ? "h-2.5 w-9 bg-slate-950"
+                  : "h-2.5 w-2.5 bg-slate-300 hover:bg-slate-400"
+              }`}
+            />
+          );
+        })}
+      </div>
     </section>
   );
 }
