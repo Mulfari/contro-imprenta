@@ -284,23 +284,12 @@ function DeliveryPanel() {
 
                 <div className="absolute inset-x-[10%] top-[2%] h-[78%] rounded-[1.8rem] bg-[linear-gradient(180deg,#d1a768_0%,#b78345_100%)] shadow-[0_28px_52px_rgba(15,23,42,0.2)]">
                   <div className="absolute inset-x-[7%] top-[8%] h-[24%] rounded-[1.1rem] bg-[linear-gradient(180deg,#e7c792_0%,#c89454_100%)]" />
-                  <div className="absolute left-1/2 top-[27%] h-[60%] w-[72%] -translate-x-1/2 rounded-[1.25rem] border border-white/30 bg-white/88 p-3 shadow-[0_14px_30px_rgba(15,23,42,0.08)]">
-                    <div
-                      aria-label="Express Printer"
-                      role="img"
-                      className="h-8 w-full"
-                      style={{
-                        backgroundImage: "url('/express-printer-logo.webp')",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "center",
-                        backgroundSize: "contain",
-                      }}
-                    />
-                    <div className="mt-3 rounded-full bg-emerald-50 px-2.5 py-1.5 text-center text-[0.55rem] font-semibold uppercase tracking-[0.14em] text-emerald-700">
-                      Delivery gratis
-                    </div>
+                  <div className="absolute inset-x-[11%] top-[29%] h-[54%] rounded-[1.15rem] bg-[linear-gradient(180deg,#d8ae73_0%,#bd8a4a_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.26)]">
+                    <div className="absolute inset-x-[10%] top-[16%] h-[10%] rounded-full bg-[#e7c792]/75" />
+                    <div className="absolute inset-y-[11%] left-1/2 w-[7%] -translate-x-1/2 rounded-full bg-[#8e6331]/55" />
+                    <div className="absolute inset-x-[15%] bottom-[20%] h-[13%] rounded-full bg-[#a06f35]/22 blur-sm" />
                   </div>
-                  <div className="absolute left-1/2 top-[22%] h-[64%] w-[8%] -translate-x-1/2 rounded-full bg-[#8e6331]/65" />
+                  <div className="absolute left-1/2 top-[22%] h-[64%] w-[8%] -translate-x-1/2 rounded-full bg-[#8e6331]/6" />
                 </div>
               </div>
             </div>
