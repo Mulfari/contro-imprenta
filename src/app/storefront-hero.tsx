@@ -226,8 +226,7 @@ function SchedulePanel() {
         <div className="flex items-center justify-end px-8 py-10 sm:px-12 lg:px-16">
           <div className="max-w-[21rem] text-right">
             <div className="space-y-5 text-[clamp(1.35rem,2.05vw,2.2rem)] font-bold leading-[1.1] tracking-[-0.04em] text-slate-950">
-              <p>Recibimos pedidos y artes durante la semana.</p>
-              <p>Si necesitas produccion urgente, te confirmamos tiempos reales dentro del horario.</p>
+              <p>Recibimos pedidos online en cualquier momento.</p>
             </div>
           </div>
         </div>
