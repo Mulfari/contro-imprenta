@@ -209,15 +209,6 @@ function SchedulePanel() {
                     </div>
                   </div>
                 </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-600">
-                  <span className="rounded-[1rem] border border-sky-100 bg-white/85 px-3 py-3">
-                    WhatsApp activo
-                  </span>
-                  <span className="rounded-[1rem] border border-sky-100 bg-white/85 px-3 py-3">
-                    Recepcion de artes
-                  </span>
-                </div>
               </div>
             </div>
           </div>
