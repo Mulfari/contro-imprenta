@@ -361,12 +361,19 @@ export function StorefrontHero() {
                   onClick={() => goToSlide(index)}
                   aria-label={`Ir al banner ${index + 1}`}
                   aria-pressed={isActive}
-                  className={`cursor-pointer rounded-full transition-all duration-250 ${
+                  className={`relative cursor-pointer overflow-hidden rounded-full transition-all duration-250 ${
                     isActive
-                      ? "h-2.5 w-9 bg-slate-950"
+                      ? "h-2.5 w-11 bg-slate-300/90"
                       : "h-2.5 w-4 bg-slate-300 hover:bg-slate-400"
                   }`}
-                />
+                >
+                  {isActive ? (
+                    <span
+                      key={`${slide.id}-${activeIndex}`}
+                      className="hero-indicator-progress absolute inset-y-0 left-0 rounded-full bg-slate-950"
+                    />
+                  ) : null}
+                </button>
               );
             })}
           </div>
