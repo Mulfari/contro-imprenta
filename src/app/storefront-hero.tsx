@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type HeroSlide = {
   id: string;
@@ -35,6 +35,8 @@ const slides: HeroSlide[] = [
       "bg-[linear-gradient(135deg,#f6fff8_0%,#effdf5_46%,#dcfce7_100%)]",
   },
 ];
+
+const HERO_AUTOPLAY_MS = 5000;
 
 function PromoPanel() {
   return (
@@ -317,17 +319,50 @@ function HeroPanel({ slide }: { slide: HeroSlide }) {
 
 export function StorefrontHero() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isIndicatorHovered, setIsIndicatorHovered] = useState(false);
+  const [remainingMs, setRemainingMs] = useState(HERO_AUTOPLAY_MS);
+  const [progressSeed, setProgressSeed] = useState(0);
+  const playStartedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (isIndicatorHovered) {
+      return;
+    }
+
+    playStartedAtRef.current = Date.now();
+
     const intervalId = window.setTimeout(() => {
       setActiveIndex((current) => (current + 1) % slides.length);
-    }, 5000);
+      setRemainingMs(HERO_AUTOPLAY_MS);
+      setProgressSeed((current) => current + 1);
+    }, remainingMs);
 
     return () => window.clearTimeout(intervalId);
-  }, [activeIndex]);
+  }, [activeIndex, isIndicatorHovered, remainingMs]);
 
   const goToSlide = (index: number) => {
+    setIsIndicatorHovered(false);
     setActiveIndex(index);
+    setRemainingMs(HERO_AUTOPLAY_MS);
+    setProgressSeed((current) => current + 1);
+  };
+
+  const pauseIndicators = () => {
+    if (isIndicatorHovered) {
+      return;
+    }
+
+    const startedAt = playStartedAtRef.current;
+    if (startedAt) {
+      const elapsed = Date.now() - startedAt;
+      setRemainingMs((current) => Math.max(0, current - elapsed));
+    }
+
+    setIsIndicatorHovered(true);
+  };
+
+  const resumeIndicators = () => {
+    setIsIndicatorHovered(false);
   };
 
   return (
@@ -351,31 +386,43 @@ export function StorefrontHero() {
 
         <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-6 sm:bottom-4">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/82 px-3 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-md">
-            {slides.map((slide, index) => {
-              const isActive = index === activeIndex;
+            <div
+              className="inline-flex items-center gap-2"
+              onMouseEnter={pauseIndicators}
+              onMouseLeave={resumeIndicators}
+            >
+              {slides.map((slide, index) => {
+                const isActive = index === activeIndex;
 
-              return (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => goToSlide(index)}
-                  aria-label={`Ir al banner ${index + 1}`}
-                  aria-pressed={isActive}
-                  className={`relative cursor-pointer overflow-hidden rounded-full transition-all duration-250 ${
-                    isActive
-                      ? "h-2.5 w-11 bg-slate-300/90"
-                      : "h-2.5 w-4 bg-slate-300 hover:bg-slate-400"
-                  }`}
-                >
-                  {isActive ? (
-                    <span
-                      key={`${slide.id}-${activeIndex}`}
-                      className="hero-indicator-progress absolute inset-y-0 left-0 rounded-full bg-slate-950"
-                    />
-                  ) : null}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    onClick={() => goToSlide(index)}
+                    aria-label={`Ir al banner ${index + 1}`}
+                    aria-pressed={isActive}
+                    className={`relative cursor-pointer overflow-hidden rounded-full transition-all duration-250 ${
+                      isActive
+                        ? "h-2.5 w-11 bg-slate-300/90"
+                        : "h-2.5 w-4 bg-slate-300 hover:bg-slate-400"
+                    }`}
+                  >
+                    {isActive ? (
+                      <span
+                        key={`${slide.id}-${progressSeed}`}
+                        className="hero-indicator-progress absolute inset-y-0 left-0 rounded-full bg-slate-950"
+                        style={{
+                          animationDuration: `${HERO_AUTOPLAY_MS}ms`,
+                          animationPlayState: isIndicatorHovered
+                            ? "paused"
+                            : "running",
+                        }}
+                      />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
