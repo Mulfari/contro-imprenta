@@ -277,81 +277,79 @@ function DeliveryPanel() {
         <div className="relative hidden items-center justify-center px-2 py-8 lg:flex">
           <div className="absolute bottom-[11%] left-1/2 h-11 w-[74%] -translate-x-1/2 rounded-full bg-black/25 blur-2xl" />
           <div className="relative -translate-y-2 w-[88%] max-w-[24.5rem]">
-            <div className="absolute inset-x-[10%] top-[4%] h-[88%] rotate-[-2deg] bg-white/18 shadow-[0_24px_48px_rgba(15,23,42,0.14)]" />
-            <div className="absolute inset-x-[7%] top-[2.5%] h-[92%] rotate-[2deg] bg-white/24 shadow-[0_28px_54px_rgba(15,23,42,0.16)]" />
-            <div className="relative rotate-[-4deg] border border-white/20 bg-[linear-gradient(180deg,#f6fff8_0%,#ebfff1_100%)] p-6 text-slate-950 shadow-[0_34px_70px_rgba(15,23,42,0.28)]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.12),transparent_32%)]" />
-              <div className="relative">
-                <div className="flex items-center justify-between">
-                  <div
-                    aria-label="Express Printer"
-                    role="img"
-                    className="h-8 w-32"
-                    style={{
-                      backgroundImage: "url('/express-printer-logo.webp')",
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "left center",
-                      backgroundSize: "contain",
-                    }}
-                  />
-                  <span className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                    Delivery
-                  </span>
-                </div>
+            <div className="absolute bottom-[8%] left-1/2 h-12 w-[68%] -translate-x-1/2 rounded-full bg-black/18 blur-2xl" />
+            <div className="relative mx-auto h-[25rem] w-full max-w-[23rem]">
+              <div className="absolute left-[6%] top-[18%] h-[54%] w-[28%] rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,#ffffff_0%,#f0fdf4_100%)] shadow-[0_28px_50px_rgba(15,23,42,0.16)]" />
+              <div className="absolute left-[12%] top-[25%] h-[40%] w-[18%] rounded-[1.6rem] bg-[linear-gradient(180deg,#dcfce7_0%,#bbf7d0_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]" />
+              <div className="absolute left-[16%] top-[29%] h-3 w-10 rounded-full bg-emerald-500/75" />
+              <div className="absolute left-[16%] top-[36%] h-2.5 w-16 rounded-full bg-slate-200" />
+              <div className="absolute left-[16%] top-[41%] h-2.5 w-12 rounded-full bg-slate-200" />
+              <div className="absolute left-[16%] top-[47%] h-2.5 w-14 rounded-full bg-slate-200" />
 
-                <div className="mt-5 rounded-[1.55rem] border border-emerald-100 bg-white/90 p-5 shadow-[0_16px_34px_rgba(16,185,129,0.08)]">
-                  <div className="mb-4 flex items-center justify-between rounded-[1rem] bg-emerald-50 px-4 py-3">
-                    <div>
-                      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-emerald-600">
-                        Pedido confirmado
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-700">
-                        Recibe tu impresion sin costo extra
-                      </p>
-                    </div>
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-emerald-600 shadow-[0_10px_20px_rgba(16,185,129,0.14)]">
-                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 16.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10.5" />
-                        <path d="M2 14h15" />
-                        <path d="M15 8h2.5L21 11v5.5a1.5 1.5 0 0 1-1.5 1.5H18" />
-                        <circle cx="7.5" cy="17.5" r="1.5" />
-                        <circle cx="16.5" cy="17.5" r="1.5" />
-                      </svg>
-                    </div>
-                  </div>
+              <div className="absolute left-[31%] top-[30%] h-1.5 w-[16%] rotate-[15deg] rounded-full bg-[#ffd23d]" />
+              <div className="absolute left-[43%] top-[27.5%] h-3.5 w-3.5 rotate-45 border-r-[3px] border-t-[3px] border-[#ffd23d]" />
 
-                  <div className="grid grid-cols-[1fr_auto] items-center gap-4">
-                    <div>
-                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                        Disponible
-                      </p>
-                      <p className="mt-1 text-[1.55rem] font-black tracking-[-0.05em] text-slate-950">
-                        Delivery gratis
-                      </p>
-                      <p className="text-sm font-semibold text-slate-500">
-                        en zonas seleccionadas
-                      </p>
-                    </div>
-                    <div className="relative h-20 w-28">
-                      <div className="absolute bottom-3 left-4 right-1 h-4 rounded-full bg-black/10 blur-xl" />
-                      <div className="absolute bottom-6 left-4 h-8 w-16 rounded-[0.9rem] bg-emerald-500 shadow-[0_14px_28px_rgba(16,185,129,0.24)]" />
-                      <div className="absolute bottom-10 left-10 h-6 w-11 rounded-[0.9rem] rounded-bl-[0.3rem] bg-emerald-100" />
-                      <div className="absolute bottom-[1.45rem] left-7 h-3.5 w-3.5 rounded-full bg-slate-900" />
-                      <div className="absolute bottom-[1.45rem] left-[4.2rem] h-3.5 w-3.5 rounded-full bg-slate-900" />
-                      <div className="absolute left-0 top-2 h-1.5 w-10 rounded-full bg-[#ffd23d]" />
-                      <div className="absolute left-7 top-0 h-3.5 w-3.5 rotate-45 border-r-[3px] border-t-[3px] border-[#ffd23d]" />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    <span className="rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5">
-                      Compra desde la web
-                    </span>
-                    <span className="rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5 text-right">
-                      Confirmacion rapida
+              <div className="absolute right-[6%] top-[8%] h-[58%] w-[46%] rotate-[5deg] rounded-[2rem] border border-white/20 bg-[linear-gradient(180deg,#f6fff8_0%,#ebfff1_100%)] p-5 shadow-[0_34px_70px_rgba(15,23,42,0.28)]">
+                <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.12),transparent_32%)]" />
+                <div className="relative">
+                  <div className="flex items-center justify-between">
+                    <div
+                      aria-label="Express Printer"
+                      role="img"
+                      className="h-7 w-24"
+                      style={{
+                        backgroundImage: "url('/express-printer-logo.webp')",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "left center",
+                        backgroundSize: "contain",
+                      }}
+                    />
+                    <span className="rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                      Gratis
                     </span>
                   </div>
+
+                  <div className="mt-5 rounded-[1.35rem] border border-emerald-100 bg-white/88 p-4 shadow-[0_16px_34px_rgba(16,185,129,0.08)]">
+                    <p className="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-emerald-600">
+                      Pedido web
+                    </p>
+                    <p className="mt-2 text-[1.3rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-slate-950">
+                      Delivery gratis
+                    </p>
+                    <p className="mt-2 text-xs font-semibold text-slate-500">
+                      para pedidos confirmados en linea
+                    </p>
+
+                    <div className="mt-4 space-y-2.5">
+                      <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-emerald-700">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                        Compra desde la web
+                      </div>
+                      <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-slate-500 shadow-[inset_0_0_0_1px_rgba(226,232,240,1)]">
+                        <span className="h-2 w-2 rounded-full bg-slate-300" />
+                        Confirmacion rapida
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-end justify-between">
+                    <div className="space-y-1 text-[0.62rem] font-medium leading-4 text-slate-500">
+                      <p>Zona centro</p>
+                      <p>Las Americas</p>
+                    </div>
+                    <div className="relative h-16 w-20">
+                      <div className="absolute bottom-2 left-2 right-0 h-3 rounded-full bg-black/10 blur-lg" />
+                      <div className="absolute bottom-5 left-3 h-7 w-11 rounded-[0.8rem] bg-emerald-500 shadow-[0_14px_28px_rgba(16,185,129,0.24)]" />
+                      <div className="absolute bottom-9 left-9 h-5 w-8 rounded-[0.8rem] rounded-bl-[0.3rem] bg-emerald-100" />
+                      <div className="absolute bottom-[1.1rem] left-5 h-3 w-3 rounded-full bg-slate-900" />
+                      <div className="absolute bottom-[1.1rem] left-[2.7rem] h-3 w-3 rounded-full bg-slate-900" />
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              <div className="absolute bottom-[17%] right-[20%] rounded-full border border-emerald-200 bg-white/90 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-emerald-700 shadow-[0_16px_34px_rgba(16,185,129,0.12)]">
+                Sin costo extra
               </div>
             </div>
           </div>
