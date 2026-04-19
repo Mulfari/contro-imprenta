@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -29,16 +28,16 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "11rem", height: "10rem" }}
       >
         <div className="absolute inset-x-3 bottom-1 h-9 rounded-full bg-slate-300/65 blur-xl" />
-        <img
-          src="/storefront-cards.webp"
-          alt="Tarjetas"
-          width={186}
-          height={139}
-          className="h-auto w-[11.625rem] translate-x-1 object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_72%_66%_at_52%_52%,black_58%,transparent_84%)]"
-          style={{ width: "11.625rem", height: "auto" }}
-          draggable={false}
-          loading="eager"
-          decoding="sync"
+        <div
+          aria-label="Tarjetas"
+          role="img"
+          className="h-[139px] w-[11.625rem] translate-x-1 drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_72%_66%_at_52%_52%,black_58%,transparent_84%)]"
+          style={{
+            backgroundImage: "url('/storefront-cards.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
         />
       </div>
     );
@@ -51,16 +50,16 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "9rem", height: "8rem" }}
       >
         <div className="absolute inset-x-4 bottom-2 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <img
-          src="/storefront-stickers.webp"
-          alt="Stickers"
-          width={158}
-          height={119}
-          className="h-auto w-[9.875rem] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.18)]"
-          style={{ width: "9.875rem", height: "auto" }}
-          draggable={false}
-          loading="eager"
-          decoding="sync"
+        <div
+          aria-label="Stickers"
+          role="img"
+          className="h-[119px] w-[9.875rem] drop-shadow-[0_20px_30px_rgba(15,23,42,0.18)]"
+          style={{
+            backgroundImage: "url('/storefront-stickers.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
         />
       </div>
     );
@@ -82,16 +81,16 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "10rem", height: "9rem" }}
       >
         <div className="absolute inset-x-4 bottom-1 h-8 rounded-full bg-slate-300/65 blur-xl" />
-        <img
-          src="/storefront-brochures.webp"
-          alt="Folletos"
-          width={174}
-          height={133}
-          className="h-auto w-[10.875rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_52%,black_58%,transparent_84%)]"
-          style={{ width: "10.875rem", height: "auto" }}
-          draggable={false}
-          loading="eager"
-          decoding="sync"
+        <div
+          aria-label="Folletos"
+          role="img"
+          className="h-[133px] w-[10.875rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_52%,black_58%,transparent_84%)]"
+          style={{
+            backgroundImage: "url('/storefront-brochures.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
         />
       </div>
     );
@@ -113,16 +112,16 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "7rem", height: "9rem" }}
       >
         <div className="absolute inset-x-2 bottom-1 h-6 rounded-full bg-slate-300/65 blur-xl" />
-        <img
-          src="/storefront-banners.webp"
-          alt="Pendones"
-          width={113}
-          height={161}
-          className="h-auto w-[7.0625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_70%_76%_at_50%_52%,black_60%,transparent_86%)]"
-          style={{ width: "7.0625rem", height: "auto" }}
-          draggable={false}
-          loading="eager"
-          decoding="sync"
+        <div
+          aria-label="Pendones"
+          role="img"
+          className="h-[161px] w-[7.0625rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_70%_76%_at_50%_52%,black_60%,transparent_86%)]"
+          style={{
+            backgroundImage: "url('/storefront-banners.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
         />
       </div>
     );
@@ -146,16 +145,16 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "9rem", height: "8.5rem" }}
       >
         <div className="absolute inset-x-3 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <img
-          src="/storefront-invoices.webp"
-          alt="Talonarios"
-          width={156}
-          height={125}
-          className="h-auto w-[9.75rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_54%,black_58%,transparent_84%)]"
-          style={{ width: "9.75rem", height: "auto" }}
-          draggable={false}
-          loading="eager"
-          decoding="sync"
+        <div
+          aria-label="Talonarios"
+          role="img"
+          className="h-[125px] w-[9.75rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_54%,black_58%,transparent_84%)]"
+          style={{
+            backgroundImage: "url('/storefront-invoices.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
         />
       </div>
     );
@@ -179,16 +178,16 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "10rem", height: "8.5rem" }}
       >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <img
-          src="/storefront-labels.webp"
-          alt="Etiquetas"
-          width={169}
-          height={127}
-          className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
-          style={{ width: "10.5625rem", height: "auto" }}
-          draggable={false}
-          loading="eager"
-          decoding="sync"
+        <div
+          aria-label="Etiquetas"
+          role="img"
+          className="h-[127px] w-[10.5625rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          style={{
+            backgroundImage: "url('/storefront-labels.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
         />
       </div>
     );
@@ -211,16 +210,16 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "10rem", height: "8.5rem" }}
       >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <img
-          src="/storefront-invitations.webp"
-          alt="Invitaciones"
-          width={169}
-          height={127}
-          className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
-          style={{ width: "10.5625rem", height: "auto" }}
-          draggable={false}
-          loading="eager"
-          decoding="sync"
+        <div
+          aria-label="Invitaciones"
+          role="img"
+          className="h-[127px] w-[10.5625rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          style={{
+            backgroundImage: "url('/storefront-invitations.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
         />
       </div>
     );
@@ -243,16 +242,16 @@ function CategoryArt({ art }: { art: string }) {
         style={{ width: "10rem", height: "8.5rem" }}
       >
         <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <img
-          src="/storefront-packaging.webp"
-          alt="Packaging"
-          width={169}
-          height={127}
-          className="h-auto w-[10.5625rem] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
-          style={{ width: "10.5625rem", height: "auto" }}
-          draggable={false}
-          loading="eager"
-          decoding="sync"
+        <div
+          aria-label="Packaging"
+          role="img"
+          className="h-[127px] w-[10.5625rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
+          style={{
+            backgroundImage: "url('/storefront-packaging.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
         />
       </div>
     );

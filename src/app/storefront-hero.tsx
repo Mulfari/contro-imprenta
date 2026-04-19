@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -67,15 +66,16 @@ function PromoPanel() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.1),transparent_32%)]" />
               <div className="relative">
                 <div className="flex items-center justify-between">
-                <img
-                  src="/express-printer-logo.webp"
-                  alt="Express Printer"
-                  width={128}
-                  height={38}
-                  className="h-auto w-32"
-                  style={{ width: "8rem", height: "auto" }}
-                  loading="eager"
-                  decoding="sync"
+                <div
+                  aria-label="Express Printer"
+                  role="img"
+                  className="h-8 w-32"
+                  style={{
+                    backgroundImage: "url('/express-printer-logo.webp')",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "left center",
+                    backgroundSize: "contain",
+                  }}
                 />
                 <span className="text-[0.62rem] font-semibold tracking-[0.18em] text-white/60">
                   EXPRESS
