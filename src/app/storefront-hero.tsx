@@ -385,12 +385,12 @@ export function StorefrontHero() {
         })}
 
         <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-6 sm:bottom-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/82 px-3 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-md">
-            <div
-              className="inline-flex items-center gap-2"
-              onMouseEnter={pauseIndicators}
-              onMouseLeave={resumeIndicators}
-            >
+          <div
+            className="inline-flex items-center gap-2 rounded-full bg-white/82 px-3 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-md"
+            onMouseEnter={pauseIndicators}
+            onMouseLeave={resumeIndicators}
+          >
+            <div className="inline-flex items-center gap-2">
               {slides.map((slide, index) => {
                 const isActive = index === activeIndex;
 
