@@ -46,16 +46,47 @@ function PromoPanel() {
       <div className="absolute inset-y-0 left-0 w-1/2 bg-[radial-gradient(circle_at_left_center,rgba(255,255,255,0.08),transparent_58%)]" />
       <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_right_center,rgba(255,255,255,0.08),transparent_58%)]" />
 
-      <div className="relative grid h-full grid-cols-1 lg:grid-cols-[1fr_0.92fr_0.92fr]">
-        <div className="flex items-center px-8 py-10 sm:px-12 lg:px-16">
+      <div className="relative flex h-full flex-col lg:grid lg:grid-cols-[1fr_0.92fr_0.92fr]">
+        <div className="flex items-center px-6 pb-2 pt-8 sm:px-12 lg:px-16 lg:py-10">
           <div className="max-w-[20rem]">
-            <p className="text-[clamp(2rem,4.4vw,4.35rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white">
+            <p className="text-[clamp(2rem,8vw,4.35rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white">
               <span className="block">La </span>
               <span className="text-[#ffd23d]">calidad</span>
               <span className="block">de tu flyer</span>
               <span className="block">define tu</span>
               <span className="block">negocio</span>
             </p>
+          </div>
+        </div>
+
+        <div className="relative flex items-center justify-center px-5 pb-3 pt-2 lg:hidden">
+          <div className="absolute bottom-[9%] left-1/2 h-9 w-[60%] -translate-x-1/2 rounded-full bg-black/30 blur-2xl" />
+          <div className="relative w-[64%] min-w-[12rem] max-w-[15rem]">
+            <div className="absolute inset-x-[12%] top-[5%] h-[88%] -rotate-[4deg] bg-white/16 shadow-[0_16px_34px_rgba(15,23,42,0.16)]" />
+            <div className="relative rotate-[-6deg] border border-white/14 bg-[linear-gradient(180deg,#07111f_0%,#0f1728_100%)] p-3 text-white shadow-[0_24px_48px_rgba(15,23,42,0.42)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(255,214,10,0.1),transparent_32%)]" />
+              <div className="relative">
+                <div
+                  aria-label="Express Printer"
+                  role="img"
+                  className="h-6 w-24"
+                  style={{
+                    backgroundImage: "url('/express-printer-logo.webp')",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "left center",
+                    backgroundSize: "contain",
+                  }}
+                />
+                <div className="mt-3 space-y-1 text-[0.92rem] font-black uppercase leading-[0.94] tracking-[-0.04em]">
+                  <div className="text-[#ffe24a]">Impresion laser</div>
+                  <div className="text-white">Tarjetas</div>
+                  <div className="text-[#ff4ea5]">Gigantografia</div>
+                  <div className="text-white">Stickers</div>
+                  <div className="text-[#49da83]">Volantes</div>
+                  <div className="text-[#ff4ea5]">Pendones</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -130,9 +161,9 @@ function PromoPanel() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end px-8 py-10 sm:px-12 lg:px-16">
-          <div className="max-w-[21rem] text-right">
-            <div className="space-y-5 text-[clamp(1.35rem,2.15vw,2.45rem)] font-bold leading-[1.1] tracking-[-0.04em] text-white">
+        <div className="flex items-center justify-end px-6 pb-8 pt-2 sm:px-12 lg:px-16 lg:py-10">
+          <div className="max-w-[21rem] text-left lg:text-right">
+            <div className="space-y-3 text-[clamp(1.05rem,4.8vw,2.45rem)] font-bold leading-[1.08] tracking-[-0.04em] text-white lg:space-y-5">
               <p>No es solo papel, es la primera impresion que dejas en tus clientes.</p>
               <p>Un volante mal impreso puede alejar una venta; uno impecable, la cierra.</p>
             </div>

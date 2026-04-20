@@ -336,11 +336,11 @@ export function StorefrontCategoryStrip() {
 
   return (
     <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="grid grid-cols-[2.9rem_minmax(0,1fr)_2.9rem] items-center gap-4">
+      <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[2.9rem_minmax(0,1fr)_2.9rem]">
         <button
           type="button"
           onClick={() => slideBy("prev")}
-          className={`flex h-12 w-12 items-center justify-center rounded-full border bg-white shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition ${
+          className={`hidden h-12 w-12 items-center justify-center rounded-full border bg-white shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition md:flex ${
             canScrollLeft
               ? "cursor-pointer border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
               : "cursor-default border-slate-100 text-slate-300"
@@ -356,7 +356,7 @@ export function StorefrontCategoryStrip() {
         <div className="relative overflow-hidden">
           <div
             ref={trackRef}
-            className={`storefront-strip-scrollbar storefront-strip-track flex gap-[18px] overflow-x-auto px-1 ${
+            className={`storefront-strip-scrollbar storefront-strip-track flex gap-3 overflow-x-auto px-0.5 md:gap-[18px] md:px-1 ${
               isDragging ? "cursor-grabbing" : "cursor-grab scroll-smooth"
             }`}
             onPointerDown={(event) => {
@@ -421,7 +421,7 @@ export function StorefrontCategoryStrip() {
                 key={item.title}
                 type="button"
                 draggable={false}
-                className="w-[188px] shrink-0 cursor-pointer px-2 py-4 text-center transition hover:opacity-85"
+                className="w-[calc(50%-0.4rem)] min-w-[calc(50%-0.4rem)] shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:px-2"
                 onClick={(event) => {
                   if (dragState.current.hasMoved) {
                     event.preventDefault();
@@ -430,13 +430,13 @@ export function StorefrontCategoryStrip() {
                   }
                 }}
               >
-                <div className="mx-auto flex h-32 w-full items-center justify-center">
+                <div className="mx-auto flex h-28 w-full items-center justify-center md:h-32">
                   <CategoryArt art={item.art} />
                 </div>
-                <p className="mt-5 text-[1.02rem] font-semibold leading-6 tracking-tight text-slate-950">
+                <p className="mt-4 text-[0.98rem] font-semibold leading-5 tracking-tight text-slate-950 md:mt-5 md:text-[1.02rem] md:leading-6">
                   {item.title}
                 </p>
-                <p className="mt-1 text-[0.95rem] text-slate-400">{item.count}</p>
+                <p className="mt-1 text-[0.86rem] text-slate-400 md:text-[0.95rem]">{item.count}</p>
               </button>
             ))}
           </div>
@@ -445,7 +445,7 @@ export function StorefrontCategoryStrip() {
         <button
           type="button"
           onClick={() => slideBy("next")}
-          className={`flex h-12 w-12 items-center justify-center rounded-full border bg-white shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition ${
+          className={`hidden h-12 w-12 items-center justify-center rounded-full border bg-white shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition md:flex ${
             canScrollRight
               ? "cursor-pointer border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
               : "cursor-default border-slate-100 text-slate-300"
