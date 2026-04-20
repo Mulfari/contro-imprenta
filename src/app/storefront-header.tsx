@@ -65,7 +65,7 @@ export function StorefrontHeader({
   }, []);
   return (
     <>
-      <div className="border-b border-slate-800 bg-slate-950 text-white">
+      <div className="hidden border-b border-slate-800 bg-slate-950 text-white sm:block">
         <div className="mx-auto flex w-full max-w-[112rem] px-4 py-3 text-sm sm:px-6 lg:px-8 2xl:px-10">
           <p>Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.</p>
         </div>
@@ -73,8 +73,91 @@ export function StorefrontHeader({
 
       <header className="relative z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <Link href="/" className="relative ml-8 flex items-center sm:ml-12 xl:ml-16">
+          <div className="flex items-center justify-between gap-4 lg:hidden">
+            <Link href="/" className="relative flex items-center">
+              <div
+                className="h-[2.5rem] w-[8.8rem]"
+                aria-label="Express Printer"
+                role="img"
+                style={{
+                  width: "8.8rem",
+                  height: "2.5rem",
+                  backgroundImage: "url('/express-printer-logo.webp')",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "left center",
+                  backgroundSize: "contain",
+                }}
+              />
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onAccountClick}
+                aria-label="Mi cuenta"
+                className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border transition ${
+                  isAccountActive
+                    ? "border-slate-950 bg-slate-950 text-white"
+                    : "border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+                  <path d="M5 20a7 7 0 0 1 14 0" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                aria-label="Deseados"
+                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                aria-label="Carrito"
+                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-slate-950 text-white transition hover:bg-slate-800"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="9" cy="19" r="1.75" />
+                  <circle cx="18" cy="19" r="1.75" />
+                  <path d="M3 4h2l2.3 10.2a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 7H7.2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <Link href="/" className="relative hidden items-center lg:ml-16 lg:flex">
               <div
                 className="h-[2.9rem] w-[10.4rem]"
                 aria-label="Express Printer"
@@ -96,7 +179,7 @@ export function StorefrontHeader({
               </span>
             </Link>
 
-            <div className="flex flex-1 xl:mx-8 xl:max-w-[62rem]">
+            <div className="flex flex-1 lg:mx-8 lg:max-w-[62rem]">
               <div
                 className={`flex w-full flex-col overflow-visible rounded-[1.35rem] border bg-white shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition xl:flex-row ${
                   hasActiveSearch || categoryOpen
@@ -121,7 +204,7 @@ export function StorefrontHeader({
                         return next;
                       })
                     }
-                    className={`inline-flex w-full cursor-pointer items-center justify-between gap-3 rounded-[1.05rem] border border-transparent bg-slate-50 px-5 py-4 text-sm font-semibold transition-[background-color,color,border-color,box-shadow] duration-200 xl:min-w-[15.5rem] xl:rounded-r-none ${
+                    className={`inline-flex w-full cursor-pointer items-center justify-between gap-3 rounded-[1.05rem] border border-transparent bg-slate-50 px-5 py-4 text-sm font-semibold transition-[background-color,color,border-color,box-shadow] duration-200 lg:min-w-[15.5rem] lg:rounded-r-none ${
                       categoryOpen
                         ? "border-slate-200 bg-slate-100 text-slate-950 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]"
                         : "text-slate-700 hover:border-slate-200 hover:bg-slate-100 hover:shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]"
@@ -167,13 +250,17 @@ export function StorefrontHeader({
                   >
                     <div
                       ref={categoryPanelRef}
-                      className={`grid overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_26px_60px_rgba(15,23,42,0.18)] transition-all duration-200 ${
+                      className={`grid max-h-[70vh] overflow-auto rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_26px_60px_rgba(15,23,42,0.18)] transition-all duration-200 ${
                         activeCategoryIndex !== null
-                          ? "w-[44rem] grid-cols-[17rem_1fr]"
-                          : "w-[17rem] grid-cols-[17rem]"
+                          ? "w-[min(22rem,calc(100vw-2rem))] grid-cols-1 lg:w-[44rem] lg:grid-cols-[17rem_1fr]"
+                          : "w-[min(22rem,calc(100vw-2rem))] grid-cols-1 lg:w-[17rem] lg:grid-cols-[17rem]"
                       }`}
                     >
-                      <div className="border-r border-slate-200 bg-slate-50/65">
+                      <div
+                        className={`bg-slate-50/65 lg:border-r lg:border-slate-200 ${
+                          activeCategoryIndex !== null ? "hidden lg:block" : ""
+                        }`}
+                      >
                         {categoryMenu.map((group, index) => (
                           <button
                             key={group.title}
@@ -205,7 +292,26 @@ export function StorefrontHeader({
                       </div>
 
                       {activeCategoryIndex !== null ? (
-                        <div className="bg-white p-6">
+                        <div className="bg-white p-6 lg:border-t lg:border-t-0 lg:border-slate-200">
+                          <button
+                            type="button"
+                            onClick={() => setActiveCategoryIndex(null)}
+                            className="mb-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 lg:hidden"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              viewBox="0 0 24 24"
+                              className="h-3.5 w-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="m15 18-6-6 6-6" />
+                            </svg>
+                            Categorias
+                          </button>
                           <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
                             Subcategorias
                           </p>
@@ -271,7 +377,7 @@ export function StorefrontHeader({
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+              <div className="hidden flex-wrap items-center gap-3 lg:flex">
               <button
                 type="button"
                 onClick={onAccountClick}
@@ -337,7 +443,7 @@ export function StorefrontHeader({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 text-sm font-medium text-slate-700">
+          <div className="hidden flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 text-sm font-medium text-slate-700 lg:flex">
             <a href="#catalogo" className="transition hover:text-slate-950">
               Catalogo
             </a>
