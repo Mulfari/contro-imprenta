@@ -15,12 +15,9 @@ const items = [
   { title: "Acrilicos", count: "6 productos", art: "banner" },
   { title: "Sellos", count: "8 productos", art: "invoice" },
 ];
+const loopedItems = [...items, ...items, ...items];
 
 const DESKTOP_ITEM_STRIDE = 206;
-
-function getLoopedItem(index: number) {
-  return items[((index % items.length) + items.length) % items.length];
-}
 
 function getTrackItemStride(track: HTMLDivElement) {
   const firstItem = track.firstElementChild as HTMLElement | null;
@@ -274,159 +271,13 @@ function CategoryArt({ art }: { art: string }) {
   return null;
 }
 
-function CategoryItem({
-  item,
-  className = "",
-  onClick,
-}: {
-  item: (typeof items)[number];
-  className?: string;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-}) {
-  return (
-    <button
-      type="button"
-      draggable={false}
-      className={`shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 ${className}`}
-      onClick={onClick}
-    >
-      <div className="mx-auto flex h-28 w-full items-center justify-center md:h-32">
-        <CategoryArt art={item.art} />
-      </div>
-      <p className="mt-4 text-[0.98rem] font-semibold leading-5 tracking-tight text-slate-950 md:mt-5 md:text-[1.02rem] md:leading-6">
-        {item.title}
-      </p>
-      <p className="mt-1 text-[0.86rem] text-slate-400 md:text-[0.95rem]">{item.count}</p>
-    </button>
-  );
-}
-
-function MobileCategoryStrip() {
-  const viewportRef = useRef<HTMLDivElement | null>(null);
-  const pendingDirection = useRef<0 | 1 | -1>(0);
-  const pointerId = useRef<number | null>(null);
-  const dragStartX = useRef(0);
-  const dragOffsetRef = useRef(0);
-  const [startIndex, setStartIndex] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const getPageItems = (pageOffset: number) => {
-    const pageStart = startIndex + pageOffset * 2;
-
-    return [getLoopedItem(pageStart), getLoopedItem(pageStart + 1)];
-  };
-
-  const animateTo = (direction: 1 | -1) => {
-    const viewportWidth = viewportRef.current?.clientWidth ?? 0;
-
-    if (!viewportWidth) {
-      setStartIndex((current) => current + direction * 2);
-      return;
-    }
-
-    pendingDirection.current = direction;
-    setIsAnimating(true);
-    dragOffsetRef.current = direction === 1 ? -viewportWidth : viewportWidth;
-    setDragOffset(dragOffsetRef.current);
-  };
-
-  return (
-    <div className="md:hidden">
-      <div
-        ref={viewportRef}
-        className="overflow-hidden select-none"
-        style={{ touchAction: "pan-y" }}
-        onPointerDown={(event) => {
-          pointerId.current = event.pointerId;
-          dragStartX.current = event.clientX;
-          dragOffsetRef.current = 0;
-          setDragOffset(0);
-          setIsDragging(true);
-          setIsAnimating(false);
-          event.currentTarget.setPointerCapture(event.pointerId);
-        }}
-        onPointerMove={(event) => {
-          if (pointerId.current !== event.pointerId || !isDragging) {
-            return;
-          }
-
-          const viewportWidth = viewportRef.current?.clientWidth ?? 1;
-          const delta = event.clientX - dragStartX.current;
-          dragOffsetRef.current = Math.max(Math.min(delta, viewportWidth * 0.92), -viewportWidth * 0.92);
-          setDragOffset(dragOffsetRef.current);
-        }}
-        onPointerUp={(event) => {
-          if (pointerId.current !== event.pointerId) {
-            return;
-          }
-
-          event.currentTarget.releasePointerCapture(event.pointerId);
-          pointerId.current = null;
-          setIsDragging(false);
-
-          const viewportWidth = viewportRef.current?.clientWidth ?? 1;
-          if (Math.abs(dragOffsetRef.current) < Math.min(70, viewportWidth * 0.18)) {
-            pendingDirection.current = 0;
-            setIsAnimating(true);
-            dragOffsetRef.current = 0;
-            setDragOffset(0);
-            return;
-          }
-
-          animateTo(dragOffsetRef.current < 0 ? 1 : -1);
-        }}
-        onPointerCancel={() => {
-          pointerId.current = null;
-          setIsDragging(false);
-          pendingDirection.current = 0;
-          setIsAnimating(true);
-          dragOffsetRef.current = 0;
-          setDragOffset(0);
-        }}
-      >
-        <div
-          className={`flex ${isAnimating ? "transition-transform duration-300 ease-out" : ""}`}
-          style={{ transform: `translateX(calc(-100% + ${dragOffset}px))` }}
-          onTransitionEnd={() => {
-            if (pendingDirection.current !== 0) {
-              const direction = pendingDirection.current;
-              pendingDirection.current = 0;
-              setIsAnimating(false);
-              dragOffsetRef.current = 0;
-              setDragOffset(0);
-              setStartIndex((current) => current + direction * 2);
-              return;
-            }
-
-            setIsAnimating(false);
-          }}
-        >
-          {[-1, 0, 1].map((pageOffset) => (
-            <div
-              key={pageOffset}
-              className="grid w-full shrink-0 grid-cols-2 gap-3"
-            >
-              {getPageItems(pageOffset).map((item, index) => (
-                <CategoryItem
-                  key={`${pageOffset}-${item.title}-${index}`}
-                  item={item}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DesktopCategoryStrip() {
+export function StorefrontCategoryStrip() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const didPositionLoop = useRef(false);
+  const isLoopJumping = useRef(false);
   const dragState = useRef<{
     pointerId: number | null;
     startX: number;
@@ -448,17 +299,57 @@ function DesktopCategoryStrip() {
       return;
     }
 
+    const getLoopSegmentWidth = () => getTrackItemStride(track) * items.length;
+
+    const positionLoop = () => {
+      const segmentWidth = getLoopSegmentWidth();
+
+      if (!segmentWidth) {
+        return;
+      }
+
+      const sidePeek = window.innerWidth < 768 ? track.clientWidth * 0.12 : 0;
+      track.scrollLeft = segmentWidth - sidePeek;
+      didPositionLoop.current = true;
+    };
+
     const updateControls = () => {
+      if (!didPositionLoop.current) {
+        positionLoop();
+      }
+
+      const segmentWidth = getLoopSegmentWidth();
+      if (segmentWidth && !isLoopJumping.current) {
+        const minLoopScroll = segmentWidth * 0.55;
+        const maxLoopScroll = segmentWidth * 2.45;
+
+        if (track.scrollLeft < minLoopScroll) {
+          isLoopJumping.current = true;
+          track.scrollLeft += segmentWidth;
+          window.requestAnimationFrame(() => {
+            isLoopJumping.current = false;
+          });
+        } else if (track.scrollLeft > maxLoopScroll) {
+          isLoopJumping.current = true;
+          track.scrollLeft -= segmentWidth;
+          window.requestAnimationFrame(() => {
+            isLoopJumping.current = false;
+          });
+        }
+      }
+
       const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
       setCanScrollLeft(track.scrollLeft > 4);
       setCanScrollRight(track.scrollLeft < maxScrollLeft - 4);
     };
 
-    updateControls();
+    window.requestAnimationFrame(updateControls);
     track.addEventListener("scroll", updateControls, { passive: true });
+    window.addEventListener("resize", positionLoop);
 
     return () => {
       track.removeEventListener("scroll", updateControls);
+      window.removeEventListener("resize", positionLoop);
     };
   }, []);
 
@@ -499,7 +390,8 @@ function DesktopCategoryStrip() {
   };
 
   return (
-      <div className="hidden grid-cols-[2.9rem_minmax(0,1fr)_2.9rem] items-center gap-4 md:grid">
+    <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
+      <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[2.9rem_minmax(0,1fr)_2.9rem]">
         <button
           type="button"
           onClick={() => slideBy("prev")}
@@ -595,11 +487,12 @@ function DesktopCategoryStrip() {
               snapToNearestItem();
             }}
           >
-            {items.map((item) => (
-              <CategoryItem
-                key={item.title}
-                item={item}
-                className="w-[188px] min-w-[188px] snap-start md:px-2"
+            {loopedItems.map((item, index) => (
+              <button
+                key={`${item.title}-${index}`}
+                type="button"
+                draggable={false}
+                className="min-w-0 basis-[38%] snap-start shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:basis-auto md:px-2"
                 onClick={(event) => {
                   if (dragState.current.hasMoved) {
                     event.preventDefault();
@@ -607,7 +500,15 @@ function DesktopCategoryStrip() {
                     dragState.current.hasMoved = false;
                   }
                 }}
-              />
+              >
+                <div className="mx-auto flex h-28 w-full items-center justify-center md:h-32">
+                  <CategoryArt art={item.art} />
+                </div>
+                <p className="mt-4 text-[0.98rem] font-semibold leading-5 tracking-tight text-slate-950 md:mt-5 md:text-[1.02rem] md:leading-6">
+                  {item.title}
+                </p>
+                <p className="mt-1 text-[0.86rem] text-slate-400 md:text-[0.95rem]">{item.count}</p>
+              </button>
             ))}
           </div>
         </div>
@@ -628,14 +529,6 @@ function DesktopCategoryStrip() {
           </svg>
         </button>
       </div>
-  );
-}
-
-export function StorefrontCategoryStrip() {
-  return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
-      <MobileCategoryStrip />
-      <DesktopCategoryStrip />
     </section>
   );
 }
