@@ -19,6 +19,7 @@ function PromoTile({
     width: number;
     height: number;
     className?: string;
+    frameClassName?: string;
   };
 }) {
   const palette =
@@ -85,7 +86,7 @@ function PromoTile({
 
         <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : image ? "flex min-h-[10.25rem] items-center justify-center sm:min-h-[11.5rem] xl:min-h-[19rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
           {image ? (
-            <div className="relative flex w-full items-center justify-center">
+            <div className={`relative flex w-full items-center justify-center ${image.frameClassName ?? ""}`}>
               <div className={`absolute bottom-2 h-10 w-4/5 rounded-full blur-2xl ${theme === "sky" ? "bg-black/12" : "bg-black/14"}`} />
               <Image
                 src={image.src}
@@ -124,7 +125,8 @@ const promoTiles = [
       alt: "Tarjetas premium con acabado elegante",
       width: 914,
       height: 523,
-      className: "w-[15.75rem] sm:w-[16.75rem] xl:w-[19rem] 2xl:w-[21rem]",
+      className: "w-[17.25rem] sm:w-[18rem] xl:w-[21rem] 2xl:w-[22.75rem]",
+      frameClassName: "translate-y-2 sm:translate-y-3 xl:translate-x-[-0.75rem] xl:translate-y-8 2xl:translate-x-[-1.25rem]",
     },
   },
   {
