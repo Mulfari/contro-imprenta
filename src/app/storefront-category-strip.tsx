@@ -368,7 +368,7 @@ export function StorefrontCategoryStrip() {
         <div className="relative overflow-hidden">
           <div
             ref={trackRef}
-            className={`storefront-strip-scrollbar storefront-strip-track flex gap-3 overflow-x-auto px-0.5 md:gap-[18px] md:px-1 ${
+            className={`storefront-strip-scrollbar storefront-strip-track flex gap-3 overflow-x-auto px-[16vw] md:gap-[18px] md:px-1 ${
               isDragging ? "cursor-grabbing" : "cursor-grab scroll-smooth"
             }`}
             onPointerDown={(event) => {
@@ -449,7 +449,7 @@ export function StorefrontCategoryStrip() {
                 key={item.title}
                 type="button"
                 draggable={false}
-                className="min-w-0 basis-[calc((100%_-_0.75rem)/2)] snap-start shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:basis-auto md:px-2"
+                className="w-[68vw] max-w-[15.5rem] snap-center shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:max-w-none md:snap-start md:px-2"
                 onClick={(event) => {
                   if (dragState.current.hasMoved) {
                     event.preventDefault();
@@ -468,25 +468,6 @@ export function StorefrontCategoryStrip() {
               </button>
             ))}
           </div>
-          {canScrollRight ? (
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center md:hidden">
-              <div className="h-full w-14 bg-gradient-to-l from-[#f3f5f8] via-[#f3f5f8]/88 to-transparent" />
-              <div className="absolute right-1 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/92 text-slate-500 shadow-[0_12px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 6 6 6-6 6" />
-                </svg>
-              </div>
-            </div>
-          ) : null}
         </div>
 
         <button
