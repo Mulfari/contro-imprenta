@@ -121,12 +121,12 @@ const promoTiles = [
     eyebrow: "Acabados destacados",
     theme: "sun" as const,
     image: {
-      src: "/storefront-promo-cards-trimmed.webp",
+      src: "/storefront-promo-cards-premium.webp",
       alt: "Tarjetas premium con acabado elegante",
-      width: 914,
-      height: 523,
-      className: "w-[17.25rem] sm:w-[18rem] xl:w-[21rem] 2xl:w-[22.75rem]",
-      frameClassName: "translate-y-2 sm:translate-y-3 xl:translate-x-[-0.75rem] xl:translate-y-8 2xl:translate-x-[-1.25rem]",
+      width: 1000,
+      height: 640,
+      className: "w-[16rem] sm:w-[17rem] xl:w-[20.5rem] 2xl:w-[22rem]",
+      frameClassName: "translate-y-1 sm:translate-y-2 xl:translate-y-5",
     },
   },
   {
