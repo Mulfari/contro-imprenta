@@ -5,11 +5,17 @@ function PromoTile({
   eyebrow,
   theme,
   compact = false,
+  image,
 }: {
   title: string;
   eyebrow: string;
   theme: "sun" | "sky" | "ink" | "paper";
   compact?: boolean;
+  image?: {
+    src: string;
+    alt: string;
+    position?: string;
+  };
 }) {
   const palette =
     theme === "sun"
@@ -74,14 +80,31 @@ function PromoTile({
         </div>
 
         <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
-          <div className={`absolute left-2 top-0 h-20 w-44 -rotate-12 rounded-full ${palette.line}`} />
-          <div className={`absolute right-0 top-4 h-16 w-28 rounded-full ${palette.line}`} />
-          <div className={`absolute right-16 top-8 h-44 w-32 rotate-[7deg] rounded-[1.9rem] ${palette.shapeA} shadow-[0_26px_50px_rgba(15,23,42,0.15)] transition duration-300 group-hover:-translate-y-2 group-hover:rotate-[10deg]`} />
-          <div className={`absolute right-34 top-18 h-40 w-28 -rotate-[9deg] rounded-[1.5rem] ${palette.shapeB} shadow-[0_22px_44px_rgba(15,23,42,0.14)] transition duration-300 group-hover:translate-x-2 group-hover:translate-y-2`} />
-          <div className={`absolute right-22 top-18 h-5 w-22 rounded-full ${palette.shapeC} transition duration-300 group-hover:scale-110`} />
-          <div className={`absolute right-22 top-30 h-3 w-18 rounded-full ${theme === "ink" ? "bg-white/24" : "bg-slate-200/90"}`} />
-          <div className={`absolute right-20 top-37 h-3 w-12 rounded-full ${theme === "ink" ? "bg-white/18" : "bg-slate-200/90"}`} />
-          <div className={`absolute right-40 top-28 h-14 w-14 rounded-full ${theme === "paper" ? "bg-[#38bdf8]" : "bg-white/18"} transition duration-300 group-hover:-translate-y-1 group-hover:scale-105`} />
+          {image ? (
+            <div className="absolute inset-x-0 bottom-0 top-1 overflow-hidden rounded-[1.15rem] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.26)] sm:rounded-[1.55rem]">
+              <div
+                role="img"
+                aria-label={image.alt}
+                className="absolute inset-0 scale-[1.04] bg-cover bg-center transition duration-500 group-hover:scale-[1.09]"
+                style={{
+                  backgroundImage: `url('${image.src}')`,
+                  backgroundPosition: image.position ?? "center",
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-white/8" />
+            </div>
+          ) : (
+            <>
+              <div className={`absolute left-2 top-0 h-20 w-44 -rotate-12 rounded-full ${palette.line}`} />
+              <div className={`absolute right-0 top-4 h-16 w-28 rounded-full ${palette.line}`} />
+              <div className={`absolute right-16 top-8 h-44 w-32 rotate-[7deg] rounded-[1.9rem] ${palette.shapeA} shadow-[0_26px_50px_rgba(15,23,42,0.15)] transition duration-300 group-hover:-translate-y-2 group-hover:rotate-[10deg]`} />
+              <div className={`absolute right-34 top-18 h-40 w-28 -rotate-[9deg] rounded-[1.5rem] ${palette.shapeB} shadow-[0_22px_44px_rgba(15,23,42,0.14)] transition duration-300 group-hover:translate-x-2 group-hover:translate-y-2`} />
+              <div className={`absolute right-22 top-18 h-5 w-22 rounded-full ${palette.shapeC} transition duration-300 group-hover:scale-110`} />
+              <div className={`absolute right-22 top-30 h-3 w-18 rounded-full ${theme === "ink" ? "bg-white/24" : "bg-slate-200/90"}`} />
+              <div className={`absolute right-20 top-37 h-3 w-12 rounded-full ${theme === "ink" ? "bg-white/18" : "bg-slate-200/90"}`} />
+              <div className={`absolute right-40 top-28 h-14 w-14 rounded-full ${theme === "paper" ? "bg-[#38bdf8]" : "bg-white/18"} transition duration-300 group-hover:-translate-y-1 group-hover:scale-105`} />
+            </>
+          )}
         </div>
       </div>
     </article>
@@ -93,11 +116,21 @@ const promoTiles = [
     title: "Tarjetas\nPremium",
     eyebrow: "Acabados destacados",
     theme: "sun" as const,
+    image: {
+      src: "/storefront-promo-cards.webp",
+      alt: "Tarjetas premium con acabado elegante",
+      position: "center 58%",
+    },
   },
   {
     title: "Stickers y\nEtiquetas",
     eyebrow: "Marca y packaging",
     theme: "sky" as const,
+    image: {
+      src: "/storefront-promo-stickers-labels.webp",
+      alt: "Stickers y etiquetas personalizadas",
+      position: "center 54%",
+    },
   },
   {
     title: "Pendones,\nafiches",
