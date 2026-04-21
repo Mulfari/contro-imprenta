@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 function PromoTile({
   title,
   eyebrow,
@@ -14,7 +16,7 @@ function PromoTile({
   image?: {
     src: string;
     alt: string;
-    position?: string;
+    className?: string;
   };
 }) {
   const palette =
@@ -81,17 +83,16 @@ function PromoTile({
 
         <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : image ? "min-h-[12.5rem] sm:min-h-[13.5rem] xl:min-h-[19rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
           {image ? (
-            <div className="absolute inset-0 overflow-hidden rounded-[1.25rem] bg-white/16 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]">
-              <div
-                role="img"
-                aria-label={image.alt}
-                className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-[1.045]"
-                style={{
-                  backgroundImage: `url('${image.src}')`,
-                  backgroundPosition: image.position ?? "center",
-                }}
+            <div className="absolute inset-0 overflow-visible">
+              <div className={`absolute inset-x-2 bottom-2 h-14 rounded-full blur-2xl ${theme === "sky" ? "bg-black/14" : "bg-black/16"}`} />
+              <Image
+                src={image.src}
+                alt={image.alt}
+                width={560}
+                height={420}
+                sizes="(min-width: 1280px) 32vw, 78vw"
+                className={`absolute max-w-none object-contain drop-shadow-[0_26px_34px_rgba(15,23,42,0.2)] transition duration-500 group-hover:-translate-y-1 group-hover:scale-[1.035] ${image.className ?? ""}`}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-white/5" />
             </div>
           ) : (
             <>
@@ -119,7 +120,7 @@ const promoTiles = [
     image: {
       src: "/storefront-promo-cards.webp",
       alt: "Tarjetas premium con acabado elegante",
-      position: "center 56%",
+      className: "-right-12 bottom-0 w-[21rem] sm:-right-10 sm:w-[22rem] xl:-right-16 xl:bottom-2 xl:w-[30rem]",
     },
   },
   {
@@ -129,7 +130,7 @@ const promoTiles = [
     image: {
       src: "/storefront-promo-stickers-labels.webp",
       alt: "Stickers y etiquetas personalizadas",
-      position: "center 55%",
+      className: "-right-16 bottom-[-0.75rem] w-[23rem] sm:-right-14 sm:w-[24rem] xl:-right-20 xl:bottom-0 xl:w-[32rem]",
     },
   },
   {
