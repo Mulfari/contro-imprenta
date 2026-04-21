@@ -17,31 +17,9 @@ const items = [
 ];
 
 const DESKTOP_ITEM_STRIDE = 206;
-const MOBILE_LOOP_PADDING_ITEMS = 2;
-
-const mobileLoopItems = [
-  ...items.slice(-MOBILE_LOOP_PADDING_ITEMS).map((item, index) => ({
-    ...item,
-    loopKey: `before-${index}-${item.title}`,
-    isMobileClone: true,
-  })),
-  ...items.map((item, index) => ({
-    ...item,
-    loopKey: `main-${index}-${item.title}`,
-    isMobileClone: false,
-  })),
-  ...items.slice(0, MOBILE_LOOP_PADDING_ITEMS).map((item, index) => ({
-    ...item,
-    loopKey: `after-${index}-${item.title}`,
-    isMobileClone: true,
-  })),
-];
 
 function getTrackItemStride(track: HTMLDivElement) {
-  const firstItem = Array.from(track.children).find(
-    (child): child is HTMLElement =>
-      child instanceof HTMLElement && child.getBoundingClientRect().width > 0,
-  );
+  const firstItem = track.firstElementChild as HTMLElement | null;
 
   if (!firstItem) {
     return DESKTOP_ITEM_STRIDE;
@@ -294,8 +272,6 @@ function CategoryArt({ art }: { art: string }) {
 
 export function StorefrontCategoryStrip() {
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const didPositionMobileLoop = useRef(false);
-  const isLoopJumping = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -320,62 +296,17 @@ export function StorefrontCategoryStrip() {
       return;
     }
 
-    const isMobileStrip = () => window.innerWidth < 768;
-
-    const positionMobileLoopStart = () => {
-      if (!isMobileStrip()) {
-        didPositionMobileLoop.current = false;
-        return;
-      }
-
-      requestAnimationFrame(() => {
-        const stride = getTrackItemStride(track);
-        track.scrollLeft = stride * MOBILE_LOOP_PADDING_ITEMS;
-        didPositionMobileLoop.current = true;
-      });
-    };
-
-    const normalizeMobileLoop = () => {
-      if (!isMobileStrip() || !didPositionMobileLoop.current || isLoopJumping.current) {
-        return;
-      }
-
-      const stride = getTrackItemStride(track);
-      const realEnd = stride * (MOBILE_LOOP_PADDING_ITEMS + items.length);
-
-      if (track.scrollLeft < stride * 0.35) {
-        isLoopJumping.current = true;
-        track.scrollLeft += stride * items.length;
-        requestAnimationFrame(() => {
-          isLoopJumping.current = false;
-        });
-        return;
-      }
-
-      if (track.scrollLeft > realEnd + stride * 0.65) {
-        isLoopJumping.current = true;
-        track.scrollLeft -= stride * items.length;
-        requestAnimationFrame(() => {
-          isLoopJumping.current = false;
-        });
-      }
-    };
-
     const updateControls = () => {
-      normalizeMobileLoop();
       const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
       setCanScrollLeft(track.scrollLeft > 4);
       setCanScrollRight(track.scrollLeft < maxScrollLeft - 4);
     };
 
-    positionMobileLoopStart();
-    requestAnimationFrame(updateControls);
+    updateControls();
     track.addEventListener("scroll", updateControls, { passive: true });
-    window.addEventListener("resize", positionMobileLoopStart);
 
     return () => {
       track.removeEventListener("scroll", updateControls);
-      window.removeEventListener("resize", positionMobileLoopStart);
     };
   }, []);
 
@@ -513,14 +444,12 @@ export function StorefrontCategoryStrip() {
               snapToNearestItem();
             }}
           >
-            {mobileLoopItems.map((item) => (
+            {items.map((item) => (
               <button
-                key={item.loopKey}
+                key={item.title}
                 type="button"
                 draggable={false}
-                className={`min-w-0 basis-[42%] snap-start shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:basis-auto md:px-2 ${
-                  item.isMobileClone ? "md:hidden" : ""
-                }`}
+                className="min-w-0 basis-[42%] snap-start shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:basis-auto md:px-2"
                 onClick={(event) => {
                   if (dragState.current.hasMoved) {
                     event.preventDefault();
