@@ -16,9 +16,20 @@ const items = [
   { title: "Sellos", count: "8 productos", art: "invoice" },
 ];
 
-const ITEM_WIDTH = 188;
-const ITEM_GAP = 18;
-const ITEM_STRIDE = ITEM_WIDTH + ITEM_GAP;
+const DESKTOP_ITEM_STRIDE = 206;
+
+function getTrackItemStride(track: HTMLDivElement) {
+  const firstItem = track.firstElementChild as HTMLElement | null;
+
+  if (!firstItem) {
+    return DESKTOP_ITEM_STRIDE;
+  }
+
+  const trackStyles = window.getComputedStyle(track);
+  const gap = Number.parseFloat(trackStyles.columnGap || trackStyles.gap || "0");
+
+  return firstItem.getBoundingClientRect().width + (Number.isFinite(gap) ? gap : 0);
+}
 
 function CategoryArt({ art }: { art: string }) {
   if (art === "cards") {
@@ -315,7 +326,8 @@ export function StorefrontCategoryStrip() {
       return;
     }
 
-    const target = Math.round(track.scrollLeft / ITEM_STRIDE) * ITEM_STRIDE;
+    const stride = getTrackItemStride(track);
+    const target = Math.round(track.scrollLeft / stride) * stride;
     track.scrollTo({
       left: target,
       behavior: "smooth",
@@ -329,7 +341,7 @@ export function StorefrontCategoryStrip() {
     }
 
     track.scrollBy({
-      left: direction === "next" ? ITEM_STRIDE : -ITEM_STRIDE,
+      left: direction === "next" ? getTrackItemStride(track) : -getTrackItemStride(track),
       behavior: "smooth",
     });
   };
@@ -360,6 +372,10 @@ export function StorefrontCategoryStrip() {
               isDragging ? "cursor-grabbing" : "cursor-grab scroll-smooth"
             }`}
             onPointerDown={(event) => {
+              if (event.pointerType !== "mouse") {
+                return;
+              }
+
               const track = trackRef.current;
               if (!track) {
                 return;
@@ -374,6 +390,10 @@ export function StorefrontCategoryStrip() {
               track.setPointerCapture(event.pointerId);
             }}
             onPointerMove={(event) => {
+              if (event.pointerType !== "mouse") {
+                return;
+              }
+
               const track = trackRef.current;
               if (!track || dragState.current.pointerId !== event.pointerId) {
                 return;
@@ -400,6 +420,10 @@ export function StorefrontCategoryStrip() {
               });
             }}
             onPointerUp={(event) => {
+              if (event.pointerType !== "mouse") {
+                return;
+              }
+
               const track = trackRef.current;
               if (!track || dragState.current.pointerId !== event.pointerId) {
                 return;
@@ -411,6 +435,10 @@ export function StorefrontCategoryStrip() {
               snapToNearestItem();
             }}
             onPointerCancel={() => {
+              if (dragState.current.pointerId === null) {
+                return;
+              }
+
               dragState.current.pointerId = null;
               setIsDragging(false);
               snapToNearestItem();
@@ -421,7 +449,7 @@ export function StorefrontCategoryStrip() {
                 key={item.title}
                 type="button"
                 draggable={false}
-                className="w-[calc(50%-0.4rem)] min-w-[calc(50%-0.4rem)] shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:px-2"
+                className="min-w-0 basis-[calc((100%_-_0.75rem)/2)] snap-start shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:basis-auto md:px-2"
                 onClick={(event) => {
                   if (dragState.current.hasMoved) {
                     event.preventDefault();
