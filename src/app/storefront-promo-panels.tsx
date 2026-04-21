@@ -117,11 +117,16 @@ export function StorefrontPromoPanels() {
   return (
     <section className="mx-auto w-full max-w-[112rem] pb-7 sm:pb-10 xl:px-4 2xl:px-10">
       <div className="xl:hidden">
-        <div className="storefront-strip-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto pl-4 pr-[18vw] sm:pl-6">
+        <div
+          className="storefront-strip-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto"
+          style={{
+            paddingInline: "max(1rem, calc((100vw - min(78vw, 19rem)) / 2))",
+          }}
+        >
           {promoTiles.map((tile) => (
             <div
               key={tile.title}
-              className="w-[78vw] max-w-[19rem] shrink-0 snap-start"
+              className="w-[78vw] max-w-[19rem] shrink-0 snap-center"
             >
               <PromoTile {...tile} />
             </div>
