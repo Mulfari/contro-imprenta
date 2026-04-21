@@ -50,30 +50,30 @@ function PromoTile({
 
   return (
     <article
-      className={`group overflow-hidden rounded-[2rem] ${palette.wrapper} shadow-[0_22px_48px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(15,23,42,0.12)]`}
+      className={`group overflow-hidden rounded-[1.45rem] ${palette.wrapper} shadow-[0_16px_34px_rgba(15,23,42,0.07)] transition duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1)] sm:rounded-[2rem] lg:hover:-translate-y-1`}
     >
-      <div className={`grid h-full gap-6 p-8 ${compact ? "lg:grid-cols-[1fr_0.9fr]" : "lg:grid-cols-[0.95fr_1.05fr]"}`}>
+      <div className={`grid h-full gap-4 p-5 sm:gap-6 sm:p-8 ${compact ? "lg:grid-cols-[1fr_0.9fr]" : "lg:grid-cols-[0.95fr_1.05fr]"}`}>
         <div className="flex flex-col justify-between">
           <div>
-            <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${palette.eyebrow}`}>
+            <p className={`text-[0.68rem] font-semibold uppercase tracking-[0.18em] sm:text-sm sm:tracking-[0.22em] ${palette.eyebrow}`}>
               {eyebrow}
             </p>
             <h2
-              className={`mt-4 whitespace-pre-line font-black leading-none tracking-tight ${
-                compact ? "text-3xl xl:text-[2.55rem]" : "text-4xl xl:text-[3.2rem]"
+              className={`mt-3 whitespace-pre-line font-black leading-none tracking-tight sm:mt-4 ${
+                compact ? "text-[2rem] sm:text-3xl xl:text-[2.55rem]" : "text-[2.35rem] sm:text-4xl xl:text-[3.2rem]"
               }`}
             >
               {title}
             </h2>
           </div>
 
-          <span className="mt-8 inline-flex w-fit items-center gap-2 rounded-2xl bg-white/88 px-5 py-3 text-sm font-semibold text-slate-950 shadow-sm backdrop-blur-sm">
+          <span className="mt-5 inline-flex w-fit items-center gap-2 rounded-xl bg-white/88 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-sm backdrop-blur-sm sm:mt-8 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-sm">
             Ver mas
             <span aria-hidden="true">›</span>
           </span>
         </div>
 
-        <div className={`relative ${compact ? "min-h-[12rem]" : "min-h-[19rem]"}`}>
+        <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
           <div className={`absolute left-2 top-0 h-20 w-44 -rotate-12 rounded-full ${palette.line}`} />
           <div className={`absolute right-0 top-4 h-16 w-28 rounded-full ${palette.line}`} />
           <div className={`absolute right-16 top-8 h-44 w-32 rotate-[7deg] rounded-[1.9rem] ${palette.shapeA} shadow-[0_26px_50px_rgba(15,23,42,0.15)] transition duration-300 group-hover:-translate-y-2 group-hover:rotate-[10deg]`} />
@@ -90,7 +90,7 @@ function PromoTile({
 
 export function StorefrontPromoPanels() {
   return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 pb-10 sm:px-6 lg:px-8 2xl:px-10">
+    <section className="mx-auto w-full max-w-[112rem] px-4 pb-7 sm:px-6 sm:pb-10 lg:px-8 2xl:px-10">
       <div className="grid gap-4 xl:grid-cols-[1.02fr_1.22fr_1fr]">
         <PromoTile
           title={"Tarjetas\nPremium"}

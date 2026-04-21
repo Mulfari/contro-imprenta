@@ -123,7 +123,7 @@ function StarRow() {
 
 function SideFeature() {
   return (
-    <article className="relative overflow-hidden bg-[#0d0d0d] p-10 text-white">
+    <article className="relative overflow-hidden bg-[#0d0d0d] p-6 text-white sm:p-10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_40%)]" />
       <div className="absolute inset-y-0 right-0 w-[54%] bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))]" />
 
@@ -131,12 +131,12 @@ function SideFeature() {
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/45">
           Coleccion destacada
         </p>
-        <h3 className="mt-4 max-w-[13rem] text-[2.15rem] font-black leading-tight tracking-tight">
+        <h3 className="mt-3 max-w-[13rem] text-[1.55rem] font-black leading-tight tracking-tight sm:mt-4 sm:text-[2.15rem]">
           Papeleria comercial
         </h3>
-        <ul className="mt-8 space-y-2.5">
+        <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2 sm:mt-8 sm:block sm:space-y-2.5">
           {["Tarjetas", "Talonarios", "Sobres", "Facturas", "Recibos", "Sellos"].map((item) => (
-            <li key={item} className="flex items-center gap-3 text-[1.05rem] font-medium">
+            <li key={item} className="flex items-center gap-2 text-sm font-medium sm:gap-3 sm:text-[1.05rem]">
               <span className="h-2.5 w-2.5 rounded-full bg-[#facc15]" />
               <span>{item}</span>
             </li>
@@ -151,7 +151,7 @@ function SideFeature() {
         </button>
       </div>
 
-      <div className="pointer-events-none absolute bottom-0 right-0 h-[78%] w-[52%]">
+      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[78%] w-[52%] sm:block">
         <div className="absolute bottom-2 right-4 h-full w-10 rounded-full bg-white/14" />
         <div className="absolute bottom-10 right-14 h-48 w-20 rounded-[1.5rem] bg-white shadow-[0_28px_52px_rgba(0,0,0,0.24)]" />
         <div className="absolute bottom-24 right-28 h-36 w-16 rounded-[1.2rem] bg-[#facc15] shadow-[0_28px_52px_rgba(0,0,0,0.24)]" />
@@ -178,7 +178,7 @@ function ProductCard({
   tint: string;
 }) {
   return (
-    <article className="group relative border-r border-slate-200 px-5 py-5 last:border-r-0">
+    <article className="group relative border-b border-slate-200 px-4 py-4 last:border-b-0 sm:px-5 sm:py-5 md:border-b-0 md:border-r md:last:border-r-0">
       <span className="absolute left-5 top-5 rounded-md bg-[#ff5b4d] px-2.5 py-1 text-xs font-bold text-white">
         {discount}
       </span>
@@ -190,7 +190,7 @@ function ProductCard({
         <HeartIcon />
       </button>
 
-      <div className={`flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br ${tint}`}>
+      <div className={`flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br ${tint} sm:h-52`}>
         <div className="relative h-32 w-28">
           <div className="absolute inset-0 rotate-[8deg] rounded-[1.45rem] bg-white shadow-[0_20px_40px_rgba(15,23,42,0.12)] transition duration-300 group-hover:-translate-y-1 group-hover:rotate-[10deg]" />
           <div className="absolute left-[-1rem] top-7 h-28 w-24 -rotate-[9deg] rounded-[1.3rem] bg-slate-950 shadow-[0_20px_40px_rgba(15,23,42,0.14)] transition duration-300 group-hover:translate-x-1 group-hover:translate-y-1" />
@@ -239,12 +239,15 @@ export function StorefrontFeatureGridSection() {
   const canGoNext = startIndex + visibleCount < products.length;
 
   return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 pb-16 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_16px_36px_rgba(15,23,42,0.04)] xl:grid xl:grid-cols-[430px_1fr]">
+    <section className="mx-auto w-full max-w-[112rem] px-4 pb-10 sm:px-6 sm:pb-16 lg:px-8 2xl:px-10">
+      <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_16px_36px_rgba(15,23,42,0.04)] sm:rounded-[2rem] xl:grid xl:grid-cols-[430px_1fr]">
         <SideFeature />
 
         <div className="relative">
-          <div className="flex items-center justify-end gap-2 border-b border-slate-200 px-5 py-4">
+          <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-4 py-3 sm:justify-end sm:px-5 sm:py-4">
+            <p className="text-sm font-semibold text-slate-500 sm:hidden">
+              Productos destacados
+            </p>
             <button
               type="button"
               onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}

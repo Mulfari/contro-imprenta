@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const testimonials = [
   {
@@ -89,20 +89,37 @@ function RatingStars() {
 
 export function StorefrontTestimonialsSection() {
   const [startIndex, setStartIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(1);
+
+  useEffect(() => {
+    const updateVisibleCount = () => {
+      const nextVisibleCount = window.innerWidth >= 1024 ? 3 : 1;
+      setVisibleCount(nextVisibleCount);
+      setStartIndex((current) =>
+        Math.min(current, Math.max(testimonials.length - nextVisibleCount, 0)),
+      );
+    };
+
+    updateVisibleCount();
+    window.addEventListener("resize", updateVisibleCount);
+
+    return () => window.removeEventListener("resize", updateVisibleCount);
+  }, []);
+
   const visibleTestimonials = useMemo(
-    () => testimonials.slice(startIndex, startIndex + 3),
-    [startIndex],
+    () => testimonials.slice(startIndex, startIndex + visibleCount),
+    [startIndex, visibleCount],
   );
 
   const canGoPrev = startIndex > 0;
-  const canGoNext = startIndex + 3 < testimonials.length;
+  const canGoNext = startIndex + visibleCount < testimonials.length;
 
   return (
     <section className="w-full">
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[104rem] items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
           <div className="h-px flex-1 bg-slate-200" />
-          <h2 className="text-center text-[1.95rem] font-semibold tracking-tight text-slate-950">
+          <h2 className="text-center text-[1.35rem] font-semibold tracking-tight text-slate-950 sm:text-[1.95rem]">
             Lo que nuestros clientes estan diciendo
           </h2>
           <div className="h-px flex-1 bg-slate-200" />
@@ -125,7 +142,9 @@ export function StorefrontTestimonialsSection() {
           <button
             type="button"
             onClick={() =>
-              setStartIndex((current) => Math.min(current + 1, testimonials.length - 3))
+              setStartIndex((current) =>
+                Math.min(current + 1, testimonials.length - visibleCount),
+              )
             }
             disabled={!canGoNext}
             className={`absolute right-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border transition lg:flex xl:right-5 2xl:right-6 ${
@@ -142,12 +161,12 @@ export function StorefrontTestimonialsSection() {
             {visibleTestimonials.map((item, index) => (
               <article
                 key={`${item.name}-${item.time}`}
-                className={`px-5 py-8 text-center lg:px-10 2xl:px-12 ${
+                className={`px-4 py-6 text-center sm:px-5 sm:py-8 lg:px-10 2xl:px-12 ${
                   index < visibleTestimonials.length - 1 ? "lg:border-r lg:border-slate-200" : ""
                 }`}
               >
                 <div className="flex items-start justify-center gap-5">
-                  <p className="text-[4.6rem] font-black leading-none tracking-tight text-[#ffb61d]">
+                  <p className="text-[3.6rem] font-black leading-none tracking-tight text-[#ffb61d] sm:text-[4.6rem]">
                     5.0
                   </p>
                   <div className="pt-2 text-left">
@@ -158,7 +177,7 @@ export function StorefrontTestimonialsSection() {
                     <RatingStars />
                   </div>
                 </div>
-                <p className="mx-auto mt-8 max-w-[30rem] text-[1.15rem] leading-10 tracking-tight text-slate-800">
+                <p className="mx-auto mt-6 max-w-[30rem] text-base leading-8 tracking-tight text-slate-800 sm:mt-8 sm:text-[1.15rem] sm:leading-10">
                   &quot;{item.quote}&quot;
                 </p>
               </article>
@@ -182,7 +201,9 @@ export function StorefrontTestimonialsSection() {
             <button
               type="button"
               onClick={() =>
-                setStartIndex((current) => Math.min(current + 1, testimonials.length - 3))
+                setStartIndex((current) =>
+                  Math.min(current + 1, testimonials.length - visibleCount),
+                )
               }
               disabled={!canGoNext}
               className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
