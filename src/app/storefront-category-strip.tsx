@@ -468,6 +468,25 @@ export function StorefrontCategoryStrip() {
               </button>
             ))}
           </div>
+          {canScrollRight ? (
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center md:hidden">
+              <div className="h-full w-14 bg-gradient-to-l from-[#f3f5f8] via-[#f3f5f8]/88 to-transparent" />
+              <div className="absolute right-1 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/92 text-slate-500 shadow-[0_12px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 6 6 6-6 6" />
+                </svg>
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <button
