@@ -16,6 +16,8 @@ function PromoTile({
   image?: {
     src: string;
     alt: string;
+    width: number;
+    height: number;
     className?: string;
   };
 }) {
@@ -88,8 +90,8 @@ function PromoTile({
               <Image
                 src={image.src}
                 alt={image.alt}
-                width={1024}
-                height={1024}
+                width={image.width}
+                height={image.height}
                 sizes="(min-width: 1280px) 18vw, 58vw"
                 className={`relative z-10 h-auto select-none object-contain drop-shadow-[0_22px_28px_rgba(15,23,42,0.18)] transition duration-500 group-hover:-translate-y-1 group-hover:scale-[1.02] ${image.className ?? ""}`}
               />
@@ -118,9 +120,11 @@ const promoTiles = [
     eyebrow: "Acabados destacados",
     theme: "sun" as const,
     image: {
-      src: "/storefront-promo-cards.webp",
+      src: "/storefront-promo-cards-trimmed.webp",
       alt: "Tarjetas premium con acabado elegante",
-      className: "w-[14rem] sm:w-[15rem] xl:w-[18rem] 2xl:w-[19.5rem]",
+      width: 914,
+      height: 523,
+      className: "w-[15.75rem] sm:w-[16.75rem] xl:w-[19rem] 2xl:w-[21rem]",
     },
   },
   {
@@ -128,9 +132,11 @@ const promoTiles = [
     eyebrow: "Marca y packaging",
     theme: "sky" as const,
     image: {
-      src: "/storefront-promo-stickers-labels.webp",
+      src: "/storefront-promo-stickers-labels-trimmed.webp",
       alt: "Stickers y etiquetas personalizadas",
-      className: "w-[14.75rem] sm:w-[15.75rem] xl:w-[18.75rem] 2xl:w-[20rem]",
+      width: 1024,
+      height: 824,
+      className: "w-[15.25rem] sm:w-[16.25rem] xl:w-[18.5rem] 2xl:w-[20.25rem]",
     },
   },
   {
