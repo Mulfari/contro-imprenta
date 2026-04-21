@@ -15,6 +15,7 @@ const items = [
   { title: "Acrilicos", count: "6 productos", art: "banner" },
   { title: "Sellos", count: "8 productos", art: "invoice" },
 ];
+const loopedItems = [...items, ...items, ...items];
 
 const DESKTOP_ITEM_STRIDE = 206;
 
@@ -275,6 +276,8 @@ export function StorefrontCategoryStrip() {
   const [isDragging, setIsDragging] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const didPositionLoop = useRef(false);
+  const isLoopJumping = useRef(false);
   const dragState = useRef<{
     pointerId: number | null;
     startX: number;
@@ -296,17 +299,57 @@ export function StorefrontCategoryStrip() {
       return;
     }
 
+    const getLoopSegmentWidth = () => getTrackItemStride(track) * items.length;
+
+    const positionLoop = () => {
+      const segmentWidth = getLoopSegmentWidth();
+
+      if (!segmentWidth) {
+        return;
+      }
+
+      const sidePeek = window.innerWidth < 768 ? track.clientWidth * 0.12 : 0;
+      track.scrollLeft = segmentWidth - sidePeek;
+      didPositionLoop.current = true;
+    };
+
     const updateControls = () => {
+      if (!didPositionLoop.current) {
+        positionLoop();
+      }
+
+      const segmentWidth = getLoopSegmentWidth();
+      if (segmentWidth && !isLoopJumping.current) {
+        const minLoopScroll = segmentWidth * 0.55;
+        const maxLoopScroll = segmentWidth * 2.45;
+
+        if (track.scrollLeft < minLoopScroll) {
+          isLoopJumping.current = true;
+          track.scrollLeft += segmentWidth;
+          window.requestAnimationFrame(() => {
+            isLoopJumping.current = false;
+          });
+        } else if (track.scrollLeft > maxLoopScroll) {
+          isLoopJumping.current = true;
+          track.scrollLeft -= segmentWidth;
+          window.requestAnimationFrame(() => {
+            isLoopJumping.current = false;
+          });
+        }
+      }
+
       const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
       setCanScrollLeft(track.scrollLeft > 4);
       setCanScrollRight(track.scrollLeft < maxScrollLeft - 4);
     };
 
-    updateControls();
+    window.requestAnimationFrame(updateControls);
     track.addEventListener("scroll", updateControls, { passive: true });
+    window.addEventListener("resize", positionLoop);
 
     return () => {
       track.removeEventListener("scroll", updateControls);
+      window.removeEventListener("resize", positionLoop);
     };
   }, []);
 
@@ -444,12 +487,12 @@ export function StorefrontCategoryStrip() {
               snapToNearestItem();
             }}
           >
-            {items.map((item) => (
+            {loopedItems.map((item, index) => (
               <button
-                key={item.title}
+                key={`${item.title}-${index}`}
                 type="button"
                 draggable={false}
-                className="min-w-0 basis-[42%] snap-start shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:basis-auto md:px-2"
+                className="min-w-0 basis-[38%] snap-start shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:basis-auto md:px-2"
                 onClick={(event) => {
                   if (dragState.current.hasMoved) {
                     event.preventDefault();
