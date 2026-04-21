@@ -66,7 +66,7 @@ function PromoTile({
             </p>
             <h2
               className={`mt-3 whitespace-pre-line font-black leading-none tracking-tight sm:mt-4 ${
-                compact ? "text-[2rem] sm:text-3xl xl:text-[2.55rem]" : "text-[2.35rem] sm:text-4xl xl:text-[3.2rem]"
+                compact ? "text-[2rem] sm:text-3xl xl:text-[2.55rem]" : "text-[2.2rem] sm:text-[2.45rem] xl:text-[3.2rem]"
               }`}
             >
               {title}
@@ -79,20 +79,19 @@ function PromoTile({
           </span>
         </div>
 
-        <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
+        <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : image ? "min-h-[12.5rem] sm:min-h-[13.5rem] xl:min-h-[19rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
           {image ? (
-            <div className="absolute inset-0 overflow-hidden">
-              <div className={`absolute inset-x-3 bottom-2 h-16 rounded-full blur-2xl ${theme === "sky" ? "bg-white/18" : "bg-black/12"}`} />
-              <div className={`absolute right-0 top-2 h-28 w-28 rounded-full blur-2xl ${theme === "sky" ? "bg-cyan-200/28" : "bg-white/24"}`} />
+            <div className="absolute inset-0 overflow-hidden rounded-[1.25rem] bg-white/16 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]">
               <div
                 role="img"
                 aria-label={image.alt}
-                className="absolute inset-x-[-0.5rem] bottom-0 top-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_24px_34px_rgba(15,23,42,0.18)] transition duration-500 group-hover:scale-[1.04]"
+                className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-[1.045]"
                 style={{
                   backgroundImage: `url('${image.src}')`,
                   backgroundPosition: image.position ?? "center",
                 }}
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-white/5" />
             </div>
           ) : (
             <>
@@ -120,7 +119,7 @@ const promoTiles = [
     image: {
       src: "/storefront-promo-cards.webp",
       alt: "Tarjetas premium con acabado elegante",
-      position: "center",
+      position: "center 56%",
     },
   },
   {
@@ -130,7 +129,7 @@ const promoTiles = [
     image: {
       src: "/storefront-promo-stickers-labels.webp",
       alt: "Stickers y etiquetas personalizadas",
-      position: "center",
+      position: "center 55%",
     },
   },
   {
