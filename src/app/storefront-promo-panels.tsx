@@ -81,17 +81,18 @@ function PromoTile({
 
         <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
           {image ? (
-            <div className="absolute inset-x-0 bottom-0 top-1 overflow-hidden rounded-[1.15rem] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.26)] sm:rounded-[1.55rem]">
+            <div className="absolute inset-0 overflow-hidden">
+              <div className={`absolute inset-x-3 bottom-2 h-16 rounded-full blur-2xl ${theme === "sky" ? "bg-white/18" : "bg-black/12"}`} />
+              <div className={`absolute right-0 top-2 h-28 w-28 rounded-full blur-2xl ${theme === "sky" ? "bg-cyan-200/28" : "bg-white/24"}`} />
               <div
                 role="img"
                 aria-label={image.alt}
-                className="absolute inset-0 scale-[1.04] bg-cover bg-center transition duration-500 group-hover:scale-[1.09]"
+                className="absolute inset-x-[-0.5rem] bottom-0 top-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_24px_34px_rgba(15,23,42,0.18)] transition duration-500 group-hover:scale-[1.04]"
                 style={{
                   backgroundImage: `url('${image.src}')`,
                   backgroundPosition: image.position ?? "center",
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-white/8" />
             </div>
           ) : (
             <>
@@ -119,7 +120,7 @@ const promoTiles = [
     image: {
       src: "/storefront-promo-cards.webp",
       alt: "Tarjetas premium con acabado elegante",
-      position: "center 58%",
+      position: "center",
     },
   },
   {
@@ -129,7 +130,7 @@ const promoTiles = [
     image: {
       src: "/storefront-promo-stickers-labels.webp",
       alt: "Stickers y etiquetas personalizadas",
-      position: "center 54%",
+      position: "center",
     },
   },
   {
