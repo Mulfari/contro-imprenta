@@ -88,34 +88,54 @@ function PromoTile({
   );
 }
 
+const promoTiles = [
+  {
+    title: "Tarjetas\nPremium",
+    eyebrow: "Acabados destacados",
+    theme: "sun" as const,
+  },
+  {
+    title: "Stickers y\nEtiquetas",
+    eyebrow: "Marca y packaging",
+    theme: "sky" as const,
+  },
+  {
+    title: "Pendones,\nafiches",
+    eyebrow: "Gran formato",
+    theme: "ink" as const,
+    compact: true,
+  },
+  {
+    title: "Talonarios,\nrecibos",
+    eyebrow: "Impresion diaria",
+    theme: "paper" as const,
+    compact: true,
+  },
+];
+
 export function StorefrontPromoPanels() {
   return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 pb-7 sm:px-6 sm:pb-10 lg:px-8 2xl:px-10">
-      <div className="grid gap-4 xl:grid-cols-[1.02fr_1.22fr_1fr]">
-        <PromoTile
-          title={"Tarjetas\nPremium"}
-          eyebrow="Acabados destacados"
-          theme="sun"
-        />
-        <PromoTile
-          title={"Stickers y\nEtiquetas"}
-          eyebrow="Marca y packaging"
-          theme="sky"
-        />
+    <section className="mx-auto w-full max-w-[112rem] pb-7 sm:pb-10 xl:px-4 2xl:px-10">
+      <div className="xl:hidden">
+        <div className="storefront-strip-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto pl-4 pr-[18vw] sm:pl-6">
+          {promoTiles.map((tile) => (
+            <div
+              key={tile.title}
+              className="w-[78vw] max-w-[19rem] shrink-0 snap-start"
+            >
+              <PromoTile {...tile} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="hidden gap-4 px-4 sm:px-6 lg:px-8 xl:grid xl:grid-cols-[1.02fr_1.22fr_1fr] xl:px-4 2xl:px-0">
+        <PromoTile {...promoTiles[0]} />
+        <PromoTile {...promoTiles[1]} />
 
         <div className="grid gap-4">
-          <PromoTile
-            title={"Pendones,\nafiches"}
-            eyebrow="Gran formato"
-            theme="ink"
-            compact
-          />
-          <PromoTile
-            title={"Talonarios,\nrecibos"}
-            eyebrow="Impresion diaria"
-            theme="paper"
-            compact
-          />
+          <PromoTile {...promoTiles[2]} />
+          <PromoTile {...promoTiles[3]} />
         </div>
       </div>
     </section>
