@@ -58,7 +58,7 @@ function PromoTile({
 
   return (
     <article
-      className={`group overflow-hidden rounded-[1.45rem] ${palette.wrapper} shadow-[0_16px_34px_rgba(15,23,42,0.07)] transition duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1)] sm:rounded-[2rem] lg:hover:-translate-y-1`}
+      className={`group rounded-[1.45rem] ${palette.wrapper} shadow-[0_16px_34px_rgba(15,23,42,0.07)] transition duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1)] sm:rounded-[2rem] lg:hover:-translate-y-1`}
     >
       <div className={`grid h-full gap-4 p-5 sm:gap-6 sm:p-8 ${compact ? "lg:grid-cols-[1fr_0.9fr]" : "lg:grid-cols-[0.95fr_1.05fr]"}`}>
         <div className="flex flex-col justify-between">
@@ -81,17 +81,17 @@ function PromoTile({
           </span>
         </div>
 
-        <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : image ? "min-h-[11.75rem] sm:min-h-[13rem] xl:min-h-[19rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
+        <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : image ? "flex min-h-[10.25rem] items-center justify-center sm:min-h-[11.5rem] xl:min-h-[19rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
           {image ? (
-            <div className="absolute inset-0 overflow-hidden">
-              <div className={`absolute inset-x-8 bottom-3 h-12 rounded-full blur-2xl ${theme === "sky" ? "bg-black/12" : "bg-black/14"}`} />
+            <div className="relative flex w-full items-center justify-center">
+              <div className={`absolute bottom-2 h-10 w-4/5 rounded-full blur-2xl ${theme === "sky" ? "bg-black/12" : "bg-black/14"}`} />
               <Image
                 src={image.src}
                 alt={image.alt}
-                width={560}
-                height={420}
-                sizes="(min-width: 1280px) 21vw, 58vw"
-                className={`absolute h-auto max-w-none select-none object-contain drop-shadow-[0_24px_30px_rgba(15,23,42,0.2)] transition duration-500 group-hover:-translate-y-1 group-hover:scale-[1.025] ${image.className ?? ""}`}
+                width={1024}
+                height={1024}
+                sizes="(min-width: 1280px) 18vw, 58vw"
+                className={`relative z-10 h-auto select-none object-contain drop-shadow-[0_22px_28px_rgba(15,23,42,0.18)] transition duration-500 group-hover:-translate-y-1 group-hover:scale-[1.02] ${image.className ?? ""}`}
               />
             </div>
           ) : (
@@ -120,7 +120,7 @@ const promoTiles = [
     image: {
       src: "/storefront-promo-cards.webp",
       alt: "Tarjetas premium con acabado elegante",
-      className: "bottom-1 left-1/2 w-[14.5rem] -translate-x-1/2 sm:bottom-2 sm:w-[15.75rem] xl:bottom-10 xl:left-auto xl:right-0 xl:w-[19.5rem] xl:translate-x-0 2xl:w-[21.5rem]",
+      className: "w-[14rem] sm:w-[15rem] xl:w-[18rem] 2xl:w-[19.5rem]",
     },
   },
   {
@@ -130,7 +130,7 @@ const promoTiles = [
     image: {
       src: "/storefront-promo-stickers-labels.webp",
       alt: "Stickers y etiquetas personalizadas",
-      className: "bottom-0 left-1/2 w-[15.25rem] -translate-x-1/2 sm:bottom-1 sm:w-[16.25rem] xl:bottom-8 xl:left-auto xl:right-0 xl:w-[20.5rem] xl:translate-x-0 2xl:w-[22.75rem]",
+      className: "w-[14.75rem] sm:w-[15.75rem] xl:w-[18.75rem] 2xl:w-[20rem]",
     },
   },
   {
