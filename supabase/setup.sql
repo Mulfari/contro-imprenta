@@ -253,10 +253,6 @@ create table if not exists public.clients (
 create index if not exists clients_created_at_idx
   on public.clients (created_at desc);
 
-create unique index if not exists clients_customer_user_id_idx
-  on public.clients (customer_user_id)
-  where customer_user_id is not null;
-
 alter table public.clients enable row level security;
 
 alter table public.clients add column if not exists name text;
@@ -270,6 +266,10 @@ alter table public.clients add column if not exists reference_files text null;
 alter table public.clients add column if not exists notes text null;
 alter table public.clients add column if not exists created_at timestamptz default now();
 alter table public.clients add column if not exists created_by uuid null;
+
+create unique index if not exists clients_customer_user_id_idx
+  on public.clients (customer_user_id)
+  where customer_user_id is not null;
 
 create table if not exists public.client_files (
   id uuid primary key default gen_random_uuid(),
@@ -343,12 +343,6 @@ create index if not exists orders_created_at_idx
 create index if not exists orders_status_idx
   on public.orders (status);
 
-create index if not exists orders_customer_user_id_idx
-  on public.orders (customer_user_id);
-
-create index if not exists orders_payment_review_status_idx
-  on public.orders (payment_review_status);
-
 alter table public.orders enable row level security;
 
 alter table public.orders add column if not exists client_id uuid null;
@@ -386,6 +380,12 @@ alter table public.orders add column if not exists current_area text null;
 alter table public.orders add column if not exists internal_notes text null;
 alter table public.orders add column if not exists created_at timestamptz default now();
 alter table public.orders add column if not exists created_by uuid null;
+
+create index if not exists orders_customer_user_id_idx
+  on public.orders (customer_user_id);
+
+create index if not exists orders_payment_review_status_idx
+  on public.orders (payment_review_status);
 
 create unique index if not exists orders_order_number_idx
   on public.orders (order_number)
