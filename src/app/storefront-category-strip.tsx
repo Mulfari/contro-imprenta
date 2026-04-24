@@ -3,17 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 
 const items = [
-  { title: "Tarjetas", count: "18 productos", art: "cards" },
-  { title: "Stickers", count: "16 productos", art: "stickers" },
-  { title: "Folletos", count: "12 productos", art: "brochure" },
-  { title: "Pendones", count: "9 productos", art: "rollup" },
-  { title: "Talonarios", count: "7 productos", art: "notepad" },
-  { title: "Etiquetas", count: "21 productos", art: "sticker-labels" },
-  { title: "Invitaciones", count: "14 productos", art: "invitations-card" },
-  { title: "Packaging", count: "11 productos", art: "packaging-real" },
-  { title: "Cuadernos", count: "10 productos", art: "booklet" },
-  { title: "Acrilicos", count: "6 productos", art: "banner" },
-  { title: "Sellos", count: "8 productos", art: "invoice" },
+  { title: "Tarjetas", count: "18 productos", art: "cards", query: "Tarjetas" },
+  { title: "Stickers", count: "16 productos", art: "stickers", query: "Stickers" },
+  { title: "Folletos", count: "12 productos", art: "brochure", query: "Afiches" },
+  { title: "Pendones", count: "9 productos", art: "rollup", query: "Pendones" },
+  { title: "Talonarios", count: "7 productos", art: "notepad", query: "Talonarios" },
+  { title: "Etiquetas", count: "21 productos", art: "sticker-labels", query: "Etiquetas" },
+  { title: "Invitaciones", count: "14 productos", art: "invitations-card", query: "Invitaciones" },
+  { title: "Packaging", count: "11 productos", art: "packaging-real", query: "Packaging" },
+  { title: "Cuadernos", count: "10 productos", art: "booklet", query: "Papeleria" },
+  { title: "Acrilicos", count: "6 productos", art: "banner", query: "Gran formato" },
+  { title: "Sellos", count: "8 productos", art: "invoice", query: "Facturas" },
 ];
 
 const DESKTOP_ITEM_STRIDE = 206;
@@ -270,7 +270,11 @@ function CategoryArt({ art }: { art: string }) {
   return null;
 }
 
-export function StorefrontCategoryStrip() {
+type StorefrontCategoryStripProps = {
+  onCategorySelect: (query: string) => void;
+};
+
+export function StorefrontCategoryStrip({ onCategorySelect }: StorefrontCategoryStripProps) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -455,7 +459,10 @@ export function StorefrontCategoryStrip() {
                     event.preventDefault();
                     event.stopPropagation();
                     dragState.current.hasMoved = false;
+                    return;
                   }
+
+                  onCategorySelect(item.query);
                 }}
               >
                 <div className="mx-auto flex h-28 w-full items-center justify-center md:h-32">

@@ -27,6 +27,21 @@ type CartItem = {
 
 type CommercePanel = "wishlist" | "cart" | null;
 
+type StoredCartItem = {
+  productId: string;
+  quantity: number;
+  options: Record<string, string>;
+};
+
+type ToastMessage = {
+  id: number;
+  message: string;
+  tone: "info" | "success" | "error";
+};
+
+const cartStorageKey = "express-printer-cart";
+const wishlistStorageKey = "express-printer-wishlist";
+
 const categoryGroups = [
   {
     title: "Papeleria comercial",
@@ -61,6 +76,113 @@ function getCartKey(product: StorefrontProduct, options: Record<string, string>)
 
 function parsePrice(price: string) {
   return Number(price.replace(/[^\d.]/g, "")) || 0;
+}
+
+function getProductById(productId: string) {
+  return storefrontProducts.find((product) => product.id === productId) ?? null;
+}
+
+function restoreStoredCart(value: string | null) {
+  if (!value) {
+    return [] as CartItem[];
+  }
+
+  try {
+    const parsed = JSON.parse(value) as StoredCartItem[];
+
+    if (!Array.isArray(parsed)) {
+      return [] as CartItem[];
+    }
+
+    return parsed.flatMap((item) => {
+      const product = getProductById(item.productId);
+
+      if (!product) {
+        return [];
+      }
+
+      const options = item.options && typeof item.options === "object"
+        ? item.options
+        : getDefaultOptions(product);
+
+      return [
+        {
+          key: getCartKey(product, options),
+          product,
+          quantity: Math.max(1, Number(item.quantity) || 1),
+          options,
+        },
+      ];
+    });
+  } catch {
+    return [] as CartItem[];
+  }
+}
+
+function restoreStoredWishlist(value: string | null) {
+  if (!value) {
+    return new Set<string>();
+  }
+
+  try {
+    const parsed = JSON.parse(value) as string[];
+
+    if (!Array.isArray(parsed)) {
+      return new Set<string>();
+    }
+
+    const validIds = new Set(storefrontProducts.map((product) => product.id));
+    return new Set(parsed.filter((productId) => validIds.has(productId)));
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function StorefrontToast({
+  toast,
+  onDone,
+}: {
+  toast: ToastMessage | null;
+  onDone: () => void;
+}) {
+  const [phase, setPhase] = useState<"enter" | "leave">("enter");
+
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+
+    const leaveTimer = window.setTimeout(() => setPhase("leave"), 2800);
+    const cleanupTimer = window.setTimeout(onDone, 3500);
+
+    return () => {
+      window.clearTimeout(leaveTimer);
+      window.clearTimeout(cleanupTimer);
+    };
+  }, [toast, onDone]);
+
+  if (!toast) {
+    return null;
+  }
+
+  const toneClasses =
+    toast.tone === "error"
+      ? "border-rose-200/80 bg-rose-50/92 text-rose-700 shadow-[0_24px_60px_rgba(190,24,93,0.18)]"
+      : toast.tone === "success"
+        ? "border-emerald-200/80 bg-emerald-50/92 text-emerald-700 shadow-[0_24px_60px_rgba(5,150,105,0.16)]"
+        : "border-blue-200/80 bg-blue-50/90 text-slate-700 shadow-[0_24px_60px_rgba(59,130,246,0.14)]";
+
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-5 z-[120] flex justify-center px-4">
+      <div
+        className={`pointer-events-auto w-full max-w-md rounded-[1.35rem] border px-5 py-4 text-center text-sm font-medium backdrop-blur-xl ${toneClasses} ${
+          phase === "enter" ? "toast-enter" : "toast-leave"
+        }`}
+      >
+        <p className="leading-6">{toast.message}</p>
+      </div>
+    </div>
+  );
 }
 
 function CatalogProductCard({
@@ -113,7 +235,18 @@ function CatalogProductCard({
                   : "border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
-              <span aria-hidden="true">♡</span>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
+              </svg>
             </button>
           </div>
           <p className="mt-2 text-sm leading-6 text-slate-600">{product.description}</p>
@@ -527,6 +660,8 @@ export function StorefrontShell() {
   const [customerSession, setCustomerSession] = useState<Session | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState("");
+  const [storageReady, setStorageReady] = useState(false);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -555,6 +690,37 @@ export function StorefrontShell() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    setWishlistIds(restoreStoredWishlist(window.localStorage.getItem(wishlistStorageKey)));
+    setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey)));
+    setStorageReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!storageReady) {
+      return;
+    }
+
+    window.localStorage.setItem(
+      wishlistStorageKey,
+      JSON.stringify(Array.from(wishlistIds)),
+    );
+  }, [storageReady, wishlistIds]);
+
+  useEffect(() => {
+    if (!storageReady) {
+      return;
+    }
+
+    const storedItems: StoredCartItem[] = cartItems.map((item) => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      options: item.options,
+    }));
+
+    window.localStorage.setItem(cartStorageKey, JSON.stringify(storedItems));
+  }, [cartItems, storageReady]);
 
   const isCatalogVisible = catalogOpen || Boolean(debouncedQuery);
 
@@ -592,9 +758,32 @@ export function StorefrontShell() {
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
   const publicAuthEnabled = hasSupabasePublicConfig();
 
+  const showToast = (message: string, tone: ToastMessage["tone"] = "info") => {
+    setToast({
+      id: Date.now(),
+      message,
+      tone,
+    });
+  };
+
   const openCatalog = () => {
     setSearchQuery("");
     setDebouncedQuery("");
+    setCatalogOpen(true);
+    setAccountOpen(false);
+    setActivePanel(null);
+    window.history.pushState(null, "", "#catalogo");
+    window.setTimeout(() => {
+      document.getElementById("catalogo")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
+  const openCatalogWithQuery = (query: string) => {
+    setSearchQuery(query);
+    setDebouncedQuery(query);
     setCatalogOpen(true);
     setAccountOpen(false);
     setActivePanel(null);
@@ -687,11 +876,14 @@ export function StorefrontShell() {
 
     if (cartItems.length === 0) {
       setCheckoutMessage("Agrega productos al carrito antes de continuar.");
+      showToast("Agrega productos al carrito antes de continuar.", "info");
       return;
     }
 
     if (!customerSession) {
-      setCheckoutMessage("Inicia sesion o registrate para crear el pedido y subir tu arte.");
+      const message = "Necesitas iniciar sesion o registrarte para continuar con el pedido.";
+      setCheckoutMessage(message);
+      showToast(message, "error");
       setAccountOpen(true);
       setActivePanel(null);
       return;
@@ -724,12 +916,13 @@ export function StorefrontShell() {
 
       setCartItems([]);
       setCheckoutMessage(payload.message || "Pedido creado.");
+      showToast(payload.message || "Pedido creado.", "success");
       setActivePanel(null);
       setAccountOpen(true);
     } catch (error) {
-      setCheckoutMessage(
-        error instanceof Error ? error.message : "No se pudo crear el pedido.",
-      );
+      const message = error instanceof Error ? error.message : "No se pudo crear el pedido.";
+      setCheckoutMessage(message);
+      showToast(message, "error");
     } finally {
       setIsCheckingOut(false);
     }
@@ -737,6 +930,11 @@ export function StorefrontShell() {
 
   return (
     <main className="min-h-screen bg-[#f3f5f8] text-slate-950">
+      <StorefrontToast
+        key={toast?.id ?? "empty-toast"}
+        toast={toast}
+        onDone={() => setToast(null)}
+      />
       <StorefrontHeader
         searchQuery={searchQuery}
         onSearchQueryChange={handleSearchQueryChange}
@@ -871,7 +1069,7 @@ export function StorefrontShell() {
       ) : (
         <>
           <StorefrontHero />
-          <StorefrontCategoryStrip />
+          <StorefrontCategoryStrip onCategorySelect={openCatalogWithQuery} />
           <StorefrontPromoPanels />
           <StorefrontDealsSection />
           <StorefrontFeatureGridSection />
