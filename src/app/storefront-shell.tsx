@@ -45,28 +45,21 @@ const wishlistStorageKey = "express-printer-wishlist";
 const categoryGroups = [
   {
     title: "Papeleria comercial",
-    items: ["Tarjetas", "Facturas", "Sobres", "Talonarios"],
-  },
-  {
-    title: "Publicidad impresa",
-    items: ["Volantes", "Dipticos", "Tripticos", "Afiches"],
-  },
-  {
-    title: "Etiquetas y stickers",
-    items: ["Etiquetas", "Stickers", "Sellos", "Packaging"],
+    items: ["Tarjetas", "Talonarios", "Facturas", "Invitaciones"],
   },
   {
     title: "Gran formato",
-    items: ["Pendones", "Banners", "Vinil", "Lonas"],
+    items: ["Pendones", "Gran formato", "Roll up", "Publicitario"],
+  },
+  {
+    title: "Etiquetas y stickers",
+    items: ["Stickers", "Etiquetas", "Packaging", "Troquelados"],
+  },
+  {
+    title: "Acabados y usos",
+    items: ["Premium", "Corporativas", "Autocopiativos", "Personalizados"],
   },
 ];
-
-const catalogFilterItems = categoryGroups.flatMap((group) =>
-  group.items.map((item) => ({
-    group: group.title,
-    label: item,
-  })),
-);
 
 function getDefaultOptions(product: StorefrontProduct) {
   return Object.fromEntries(
@@ -439,6 +432,188 @@ function ProductPreviewModal({
   );
 }
 
+function MobileCatalogFilterSheet({
+  open,
+  activeQuery,
+  onClose,
+  onClear,
+  onSelect,
+}: {
+  open: boolean;
+  activeQuery: string;
+  onClose: () => void;
+  onClear: () => void;
+  onSelect: (query: string) => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-[80] xl:hidden">
+      <button
+        type="button"
+        aria-label="Cerrar filtros"
+        className="absolute inset-0 cursor-default bg-slate-950/35 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <section className="absolute inset-x-0 bottom-0 max-h-[78vh] overflow-hidden rounded-t-[1.65rem] bg-white shadow-[0_-24px_70px_rgba(15,23,42,0.22)]">
+        <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Catalogo
+            </p>
+            <h2 className="text-lg font-black tracking-tight text-slate-950">
+              Filtrar productos
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar filtros"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+          >
+            x
+          </button>
+        </div>
+
+        <div className="max-h-[calc(78vh-5rem)] overflow-y-auto px-4 pb-28 pt-4">
+          <button
+            type="button"
+            onClick={onClear}
+            className={`w-full cursor-pointer rounded-xl px-4 py-3 text-sm font-black transition ${
+              activeQuery
+                ? "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                : "bg-slate-950 text-white"
+            }`}
+          >
+            Ver todo el catalogo
+          </button>
+
+          <div className="mt-5 space-y-5">
+            {categoryGroups.map((group) => (
+              <div key={group.title}>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  {group.title}
+                </h3>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {group.items.map((item) => {
+                    const isActive = activeQuery.toLowerCase() === item.toLowerCase();
+
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => onSelect(item)}
+                        className={`min-w-0 cursor-pointer rounded-xl border px-3 py-3 text-left text-sm font-semibold transition ${
+                          isActive
+                            ? "border-slate-950 bg-slate-950 text-white shadow-[0_12px_24px_rgba(15,23,42,0.14)]"
+                            : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white hover:text-slate-950"
+                        }`}
+                      >
+                        <span className="block truncate">{item}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function MobileStorefrontBar({
+  isCatalogVisible,
+  cartCount,
+  wishlistCount,
+  onCatalogClick,
+  onFilterClick,
+  onWishlistClick,
+  onCartClick,
+}: {
+  isCatalogVisible: boolean;
+  cartCount: number;
+  wishlistCount: number;
+  onCatalogClick: () => void;
+  onFilterClick: () => void;
+  onWishlistClick: () => void;
+  onCartClick: () => void;
+}) {
+  const itemClass =
+    "flex min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-[1rem] px-2 py-2 text-[0.68rem] font-black transition";
+
+  return (
+    <nav className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-[64] xl:hidden">
+      <div className="mx-auto flex max-w-md items-center gap-1 rounded-[1.35rem] border border-slate-200/80 bg-white/94 p-1.5 text-slate-600 shadow-[0_22px_58px_rgba(15,23,42,0.22)] backdrop-blur-xl">
+        <button
+          type="button"
+          onClick={onCatalogClick}
+          className={`${itemClass} ${
+            isCatalogVisible ? "bg-slate-950 text-white" : "hover:bg-slate-50 hover:text-slate-950"
+          }`}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 5h16" />
+            <path d="M4 12h16" />
+            <path d="M4 19h16" />
+          </svg>
+          Catalogo
+        </button>
+
+        <button
+          type="button"
+          onClick={onFilterClick}
+          className={`${itemClass} hover:bg-slate-50 hover:text-slate-950`}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 6h16" />
+            <path d="M7 12h10" />
+            <path d="M10 18h4" />
+          </svg>
+          Filtros
+        </button>
+
+        <button
+          type="button"
+          onClick={onWishlistClick}
+          className={`${itemClass} relative hover:bg-slate-50 hover:text-slate-950`}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
+          </svg>
+          Deseados
+          {wishlistCount > 0 ? (
+            <span className="absolute right-2 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ff5b4d] px-1 text-[0.62rem] font-bold text-white">
+              {wishlistCount}
+            </span>
+          ) : null}
+        </button>
+
+        <button
+          type="button"
+          onClick={onCartClick}
+          className={`${itemClass} relative hover:bg-slate-50 hover:text-slate-950`}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="9" cy="19" r="1.75" />
+            <circle cx="18" cy="19" r="1.75" />
+            <path d="M3 4h2l2.3 10.2a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 7H7.2" />
+          </svg>
+          Carrito
+          {cartCount > 0 ? (
+            <span className="absolute right-2 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ffd45f] px-1 text-[0.62rem] font-bold text-slate-950">
+              {cartCount}
+            </span>
+          ) : null}
+        </button>
+      </div>
+    </nav>
+  );
+}
+
 function CommerceDrawer({
   panel,
   cartItems,
@@ -669,6 +844,7 @@ export function StorefrontShell() {
   const [checkoutMessage, setCheckoutMessage] = useState("");
   const [storageReady, setStorageReady] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const accountDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -809,6 +985,7 @@ export function StorefrontShell() {
     setCatalogOpen(true);
     setAccountOpen(false);
     setActivePanel(null);
+    setMobileFilterOpen(false);
     window.history.pushState(null, "", "#catalogo");
     window.setTimeout(() => {
       document.getElementById("catalogo")?.scrollIntoView({
@@ -824,6 +1001,7 @@ export function StorefrontShell() {
     setCatalogOpen(true);
     setAccountOpen(false);
     setActivePanel(null);
+    setMobileFilterOpen(false);
     window.history.pushState(null, "", "#catalogo");
     window.setTimeout(() => {
       document.getElementById("catalogo")?.scrollIntoView({
@@ -837,6 +1015,7 @@ export function StorefrontShell() {
     setCatalogOpen(false);
     setActivePanel(null);
     setSelectedProduct(null);
+    setMobileFilterOpen(false);
   };
 
   const handleSearchQueryChange = (value: string) => {
@@ -852,6 +1031,7 @@ export function StorefrontShell() {
     setSelectedProduct(product);
     setSelectedOptions(getDefaultOptions(product));
     setActivePanel(null);
+    setMobileFilterOpen(false);
   };
 
   const toggleWishlist = (productId: string) => {
@@ -891,6 +1071,7 @@ export function StorefrontShell() {
       ];
     });
     setActivePanel("cart");
+    setMobileFilterOpen(false);
   };
 
   const removeCartItem = (key: string) => {
@@ -967,8 +1148,54 @@ export function StorefrontShell() {
     }
   };
 
+  const clearCatalogFilters = () => {
+    setSearchQuery("");
+    setDebouncedQuery("");
+    setCatalogOpen(true);
+    setMobileFilterOpen(false);
+    setActivePanel(null);
+    setAccountOpen(false);
+    window.history.pushState(null, "", "#catalogo");
+    window.setTimeout(() => {
+      document.getElementById("catalogo")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
+  const selectCatalogFilter = (query: string) => {
+    setSearchQuery(query);
+    setDebouncedQuery(query);
+    setCatalogOpen(true);
+    setMobileFilterOpen(false);
+    setActivePanel(null);
+    setAccountOpen(false);
+    window.history.pushState(null, "", "#catalogo");
+    window.setTimeout(() => {
+      document.getElementById("catalogo")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
+  const openMobileFilters = () => {
+    setCatalogOpen(true);
+    setActivePanel(null);
+    setAccountOpen(false);
+    setMobileFilterOpen(true);
+    window.history.pushState(null, "", "#catalogo");
+    window.setTimeout(() => {
+      document.getElementById("catalogo")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
   return (
-    <main className="relative min-h-screen bg-[#f3f5f8] text-slate-950">
+    <main className="relative min-h-screen bg-[#f3f5f8] pb-24 text-slate-950 xl:pb-0">
       <StorefrontToast
         key={toast?.id ?? "empty-toast"}
         toast={toast}
@@ -1018,66 +1245,6 @@ export function StorefrontShell() {
         <>
           <section id="catalogo" className="catalog-enter mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 2xl:px-10">
             <div className="grid gap-4 xl:grid-cols-[300px_1fr] xl:gap-6">
-              <aside className="catalog-enter-panel rounded-[1.2rem] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] xl:hidden">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      Catalogo
-                    </p>
-                    <h2 className="mt-1 text-lg font-black tracking-tight text-slate-950">
-                      Categorias
-                    </h2>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setDebouncedQuery("");
-                      setCatalogOpen(true);
-                    }}
-                    className={`shrink-0 cursor-pointer rounded-xl px-3.5 py-2 text-xs font-black transition ${
-                      debouncedQuery
-                        ? "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-                        : "bg-slate-950 text-white"
-                    }`}
-                  >
-                    Todos
-                  </button>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {catalogFilterItems.map((item) => {
-                    const isActive = debouncedQuery.toLowerCase() === item.label.toLowerCase();
-
-                    return (
-                      <button
-                        key={`${item.group}-${item.label}`}
-                        type="button"
-                        onClick={() => {
-                          setSearchQuery(item.label);
-                          setDebouncedQuery(item.label);
-                          setCatalogOpen(true);
-                        }}
-                        className={`min-w-0 cursor-pointer rounded-xl border px-3 py-2.5 text-left transition ${
-                          isActive
-                            ? "border-slate-950 bg-slate-950 text-white shadow-[0_12px_24px_rgba(15,23,42,0.14)]"
-                            : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white hover:text-slate-950"
-                        }`}
-                      >
-                        <span className="block truncate text-sm font-black">{item.label}</span>
-                        <span
-                          className={`mt-1 block truncate text-[0.64rem] font-semibold uppercase tracking-[0.12em] ${
-                            isActive ? "text-white/60" : "text-slate-400"
-                          }`}
-                        >
-                          {item.group}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </aside>
-
               <aside className="catalog-enter-panel hidden rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)] xl:block xl:rounded-[1.8rem]">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
                   Catalogo
@@ -1220,6 +1387,32 @@ export function StorefrontShell() {
         onCheckout={handleCheckout}
         isCheckingOut={isCheckingOut}
         checkoutMessage={checkoutMessage}
+      />
+
+      <MobileCatalogFilterSheet
+        open={mobileFilterOpen}
+        activeQuery={debouncedQuery}
+        onClose={() => setMobileFilterOpen(false)}
+        onClear={clearCatalogFilters}
+        onSelect={selectCatalogFilter}
+      />
+
+      <MobileStorefrontBar
+        isCatalogVisible={isCatalogVisible}
+        cartCount={cartCount}
+        wishlistCount={wishlistIds.size}
+        onCatalogClick={openCatalog}
+        onFilterClick={openMobileFilters}
+        onWishlistClick={() => {
+          setActivePanel("wishlist");
+          setAccountOpen(false);
+          setMobileFilterOpen(false);
+        }}
+        onCartClick={() => {
+          setActivePanel("cart");
+          setAccountOpen(false);
+          setMobileFilterOpen(false);
+        }}
       />
     </main>
   );
