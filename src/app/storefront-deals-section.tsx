@@ -1,5 +1,15 @@
 "use client";
 
+import Image from "next/image";
+
+type DealImage = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  className: string;
+};
+
 const deals = [
   {
     title: "Tarjetas ejecutivas",
@@ -9,6 +19,13 @@ const deals = [
     discount: "-$3",
     tint: "from-[#fff7d6] via-white to-[#fff2b3]",
     note: "Acabado mate o brillante",
+    image: {
+      src: "/storefront-promo-cards-premium.webp",
+      alt: "Tarjetas ejecutivas premium",
+      width: 1000,
+      height: 640,
+      className: "w-[13.75rem] sm:w-[18.25rem] lg:w-[15.5rem] xl:w-[16.5rem]",
+    },
   },
   {
     title: "Stickers troquelados",
@@ -18,27 +35,37 @@ const deals = [
     discount: "-$4",
     tint: "from-[#dff3ff] via-white to-[#cae8ff]",
     note: "Ideales para packaging",
+    image: {
+      src: "/storefront-promo-stickers-labels-trimmed.webp",
+      alt: "Stickers troquelados para packaging",
+      width: 1024,
+      height: 824,
+      className: "w-[13.5rem] sm:w-[17.75rem] lg:w-[15.25rem] xl:w-[16.25rem]",
+    },
   },
 ];
 
-function DealArt({ tint }: { tint: string }) {
+function DealArt({ tint, image }: { tint: string; image: DealImage }) {
   return (
-    <div className={`relative h-[13.5rem] overflow-hidden rounded-[1.3rem] bg-gradient-to-br ${tint} p-4 sm:h-[18.8rem] sm:rounded-[1.6rem]`}>
+    <div className={`relative flex h-[13.5rem] items-center justify-center overflow-hidden rounded-[1.3rem] bg-gradient-to-br ${tint} p-4 sm:h-[18.8rem] sm:rounded-[1.6rem]`}>
       <div className="absolute left-2 top-0 h-20 w-36 -rotate-[16deg] rounded-full bg-white/45 blur-xl" />
       <div className="absolute right-3 top-4 h-16 w-28 rounded-full bg-white/38 blur-xl" />
-      <div className="absolute left-7 top-15 h-30 w-22 -rotate-[12deg] rounded-[1.5rem] bg-white shadow-[0_24px_46px_rgba(15,23,42,0.12)] transition duration-300 group-hover:-translate-y-1 group-hover:rotate-[-9deg]" />
-      <div className="absolute left-24 top-23 h-30 w-22 rotate-[10deg] rounded-[1.5rem] bg-slate-950 shadow-[0_24px_46px_rgba(15,23,42,0.14)] transition duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-[12deg]" />
-      <div className="absolute left-13 top-11 h-7 w-16 rounded-full bg-[#facc15] transition duration-300 group-hover:scale-105" />
-      <div className="absolute left-12 top-21 h-2.5 w-14 rounded-full bg-slate-200" />
-      <div className="absolute left-12 top-26 h-2.5 w-11 rounded-full bg-slate-200" />
-      <div className="absolute right-6 bottom-6 h-24 w-24 rounded-full bg-white/65 blur-2xl" />
+      <div className="absolute inset-x-8 bottom-5 h-10 rounded-full bg-slate-900/14 blur-2xl" />
+      <Image
+        src={image.src}
+        alt={image.alt}
+        width={image.width}
+        height={image.height}
+        sizes="(min-width: 1280px) 15vw, (min-width: 1024px) 18vw, (min-width: 640px) 46vw, 74vw"
+        className={`relative z-10 h-auto max-h-[88%] max-w-none object-contain drop-shadow-[0_22px_34px_rgba(15,23,42,0.18)] transition duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02] ${image.className}`}
+      />
     </div>
   );
 }
 
 export function StorefrontDealsSection() {
   return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 pb-10 sm:px-6 sm:pb-14 lg:px-8 2xl:px-10">
+    <section id="promociones" className="mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 pb-10 sm:px-6 sm:pb-14 lg:px-8 2xl:px-10">
       <div className="grid gap-5 sm:gap-6 xl:grid-cols-[1.45fr_420px]">
         <div>
           <div className="mb-5 flex items-center justify-between gap-4 border-b border-slate-200 pb-4 sm:mb-6">
@@ -80,7 +107,7 @@ export function StorefrontDealsSection() {
                   >
                     ♡
                   </button>
-                  <DealArt tint={deal.tint} />
+                  <DealArt tint={deal.tint} image={deal.image} />
                 </div>
 
                 <div className="flex flex-col justify-start px-1 pb-2 pt-1 lg:px-0 lg:pb-0">

@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 
 const promoTickerItems = [
   "Impresion express para tarjetas, stickers y pendones",
@@ -26,6 +26,13 @@ const categoryMenu = [
     title: "Gran formato",
     items: ["Pendones", "Banners", "Vinil", "Lonas"],
   },
+];
+const navLinks = [
+  { label: "Catalogo", href: "#catalogo" },
+  { label: "Destacados", href: "#destacados" },
+  { label: "Nuevos productos", href: "#nuevos-productos" },
+  { label: "Promociones", href: "#promociones" },
+  { label: "Empresas", href: "#empresas" },
 ];
 
 type StorefrontHeaderProps = {
@@ -63,6 +70,27 @@ export function StorefrontHeader({
 
     return () => window.removeEventListener("mousedown", handlePointerDown);
   }, []);
+
+  const handleSectionLinkClick = (
+    event: ReactMouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    event.preventDefault();
+
+    const sectionId = href.slice(1);
+
+    onSearchQueryChange("");
+    setCategoryOpen(false);
+    setActiveCategoryIndex(null);
+    window.history.pushState(null, "", href);
+    window.setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
   return (
     <>
       <div className="hidden border-b border-slate-800 bg-slate-950 text-white sm:block">
@@ -444,21 +472,16 @@ export function StorefrontHeader({
           </div>
 
           <div className="hidden flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 text-sm font-medium text-slate-700 lg:flex">
-            <a href="#catalogo" className="transition hover:text-slate-950">
-              Catalogo
-            </a>
-            <a href="#destacados" className="transition hover:text-slate-950">
-              Destacados
-            </a>
-            <button type="button" className="cursor-pointer transition hover:text-slate-950">
-              Nuevos productos
-            </button>
-            <button type="button" className="cursor-pointer transition hover:text-slate-950">
-              Promociones
-            </button>
-            <button type="button" className="cursor-pointer transition hover:text-slate-950">
-              Empresas
-            </button>
+            {navLinks.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={(event) => handleSectionLinkClick(event, item.href)}
+                className="transition hover:text-slate-950"
+              >
+                {item.label}
+              </a>
+            ))}
           </div>
         </div>
       </header>

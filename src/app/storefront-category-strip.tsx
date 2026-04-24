@@ -347,7 +347,7 @@ export function StorefrontCategoryStrip() {
   };
 
   return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
+    <section id="catalogo" className="mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
       <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[2.9rem_minmax(0,1fr)_2.9rem]">
         <button
           type="button"

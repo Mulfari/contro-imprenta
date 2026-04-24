@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
 const products = [
@@ -10,6 +11,13 @@ const products = [
     previousPrice: "$34",
     discount: "-$5",
     tint: "from-[#fff7d6] via-white to-[#fff1bf]",
+    image: {
+      src: "/storefront-promo-cards-premium.webp",
+      alt: "Tarjetas soft touch",
+      width: 1000,
+      height: 640,
+      className: "w-[12.25rem] sm:w-[14.5rem]",
+    },
   },
   {
     title: "Stickers troquelados",
@@ -18,6 +26,13 @@ const products = [
     previousPrice: "$23",
     discount: "-$4",
     tint: "from-[#dff3ff] via-white to-[#cae8ff]",
+    image: {
+      src: "/storefront-promo-stickers-labels-trimmed.webp",
+      alt: "Stickers troquelados",
+      width: 1024,
+      height: 824,
+      className: "w-[11.75rem] sm:w-[14rem]",
+    },
   },
   {
     title: "Pendon express",
@@ -26,6 +41,13 @@ const products = [
     previousPrice: "$39",
     discount: "-$7",
     tint: "from-[#efe4ff] via-white to-[#e2d7ff]",
+    image: {
+      src: "/storefront-promo-banners-posters-transparent.webp",
+      alt: "Pendon express",
+      width: 920,
+      height: 885,
+      className: "w-[10.75rem] sm:w-[12.25rem]",
+    },
   },
   {
     title: "Invitaciones deluxe",
@@ -34,6 +56,13 @@ const products = [
     previousPrice: "$33",
     discount: "-$6",
     tint: "from-[#ffe0ea] via-white to-[#ffd2df]",
+    image: {
+      src: "/storefront-invitations.webp",
+      alt: "Invitaciones deluxe",
+      width: 420,
+      height: 420,
+      className: "w-[10.5rem] sm:w-[12.5rem]",
+    },
   },
   {
     title: "Sobres membretados",
@@ -42,6 +71,13 @@ const products = [
     previousPrice: "$22",
     discount: "-$4",
     tint: "from-[#f3f4f6] via-white to-[#e5e7eb]",
+    image: {
+      src: "/storefront-invoices.webp",
+      alt: "Sobres membretados",
+      width: 420,
+      height: 420,
+      className: "w-[10.5rem] sm:w-[12rem]",
+    },
   },
   {
     title: "Etiquetas metalizadas",
@@ -50,6 +86,13 @@ const products = [
     previousPrice: "$22",
     discount: "-$4",
     tint: "from-[#eef2ff] via-white to-[#e4e9ff]",
+    image: {
+      src: "/storefront-labels.webp",
+      alt: "Etiquetas metalizadas",
+      width: 420,
+      height: 420,
+      className: "w-[10.75rem] sm:w-[12.25rem]",
+    },
   },
   {
     title: "Talonarios autocopiativos",
@@ -58,6 +101,13 @@ const products = [
     previousPrice: "$31",
     discount: "-$7",
     tint: "from-[#e8ffe7] via-white to-[#d8ffd5]",
+    image: {
+      src: "/storefront-promo-invoices-receipts-transparent.webp",
+      alt: "Talonarios autocopiativos",
+      width: 1040,
+      height: 670,
+      className: "w-[13.25rem] sm:w-[15.5rem]",
+    },
   },
   {
     title: "Vinil adhesivo",
@@ -66,6 +116,13 @@ const products = [
     previousPrice: "$35",
     discount: "-$7",
     tint: "from-[#fff3cf] via-white to-[#ffe7af]",
+    image: {
+      src: "/storefront-packaging.webp",
+      alt: "Vinil adhesivo",
+      width: 420,
+      height: 420,
+      className: "w-[10.75rem] sm:w-[12.25rem]",
+    },
   },
 ];
 
@@ -151,12 +208,17 @@ function SideFeature() {
         </button>
       </div>
 
-      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[78%] w-[52%] sm:block">
-        <div className="absolute bottom-2 right-4 h-full w-10 rounded-full bg-white/14" />
-        <div className="absolute bottom-10 right-14 h-48 w-20 rounded-[1.5rem] bg-white shadow-[0_28px_52px_rgba(0,0,0,0.24)]" />
-        <div className="absolute bottom-24 right-28 h-36 w-16 rounded-[1.2rem] bg-[#facc15] shadow-[0_28px_52px_rgba(0,0,0,0.24)]" />
-        <div className="absolute bottom-10 right-30 h-24 w-24 rounded-full bg-[#38bdf8]/18 blur-2xl" />
-        <div className="absolute bottom-28 right-8 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[78%] w-[58%] sm:block">
+        <div className="absolute bottom-4 right-8 h-16 w-64 rounded-full bg-black/40 blur-2xl" />
+        <div className="absolute bottom-8 right-4 h-24 w-24 rounded-full bg-[#38bdf8]/18 blur-2xl" />
+        <Image
+          src="/storefront-promo-invoices-receipts-transparent.webp"
+          alt="Papeleria comercial impresa"
+          width={1040}
+          height={670}
+          sizes="(min-width: 1280px) 22vw, 40vw"
+          className="absolute bottom-1 right-[-3.5rem] h-auto w-[25rem] max-w-none drop-shadow-[0_28px_40px_rgba(0,0,0,0.28)] lg:right-[-5rem] xl:w-[24rem]"
+        />
       </div>
     </article>
   );
@@ -169,6 +231,7 @@ function ProductCard({
   previousPrice,
   discount,
   tint,
+  image,
 }: {
   title: string;
   category: string;
@@ -176,6 +239,13 @@ function ProductCard({
   previousPrice: string;
   discount: string;
   tint: string;
+  image: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+    className: string;
+  };
 }) {
   return (
     <article className="group relative border-b border-slate-200 px-4 py-4 last:border-b-0 sm:px-5 sm:py-5 md:border-b-0 md:border-r md:last:border-r-0">
@@ -190,14 +260,16 @@ function ProductCard({
         <HeartIcon />
       </button>
 
-      <div className={`flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br ${tint} sm:h-52`}>
-        <div className="relative h-32 w-28">
-          <div className="absolute inset-0 rotate-[8deg] rounded-[1.45rem] bg-white shadow-[0_20px_40px_rgba(15,23,42,0.12)] transition duration-300 group-hover:-translate-y-1 group-hover:rotate-[10deg]" />
-          <div className="absolute left-[-1rem] top-7 h-28 w-24 -rotate-[9deg] rounded-[1.3rem] bg-slate-950 shadow-[0_20px_40px_rgba(15,23,42,0.14)] transition duration-300 group-hover:translate-x-1 group-hover:translate-y-1" />
-          <div className="absolute left-4 top-4 h-4 w-14 rounded-full bg-[#facc15]" />
-          <div className="absolute left-6 top-12 h-2.5 w-10 rounded-full bg-slate-200" />
-          <div className="absolute left-6 top-[4.45rem] h-2.5 w-7 rounded-full bg-slate-200" />
-        </div>
+      <div className={`relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br ${tint} sm:h-52`}>
+        <div className="absolute inset-x-9 bottom-4 h-8 rounded-full bg-slate-900/12 blur-2xl" />
+        <Image
+          src={image.src}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          sizes="(min-width: 1280px) 13vw, (min-width: 768px) 32vw, 76vw"
+          className={`relative z-10 h-auto max-h-[88%] max-w-none object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] transition duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02] ${image.className}`}
+        />
       </div>
 
       <div className="mt-4 flex items-center gap-2 text-lg font-semibold">
@@ -239,7 +311,7 @@ export function StorefrontFeatureGridSection() {
   const canGoNext = startIndex + visibleCount < products.length;
 
   return (
-    <section className="mx-auto w-full max-w-[112rem] px-4 pb-10 sm:px-6 sm:pb-16 lg:px-8 2xl:px-10">
+    <section id="nuevos-productos" className="mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 pb-10 sm:px-6 sm:pb-16 lg:px-8 2xl:px-10">
       <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_16px_36px_rgba(15,23,42,0.04)] sm:rounded-[2rem] xl:grid xl:grid-cols-[430px_1fr]">
         <SideFeature />
 

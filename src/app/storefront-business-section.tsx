@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 const businessBenefits = [
   "Precios preferenciales para compras recurrentes",
   "Produccion por volumen para sedes, marcas y eventos",
@@ -9,9 +11,9 @@ const businessBenefits = [
 
 export function StorefrontBusinessSection() {
   return (
-    <section className="w-full bg-white">
+    <section id="empresas" className="w-full scroll-mt-6 bg-white">
       <div className="mx-auto grid w-full max-w-[104rem] gap-6 px-4 py-9 sm:px-5 sm:py-14 lg:grid-cols-[1.02fr_0.98fr] lg:px-6">
-        <div className="relative min-h-[19rem] overflow-hidden rounded-[1.45rem] border border-slate-200 bg-[linear-gradient(140deg,#f8fafc_0%,#eef4ff_54%,#fff4cf_100%)] sm:min-h-[25rem] sm:rounded-[1.8rem]">
+        <div className="relative min-h-[24rem] overflow-hidden rounded-[1.45rem] border border-slate-200 bg-[linear-gradient(140deg,#f8fafc_0%,#eef4ff_54%,#fff4cf_100%)] sm:min-h-[25rem] sm:rounded-[1.8rem]">
           <div className="absolute inset-y-0 left-0 w-[72%] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.82),transparent_48%)]" />
           <div className="absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#fbbf24]/18 blur-3xl" />
 
@@ -27,36 +29,15 @@ export function StorefrontBusinessSection() {
             </p>
           </div>
 
-          <div className="absolute bottom-6 left-8 h-40 w-32 rotate-[-8deg] rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_20px_34px_rgba(15,23,42,0.12)] sm:bottom-7 sm:left-10 sm:h-56 sm:w-44 sm:rounded-[1.9rem] sm:shadow-[0_26px_42px_rgba(15,23,42,0.14)]">
-            <div className="h-full w-full rounded-[1.9rem] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
-              <div className="h-4 w-20 rounded-full bg-[#3558ff]" />
-              <div className="mt-5 space-y-2">
-                <div className="h-3 w-24 rounded-full bg-slate-200" />
-                <div className="h-3 w-20 rounded-full bg-slate-200" />
-                <div className="h-20 rounded-[1.2rem] bg-[#eff6ff]" />
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                <div className="h-10 rounded-xl bg-slate-100" />
-                <div className="h-10 rounded-xl bg-slate-100" />
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute bottom-10 left-28 h-30 w-24 rotate-[8deg] rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_18px_28px_rgba(15,23,42,0.1)] sm:bottom-12 sm:left-36 sm:h-40 sm:w-32 sm:rounded-[1.6rem] sm:shadow-[0_22px_34px_rgba(15,23,42,0.12)]">
-            <div className="p-4">
-              <div className="h-3 w-16 rounded-full bg-[#fbbf24]" />
-              <div className="mt-4 h-16 rounded-[1rem] bg-[#e0ecff]" />
-              <div className="mt-4 h-3 w-20 rounded-full bg-slate-200" />
-              <div className="mt-2 h-3 w-14 rounded-full bg-slate-200" />
-            </div>
-          </div>
-
-          <div className="absolute bottom-14 left-46 h-24 w-18 rotate-[-4deg] rounded-[1.1rem] bg-[#0f172a] shadow-[0_18px_28px_rgba(15,23,42,0.16)] sm:bottom-16 sm:left-56 sm:h-32 sm:w-24 sm:rounded-[1.35rem] sm:shadow-[0_20px_34px_rgba(15,23,42,0.18)]">
-            <div className="p-4">
-              <div className="h-2.5 w-10 rounded-full bg-white/70" />
-              <div className="mt-4 h-14 rounded-[0.9rem] bg-white/10" />
-            </div>
-          </div>
+          <div className="absolute inset-x-8 bottom-7 h-14 rounded-full bg-slate-900/12 blur-2xl sm:inset-x-16 sm:bottom-10" />
+          <Image
+            src="/storefront-promo-banners-posters-transparent.webp"
+            alt="Pendones y afiches para empresas"
+            width={920}
+            height={885}
+            sizes="(min-width: 1024px) 42vw, 84vw"
+            className="absolute bottom-[-6rem] right-[-4rem] h-auto w-[17rem] max-w-none drop-shadow-[0_28px_42px_rgba(15,23,42,0.18)] sm:bottom-[-0.75rem] sm:right-[-1.5rem] sm:w-[27rem] lg:right-[-2rem] lg:w-[29rem] xl:right-2 xl:w-[31rem]"
+          />
 
           <div className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-950 backdrop-blur-sm sm:right-10 sm:top-8 sm:h-14 sm:w-14">
             <svg

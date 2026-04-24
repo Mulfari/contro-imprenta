@@ -173,7 +173,7 @@ const promoTiles = [
 
 export function StorefrontPromoPanels() {
   return (
-    <section className="mx-auto w-full max-w-[112rem] pb-7 sm:px-4 sm:pb-10 lg:px-6 xl:px-4 2xl:px-10">
+    <section id="destacados" className="mx-auto w-full max-w-[112rem] scroll-mt-6 pb-7 sm:px-4 sm:pb-10 lg:px-6 xl:px-4 2xl:px-10">
       <div className="sm:hidden">
         <div
           className="storefront-strip-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto"
