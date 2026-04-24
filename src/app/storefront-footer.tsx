@@ -35,20 +35,27 @@ export function StorefrontFooter() {
 
         <div className="space-y-2 text-sm text-slate-300 lg:text-right">
           <p>
-            WhatsApp:
-            {" "}
-            <a href="#" className="font-medium text-white transition hover:text-slate-100">
-              +58 000-0000000
+            WhatsApp:{" "}
+            <a
+              href="https://wa.me/584243390487?text=Hola%2C%20necesito%20ayuda%20con%20mi%20pedido%20en%20Express%20Printer."
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-white transition hover:text-slate-100"
+            >
+              +58 424-339-0487
             </a>
           </p>
           <p>
-            Correo:
-            {" "}
-            <a href="#" className="font-medium text-white transition hover:text-slate-100">
-              hola@expressprinter.com
+            Correo:{" "}
+            <a
+              href="mailto:expressprinterpedidos@gmail.com"
+              className="font-medium text-white transition hover:text-slate-100"
+            >
+              expressprinterpedidos@gmail.com
             </a>
           </p>
-          <p>Lunes a Sabado, 8:00 AM - 6:00 PM</p>
+          <p>Lunes a viernes, 8:00 AM - 6:00 PM</p>
+          <p>Sabados, 9:00 AM - 2:00 PM</p>
         </div>
       </div>
 
@@ -56,12 +63,6 @@ export function StorefrontFooter() {
         <div className="mx-auto flex w-full max-w-[118rem] flex-col gap-3 px-4 py-5 text-sm text-slate-400 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 2xl:px-10">
           <p>© 2026 Express Printer. Todos los derechos reservados.</p>
           <div className="flex flex-wrap gap-4">
-            <a href="#" className="transition hover:text-white">
-              Terminos
-            </a>
-            <a href="#" className="transition hover:text-white">
-              Privacidad
-            </a>
             <a href="/login" className="transition hover:text-white">
               Panel administrativo
             </a>

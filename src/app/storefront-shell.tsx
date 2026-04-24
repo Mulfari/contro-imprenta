@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
@@ -662,6 +662,7 @@ export function StorefrontShell() {
   const [checkoutMessage, setCheckoutMessage] = useState("");
   const [storageReady, setStorageReady] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  const accountDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -721,6 +722,35 @@ export function StorefrontShell() {
 
     window.localStorage.setItem(cartStorageKey, JSON.stringify(storedItems));
   }, [cartItems, storageReady]);
+
+  useEffect(() => {
+    if (!accountOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+
+      if (!target) {
+        return;
+      }
+
+      if (
+        accountDropdownRef.current?.contains(target) ||
+        target.closest("[data-account-trigger='true']")
+      ) {
+        return;
+      }
+
+      setAccountOpen(false);
+    };
+
+    window.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      window.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [accountOpen]);
 
   const isCatalogVisible = catalogOpen || Boolean(debouncedQuery);
 
@@ -886,6 +916,7 @@ export function StorefrontShell() {
       showToast(message, "error");
       setAccountOpen(true);
       setActivePanel(null);
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -919,6 +950,7 @@ export function StorefrontShell() {
       showToast(payload.message || "Pedido creado.", "success");
       setActivePanel(null);
       setAccountOpen(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       const message = error instanceof Error ? error.message : "No se pudo crear el pedido.";
       setCheckoutMessage(message);
@@ -929,7 +961,7 @@ export function StorefrontShell() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f3f5f8] text-slate-950">
+    <main className="relative min-h-screen bg-[#f3f5f8] text-slate-950">
       <StorefrontToast
         key={toast?.id ?? "empty-toast"}
         toast={toast}
@@ -959,8 +991,11 @@ export function StorefrontShell() {
       />
 
       {accountOpen ? (
-        <div className="pointer-events-none fixed inset-x-0 top-[7.35rem] z-[70] px-4 sm:px-6 lg:px-8 2xl:px-10">
-          <div className="mx-auto flex w-full max-w-[112rem] justify-end">
+        <div className="pointer-events-none absolute inset-x-0 top-[7.35rem] z-[70] px-4 sm:px-6 lg:px-8 2xl:px-10">
+          <div
+            ref={accountDropdownRef}
+            className="mx-auto flex w-full max-w-[112rem] justify-end"
+          >
             <CustomerAccountClient
               hasPublicAuth={publicAuthEnabled}
               onClose={() => setAccountOpen(false)}

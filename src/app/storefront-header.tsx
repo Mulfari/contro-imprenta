@@ -136,6 +136,7 @@ export function StorefrontHeader({
                 type="button"
                 onClick={onAccountClick}
                 aria-label="Mi cuenta"
+                data-account-trigger="true"
                 className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border transition ${
                   isAccountActive
                     ? "border-slate-950 bg-slate-950 text-white"
@@ -434,6 +435,7 @@ export function StorefrontHeader({
               <button
                 type="button"
                 onClick={onAccountClick}
+                data-account-trigger="true"
                 className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
                   isAccountActive
                     ? "border-slate-950 bg-slate-950 text-white"
@@ -553,7 +555,7 @@ export function StorefrontHeader({
       </section>
 
       <a
-        href="https://wa.me/351922250664?text=Hola%2C%20necesito%20ayuda%20con%20mi%20pedido%20en%20Express%20Printer."
+        href="https://wa.me/584243390487?text=Hola%2C%20necesito%20ayuda%20con%20mi%20pedido%20en%20Express%20Printer."
         target="_blank"
         rel="noreferrer"
         aria-label="WhatsApp"

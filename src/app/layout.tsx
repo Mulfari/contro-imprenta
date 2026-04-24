@@ -13,8 +13,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Express Printer",
-  description: "Tienda online y panel administrativo para Express Printer.",
+  title: {
+    default: "Express Printer | Imprenta online",
+    template: "%s | Express Printer",
+  },
+  description:
+    "Impresion comercial, publicitaria y corporativa con pedidos online, arte digital y seguimiento de pagos para Express Printer.",
+  metadataBase: new URL("https://expressprinter.vercel.app"),
+  openGraph: {
+    title: "Express Printer | Imprenta online",
+    description:
+      "Tarjetas, stickers, pendones, afiches, talonarios y papeleria comercial con pedidos online.",
+    siteName: "Express Printer",
+    type: "website",
+    locale: "es_VE",
+  },
   icons: {
     icon: "/favicon-x.webp",
     shortcut: "/favicon-x.webp",
