@@ -147,12 +147,12 @@ const promoTiles = [
     theme: "ink" as const,
     compact: true,
     image: {
-      src: "/storefront-promo-banners-posters-clean.webp",
+      src: "/storefront-promo-banners-posters-transparent.webp",
       alt: "Pendones y afiches impresos",
       width: 920,
       height: 885,
-      className: "w-[13rem] max-w-none sm:w-[14.5rem] lg:w-[15.5rem] xl:w-[10.75rem] 2xl:w-[12.25rem]",
-      frameClassName: "translate-y-2 sm:-mr-5 lg:-mr-7 xl:-mr-4 xl:translate-y-1",
+      className: "w-[13rem] max-w-none sm:w-[14.5rem] lg:w-[15.5rem] xl:w-[9.5rem] 2xl:w-[11rem]",
+      frameClassName: "translate-y-2 sm:-mr-5 lg:-mr-7 xl:mr-0 xl:translate-y-1",
     },
   },
   {
@@ -161,12 +161,12 @@ const promoTiles = [
     theme: "paper" as const,
     compact: true,
     image: {
-      src: "/storefront-promo-invoices-receipts-clean.webp",
+      src: "/storefront-promo-invoices-receipts-transparent.webp",
       alt: "Talonarios y recibos impresos",
       width: 1040,
       height: 670,
-      className: "w-[14.5rem] max-w-none sm:w-[16.25rem] lg:w-[17.5rem] xl:w-[12rem] 2xl:w-[13.75rem]",
-      frameClassName: "translate-y-1 sm:-mr-6 lg:-mr-8 xl:-mr-5 xl:translate-y-2",
+      className: "w-[14.5rem] max-w-none sm:w-[16.25rem] lg:w-[17.5rem] xl:w-[10.5rem] 2xl:w-[12.25rem]",
+      frameClassName: "translate-y-1 sm:-mr-6 lg:-mr-8 xl:mr-0 xl:translate-y-2",
     },
   },
 ];

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="670" viewBox="0 0 1040 670" fill="none">
+  <defs>
+    <linearGradient id="navy" x1="120" y1="60" x2="760" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17263a"/>
+      <stop offset="0.55" stop-color="#07111f"/>
+      <stop offset="1" stop-color="#12243a"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="142" y1="72" x2="480" y2="565" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffd449"/>
+      <stop offset="0.55" stop-color="#f4b51d"/>
+      <stop offset="1" stop-color="#b87608"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="630" y1="178" x2="958" y2="522" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#46d7ff"/>
+      <stop offset="1" stop-color="#1162b3"/>
+    </linearGradient>
+    <filter id="deep-shadow" x="-15%" y="-15%" width="135%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="20" flood-color="#020617" flood-opacity="0.22"/>
+    </filter>
+    <filter id="paper-shadow" x="-15%" y="-15%" width="130%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#020617" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="514" cy="610" rx="396" ry="34" fill="#020617" opacity="0.14"/>
+
+  <g filter="url(#deep-shadow)" transform="translate(98 50) rotate(-5 220 285)">
+    <rect x="0" y="0" width="392" height="540" rx="14" fill="#d1d5db"/>
+    <rect x="12" y="18" width="368" height="500" rx="10" fill="#f8fafc"/>
+    <path d="M12 18H380V176L12 402V18Z" fill="url(#gold)"/>
+    <path d="M12 164C116 102 238 76 380 80V518H12V164Z" fill="url(#navy)"/>
+    <path d="M12 392C126 362 241 312 380 212V518H12V392Z" fill="url(#gold)"/>
+    <path d="M74 130H300" stroke="#f8fafc" stroke-width="17" stroke-linecap="round"/>
+    <path d="M74 168H154" stroke="#ffd449" stroke-width="7" stroke-linecap="round"/>
+    <text x="62" y="126" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800">Talonarios</text>
+    <path d="M190 210C276 205 338 221 380 252V518H142C148 389 162 287 190 210Z" fill="#f8fafc"/>
+    <path d="M130 356C174 420 239 456 351 470C286 496 202 498 98 472C114 434 125 394 130 356Z" fill="#eef2f7"/>
+    <path d="M130 356C171 399 206 429 260 448C208 459 158 448 98 472C114 434 125 394 130 356Z" fill="#f8fafc"/>
+    <path d="M202 283H338" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M202 318H338" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M202 353H338" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M202 388H338" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M227 431H342" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <g filter="url(#paper-shadow)" transform="translate(545 180) rotate(5 221 170)">
+    <rect x="0" y="0" width="442" height="340" rx="10" fill="url(#navy)"/>
+    <path d="M0 218C105 152 238 110 442 98V340H0V218Z" fill="url(#cyan)"/>
+    <path d="M0 292C92 256 185 203 290 118H442V340H0V292Z" fill="#f8fafc"/>
+    <path d="M0 315C74 280 146 242 236 172L86 340H0V315Z" fill="url(#gold)"/>
+    <text x="58" y="88" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="800">Recibos</text>
+    <path d="M60 116H127" stroke="#38bdf8" stroke-width="7" stroke-linecap="round"/>
+    <text x="318" y="86" fill="#dc2626" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="600">Nº 0001</text>
+  </g>
+
+  <g filter="url(#paper-shadow)" transform="translate(636 248) rotate(4 170 125)">
+    <rect x="0" y="0" width="340" height="250" rx="12" fill="#f8fafc"/>
+    <rect x="0.5" y="0.5" width="339" height="249" rx="11.5" stroke="#cbd5e1"/>
+    <path d="M34 50H294" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M34 86H294" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M34 122H294" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M34 158H222" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M246 151H304V185H246V151Z" stroke="#64748b" stroke-width="2"/>
+    <text x="34" y="33" fill="#1e3a8a" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">RECIBI DE</text>
+    <text x="34" y="70" fill="#1e3a8a" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">LA SUMA DE</text>
+    <text x="34" y="107" fill="#1e3a8a" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">POR CONCEPTO DE</text>
+    <text x="270" y="176" fill="#1e3a8a" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="800">$</text>
+    <text x="238" y="224" fill="#1e3a8a" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">FIRMA</text>
+  </g>
+</svg>
