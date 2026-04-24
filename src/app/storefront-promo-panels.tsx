@@ -61,9 +61,9 @@ function PromoTile({
 
   return (
     <article
-      className={`group overflow-hidden rounded-[1.45rem] ${palette.wrapper} shadow-[0_16px_34px_rgba(15,23,42,0.07)] transition duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1)] sm:rounded-[2rem] lg:hover:-translate-y-1`}
+      className={`group h-full overflow-hidden rounded-[1.45rem] ${palette.wrapper} shadow-[0_16px_34px_rgba(15,23,42,0.07)] transition duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1)] sm:rounded-[2rem] lg:hover:-translate-y-1`}
     >
-      <div className={`grid h-full gap-4 p-5 sm:gap-6 sm:p-8 ${compact ? "lg:grid-cols-[1fr_0.9fr]" : "lg:grid-cols-[0.95fr_1.05fr]"}`}>
+      <div className={`grid h-full gap-4 p-5 sm:gap-5 sm:p-6 lg:p-7 xl:p-8 ${compact ? "lg:grid-cols-[0.86fr_1.14fr] xl:grid-cols-[0.78fr_1.22fr]" : "lg:grid-cols-[0.95fr_1.05fr]"}`}>
         <div className="flex flex-col justify-between">
           <div>
             <p className={`text-[0.68rem] font-semibold uppercase tracking-[0.18em] sm:text-sm sm:tracking-[0.22em] ${palette.eyebrow}`}>
@@ -71,20 +71,20 @@ function PromoTile({
             </p>
             <h2
               className={`mt-3 whitespace-pre-line font-black leading-none tracking-tight sm:mt-4 ${
-                compact ? "text-[2rem] sm:text-3xl xl:text-[2.55rem]" : "text-[2.2rem] sm:text-[2.45rem] xl:text-[3.2rem]"
+                compact ? "text-[2rem] sm:text-[1.85rem] lg:text-3xl xl:text-[2.55rem]" : "text-[2.2rem] sm:text-[2rem] lg:text-[2.35rem] xl:text-[3.2rem]"
               }`}
             >
               {title}
             </h2>
           </div>
 
-          <span className="mt-5 inline-flex w-fit items-center gap-2 rounded-xl bg-white/88 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-sm backdrop-blur-sm sm:mt-8 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-sm">
+          <span className="mt-5 inline-flex w-fit items-center gap-2 rounded-xl bg-white/88 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-sm backdrop-blur-sm sm:mt-6 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-sm">
             Ver mas
             <span aria-hidden="true">›</span>
           </span>
         </div>
 
-        <div className={`relative ${compact ? "min-h-[8.5rem] sm:min-h-[12rem]" : image ? "flex min-h-[10.25rem] items-center justify-center sm:min-h-[12.5rem] xl:min-h-[19rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
+        <div className={`relative ${compact ? image ? "flex min-h-[9rem] items-center justify-center sm:min-h-[10.5rem] lg:min-h-[11.5rem] xl:min-h-[8.5rem]" : "min-h-[8.5rem] sm:min-h-[12rem]" : image ? "flex min-h-[10.25rem] items-center justify-center sm:min-h-[12.5rem] xl:min-h-[19rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
           {image ? (
             <div className={`relative flex w-full items-center justify-center ${image.frameClassName ?? ""}`}>
               <div className={`absolute bottom-2 h-10 w-4/5 rounded-full blur-2xl ${theme === "sky" ? "bg-black/12" : "bg-black/14"}`} />
@@ -146,19 +146,35 @@ const promoTiles = [
     eyebrow: "Gran formato",
     theme: "ink" as const,
     compact: true,
+    image: {
+      src: "/storefront-promo-banners-posters-clean.webp",
+      alt: "Pendones y afiches impresos",
+      width: 920,
+      height: 885,
+      className: "w-[13rem] max-w-none sm:w-[14.5rem] lg:w-[15.5rem] xl:w-[10.75rem] 2xl:w-[12.25rem]",
+      frameClassName: "translate-y-2 sm:-mr-5 lg:-mr-7 xl:-mr-4 xl:translate-y-1",
+    },
   },
   {
     title: "Talonarios,\nrecibos",
     eyebrow: "Impresion diaria",
     theme: "paper" as const,
     compact: true,
+    image: {
+      src: "/storefront-promo-invoices-receipts-clean.webp",
+      alt: "Talonarios y recibos impresos",
+      width: 1040,
+      height: 670,
+      className: "w-[14.5rem] max-w-none sm:w-[16.25rem] lg:w-[17.5rem] xl:w-[12rem] 2xl:w-[13.75rem]",
+      frameClassName: "translate-y-1 sm:-mr-6 lg:-mr-8 xl:-mr-5 xl:translate-y-2",
+    },
   },
 ];
 
 export function StorefrontPromoPanels() {
   return (
-    <section className="mx-auto w-full max-w-[112rem] pb-7 sm:pb-10 xl:px-4 2xl:px-10">
-      <div className="xl:hidden">
+    <section className="mx-auto w-full max-w-[112rem] pb-7 sm:px-4 sm:pb-10 lg:px-6 xl:px-4 2xl:px-10">
+      <div className="sm:hidden">
         <div
           className="storefront-strip-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto"
           style={{
@@ -174,6 +190,12 @@ export function StorefrontPromoPanels() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="hidden grid-cols-2 gap-4 sm:grid lg:gap-5 xl:hidden">
+        {promoTiles.map((tile) => (
+          <PromoTile key={tile.title} {...tile} />
+        ))}
       </div>
 
       <div className="hidden gap-4 px-4 sm:px-6 lg:px-8 xl:grid xl:grid-cols-[1.02fr_1.22fr_1fr] xl:px-4 2xl:px-0">
