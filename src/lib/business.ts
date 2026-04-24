@@ -27,6 +27,17 @@ export type PaymentStatus =
   | "pagado"
   | "credito";
 
+export type PaymentReviewStatus =
+  | "sin_pago"
+  | "por_validar"
+  | "validado"
+  | "rechazado";
+
+export type OrderConfirmationStatus =
+  | "pendiente"
+  | "confirmado"
+  | "rechazado";
+
 export type OrderPriority = "baja" | "media" | "alta" | "urgente";
 
 export type OrderUrgency = "normal" | "prioritaria" | "express";
@@ -40,6 +51,7 @@ export type OrderAttachmentType =
 export type Order = {
   id: string;
   client_id: string;
+  customer_user_id: string | null;
   order_number: string;
   title: string;
   product_type: string;
@@ -61,6 +73,9 @@ export type Order = {
   pending_amount: number | null;
   payment_method: string | null;
   payment_status: PaymentStatus;
+  payment_review_status: PaymentReviewStatus;
+  confirmation_status: OrderConfirmationStatus;
+  source: "admin" | "storefront";
   promised_delivery_at: string | null;
   priority: OrderPriority;
   current_owner: string | null;
@@ -108,7 +123,7 @@ function parseCurrency(value: string) {
   return parsed;
 }
 
-async function createOrderNumber() {
+export async function createOrderNumber() {
   const supabase = createSupabaseAdminClient();
   const { count, error } = await supabase
     .from("orders")
@@ -289,7 +304,7 @@ export async function listOrders() {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, client_id, order_number, title, product_type, description, quantity, measurements, material, size, lamination_finish, color_profile, includes_design, includes_installation, urgency, branch, quoted_price, discount_amount, total_amount, deposit_amount, pending_amount, payment_method, payment_status, promised_delivery_at, priority, current_owner, current_area, due_date, status, internal_notes, created_at, created_by",
+      "id, client_id, customer_user_id, order_number, title, product_type, description, quantity, measurements, material, size, lamination_finish, color_profile, includes_design, includes_installation, urgency, branch, quoted_price, discount_amount, total_amount, deposit_amount, pending_amount, payment_method, payment_status, payment_review_status, confirmation_status, source, promised_delivery_at, priority, current_owner, current_area, due_date, status, internal_notes, created_at, created_by",
     )
     .order("created_at", { ascending: false });
 
@@ -398,6 +413,9 @@ export async function createOrder(input: {
     .from("orders")
     .insert({
       client_id: input.clientId,
+      source: "admin",
+      payment_review_status: input.paymentStatus === "pagado" ? "validado" : "sin_pago",
+      confirmation_status: "confirmado",
       order_number: orderNumber,
       title: productType,
       product_type: productType,

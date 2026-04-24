@@ -237,6 +237,7 @@ where not exists (
 
 create table if not exists public.clients (
   id uuid primary key default gen_random_uuid(),
+  customer_user_id uuid null references auth.users(id) on delete set null,
   name text not null,
   phone text null,
   email text null,
@@ -252,9 +253,14 @@ create table if not exists public.clients (
 create index if not exists clients_created_at_idx
   on public.clients (created_at desc);
 
+create unique index if not exists clients_customer_user_id_idx
+  on public.clients (customer_user_id)
+  where customer_user_id is not null;
+
 alter table public.clients enable row level security;
 
 alter table public.clients add column if not exists name text;
+alter table public.clients add column if not exists customer_user_id uuid null;
 alter table public.clients add column if not exists phone text null;
 alter table public.clients add column if not exists email text null;
 alter table public.clients add column if not exists document_id text null;
@@ -295,6 +301,7 @@ alter table public.client_files add column if not exists uploaded_by uuid null;
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   client_id uuid not null references public.clients(id) on delete restrict,
+  customer_user_id uuid null references auth.users(id) on delete set null,
   order_number text null,
   title text not null,
   product_type text null,
@@ -317,6 +324,9 @@ create table if not exists public.orders (
   pending_amount numeric(12,2) null,
   payment_method text null,
   payment_status text not null default 'pendiente' check (payment_status in ('pendiente', 'anticipo', 'pagado', 'credito')),
+  payment_review_status text not null default 'sin_pago' check (payment_review_status in ('sin_pago', 'por_validar', 'validado', 'rechazado')),
+  confirmation_status text not null default 'pendiente' check (confirmation_status in ('pendiente', 'confirmado', 'rechazado')),
+  source text not null default 'admin' check (source in ('admin', 'storefront')),
   promised_delivery_at date null,
   priority text not null default 'media' check (priority in ('baja', 'media', 'alta', 'urgente')),
   current_owner text null,
@@ -333,9 +343,16 @@ create index if not exists orders_created_at_idx
 create index if not exists orders_status_idx
   on public.orders (status);
 
+create index if not exists orders_customer_user_id_idx
+  on public.orders (customer_user_id);
+
+create index if not exists orders_payment_review_status_idx
+  on public.orders (payment_review_status);
+
 alter table public.orders enable row level security;
 
 alter table public.orders add column if not exists client_id uuid null;
+alter table public.orders add column if not exists customer_user_id uuid null;
 alter table public.orders add column if not exists order_number text null;
 alter table public.orders add column if not exists title text;
 alter table public.orders add column if not exists product_type text null;
@@ -359,6 +376,9 @@ alter table public.orders add column if not exists deposit_amount numeric(12,2) 
 alter table public.orders add column if not exists pending_amount numeric(12,2) null;
 alter table public.orders add column if not exists payment_method text null;
 alter table public.orders add column if not exists payment_status text default 'pendiente';
+alter table public.orders add column if not exists payment_review_status text default 'sin_pago';
+alter table public.orders add column if not exists confirmation_status text default 'pendiente';
+alter table public.orders add column if not exists source text default 'admin';
 alter table public.orders add column if not exists promised_delivery_at date null;
 alter table public.orders add column if not exists priority text default 'media';
 alter table public.orders add column if not exists current_owner text null;
@@ -403,7 +423,8 @@ create table if not exists public.order_files (
   file_type text null,
   file_size bigint null,
   created_at timestamptz not null default now(),
-  uploaded_by uuid null references public.app_users(id) on delete set null
+  uploaded_by uuid null references public.app_users(id) on delete set null,
+  customer_uploaded_by uuid null references auth.users(id) on delete set null
 );
 
 create index if not exists order_files_order_id_idx
@@ -422,6 +443,49 @@ alter table public.order_files add column if not exists file_type text null;
 alter table public.order_files add column if not exists file_size bigint null;
 alter table public.order_files add column if not exists created_at timestamptz default now();
 alter table public.order_files add column if not exists uploaded_by uuid null;
+alter table public.order_files add column if not exists customer_uploaded_by uuid null;
+
+create table if not exists public.order_payments (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  customer_user_id uuid null references auth.users(id) on delete set null,
+  amount numeric(12,2) not null check (amount > 0),
+  method text not null default 'pago_movil',
+  bank text null,
+  payer_phone text null,
+  reference text null,
+  status text not null default 'por_validar' check (status in ('por_validar', 'aprobado', 'rechazado')),
+  proof_file_id uuid null references public.order_files(id) on delete set null,
+  notes text null,
+  reviewed_by uuid null references public.app_users(id) on delete set null,
+  reviewed_at timestamptz null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.order_payments enable row level security;
+
+alter table public.order_payments add column if not exists order_id uuid null;
+alter table public.order_payments add column if not exists customer_user_id uuid null;
+alter table public.order_payments add column if not exists amount numeric(12,2);
+alter table public.order_payments add column if not exists method text default 'pago_movil';
+alter table public.order_payments add column if not exists bank text null;
+alter table public.order_payments add column if not exists payer_phone text null;
+alter table public.order_payments add column if not exists reference text null;
+alter table public.order_payments add column if not exists status text default 'por_validar';
+alter table public.order_payments add column if not exists proof_file_id uuid null;
+alter table public.order_payments add column if not exists notes text null;
+alter table public.order_payments add column if not exists reviewed_by uuid null;
+alter table public.order_payments add column if not exists reviewed_at timestamptz null;
+alter table public.order_payments add column if not exists created_at timestamptz default now();
+
+create index if not exists order_payments_order_id_idx
+  on public.order_payments (order_id);
+
+create index if not exists order_payments_status_idx
+  on public.order_payments (status);
+
+create index if not exists order_payments_customer_user_id_idx
+  on public.order_payments (customer_user_id);
 
 do $$
 begin
@@ -436,11 +500,29 @@ begin
 
   if not exists (
     select 1 from pg_constraint
+    where conname = 'clients_customer_user_id_fkey'
+  ) then
+    alter table public.clients
+      add constraint clients_customer_user_id_fkey
+      foreign key (customer_user_id) references auth.users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
     where conname = 'orders_client_id_fkey'
   ) then
     alter table public.orders
       add constraint orders_client_id_fkey
       foreign key (client_id) references public.clients(id) on delete restrict;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'orders_customer_user_id_fkey'
+  ) then
+    alter table public.orders
+      add constraint orders_customer_user_id_fkey
+      foreign key (customer_user_id) references auth.users(id) on delete set null;
   end if;
 
   if not exists (
@@ -490,6 +572,33 @@ begin
 
   if not exists (
     select 1 from pg_constraint
+    where conname = 'orders_payment_review_status_check'
+  ) then
+    alter table public.orders
+      add constraint orders_payment_review_status_check
+      check (payment_review_status in ('sin_pago', 'por_validar', 'validado', 'rechazado'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'orders_confirmation_status_check'
+  ) then
+    alter table public.orders
+      add constraint orders_confirmation_status_check
+      check (confirmation_status in ('pendiente', 'confirmado', 'rechazado'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'orders_source_check'
+  ) then
+    alter table public.orders
+      add constraint orders_source_check
+      check (source in ('admin', 'storefront'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
     where conname = 'orders_priority_check'
   ) then
     alter table public.orders
@@ -535,11 +644,74 @@ begin
 
   if not exists (
     select 1 from pg_constraint
+    where conname = 'order_files_customer_uploaded_by_fkey'
+  ) then
+    alter table public.order_files
+      add constraint order_files_customer_uploaded_by_fkey
+      foreign key (customer_uploaded_by) references auth.users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
     where conname = 'order_files_attachment_type_check'
   ) then
     alter table public.order_files
       add constraint order_files_attachment_type_check
       check (attachment_type in ('arte_cliente', 'prueba_aprobada', 'imagen_referencia', 'comprobante_pago'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_payments_order_id_fkey'
+  ) then
+    alter table public.order_payments
+      add constraint order_payments_order_id_fkey
+      foreign key (order_id) references public.orders(id) on delete cascade;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_payments_customer_user_id_fkey'
+  ) then
+    alter table public.order_payments
+      add constraint order_payments_customer_user_id_fkey
+      foreign key (customer_user_id) references auth.users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_payments_proof_file_id_fkey'
+  ) then
+    alter table public.order_payments
+      add constraint order_payments_proof_file_id_fkey
+      foreign key (proof_file_id) references public.order_files(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_payments_reviewed_by_fkey'
+  ) then
+    alter table public.order_payments
+      add constraint order_payments_reviewed_by_fkey
+      foreign key (reviewed_by) references public.app_users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_payments_status_check'
+  ) then
+    alter table public.order_payments
+      add constraint order_payments_status_check
+      check (status in ('por_validar', 'aprobado', 'rechazado'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_payments_amount_check'
+  ) then
+    alter table public.order_payments
+      add constraint order_payments_amount_check
+      check (amount > 0);
   end if;
 
   if not exists (

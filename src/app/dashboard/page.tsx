@@ -17,6 +17,7 @@ import {
   type DashboardNotificationItem,
 } from "@/app/dashboard/notification-center-button";
 import { OrdersPanel } from "@/app/dashboard/orders-panel";
+import { PaymentsPanel } from "@/app/dashboard/payments-panel";
 import { TeamUserModal } from "@/app/dashboard/team-user-modal";
 import { TeamUsersPanel } from "@/app/dashboard/team-users-panel";
 import { signOutAction } from "@/app/login/actions";
@@ -40,6 +41,11 @@ import {
   updateClient,
   updateOrderStatus,
 } from "@/lib/business";
+import {
+  listAdminPayments,
+  reviewOrderPayment,
+  type AdminPayment,
+} from "@/lib/customer-commerce";
 import {
   deleteClientFile,
   listClientFiles,
@@ -85,6 +91,7 @@ const dashboardViews = [
   "resumen",
   "clientes",
   "pedidos",
+  "pagos",
   "inventario",
   "proveedores",
   "equipo",
@@ -94,13 +101,14 @@ type DashboardView = (typeof dashboardViews)[number];
 const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Resumen", view: "resumen" },
   { label: "Pedidos", view: "pedidos" },
+  { label: "Pagos", view: "pagos" },
   { label: "Clientes", view: "clientes" },
   { label: "Inventario", view: "inventario" },
   { label: "Proveedores", view: "proveedores" },
   { label: "Equipo", view: "equipo" },
 ];
 
-const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "clientes"];
+const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "pagos", "clientes"];
 const adminSideNavViews: DashboardView[] = [
   "inventario",
   "proveedores",
@@ -481,6 +489,34 @@ async function deleteOrderFileAction(formData: FormData) {
   redirect(buildDashboardUrl("pedidos", "Adjunto eliminado"));
 }
 
+async function reviewPaymentAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  const paymentId = String(formData.get("paymentId") ?? "");
+  const status = String(formData.get("status") ?? "rechazado");
+
+  try {
+    await reviewOrderPayment({
+      paymentId,
+      status: status === "aprobado" ? "aprobado" : "rechazado",
+      reviewedBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo revisar el pago.";
+    redirect(buildDashboardUrl("pagos", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("pagos", "Pago revisado"));
+}
+
 type DashboardPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -716,6 +752,8 @@ function getViewLabel(view: DashboardView) {
       return "Clientes";
     case "pedidos":
       return "Pedidos";
+    case "pagos":
+      return "Pagos";
     case "inventario":
       return "Inventario";
     case "proveedores":
@@ -805,6 +843,7 @@ export default async function DashboardPage({
   let clientFiles: ClientFile[] = [];
   let orderFiles: OrderFile[] = [];
   let orderHistory: OrderHistoryEntry[] = [];
+  let payments: AdminPayment[] = [];
   let activeStaffCount = 0;
   let activeSessions: Awaited<ReturnType<typeof listActivePanelSessions>> = [];
   let schemaMessage = "";
@@ -816,6 +855,7 @@ export default async function DashboardPage({
       session.role === "admin" ? await listActivePasswordRecoveryRequests(10) : [];
     clients = await listClients();
     orders = await listOrders();
+    payments = await listAdminPayments();
     clientFiles = selectedClientId ? await listClientFiles(selectedClientId) : [];
     orderFiles = await listOrderFiles(orders.map((order) => order.id));
     orderHistory = await listOrderHistory(orders.map((order) => order.id));
@@ -1694,6 +1734,13 @@ export default async function DashboardPage({
               updateStatusAction={updateOrderStatusAction}
               deleteOrderFileAction={deleteOrderFileAction}
               isAdmin={session.role === "admin"}
+            />
+          ) : null}
+
+          {activeView === "pagos" ? (
+            <PaymentsPanel
+              payments={payments}
+              reviewAction={reviewPaymentAction}
             />
           ) : null}
 

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 
 import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import { storefrontProducts, type StorefrontProduct } from "@/app/storefront-data";
@@ -14,6 +15,7 @@ import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
 import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
 import { StorefrontTestimonialsSection } from "@/app/storefront-testimonials-section";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 type CartItem = {
@@ -185,7 +187,7 @@ function ProductPreviewModal({
               aria-label="Cerrar"
               className="absolute left-4 top-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/88 text-slate-700 shadow-sm transition hover:bg-white hover:text-slate-950 lg:hidden"
             >
-              ×
+              x
             </button>
             <div className="absolute inset-x-14 bottom-10 h-12 rounded-full bg-slate-900/12 blur-2xl" />
             <Image
@@ -214,7 +216,7 @@ function ProductPreviewModal({
                 aria-label="Cerrar"
                 className="hidden h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 lg:flex"
               >
-                ×
+                x
               </button>
             </div>
 
@@ -307,6 +309,9 @@ function CommerceDrawer({
   onRemoveWishlist,
   onRemoveCartItem,
   onQuantityChange,
+  onCheckout,
+  isCheckingOut,
+  checkoutMessage,
 }: {
   panel: CommercePanel;
   cartItems: CartItem[];
@@ -317,6 +322,9 @@ function CommerceDrawer({
   onRemoveWishlist: (productId: string) => void;
   onRemoveCartItem: (key: string) => void;
   onQuantityChange: (key: string, quantity: number) => void;
+  onCheckout: () => void;
+  isCheckingOut: boolean;
+  checkoutMessage: string;
 }) {
   if (!panel) {
     return null;
@@ -351,7 +359,7 @@ function CommerceDrawer({
             className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
             aria-label="Cerrar"
           >
-            ×
+            x
           </button>
         </div>
 
@@ -479,15 +487,22 @@ function CommerceDrawer({
 
         {panel === "cart" ? (
           <div className="border-t border-slate-200 p-5">
+            {checkoutMessage ? (
+              <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-900">
+                {checkoutMessage}
+              </div>
+            ) : null}
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-slate-500">Subtotal estimado</span>
               <span className="text-2xl font-black text-slate-950">${cartSubtotal}</span>
             </div>
             <button
               type="button"
-              className="mt-4 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+              onClick={onCheckout}
+              disabled={isCheckingOut}
+              className="mt-4 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Continuar pedido
+              {isCheckingOut ? "Creando pedido..." : "Continuar pedido"}
             </button>
             <p className="mt-3 text-center text-xs leading-5 text-slate-400">
               El total final puede variar segun arte, medidas y acabados.
@@ -509,6 +524,9 @@ export function StorefrontShell() {
   const [activePanel, setActivePanel] = useState<CommercePanel>(null);
   const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [customerSession, setCustomerSession] = useState<Session | null>(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutMessage, setCheckoutMessage] = useState("");
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -517,6 +535,26 @@ export function StorefrontShell() {
 
     return () => window.clearTimeout(timeout);
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (!hasSupabasePublicConfig()) {
+      return;
+    }
+
+    const supabase = createBrowserSupabaseClient();
+
+    void supabase.auth.getSession().then(({ data }) => {
+      setCustomerSession(data.session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setCustomerSession(nextSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const isCatalogVisible = catalogOpen || Boolean(debouncedQuery);
 
@@ -644,6 +682,59 @@ export function StorefrontShell() {
     );
   };
 
+  const handleCheckout = async () => {
+    setCheckoutMessage("");
+
+    if (cartItems.length === 0) {
+      setCheckoutMessage("Agrega productos al carrito antes de continuar.");
+      return;
+    }
+
+    if (!customerSession) {
+      setCheckoutMessage("Inicia sesion o registrate para crear el pedido y subir tu arte.");
+      setAccountOpen(true);
+      setActivePanel(null);
+      return;
+    }
+
+    setIsCheckingOut(true);
+
+    try {
+      const response = await fetch("/api/storefront/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: cartItems.map((item) => ({
+            productId: item.product.id,
+            title: item.product.title,
+            productType: item.product.category,
+            quantity: item.quantity,
+            unitPrice: parsePrice(item.product.price),
+            options: item.options,
+          })),
+        }),
+      });
+      const payload = (await response.json()) as { error?: string; message?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error || "No se pudo crear el pedido.");
+      }
+
+      setCartItems([]);
+      setCheckoutMessage(payload.message || "Pedido creado.");
+      setActivePanel(null);
+      setAccountOpen(true);
+    } catch (error) {
+      setCheckoutMessage(
+        error instanceof Error ? error.message : "No se pudo crear el pedido.",
+      );
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#f3f5f8] text-slate-950">
       <StorefrontHeader
@@ -692,11 +783,8 @@ export function StorefrontShell() {
                   Catalogo
                 </p>
                 <h2 className="mt-2 text-xl font-black tracking-tight text-slate-950">
-                  Compra por categoria
+                  Categorias
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Filtra por familias, abre una vista previa y configura cada producto antes de anadirlo al carrito.
-                </p>
                 <button
                   type="button"
                   onClick={() => {
@@ -706,7 +794,7 @@ export function StorefrontShell() {
                   }}
                   className="mt-5 w-full cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  Ver todos los productos
+                  Ver todos
                 </button>
                 <div className="mt-5 space-y-5">
                   {categoryGroups.map((group) => (
@@ -820,6 +908,9 @@ export function StorefrontShell() {
         onRemoveWishlist={(productId) => toggleWishlist(productId)}
         onRemoveCartItem={removeCartItem}
         onQuantityChange={changeCartQuantity}
+        onCheckout={handleCheckout}
+        isCheckingOut={isCheckingOut}
+        checkoutMessage={checkoutMessage}
       />
     </main>
   );

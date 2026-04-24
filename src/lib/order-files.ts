@@ -14,6 +14,7 @@ export type OrderFile = {
   file_size: number | null;
   created_at: string;
   uploaded_by: string | null;
+  customer_uploaded_by: string | null;
   signed_url: string | null;
 };
 
@@ -64,7 +65,8 @@ export async function uploadOrderFile(input: {
   orderId: string;
   attachmentType: OrderAttachmentType;
   file: File;
-  uploadedBy: string;
+  uploadedBy?: string | null;
+  customerUploadedBy?: string | null;
 }) {
   const supabase = createSupabaseAdminClient();
 
@@ -104,7 +106,8 @@ export async function uploadOrderFile(input: {
       storage_path: storagePath,
       file_type: input.file.type || null,
       file_size: input.file.size,
-      uploaded_by: input.uploadedBy,
+      uploaded_by: input.uploadedBy ?? null,
+      customer_uploaded_by: input.customerUploadedBy ?? null,
     })
     .select("*")
     .single();
@@ -118,7 +121,7 @@ export async function uploadOrderFile(input: {
     orderId: input.orderId,
     detail: `Adjunto cargado: ${input.file.name} (${input.attachmentType}).`,
     eventType: "adjunto",
-    changedBy: input.uploadedBy,
+    changedBy: input.uploadedBy ?? null,
   });
 
   const { data: signedData } = await supabase.storage
