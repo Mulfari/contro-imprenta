@@ -1,37 +1,39 @@
 "use client";
 
-import Image from "next/image";
+import Link from "next/link";
 
 function FooterLogo() {
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex h-14 w-44 items-center rounded-2xl bg-white px-4 shadow-[0_14px_32px_rgba(0,0,0,0.18)]">
-        <Image
-          src="/express-printer-logo.webp"
-          alt="Express Printer"
-          width={340}
-          height={96}
-          sizes="11rem"
-          className="h-auto w-full object-contain"
-        />
-      </div>
-      <div>
-        <p className="text-base font-semibold tracking-tight text-white sm:text-lg">
-          Express Printer
-        </p>
-        <p className="text-xs font-medium uppercase tracking-[0.28em] text-slate-400">
-          Impresion comercial
-        </p>
-      </div>
-    </div>
+    <Link
+      href="/"
+      className="inline-flex w-fit cursor-pointer items-center rounded-[1.25rem] bg-white px-5 py-3 shadow-[0_18px_42px_rgba(0,0,0,0.2)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_54px_rgba(0,0,0,0.26)]"
+      aria-label="Express Printer"
+    >
+      <span
+        className="block h-[3rem] w-[11rem]"
+        aria-hidden="true"
+        style={{
+          backgroundImage: "url('/express-printer-logo.webp')",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "left center",
+          backgroundSize: "contain",
+        }}
+      />
+    </Link>
   );
 }
 
 export function StorefrontFooter() {
   return (
     <footer className="bg-[#0b1220] text-slate-200">
-      <div className="mx-auto flex w-full max-w-[118rem] flex-col gap-8 px-4 py-12 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 2xl:px-10">
-        <FooterLogo />
+      <div className="mx-auto grid w-full max-w-[118rem] gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center lg:px-8 2xl:px-10">
+        <div className="space-y-5">
+          <FooterLogo />
+          <p className="max-w-md text-sm leading-6 text-slate-400">
+            Impresion comercial, publicitaria y corporativa con pedidos online
+            conectados al panel administrativo.
+          </p>
+        </div>
 
         <div className="space-y-2 text-sm text-slate-300 lg:text-right">
           <p>
@@ -63,9 +65,9 @@ export function StorefrontFooter() {
         <div className="mx-auto flex w-full max-w-[118rem] flex-col gap-3 px-4 py-5 text-sm text-slate-400 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 2xl:px-10">
           <p>© 2026 Express Printer. Todos los derechos reservados.</p>
           <div className="flex flex-wrap gap-4">
-            <a href="/login" className="transition hover:text-white">
+            <Link href="/login" className="transition hover:text-white">
               Panel administrativo
-            </a>
+            </Link>
           </div>
         </div>
       </div>
