@@ -44,8 +44,8 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
   const reviewedPayments = payments.filter((payment) => payment.status !== "por_validar");
 
   return (
-    <section className="grid gap-6">
-      <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+    <section className="grid gap-4 sm:gap-6">
+      <article className="rounded-[1.4rem] border border-slate-200 bg-white/90 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:rounded-[2rem] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-950">Pagos por aceptar</h2>
@@ -74,7 +74,7 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
             pendingPayments.map((payment) => (
               <article
                 key={payment.id}
-                className="rounded-[1.5rem] border border-slate-200 bg-white p-5"
+                className="rounded-[1.3rem] border border-slate-200 bg-white p-4 sm:rounded-[1.5rem] sm:p-5"
               >
                 <div className="grid gap-4 xl:grid-cols-[1fr_auto]">
                   <div>
@@ -93,7 +93,7 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                       {payment.order?.order_number ?? "Sin numero"} - {payment.order?.title ?? "Pedido"}
                     </p>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-4">
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Monto</p>
                         <p className="mt-2 font-semibold text-slate-950">{formatCurrency(Number(payment.amount))}</p>
@@ -124,8 +124,8 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                     ) : null}
                   </div>
 
-                  <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 xl:min-w-[13rem]">
-                    <form action={reviewAction}>
+                  <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row xl:min-w-[13rem] xl:flex-col">
+                    <form action={reviewAction} className="flex-1">
                       <input type="hidden" name="paymentId" value={payment.id} />
                       <input type="hidden" name="status" value="aprobado" />
                       <button
@@ -135,7 +135,7 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                         Aprobar pago
                       </button>
                     </form>
-                    <form action={reviewAction}>
+                    <form action={reviewAction} className="flex-1">
                       <input type="hidden" name="paymentId" value={payment.id} />
                       <input type="hidden" name="status" value="rechazado" />
                       <button
@@ -153,7 +153,7 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
         </div>
       </article>
 
-      <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+      <article className="rounded-[1.4rem] border border-slate-200 bg-white/90 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:rounded-[2rem] sm:p-6">
         <h2 className="text-xl font-semibold text-slate-950">Historial de pagos</h2>
         <div className="mt-5 overflow-hidden rounded-[1.4rem] border border-slate-200">
           {reviewedPayments.length === 0 ? (

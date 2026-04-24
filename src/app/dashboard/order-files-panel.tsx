@@ -113,7 +113,7 @@ export function OrderFilesPanel({
             onChange={(event) =>
               setAttachmentType(event.target.value as OrderAttachmentType)
             }
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 lg:w-auto"
           >
             {Object.entries(attachmentTypeLabels).map(([value, label]) => (
               <option key={value} value={value}>
@@ -122,7 +122,7 @@ export function OrderFilesPanel({
             ))}
           </select>
 
-          <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+          <label className="inline-flex w-full cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:w-auto">
             {isUploading ? "Cargando..." : "Subir adjunto"}
             <input
               ref={inputRef}

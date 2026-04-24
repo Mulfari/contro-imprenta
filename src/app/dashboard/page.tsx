@@ -1024,23 +1024,28 @@ export default async function DashboardPage({
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
+    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
       <DashboardLiveRefresh />
       <FloatingToast message={message || schemaMessage} />
       <div className="min-h-screen lg:pl-[290px]">
-        <aside className="w-full border border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(248,250,252,0.88))] p-5 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:flex lg:h-screen lg:w-[290px] lg:flex-col lg:overflow-hidden lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7">
-          <div className="border-b border-slate-200 pb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
-              Express Printer
+        <aside className="sticky top-0 z-40 w-full border-x-0 border-b border-t-0 border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.96),_rgba(248,250,252,0.92))] p-3 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-4 lg:fixed lg:left-0 lg:top-0 lg:flex lg:h-screen lg:w-[290px] lg:flex-col lg:overflow-hidden lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:px-5 lg:py-7 lg:shadow-none">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-3 lg:block lg:pb-5">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500 sm:text-xs lg:tracking-[0.4em]">
+                Express Printer
+              </p>
+              <h1 className="mt-1 text-lg font-semibold tracking-tight sm:text-xl lg:mt-3 lg:text-2xl">
+                Panel administrativo
+              </h1>
+            </div>
+            <p className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 lg:hidden">
+              {getViewLabel(activeView)}
             </p>
-            <h1 className="mt-3 text-2xl font-semibold tracking-tight">
-              Panel administrativo
-            </h1>
           </div>
 
-          <div className="mt-6 space-y-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+          <div className="mt-4 space-y-4 lg:mt-6 lg:min-h-0 lg:flex-1 lg:space-y-6 lg:overflow-y-auto lg:pr-1">
             <div className="pt-1">
-              <nav className="space-y-2">
+              <nav className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:block lg:space-y-2">
                 {userSideItems.map((item) => {
                   const isActive = item.view === activeView;
 
@@ -1048,7 +1053,7 @@ export default async function DashboardPage({
                     <Link
                       key={item.view}
                       href={buildDashboardUrl(item.view)}
-                      className={`flex translate-y-0 transform-none items-center justify-between rounded-2xl border px-4 py-3 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:translate-y-0 ${
+                      className={`flex translate-y-0 transform-none items-center justify-between rounded-2xl border px-3 py-2.5 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:translate-y-0 lg:px-4 lg:py-3 ${
                         isActive
                           ? "border-blue-200 bg-blue-50 text-slate-900 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.1)]"
                           : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white"
@@ -1064,10 +1069,10 @@ export default async function DashboardPage({
 
             {adminSideItems.length > 0 ? (
               <div>
-                <p className="border-b border-slate-200 pb-3 text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="border-b border-slate-200 pb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 lg:pb-3 lg:text-xs lg:tracking-[0.28em]">
                   Opciones administrativas
                 </p>
-                <nav className="mt-3 space-y-2">
+                <nav className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:block lg:space-y-2">
                   {adminSideItems.map((item) => {
                     const isActive = item.view === activeView;
 
@@ -1075,7 +1080,7 @@ export default async function DashboardPage({
                       <Link
                         key={item.view}
                         href={buildDashboardUrl(item.view)}
-                        className={`flex translate-y-0 transform-none items-center justify-between rounded-2xl border px-4 py-3 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:translate-y-0 ${
+                        className={`flex translate-y-0 transform-none items-center justify-between rounded-2xl border px-3 py-2.5 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:translate-y-0 lg:px-4 lg:py-3 ${
                           isActive
                             ? "border-blue-200 bg-blue-50 text-slate-900 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.1)]"
                             : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white"
@@ -1091,7 +1096,7 @@ export default async function DashboardPage({
             ) : null}
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:mt-5 lg:grid-cols-1">
+          <div className="mt-6 hidden gap-3 sm:grid-cols-2 lg:mt-5 lg:grid lg:grid-cols-1">
             <div className="rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-4">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
                 Nuevos pedidos
@@ -1110,7 +1115,7 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          <form action={signOutAction} className="mt-6 lg:mt-5">
+          <form action={signOutAction} className="mt-4 hidden lg:mt-5 lg:block">
             <button
               type="submit"
               className="w-full cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
@@ -1122,7 +1127,7 @@ export default async function DashboardPage({
         </aside>
 
         <div
-          className={`flex min-w-0 flex-col px-4 py-4 sm:px-6 lg:px-5 lg:py-5 ${
+          className={`flex min-w-0 flex-col px-3 py-4 sm:px-6 lg:px-5 lg:py-5 ${
             isClientDetailView ? "gap-3" : "gap-6"
           }`}
         >
@@ -1133,7 +1138,7 @@ export default async function DashboardPage({
                 : "lg:grid-cols-[minmax(0,1fr)_220px_280px]"
             }`}
           >
-            <header className="rounded-[1.7rem] border border-slate-200/80 bg-white/88 px-6 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur">
+            <header className="rounded-[1.35rem] border border-slate-200/80 bg-white/88 px-4 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] backdrop-blur sm:rounded-[1.7rem] sm:px-6">
               <div className="flex items-center gap-4">
                 <div className="h-11 w-1.5 rounded-full bg-slate-900" />
                 <div className="min-w-0">
@@ -1252,7 +1257,7 @@ export default async function DashboardPage({
             {activeView === "clientes" && !isClientDetailView ? (
             <article
               id="clientes"
-              className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]"
+              className="rounded-[1.4rem] border border-slate-200 bg-white/90 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:rounded-[2rem] sm:p-6"
             >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -1289,7 +1294,7 @@ export default async function DashboardPage({
               </div>
             </form>
 
-            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200">
+            <div className="mt-5 hidden overflow-hidden rounded-[1.5rem] border border-slate-200 md:block">
               <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
                 <thead className="bg-slate-50 text-slate-500">
                   <tr>
@@ -1450,6 +1455,80 @@ export default async function DashboardPage({
                   )}
                 </tbody>
               </table>
+            </div>
+
+            <div className="mt-5 grid gap-3 md:hidden">
+              {filteredClients.length === 0 ? (
+                <div className="rounded-[1.3rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+                  No hay clientes que coincidan con la busqueda.
+                </div>
+              ) : (
+                filteredClients.map((client) => {
+                  const pendingTotal = clientPendingTotals.get(client.id) ?? 0;
+                  const hasPendingBalance = pendingTotal > 0;
+                  const detailHref = buildClientUrl(
+                    "detalle",
+                    client.id,
+                    undefined,
+                    clientQuery,
+                  );
+
+                  return (
+                    <article
+                      key={client.id}
+                      className="rounded-[1.25rem] border border-slate-200 bg-white p-4 shadow-[0_10px_26px_rgba(15,23,42,0.04)]"
+                    >
+                      <Link href={detailHref} className="block cursor-pointer">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="truncate font-semibold text-slate-950">
+                              {client.name}
+                            </h3>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {client.phone ?? "Sin telefono"}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                              hasPendingBalance
+                                ? "bg-rose-50 text-rose-700"
+                                : "bg-emerald-50 text-emerald-700"
+                            }`}
+                          >
+                            {hasPendingBalance ? "Saldo" : "Al dia"}
+                          </span>
+                        </div>
+                        <div className="mt-4 grid gap-2 text-sm text-slate-600">
+                          <p className="break-words">{client.email ?? "Sin email"}</p>
+                          <p>{client.document_id ?? "Sin cedula / RIF"}</p>
+                          <p className="font-semibold text-slate-950">
+                            {formatCurrency(pendingTotal)}
+                          </p>
+                        </div>
+                      </Link>
+                      {session.role === "admin" ? (
+                        <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+                          <Link
+                            href={buildClientUrl(
+                              "editar",
+                              client.id,
+                              undefined,
+                              clientQuery,
+                            )}
+                            className="inline-flex flex-1 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                          >
+                            Editar
+                          </Link>
+                          <DeleteClientButton
+                            action={deleteClientAction}
+                            clientId={client.id}
+                          />
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })
+              )}
             </div>
 
             </article>

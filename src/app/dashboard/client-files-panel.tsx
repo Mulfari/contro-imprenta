@@ -234,7 +234,7 @@ export function ClientFilesPanel({
     <>
       <FloatingToast message={toastMessage} />
 
-      <div className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
+      <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,0.05)] sm:rounded-[1.8rem] sm:p-5">
         <div>
           <h4 className="text-lg font-semibold text-slate-950">Archivos digitales</h4>
           <p className="mt-1 text-sm text-slate-500">
@@ -272,7 +272,7 @@ export function ClientFilesPanel({
             setIsDragging(false);
             void handleFiles(event.dataTransfer.files);
           }}
-          className={`mt-5 cursor-pointer select-none rounded-[1.5rem] border-2 border-dashed px-6 py-8 text-center transition ${
+          className={`mt-5 cursor-pointer select-none rounded-[1.3rem] border-2 border-dashed px-4 py-6 text-center transition sm:rounded-[1.5rem] sm:px-6 sm:py-8 ${
             isDragging
               ? "border-blue-400 bg-blue-50/80"
               : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100"
@@ -292,7 +292,7 @@ export function ClientFilesPanel({
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             <span className="text-2xl text-slate-700">+</span>
           </div>
-          <p className="mt-4 text-base font-semibold text-slate-900">
+          <p className="mt-4 text-sm font-semibold text-slate-900 sm:text-base">
             Arrastra archivos aqui o haz clic para cargarlos
           </p>
           <p className="mt-2 text-sm text-slate-500">

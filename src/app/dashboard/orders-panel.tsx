@@ -160,7 +160,7 @@ function DataItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">{label}</p>
-      <p className="mt-2 whitespace-pre-line text-sm font-medium leading-6 text-slate-800">
+      <p className="mt-2 whitespace-pre-line break-words text-sm font-medium leading-6 text-slate-800">
         {value}
       </p>
     </div>
@@ -222,8 +222,8 @@ export function OrdersPanel(props: OrdersPanelProps) {
   } = props;
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[0.95fr_1.25fr]">
-      <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+    <section className="grid gap-4 sm:gap-6 xl:grid-cols-[0.95fr_1.25fr]">
+      <article className="rounded-[1.4rem] border border-slate-200 bg-white/90 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:rounded-[2rem] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-xl font-semibold">Nueva orden</h2>
@@ -253,7 +253,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
         </div>
 
         <form action={createAction} className="mt-6 space-y-6">
-          <section className="space-y-4 rounded-[1.6rem] border border-slate-200 bg-slate-50/90 p-5">
+          <section className="space-y-4 rounded-[1.3rem] border border-slate-200 bg-slate-50/90 p-4 sm:rounded-[1.6rem] sm:p-5">
             <SectionTitle
               title="Datos del trabajo"
               description="Estos datos son visibles para produccion y ayudan a identificar rapido lo que se debe fabricar."
@@ -397,7 +397,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
             </div>
           </section>
 
-          <section className="space-y-4 rounded-[1.6rem] border border-slate-200 bg-slate-50/90 p-5">
+          <section className="space-y-4 rounded-[1.3rem] border border-slate-200 bg-slate-50/90 p-4 sm:rounded-[1.6rem] sm:p-5">
             <SectionTitle
               title="Datos comerciales"
               description="Aqui va todo lo relacionado con la cotizacion y el estado de pago del trabajo."
@@ -470,7 +470,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
             </div>
           </section>
 
-          <section className="space-y-4 rounded-[1.6rem] border border-slate-200 bg-slate-50/90 p-5">
+          <section className="space-y-4 rounded-[1.3rem] border border-slate-200 bg-slate-50/90 p-4 sm:rounded-[1.6rem] sm:p-5">
             <SectionTitle
               title="Datos operativos"
               description="Estos datos son internos y ayudan a produccion a mover la orden por el area correcta."
@@ -577,7 +577,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
         </form>
       </article>
 
-      <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+      <article className="rounded-[1.4rem] border border-slate-200 bg-white/90 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:rounded-[2rem] sm:p-6">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
@@ -641,7 +641,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
               return (
                 <article
                   key={order.id}
-                  className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.04)]"
+                className="rounded-[1.3rem] border border-slate-200 bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:rounded-[1.6rem] sm:p-5"
                 >
                   <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
                     <div className="space-y-4">
@@ -766,7 +766,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
 
                     <form
                       action={updateStatusAction}
-                      className="flex min-w-[250px] flex-col gap-3 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 xl:sticky xl:top-5"
+                      className="flex w-full flex-col gap-3 rounded-[1.3rem] border border-slate-200 bg-slate-50 p-4 sm:rounded-[1.5rem] xl:sticky xl:top-5 xl:min-w-[250px]"
                     >
                       <input type="hidden" name="orderId" value={order.id} />
                       <input type="hidden" name="activeStatus" value={activeStatus} />

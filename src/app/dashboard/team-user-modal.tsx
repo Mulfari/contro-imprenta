@@ -179,8 +179,8 @@ export function TeamUserModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/18 px-4 py-6 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.16)] sm:p-7">
+    <div className="fixed inset-0 z-50 flex overflow-y-auto bg-slate-950/18 px-3 py-5 backdrop-blur-sm sm:px-4 sm:py-6">
+      <div className="mx-auto my-auto w-full max-w-2xl rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-[0_30px_80px_rgba(15,23,42,0.16)] sm:rounded-[2rem] sm:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-xl font-semibold">
@@ -213,7 +213,7 @@ export function TeamUserModal({
           </Link>
         </div>
 
-        <div className="mt-6 grid grid-cols-3 gap-3">
+        <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
           {steps.map((item) => {
             const isActive = step === item.id;
             const isCompleted = step > item.id;
@@ -221,7 +221,7 @@ export function TeamUserModal({
             return (
               <div
                 key={item.id}
-                className={`rounded-[1.3rem] border px-4 py-3 text-center text-sm font-medium transition ${
+                className={`rounded-[1rem] border px-2 py-3 text-center text-xs font-medium transition sm:rounded-[1.3rem] sm:px-4 sm:text-sm ${
                   isActive
                     ? "border-blue-200 bg-blue-50 text-slate-900"
                     : isCompleted

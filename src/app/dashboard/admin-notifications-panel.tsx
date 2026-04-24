@@ -39,7 +39,7 @@ export function AdminNotificationsPanel({
 
   return (
     <>
-      <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+      <article className="rounded-[1.4rem] border border-slate-200 bg-white/90 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:rounded-[2rem] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h3 className="text-xl font-semibold">Alertas de administracion</h3>
@@ -132,8 +132,8 @@ export function AdminNotificationModal({
   onClose,
 }: AdminNotificationModalProps) {
   const modal = (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/20 px-4 py-6 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-7">
+    <div className="fixed inset-0 z-[80] flex overflow-y-auto bg-slate-950/20 px-3 py-5 backdrop-blur-sm sm:px-4 sm:py-6">
+      <div className="mx-auto my-auto w-full max-w-2xl rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:rounded-[2rem] sm:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h4 className="text-2xl font-semibold text-slate-950">
