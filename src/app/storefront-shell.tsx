@@ -61,6 +61,13 @@ const categoryGroups = [
   },
 ];
 
+const catalogFilterItems = categoryGroups.flatMap((group) =>
+  group.items.map((item) => ({
+    group: group.title,
+    label: item,
+  })),
+);
+
 function getDefaultOptions(product: StorefrontProduct) {
   return Object.fromEntries(
     product.options.map((group) => [group.name, group.values[0] ?? ""]),
@@ -199,11 +206,11 @@ function CatalogProductCard({
   onAddToCart: () => void;
 }) {
   return (
-    <article className="catalog-enter-card group overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_38px_rgba(15,23,42,0.08)]">
+    <article className="catalog-enter-card group overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_38px_rgba(15,23,42,0.08)] sm:rounded-[1.35rem]">
       <button
         type="button"
         onClick={onPreview}
-        className={`relative flex h-48 w-full cursor-pointer items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-5 text-left sm:h-56`}
+        className={`relative flex h-44 w-full cursor-pointer items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-4 text-left sm:h-56 sm:p-5`}
       >
         <div className="absolute left-4 top-4 rounded-full bg-white/82 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
           {product.category}
@@ -219,7 +226,7 @@ function CatalogProductCard({
         />
       </button>
 
-      <div className="space-y-4 p-5">
+      <div className="space-y-4 p-4 sm:p-5">
         <div>
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-lg font-semibold leading-tight tracking-tight text-slate-950">
@@ -263,25 +270,25 @@ function CatalogProductCard({
           ))}
         </div>
 
-        <div className="flex items-end justify-between gap-3 border-t border-slate-100 pt-4">
+        <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
               Desde
             </p>
             <p className="text-2xl font-black tracking-tight text-slate-950">{product.price}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex w-full gap-2 sm:w-auto">
             <button
               type="button"
               onClick={onPreview}
-              className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:border-slate-300 hover:bg-slate-50"
+              className="min-w-0 flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:border-slate-300 hover:bg-slate-50 sm:flex-none"
             >
               Ver
             </button>
             <button
               type="button"
               onClick={onAddToCart}
-              className="cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="min-w-0 flex-1 cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:flex-none"
             >
               Anadir
             </button>
@@ -1009,9 +1016,69 @@ export function StorefrontShell() {
 
       {isCatalogVisible ? (
         <>
-          <section id="catalogo" className="catalog-enter mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 py-6 sm:px-6 lg:px-8 2xl:px-10">
-            <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
-              <aside className="catalog-enter-panel rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)] xl:rounded-[1.8rem]">
+          <section id="catalogo" className="catalog-enter mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 2xl:px-10">
+            <div className="grid gap-4 xl:grid-cols-[300px_1fr] xl:gap-6">
+              <aside className="catalog-enter-panel rounded-[1.2rem] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] xl:hidden">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      Catalogo
+                    </p>
+                    <h2 className="mt-1 text-lg font-black tracking-tight text-slate-950">
+                      Categorias
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setDebouncedQuery("");
+                      setCatalogOpen(true);
+                    }}
+                    className={`shrink-0 cursor-pointer rounded-xl px-3.5 py-2 text-xs font-black transition ${
+                      debouncedQuery
+                        ? "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                        : "bg-slate-950 text-white"
+                    }`}
+                  >
+                    Todos
+                  </button>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {catalogFilterItems.map((item) => {
+                    const isActive = debouncedQuery.toLowerCase() === item.label.toLowerCase();
+
+                    return (
+                      <button
+                        key={`${item.group}-${item.label}`}
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery(item.label);
+                          setDebouncedQuery(item.label);
+                          setCatalogOpen(true);
+                        }}
+                        className={`min-w-0 cursor-pointer rounded-xl border px-3 py-2.5 text-left transition ${
+                          isActive
+                            ? "border-slate-950 bg-slate-950 text-white shadow-[0_12px_24px_rgba(15,23,42,0.14)]"
+                            : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white hover:text-slate-950"
+                        }`}
+                      >
+                        <span className="block truncate text-sm font-black">{item.label}</span>
+                        <span
+                          className={`mt-1 block truncate text-[0.64rem] font-semibold uppercase tracking-[0.12em] ${
+                            isActive ? "text-white/60" : "text-slate-400"
+                          }`}
+                        >
+                          {item.group}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </aside>
+
+              <aside className="catalog-enter-panel hidden rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)] xl:block xl:rounded-[1.8rem]">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
                   Catalogo
                 </p>
@@ -1025,7 +1092,11 @@ export function StorefrontShell() {
                     setDebouncedQuery("");
                     setCatalogOpen(true);
                   }}
-                  className="mt-5 w-full cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  className={`mt-5 w-full cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                    debouncedQuery
+                      ? "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                      : "bg-slate-950 text-white hover:bg-slate-800"
+                  }`}
                 >
                   Ver todos
                 </button>
@@ -1040,9 +1111,14 @@ export function StorefrontShell() {
                             type="button"
                             onClick={() => {
                               setSearchQuery(item);
+                              setDebouncedQuery(item);
                               setCatalogOpen(true);
                             }}
-                            className="block w-full cursor-pointer rounded-lg px-2 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+                            className={`block w-full cursor-pointer rounded-lg px-2 py-2.5 text-left text-sm transition ${
+                              debouncedQuery.toLowerCase() === item.toLowerCase()
+                                ? "bg-slate-950 text-white"
+                                : "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
+                            }`}
                           >
                             {item}
                           </button>
@@ -1053,17 +1129,17 @@ export function StorefrontShell() {
                 </div>
               </aside>
 
-              <section className="catalog-enter-panel rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:p-6 xl:rounded-[1.9rem]">
+              <section className="catalog-enter-panel rounded-[1.2rem] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:p-6 xl:rounded-[1.9rem]">
                 <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 sm:tracking-[0.32em]">
                       {debouncedQuery ? "Resultados de busqueda" : "Catalogo completo"}
                     </p>
-                    <h2 className="mt-2 text-[1.9rem] font-black tracking-tight text-slate-950 sm:text-4xl">
+                    <h2 className="mt-2 text-[1.55rem] font-black leading-tight tracking-tight text-slate-950 sm:text-4xl">
                       {debouncedQuery || "Productos de impresion"}
                     </h2>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 sm:text-sm">
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
                       {filteredProducts.length} producto{filteredProducts.length === 1 ? "" : "s"}
                     </span>
@@ -1074,7 +1150,7 @@ export function StorefrontShell() {
                 </div>
 
                 {filteredProducts.length > 0 ? (
-                  <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                     {filteredProducts.map((product) => (
                       <CatalogProductCard
                         key={product.id}

@@ -304,10 +304,10 @@ export function StorefrontHeader({
                   >
                     <div
                       ref={categoryPanelRef}
-                      className={`grid max-h-[70vh] overflow-auto rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_26px_60px_rgba(15,23,42,0.18)] transition-all duration-200 ${
+                      className={`grid max-h-[70vh] max-w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_26px_60px_rgba(15,23,42,0.18)] transition-all duration-200 ${
                         activeCategoryIndex !== null
-                          ? "w-[min(22rem,calc(100vw-2rem))] grid-cols-1 lg:w-[44rem] lg:grid-cols-[17rem_1fr]"
-                          : "w-[min(22rem,calc(100vw-2rem))] grid-cols-1 lg:w-[17rem] lg:grid-cols-[17rem]"
+                          ? "w-[min(21rem,calc(100vw-2rem))] grid-cols-1 lg:w-[40rem] lg:grid-cols-[16rem_1fr]"
+                          : "w-[min(21rem,calc(100vw-2rem))] grid-cols-1 lg:w-[16rem] lg:grid-cols-[16rem]"
                       }`}
                     >
                       <div
@@ -346,7 +346,7 @@ export function StorefrontHeader({
                       </div>
 
                       {activeCategoryIndex !== null ? (
-                        <div className="bg-white p-6 lg:border-t lg:border-t-0 lg:border-slate-200">
+                        <div className="min-w-0 bg-white p-4 sm:p-5 lg:border-t lg:border-t-0 lg:border-slate-200">
                           <button
                             type="button"
                             onClick={() => setActiveCategoryIndex(null)}
@@ -372,7 +372,7 @@ export function StorefrontHeader({
                           <p className="mt-2 text-base font-semibold text-slate-950">
                             {categoryMenu[activeCategoryIndex]?.title}
                           </p>
-                          <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+                          <div className="mt-5 grid min-w-0 gap-2 sm:grid-cols-2">
                             {categoryMenu[activeCategoryIndex]?.items.map((item) => (
                               <button
                                 key={item}
@@ -382,9 +382,9 @@ export function StorefrontHeader({
                                   setCategoryOpen(false);
                                   setActiveCategoryIndex(null);
                                 }}
-                                className="flex cursor-pointer items-center justify-between rounded-lg border border-transparent px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-950"
+                                className="flex min-w-0 cursor-pointer items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-950"
                               >
-                                <span>{item}</span>
+                                <span className="min-w-0">{item}</span>
                                 <svg
                                   aria-hidden="true"
                                   viewBox="0 0 24 24"
