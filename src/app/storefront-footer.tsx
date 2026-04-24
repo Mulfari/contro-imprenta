@@ -10,7 +10,7 @@ function FooterLogo() {
       aria-label="Express Printer"
     >
       <span
-        className="block h-[4.1rem] w-[12.2rem] sm:h-[4.5rem] sm:w-[13.5rem]"
+        className="block h-[4.1rem] w-[14.4rem] sm:h-[4.5rem] sm:w-[15.75rem]"
         aria-hidden="true"
         style={{
           backgroundImage: "url('/express-printer-logo-footer.svg')",

@@ -1,27 +1,27 @@
-<svg width="420" height="140" viewBox="0 0 420 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="420" height="120" viewBox="0 0 420 120" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="logo-blue-footer" x1="18" y1="88" x2="146" y2="6" gradientUnits="userSpaceOnUse">
+    <linearGradient id="footer-logo-blue" x1="18" y1="88" x2="146" y2="6" gradientUnits="userSpaceOnUse">
       <stop stop-color="#11A7F6"/>
       <stop offset="1" stop-color="#42C6FF"/>
     </linearGradient>
-    <linearGradient id="logo-pink-footer" x1="20" y1="30" x2="103" y2="106" gradientUnits="userSpaceOnUse">
+    <linearGradient id="footer-logo-pink" x1="20" y1="30" x2="103" y2="106" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FF3C9A"/>
       <stop offset="1" stop-color="#FF0076"/>
     </linearGradient>
-    <linearGradient id="logo-yellow-footer" x1="96" y1="92" x2="148" y2="122" gradientUnits="userSpaceOnUse">
+    <linearGradient id="footer-logo-yellow" x1="96" y1="92" x2="148" y2="122" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FFE93A"/>
       <stop offset="1" stop-color="#FFCC00"/>
     </linearGradient>
-    <filter id="footer-word-shadow" x="0" y="0" width="420" height="140" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.28"/>
+    <filter id="footer-logo-shadow" x="-8" y="-8" width="438" height="138" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#000000" flood-opacity="0.24"/>
     </filter>
   </defs>
 
-  <g transform="translate(0 6)" filter="url(#footer-word-shadow)">
+  <g transform="translate(0 4)" filter="url(#footer-logo-shadow)">
     <text
       x="4"
       y="74"
-      fill="#F8FAFC"
+      fill="#FFFFFF"
       font-family="Arial Black, Arial, Helvetica, sans-serif"
       font-size="48"
       font-style="italic"
@@ -32,15 +32,15 @@
     </text>
 
     <g transform="translate(32 6)">
-      <path d="M0 86H36L146 -24H110L0 86Z" fill="url(#logo-blue-footer)"/>
-      <path d="M18 34H81C101 46 115 61 120 78C124 93 120 108 107 122L92 138H54L75 117C87 106 92 95 91 82C89 67 78 53 58 40L18 34Z" fill="url(#logo-pink-footer)"/>
-      <path d="M91 89L124 122H166L133 89H91Z" fill="url(#logo-yellow-footer)"/>
+      <path d="M0 86H36L146 -24H110L0 86Z" fill="url(#footer-logo-blue)"/>
+      <path d="M18 34H81C101 46 115 61 120 78C124 93 120 108 107 122L92 138H54L75 117C87 106 92 95 91 82C89 67 78 53 58 40L18 34Z" fill="url(#footer-logo-pink)"/>
+      <path d="M91 89L124 122H166L133 89H91Z" fill="url(#footer-logo-yellow)"/>
     </g>
 
     <text
       x="168"
       y="78"
-      fill="#F8FAFC"
+      fill="#FFFFFF"
       font-family="Arial Black, Arial, Helvetica, sans-serif"
       font-size="58"
       font-style="italic"
@@ -51,13 +51,13 @@
     </text>
 
     <text
-      x="246"
-      y="111"
-      fill="#DCEBFF"
-      font-family="Arial, Helvetica, sans-serif"
-      font-size="15"
+      x="224"
+      y="102"
+      fill="#E2E8F0"
+      font-family="Arial Black, Arial, Helvetica, sans-serif"
+      font-size="22"
       font-weight="900"
-      letter-spacing="3.2"
+      letter-spacing="1.8"
     >
       PRINTER
     </text>
