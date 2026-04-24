@@ -1,13 +1,24 @@
 "use client";
 
+import Image from "next/image";
+
 function FooterLogo() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-sm font-black tracking-[0.22em] text-slate-950">
-        EX
+    <div className="flex items-center gap-4">
+      <div className="flex h-14 w-44 items-center rounded-2xl bg-white px-4 shadow-[0_14px_32px_rgba(0,0,0,0.18)]">
+        <Image
+          src="/express-printer-logo.webp"
+          alt="Express Printer"
+          width={340}
+          height={96}
+          sizes="11rem"
+          className="h-auto w-full object-contain"
+        />
       </div>
       <div>
-        <p className="text-lg font-semibold tracking-tight text-white">Express Printer</p>
+        <p className="text-base font-semibold tracking-tight text-white sm:text-lg">
+          Express Printer
+        </p>
         <p className="text-xs font-medium uppercase tracking-[0.28em] text-slate-400">
           Impresion comercial
         </p>

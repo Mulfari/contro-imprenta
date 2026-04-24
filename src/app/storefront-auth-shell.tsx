@@ -30,6 +30,12 @@ export function StorefrontAuthShell({
         hasActiveSearch={false}
         isAccountActive={false}
         onAccountClick={() => {}}
+        wishlistCount={0}
+        cartCount={0}
+        onWishlistClick={() => {}}
+        onCartClick={() => {}}
+        onCatalogClick={() => {}}
+        onSectionNavigate={() => {}}
       />
 
       <CustomerAccountClient

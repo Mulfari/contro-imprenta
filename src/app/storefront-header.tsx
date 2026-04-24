@@ -28,7 +28,7 @@ const categoryMenu = [
   },
 ];
 const navLinks = [
-  { label: "Catalogo", href: "#catalogo" },
+  { label: "Catalogo", href: "#catalogo", isCatalog: true },
   { label: "Destacados", href: "#destacados" },
   { label: "Nuevos productos", href: "#nuevos-productos" },
   { label: "Promociones", href: "#promociones" },
@@ -41,6 +41,12 @@ type StorefrontHeaderProps = {
   hasActiveSearch: boolean;
   isAccountActive: boolean;
   onAccountClick: () => void;
+  wishlistCount: number;
+  cartCount: number;
+  onWishlistClick: () => void;
+  onCartClick: () => void;
+  onCatalogClick: () => void;
+  onSectionNavigate: () => void;
 };
 
 export function StorefrontHeader({
@@ -49,6 +55,12 @@ export function StorefrontHeader({
   hasActiveSearch,
   isAccountActive,
   onAccountClick,
+  wishlistCount,
+  cartCount,
+  onWishlistClick,
+  onCartClick,
+  onCatalogClick,
+  onSectionNavigate,
 }: StorefrontHeaderProps) {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
@@ -80,6 +92,7 @@ export function StorefrontHeader({
     const sectionId = href.slice(1);
 
     onSearchQueryChange("");
+    onSectionNavigate();
     setCategoryOpen(false);
     setActiveCategoryIndex(null);
     window.history.pushState(null, "", href);
@@ -146,7 +159,8 @@ export function StorefrontHeader({
               <button
                 type="button"
                 aria-label="Deseados"
-                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                onClick={onWishlistClick}
+                className="relative inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 <svg
                   aria-hidden="true"
@@ -160,11 +174,17 @@ export function StorefrontHeader({
                 >
                   <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
                 </svg>
+                {wishlistCount > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ff5b4d] px-1 text-[0.68rem] font-bold text-white">
+                    {wishlistCount}
+                  </span>
+                ) : null}
               </button>
               <button
                 type="button"
                 aria-label="Carrito"
-                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-slate-950 text-white transition hover:bg-slate-800"
+                onClick={onCartClick}
+                className="relative inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-slate-950 text-white transition hover:bg-slate-800"
               >
                 <svg
                   aria-hidden="true"
@@ -180,6 +200,11 @@ export function StorefrontHeader({
                   <circle cx="18" cy="19" r="1.75" />
                   <path d="M3 4h2l2.3 10.2a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 7H7.2" />
                 </svg>
+                {cartCount > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ffd45f] px-1 text-[0.68rem] font-bold text-slate-950">
+                    {cartCount}
+                  </span>
+                ) : null}
               </button>
             </div>
           </div>
@@ -432,6 +457,7 @@ export function StorefrontHeader({
               </button>
               <button
                 type="button"
+                onClick={onWishlistClick}
                 className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 <svg
@@ -447,9 +473,15 @@ export function StorefrontHeader({
                   <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
                 </svg>
                 Deseados
+                {wishlistCount > 0 ? (
+                  <span className="rounded-full bg-[#ff5b4d] px-2 py-0.5 text-xs font-bold text-white">
+                    {wishlistCount}
+                  </span>
+                ) : null}
               </button>
               <button
                 type="button"
+                onClick={onCartClick}
                 className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 <svg
@@ -467,20 +499,36 @@ export function StorefrontHeader({
                   <path d="M3 4h2l2.3 10.2a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 7H7.2" />
                 </svg>
                 Carrito
+                {cartCount > 0 ? (
+                  <span className="rounded-full bg-[#ffd45f] px-2 py-0.5 text-xs font-bold text-slate-950">
+                    {cartCount}
+                  </span>
+                ) : null}
               </button>
             </div>
           </div>
 
           <div className="hidden flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 text-sm font-medium text-slate-700 lg:flex">
             {navLinks.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={(event) => handleSectionLinkClick(event, item.href)}
-                className="transition hover:text-slate-950"
-              >
-                {item.label}
-              </a>
+              item.isCatalog ? (
+                <button
+                  key={item.href}
+                  type="button"
+                  onClick={onCatalogClick}
+                  className="cursor-pointer transition hover:text-slate-950"
+                >
+                  {item.label}
+                </button>
+              ) : (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={(event) => handleSectionLinkClick(event, item.href)}
+                  className="transition hover:text-slate-950"
+                >
+                  {item.label}
+                </a>
+              )
             ))}
           </div>
         </div>

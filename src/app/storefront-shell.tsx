@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
 import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
-import { storefrontProducts } from "@/app/storefront-data";
+import { storefrontProducts, type StorefrontProduct } from "@/app/storefront-data";
 import { StorefrontBusinessSection } from "@/app/storefront-business-section";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
 import { StorefrontDealsSection } from "@/app/storefront-deals-section";
@@ -14,6 +15,15 @@ import { StorefrontHero } from "@/app/storefront-hero";
 import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
 import { StorefrontTestimonialsSection } from "@/app/storefront-testimonials-section";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+
+type CartItem = {
+  key: string;
+  product: StorefrontProduct;
+  quantity: number;
+  options: Record<string, string>;
+};
+
+type CommercePanel = "wishlist" | "cart" | null;
 
 const categoryGroups = [
   {
@@ -34,10 +44,471 @@ const categoryGroups = [
   },
 ];
 
+function getDefaultOptions(product: StorefrontProduct) {
+  return Object.fromEntries(
+    product.options.map((group) => [group.name, group.values[0] ?? ""]),
+  );
+}
+
+function getCartKey(product: StorefrontProduct, options: Record<string, string>) {
+  return `${product.id}:${Object.entries(options)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key}-${value}`)
+    .join("|")}`;
+}
+
+function parsePrice(price: string) {
+  return Number(price.replace(/[^\d.]/g, "")) || 0;
+}
+
+function CatalogProductCard({
+  product,
+  wished,
+  onPreview,
+  onToggleWishlist,
+  onAddToCart,
+}: {
+  product: StorefrontProduct;
+  wished: boolean;
+  onPreview: () => void;
+  onToggleWishlist: () => void;
+  onAddToCart: () => void;
+}) {
+  return (
+    <article className="catalog-enter-card group overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_38px_rgba(15,23,42,0.08)]">
+      <button
+        type="button"
+        onClick={onPreview}
+        className={`relative flex h-48 w-full cursor-pointer items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-5 text-left sm:h-56`}
+      >
+        <div className="absolute left-4 top-4 rounded-full bg-white/82 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
+          {product.category}
+        </div>
+        <div className="absolute inset-x-10 bottom-6 h-10 rounded-full bg-slate-900/12 blur-2xl" />
+        <Image
+          src={product.image}
+          alt={product.imageAlt}
+          width={1000}
+          height={760}
+          sizes="(min-width: 1280px) 22vw, (min-width: 768px) 40vw, 88vw"
+          className="relative z-10 h-auto max-h-[88%] w-auto max-w-[86%] object-contain drop-shadow-[0_22px_34px_rgba(15,23,42,0.18)] transition duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02]"
+        />
+      </button>
+
+      <div className="space-y-4 p-5">
+        <div>
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-lg font-semibold leading-tight tracking-tight text-slate-950">
+              {product.title}
+            </h3>
+            <button
+              type="button"
+              onClick={onToggleWishlist}
+              aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
+              className={`flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border transition ${
+                wished
+                  ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white"
+                  : "border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+              }`}
+            >
+              <span aria-hidden="true">♡</span>
+            </button>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{product.description}</p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {product.highlights.slice(0, 2).map((item) => (
+            <span
+              key={item}
+              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex items-end justify-between gap-3 border-t border-slate-100 pt-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Desde
+            </p>
+            <p className="text-2xl font-black tracking-tight text-slate-950">{product.price}</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onPreview}
+              className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              Ver
+            </button>
+            <button
+              type="button"
+              onClick={onAddToCart}
+              className="cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Anadir
+            </button>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ProductPreviewModal({
+  product,
+  selectedOptions,
+  onClose,
+  onOptionChange,
+  onAddToCart,
+  wished,
+  onToggleWishlist,
+}: {
+  product: StorefrontProduct;
+  selectedOptions: Record<string, string>;
+  onClose: () => void;
+  onOptionChange: (group: string, value: string) => void;
+  onAddToCart: () => void;
+  wished: boolean;
+  onToggleWishlist: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[90] bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:px-6">
+      <div className="mx-auto flex h-full w-full max-w-[76rem] items-center">
+        <article className="grid max-h-full w-full overflow-hidden rounded-[1.6rem] bg-white shadow-[0_28px_80px_rgba(15,23,42,0.28)] lg:grid-cols-[0.98fr_1.02fr]">
+          <div className={`relative flex min-h-[20rem] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-6 sm:min-h-[26rem]`}>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Cerrar"
+              className="absolute left-4 top-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/88 text-slate-700 shadow-sm transition hover:bg-white hover:text-slate-950 lg:hidden"
+            >
+              ×
+            </button>
+            <div className="absolute inset-x-14 bottom-10 h-12 rounded-full bg-slate-900/12 blur-2xl" />
+            <Image
+              src={product.image}
+              alt={product.imageAlt}
+              width={1200}
+              height={900}
+              sizes="(min-width: 1024px) 38vw, 88vw"
+              className="relative z-10 h-auto max-h-[80%] w-auto max-w-[88%] object-contain drop-shadow-[0_28px_42px_rgba(15,23,42,0.2)]"
+            />
+          </div>
+
+          <div className="overflow-y-auto p-5 sm:p-7 lg:p-8">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#3558ff]">
+                  {product.category}
+                </p>
+                <h2 className="mt-2 text-[1.9rem] font-black leading-tight tracking-tight text-slate-950 sm:text-[2.4rem]">
+                  {product.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Cerrar"
+                className="hidden h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 lg:flex"
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="mt-4 text-base leading-7 text-slate-600">{product.description}</p>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              {product.highlights.map((item) => (
+                <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-700">
+                  {item}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 space-y-5">
+              {product.options.map((group) => (
+                <div key={group.name}>
+                  <p className="text-sm font-semibold text-slate-950">{group.name}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {group.values.map((value) => {
+                      const selected = selectedOptions[group.name] === value;
+
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => onOptionChange(group.name, value)}
+                          className={`cursor-pointer rounded-xl border px-3.5 py-2 text-sm font-semibold transition ${
+                            selected
+                              ? "border-slate-950 bg-slate-950 text-white"
+                              : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                          }`}
+                        >
+                          {value}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-7 rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    Precio base
+                  </p>
+                  <p className="text-3xl font-black text-slate-950">{product.price}</p>
+                </div>
+                <p className="text-right text-sm font-medium text-slate-500">
+                  Entrega estimada<br />
+                  <span className="font-semibold text-slate-950">{product.turnaround}</span>
+                </p>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+                <button
+                  type="button"
+                  onClick={onAddToCart}
+                  className="cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+                >
+                  Anadir al carrito
+                </button>
+                <button
+                  type="button"
+                  onClick={onToggleWishlist}
+                  className={`cursor-pointer rounded-xl border px-5 py-3.5 text-sm font-semibold transition ${
+                    wished
+                      ? "border-[#ff5b4d] bg-[#ff5b4d] text-white"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  {wished ? "En deseados" : "Guardar"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  );
+}
+
+function CommerceDrawer({
+  panel,
+  cartItems,
+  wishlistProducts,
+  onClose,
+  onPreview,
+  onAddProduct,
+  onRemoveWishlist,
+  onRemoveCartItem,
+  onQuantityChange,
+}: {
+  panel: CommercePanel;
+  cartItems: CartItem[];
+  wishlistProducts: StorefrontProduct[];
+  onClose: () => void;
+  onPreview: (product: StorefrontProduct) => void;
+  onAddProduct: (product: StorefrontProduct) => void;
+  onRemoveWishlist: (productId: string) => void;
+  onRemoveCartItem: (key: string) => void;
+  onQuantityChange: (key: string, quantity: number) => void;
+}) {
+  if (!panel) {
+    return null;
+  }
+
+  const cartSubtotal = cartItems.reduce(
+    (sum, item) => sum + parsePrice(item.product.price) * item.quantity,
+    0,
+  );
+
+  return (
+    <div className="fixed inset-0 z-[85] bg-slate-950/35 backdrop-blur-sm">
+      <button
+        type="button"
+        aria-label="Cerrar panel"
+        className="absolute inset-0 cursor-default"
+        onClick={onClose}
+      />
+      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[28rem] flex-col bg-white shadow-[0_28px_80px_rgba(15,23,42,0.28)]">
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+              Express Printer
+            </p>
+            <h2 className="text-xl font-black tracking-tight text-slate-950">
+              {panel === "cart" ? "Carrito de compras" : "Lista de deseados"}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+            aria-label="Cerrar"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5">
+          {panel === "wishlist" ? (
+            wishlistProducts.length > 0 ? (
+              <div className="space-y-4">
+                {wishlistProducts.map((product) => (
+                  <div key={product.id} className="grid grid-cols-[5.5rem_1fr] gap-3 rounded-2xl border border-slate-200 p-3">
+                    <button
+                      type="button"
+                      onClick={() => onPreview(product)}
+                      className={`flex h-22 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${product.tint}`}
+                    >
+                      <Image
+                        src={product.image}
+                        alt={product.imageAlt}
+                        width={260}
+                        height={220}
+                        sizes="6rem"
+                        className="h-auto max-h-[84%] w-auto max-w-[84%] object-contain"
+                      />
+                    </button>
+                    <div>
+                      <h3 className="font-semibold leading-tight text-slate-950">{product.title}</h3>
+                      <p className="mt-1 text-sm text-slate-500">{product.price}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onAddProduct(product)}
+                          className="cursor-pointer rounded-lg bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                        >
+                          Anadir
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onRemoveWishlist(product.id)}
+                          className="cursor-pointer rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[1.4rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+                <p className="font-semibold text-slate-950">No tienes productos guardados.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Guarda productos del catalogo para revisarlos despues.
+                </p>
+              </div>
+            )
+          ) : cartItems.length > 0 ? (
+            <div className="space-y-4">
+              {cartItems.map((item) => (
+                <div key={item.key} className="rounded-2xl border border-slate-200 p-3">
+                  <div className="grid grid-cols-[5.5rem_1fr] gap-3">
+                    <button
+                      type="button"
+                      onClick={() => onPreview(item.product)}
+                      className={`flex h-22 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${item.product.tint}`}
+                    >
+                      <Image
+                        src={item.product.image}
+                        alt={item.product.imageAlt}
+                        width={260}
+                        height={220}
+                        sizes="6rem"
+                        className="h-auto max-h-[84%] w-auto max-w-[84%] object-contain"
+                      />
+                    </button>
+                    <div>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="font-semibold leading-tight text-slate-950">{item.product.title}</h3>
+                          <p className="mt-1 text-sm font-semibold text-[#3558ff]">{item.product.price}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => onRemoveCartItem(item.key)}
+                          className="cursor-pointer text-sm font-semibold text-slate-400 transition hover:text-slate-950"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-slate-500">
+                        {Object.entries(item.options).map(([key, value]) => `${key}: ${value}`).join(" / ")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                    <p className="text-sm font-medium text-slate-500">Cantidad</p>
+                    <div className="flex items-center rounded-full border border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => onQuantityChange(item.key, item.quantity - 1)}
+                        className="h-9 w-9 cursor-pointer text-slate-500 transition hover:text-slate-950"
+                      >
+                        -
+                      </button>
+                      <span className="min-w-8 text-center text-sm font-semibold">{item.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => onQuantityChange(item.key, item.quantity + 1)}
+                        className="h-9 w-9 cursor-pointer text-slate-500 transition hover:text-slate-950"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[1.4rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+              <p className="font-semibold text-slate-950">Tu carrito esta vacio.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Agrega productos del catalogo para preparar tu pedido.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {panel === "cart" ? (
+          <div className="border-t border-slate-200 p-5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-500">Subtotal estimado</span>
+              <span className="text-2xl font-black text-slate-950">${cartSubtotal}</span>
+            </div>
+            <button
+              type="button"
+              className="mt-4 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+            >
+              Continuar pedido
+            </button>
+            <p className="mt-3 text-center text-xs leading-5 text-slate-400">
+              El total final puede variar segun arte, medidas y acabados.
+            </p>
+          </div>
+        ) : null}
+      </aside>
+    </div>
+  );
+}
+
 export function StorefrontShell() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => new Set());
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [activePanel, setActivePanel] = useState<CommercePanel>(null);
+  const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -47,28 +518,155 @@ export function StorefrontShell() {
     return () => window.clearTimeout(timeout);
   }, [searchQuery]);
 
-  const filteredProducts = useMemo(() => {
-    const normalized = debouncedQuery.toLowerCase();
+  const isCatalogVisible = catalogOpen || Boolean(debouncedQuery);
 
-    if (!normalized) {
+  const filteredProducts = useMemo(() => {
+    if (!isCatalogVisible) {
       return [];
     }
 
-    return storefrontProducts.filter((item) =>
-      `${item.title} ${item.note} ${item.category}`.toLowerCase().includes(normalized),
-    );
-  }, [debouncedQuery]);
+    const normalized = debouncedQuery.toLowerCase();
 
+    if (!normalized) {
+      return storefrontProducts;
+    }
+
+    return storefrontProducts.filter((item) =>
+      [
+        item.title,
+        item.note,
+        item.category,
+        item.description,
+        item.highlights.join(" "),
+        item.options.map((group) => group.values.join(" ")).join(" "),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalized),
+    );
+  }, [debouncedQuery, isCatalogVisible]);
+
+  const wishlistProducts = useMemo(
+    () => storefrontProducts.filter((product) => wishlistIds.has(product.id)),
+    [wishlistIds],
+  );
+
+  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
   const publicAuthEnabled = hasSupabasePublicConfig();
+
+  const openCatalog = () => {
+    setSearchQuery("");
+    setDebouncedQuery("");
+    setCatalogOpen(true);
+    setAccountOpen(false);
+    setActivePanel(null);
+    window.history.pushState(null, "", "#catalogo");
+    window.setTimeout(() => {
+      document.getElementById("catalogo")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
+  const closeCatalogForHomeSection = () => {
+    setCatalogOpen(false);
+    setActivePanel(null);
+    setSelectedProduct(null);
+  };
+
+  const handleSearchQueryChange = (value: string) => {
+    setSearchQuery(value);
+
+    if (value.trim()) {
+      setCatalogOpen(true);
+      setAccountOpen(false);
+    }
+  };
+
+  const openPreview = (product: StorefrontProduct) => {
+    setSelectedProduct(product);
+    setSelectedOptions(getDefaultOptions(product));
+    setActivePanel(null);
+  };
+
+  const toggleWishlist = (productId: string) => {
+    setWishlistIds((current) => {
+      const next = new Set(current);
+
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+
+      return next;
+    });
+  };
+
+  const addToCart = (product: StorefrontProduct, options = getDefaultOptions(product)) => {
+    const key = getCartKey(product, options);
+
+    setCartItems((current) => {
+      const existing = current.find((item) => item.key === key);
+
+      if (existing) {
+        return current.map((item) =>
+          item.key === key ? { ...item, quantity: item.quantity + 1 } : item,
+        );
+      }
+
+      return [
+        ...current,
+        {
+          key,
+          product,
+          quantity: 1,
+          options,
+        },
+      ];
+    });
+    setActivePanel("cart");
+  };
+
+  const removeCartItem = (key: string) => {
+    setCartItems((current) => current.filter((item) => item.key !== key));
+  };
+
+  const changeCartQuantity = (key: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeCartItem(key);
+      return;
+    }
+
+    setCartItems((current) =>
+      current.map((item) => (item.key === key ? { ...item, quantity } : item)),
+    );
+  };
 
   return (
     <main className="min-h-screen bg-[#f3f5f8] text-slate-950">
       <StorefrontHeader
         searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        hasActiveSearch={Boolean(debouncedQuery)}
+        onSearchQueryChange={handleSearchQueryChange}
+        hasActiveSearch={isCatalogVisible}
         isAccountActive={accountOpen}
-        onAccountClick={() => setAccountOpen((current) => !current)}
+        onAccountClick={() => {
+          setAccountOpen((current) => !current);
+          setActivePanel(null);
+        }}
+        wishlistCount={wishlistIds.size}
+        cartCount={cartCount}
+        onWishlistClick={() => {
+          setActivePanel("wishlist");
+          setAccountOpen(false);
+        }}
+        onCartClick={() => {
+          setActivePanel("cart");
+          setAccountOpen(false);
+        }}
+        onCatalogClick={openCatalog}
+        onSectionNavigate={closeCatalogForHomeSection}
       />
 
       {accountOpen ? (
@@ -85,103 +683,86 @@ export function StorefrontShell() {
         </div>
       ) : null}
 
-      {debouncedQuery ? (
+      {isCatalogVisible ? (
         <>
-          <section className="mx-auto w-full max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8 2xl:px-10">
-            <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
-              <aside className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+          <section id="catalogo" className="catalog-enter mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 py-6 sm:px-6 lg:px-8 2xl:px-10">
+            <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
+              <aside className="catalog-enter-panel rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)] xl:rounded-[1.8rem]">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
                   Catalogo
                 </p>
-                <h2 className="mt-2 text-base font-semibold tracking-tight">
+                <h2 className="mt-2 text-xl font-black tracking-tight text-slate-950">
                   Compra por categoria
                 </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Filtra por familias, abre una vista previa y configura cada producto antes de anadirlo al carrito.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setDebouncedQuery("");
+                    setCatalogOpen(true);
+                  }}
+                  className="mt-5 w-full cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Ver todos los productos
+                </button>
                 <div className="mt-5 space-y-5">
                   {categoryGroups.map((group) => (
                     <div key={group.title} className="border-b border-slate-100 pb-5 last:border-b-0 last:pb-0">
                       <h3 className="text-sm font-semibold text-slate-500">{group.title}</h3>
                       <div className="mt-3 space-y-1.5">
-                        {group.items.map((item) => {
-                          return (
-                            <button
-                              key={item}
-                              type="button"
-                              onClick={() => setSearchQuery(item)}
-                              className="block w-full cursor-pointer rounded-lg px-2 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-                            >
-                              {item}
-                            </button>
-                          );
-                        })}
+                        {group.items.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(item);
+                              setCatalogOpen(true);
+                            }}
+                            className="block w-full cursor-pointer rounded-lg px-2 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+                          >
+                            {item}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   ))}
                 </div>
               </aside>
 
-              <section className="rounded-[1.9rem] border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+              <section className="catalog-enter-panel rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:p-6 xl:rounded-[1.9rem]">
+                <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
-                      Resultados de busqueda
+                      {debouncedQuery ? "Resultados de busqueda" : "Catalogo completo"}
                     </p>
-                    <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                      {debouncedQuery}
+                    <h2 className="mt-2 text-[1.9rem] font-black tracking-tight text-slate-950 sm:text-4xl">
+                      {debouncedQuery || "Productos de impresion"}
                     </h2>
                   </div>
-                  <p className="text-sm font-medium text-slate-500">
-                    {filteredProducts.length} producto{filteredProducts.length === 1 ? "" : "s"}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
+                      {filteredProducts.length} producto{filteredProducts.length === 1 ? "" : "s"}
+                    </span>
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
+                      {cartCount} en carrito
+                    </span>
+                  </div>
                 </div>
 
                 {filteredProducts.length > 0 ? (
-                  <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    {filteredProducts.map((item) => (
-                      <article
-                        key={item.title}
-                        className="group overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_38px_rgba(15,23,42,0.08)]"
-                      >
-                        <div
-                          className={`bg-gradient-to-br ${item.tint} p-5`}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[#8a6a00]">
-                              Destacado
-                            </span>
-                            <span className="rounded-full border border-white/55 bg-white/45 px-3 py-1 text-xs font-medium text-slate-600">
-                              {item.category}
-                            </span>
-                          </div>
-
-                          <div className="mt-5 flex h-32 items-end justify-between rounded-[1.1rem] border border-white/55 bg-white/40 p-4">
-                            <div className="space-y-2">
-                              <div className="h-3 w-24 rounded-full bg-white/80" />
-                              <div className="h-3 w-16 rounded-full bg-white/55" />
-                            </div>
-                            <div className="h-16 w-16 rounded-[1rem] border border-white/60 bg-white/80 shadow-sm" />
-                          </div>
-                        </div>
-
-                        <div className="space-y-3 p-5">
-                          <h3 className="text-lg font-semibold tracking-tight">{item.title}</h3>
-                          <p className="text-sm leading-6 text-slate-600">{item.note}</p>
-                          <div className="flex items-end justify-between gap-3 pt-1">
-                            <p className="text-lg font-semibold text-slate-950">
-                              Desde {item.price}
-                            </p>
-                            <button
-                              type="button"
-                              className="cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-                            >
-                              Ver
-                            </button>
-                          </div>
-                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs font-medium text-slate-400">
-                            <span>Entrega express</span>
-                            <span>Personalizable</span>
-                          </div>
-                        </div>
-                      </article>
+                  <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+                    {filteredProducts.map((product) => (
+                      <CatalogProductCard
+                        key={product.id}
+                        product={product}
+                        wished={wishlistIds.has(product.id)}
+                        onPreview={() => openPreview(product)}
+                        onToggleWishlist={() => toggleWishlist(product.id)}
+                        onAddToCart={() => addToCart(product)}
+                      />
                     ))}
                   </div>
                 ) : (
@@ -211,6 +792,35 @@ export function StorefrontShell() {
           <StorefrontFooter />
         </>
       )}
+
+      {selectedProduct ? (
+        <ProductPreviewModal
+          product={selectedProduct}
+          selectedOptions={selectedOptions}
+          onClose={() => setSelectedProduct(null)}
+          onOptionChange={(group, value) =>
+            setSelectedOptions((current) => ({ ...current, [group]: value }))
+          }
+          onAddToCart={() => {
+            addToCart(selectedProduct, selectedOptions);
+            setSelectedProduct(null);
+          }}
+          wished={wishlistIds.has(selectedProduct.id)}
+          onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
+        />
+      ) : null}
+
+      <CommerceDrawer
+        panel={activePanel}
+        cartItems={cartItems}
+        wishlistProducts={wishlistProducts}
+        onClose={() => setActivePanel(null)}
+        onPreview={openPreview}
+        onAddProduct={(product) => addToCart(product)}
+        onRemoveWishlist={(productId) => toggleWishlist(productId)}
+        onRemoveCartItem={removeCartItem}
+        onQuantityChange={changeCartQuantity}
+      />
     </main>
   );
 }
