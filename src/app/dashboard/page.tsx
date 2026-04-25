@@ -998,19 +998,61 @@ export default async function DashboardPage({
     ? orders.filter((order) => order.client_id === selectedClient.id)
     : [];
   const clientPendingTotals = new Map<string, number>();
+  const clientOrderCounts = new Map<string, number>();
+  const clientActiveOrderCounts = new Map<string, number>();
+  const clientLastOrderDates = new Map<string, string>();
+  const storefrontClientIds = new Set<string>();
   const orderFilesByOrderId = new Map<string, OrderFile[]>();
   const orderHistoryByOrderId = new Map<string, OrderHistoryEntry[]>();
 
   for (const order of orders) {
-    if (!order.client_id || order.total_amount === null || order.status === "entregado") {
+    if (!order.client_id) {
       continue;
     }
 
-    clientPendingTotals.set(
-      order.client_id,
-      (clientPendingTotals.get(order.client_id) ?? 0) + order.total_amount,
-    );
+    clientOrderCounts.set(order.client_id, (clientOrderCounts.get(order.client_id) ?? 0) + 1);
+
+    if (order.status !== "entregado") {
+      clientActiveOrderCounts.set(
+        order.client_id,
+        (clientActiveOrderCounts.get(order.client_id) ?? 0) + 1,
+      );
+    }
+
+    if (order.source === "storefront") {
+      storefrontClientIds.add(order.client_id);
+    }
+
+    const previousLastOrder = clientLastOrderDates.get(order.client_id);
+    if (
+      !previousLastOrder ||
+      new Date(order.created_at).getTime() > new Date(previousLastOrder).getTime()
+    ) {
+      clientLastOrderDates.set(order.client_id, order.created_at);
+    }
+
+    if (order.status === "entregado") {
+      continue;
+    }
+
+    const pendingAmount = Number(order.pending_amount ?? order.total_amount ?? 0);
+
+    if (pendingAmount > 0) {
+      clientPendingTotals.set(
+        order.client_id,
+        (clientPendingTotals.get(order.client_id) ?? 0) + pendingAmount,
+      );
+    }
   }
+
+  const totalClientPending = [...clientPendingTotals.values()].reduce(
+    (sum, value) => sum + value,
+    0,
+  );
+  const clientsWithPending = clients.filter(
+    (client) => (clientPendingTotals.get(client.id) ?? 0) > 0,
+  ).length;
+  const clientsWithContact = clients.filter((client) => client.phone || client.email).length;
 
   for (const file of orderFiles) {
     const current = orderFilesByOrderId.get(file.order_id) ?? [];
@@ -1260,26 +1302,51 @@ export default async function DashboardPage({
               id="clientes"
               className="rounded-[1.4rem] border border-slate-200 bg-white/90 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] sm:rounded-[2rem] sm:p-6"
             >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">Clientes registrados</h2>
-                <p className="mt-2 text-sm text-slate-500">
-                  Busca, selecciona y administra la base de clientes.
-                </p>
+            <div className="overflow-hidden rounded-[1.5rem] bg-slate-950 p-5 text-white sm:rounded-[1.8rem] sm:p-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="max-w-3xl">
+                  <p className="text-xs font-semibold uppercase text-[#ffd45f]">
+                    CRM de clientes
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+                    Clientes registrados
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">
+                    Consulta contacto, saldo, actividad y archivos del cliente desde una vista lista para trabajo diario. {storefrontClientIds.size} vienen desde el storefront.
+                  </p>
+                </div>
+                {session.role === "admin" ? (
+                  <Link
+                    href={buildClientUrl("nuevo", undefined, undefined, clientQuery)}
+                    className="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-[#ffd45f] px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+                  >
+                    Nuevo cliente
+                  </Link>
+                ) : null}
               </div>
-              {session.role === "admin" ? (
-                <Link
-                  href={buildClientUrl("nuevo", undefined, undefined, clientQuery)}
-                  className="inline-flex cursor-pointer items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-                >
-                  Nuevo cliente
-                </Link>
-              ) : null}
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase text-slate-300">Total</p>
+                  <p className="mt-2 text-2xl font-black">{clients.length}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase text-slate-300">Con saldo</p>
+                  <p className="mt-2 text-2xl font-black">{clientsWithPending}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase text-slate-300">Por cobrar</p>
+                  <p className="mt-2 text-2xl font-black">{formatCurrency(totalClientPending)}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase text-slate-300">Contacto</p>
+                  <p className="mt-2 text-2xl font-black">{clientsWithContact}</p>
+                </div>
+              </div>
             </div>
 
             <form className="mt-5" action="/dashboard" method="get">
               <input type="hidden" name="view" value="clientes" />
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 p-3 sm:flex sm:items-center sm:gap-3">
                 <input
                   name="clientQuery"
                   defaultValue={clientQuery}
@@ -1288,14 +1355,113 @@ export default async function DashboardPage({
                 />
                 <button
                   type="submit"
-                  className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  className="mt-3 w-full cursor-pointer rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 sm:mt-0 sm:w-auto"
                 >
                   Buscar
                 </button>
               </div>
             </form>
 
-            <div className="mt-5 hidden overflow-hidden rounded-[1.5rem] border border-slate-200 md:block">
+            <div className="mt-5 grid gap-3 xl:hidden">
+              {filteredClients.length === 0 ? (
+                <div className="rounded-[1.3rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+                  No hay clientes que coincidan con la busqueda.
+                </div>
+              ) : (
+                filteredClients.map((client) => {
+                  const pendingTotal = clientPendingTotals.get(client.id) ?? 0;
+                  const hasPendingBalance = pendingTotal > 0;
+                  const orderCount = clientOrderCounts.get(client.id) ?? 0;
+                  const activeOrderCount = clientActiveOrderCounts.get(client.id) ?? 0;
+                  const lastOrderDate = clientLastOrderDates.get(client.id);
+                  const detailHref = buildClientUrl(
+                    "detalle",
+                    client.id,
+                    undefined,
+                    clientQuery,
+                  );
+
+                  return (
+                    <article
+                      key={client.id}
+                      className="rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.05)]"
+                    >
+                      <Link href={detailHref} className="block cursor-pointer">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="break-words text-lg font-black text-slate-950">
+                              {client.name}
+                            </h3>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {client.phone ?? "Sin telefono"}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                              hasPendingBalance
+                                ? "bg-rose-50 text-rose-700"
+                                : "bg-emerald-50 text-emerald-700"
+                            }`}
+                          >
+                            {hasPendingBalance ? "Saldo" : "Al dia"}
+                          </span>
+                        </div>
+                        <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <p className="text-xs font-semibold uppercase text-slate-400">Correo</p>
+                            <p className="mt-1 break-words font-semibold text-slate-800">
+                              {client.email ?? "Sin email"}
+                            </p>
+                          </div>
+                          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <p className="text-xs font-semibold uppercase text-slate-400">Documento</p>
+                            <p className="mt-1 font-semibold text-slate-800">
+                              {client.document_id ?? "Sin cedula / RIF"}
+                            </p>
+                          </div>
+                          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <p className="text-xs font-semibold uppercase text-slate-400">Pedidos</p>
+                            <p className="mt-1 font-semibold text-slate-800">
+                              {orderCount} total - {activeOrderCount} activos
+                            </p>
+                          </div>
+                          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <p className="text-xs font-semibold uppercase text-slate-400">Saldo</p>
+                            <p className="mt-1 font-black text-slate-950">
+                              {formatCurrency(pendingTotal)}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="mt-3 text-xs font-semibold text-slate-400">
+                          Ultimo pedido: {lastOrderDate ? formatDateTime(lastOrderDate) : "Sin historial"}
+                        </p>
+                      </Link>
+                      {session.role === "admin" ? (
+                        <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+                          <Link
+                            href={buildClientUrl(
+                              "editar",
+                              client.id,
+                              undefined,
+                              clientQuery,
+                            )}
+                            className="inline-flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                          >
+                            Editar
+                          </Link>
+                          <DeleteClientButton
+                            action={deleteClientAction}
+                            clientId={client.id}
+                          />
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="mt-5 hidden overflow-hidden rounded-[1.5rem] border border-slate-200 xl:block">
               <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
                 <thead className="bg-slate-50 text-slate-500">
                   <tr>
@@ -1456,80 +1622,6 @@ export default async function DashboardPage({
                   )}
                 </tbody>
               </table>
-            </div>
-
-            <div className="mt-5 grid gap-3 md:hidden">
-              {filteredClients.length === 0 ? (
-                <div className="rounded-[1.3rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-                  No hay clientes que coincidan con la busqueda.
-                </div>
-              ) : (
-                filteredClients.map((client) => {
-                  const pendingTotal = clientPendingTotals.get(client.id) ?? 0;
-                  const hasPendingBalance = pendingTotal > 0;
-                  const detailHref = buildClientUrl(
-                    "detalle",
-                    client.id,
-                    undefined,
-                    clientQuery,
-                  );
-
-                  return (
-                    <article
-                      key={client.id}
-                      className="rounded-[1.25rem] border border-slate-200 bg-white p-4 shadow-[0_10px_26px_rgba(15,23,42,0.04)]"
-                    >
-                      <Link href={detailHref} className="block cursor-pointer">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <h3 className="truncate font-semibold text-slate-950">
-                              {client.name}
-                            </h3>
-                            <p className="mt-1 text-sm text-slate-500">
-                              {client.phone ?? "Sin telefono"}
-                            </p>
-                          </div>
-                          <span
-                            className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
-                              hasPendingBalance
-                                ? "bg-rose-50 text-rose-700"
-                                : "bg-emerald-50 text-emerald-700"
-                            }`}
-                          >
-                            {hasPendingBalance ? "Saldo" : "Al dia"}
-                          </span>
-                        </div>
-                        <div className="mt-4 grid gap-2 text-sm text-slate-600">
-                          <p className="break-words">{client.email ?? "Sin email"}</p>
-                          <p>{client.document_id ?? "Sin cedula / RIF"}</p>
-                          <p className="font-semibold text-slate-950">
-                            {formatCurrency(pendingTotal)}
-                          </p>
-                        </div>
-                      </Link>
-                      {session.role === "admin" ? (
-                        <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-                          <Link
-                            href={buildClientUrl(
-                              "editar",
-                              client.id,
-                              undefined,
-                              clientQuery,
-                            )}
-                            className="inline-flex flex-1 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-                          >
-                            Editar
-                          </Link>
-                          <DeleteClientButton
-                            action={deleteClientAction}
-                            clientId={client.id}
-                          />
-                        </div>
-                      ) : null}
-                    </article>
-                  );
-                })
-              )}
             </div>
 
             </article>
@@ -1725,7 +1817,7 @@ export default async function DashboardPage({
                             {order.title}
                           </p>
                           <p className="mt-1 text-sm text-slate-500">
-                            {order.client?.name ?? "Sin cliente"} · Cantidad {order.quantity}
+                            {order.client?.name ?? "Sin cliente"} - Cantidad {order.quantity}
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs text-slate-500">

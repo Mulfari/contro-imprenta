@@ -71,14 +71,17 @@ function DataCard({
 function MetricCard({
   label,
   value,
+  helper,
 }: {
   label: string;
   value: string | number;
+  helper?: string;
 }) {
   return (
     <div className="rounded-[1.25rem] border border-slate-200 bg-white px-4 py-4 shadow-[0_12px_35px_rgba(15,23,42,0.05)] sm:rounded-[1.5rem] sm:px-5 sm:py-5">
       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{value}</p>
+      <p className="mt-3 text-3xl font-semibold text-slate-950">{value}</p>
+      {helper ? <p className="mt-1 text-xs font-medium text-slate-500">{helper}</p> : null}
     </div>
   );
 }
@@ -101,40 +104,55 @@ export function ClientDetailsPanel({
 }: ClientDetailsModalProps) {
   const payments = orders.filter((order) => order.total_amount !== null);
   const billed = payments.reduce((sum, order) => sum + (order.total_amount ?? 0), 0);
+  const activeOrders = orders.filter((order) => order.status !== "entregado");
+  const pendingBalance = activeOrders.reduce(
+    (sum, order) => sum + Number(order.pending_amount ?? order.total_amount ?? 0),
+    0,
+  );
+  const lastOrder = orders[0] ?? null;
 
   return (
     <aside className="overflow-hidden rounded-[1.4rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,249,252,0.98))] shadow-[0_18px_40px_rgba(15,23,42,0.06)] sm:rounded-[2rem]">
-      <div className="border-b border-slate-200 bg-white/88 px-4 py-5 backdrop-blur sm:px-7">
+      <div className="border-b border-slate-200 bg-slate-950 px-4 py-5 text-white backdrop-blur sm:px-7 sm:py-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">
-              Cliente cargado
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[#ffd45f]">
+              Ficha de cliente
             </p>
-            <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+            <h3 className="mt-2 break-words text-2xl font-black sm:text-4xl">
               {client.name}
             </h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Consulta sus datos, actividad comercial, pagos e historial sin salir del modulo.
-            </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
+                {client.phone ?? "Sin telefono"}
+              </span>
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
+                {client.email ?? "Sin email"}
+              </span>
+              <span className="rounded-full bg-[#ffd45f] px-3 py-1.5 text-slate-950">
+                {activeOrders.length} activo{activeOrders.length === 1 ? "" : "s"}
+              </span>
+            </div>
           </div>
 
           <Link
             href={closeHref}
-            className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800"
+            className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
           >
             Volver a clientes
           </Link>
         </div>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
-          <MetricCard label="Pedidos" value={orders.length} />
-          <MetricCard label="Pagos registrados" value={payments.length} />
-          <MetricCard label="Facturado" value={formatCurrency(billed)} />
+        <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <MetricCard label="Pedidos" value={orders.length} helper="Historico" />
+          <MetricCard label="Activos" value={activeOrders.length} helper="En proceso" />
+          <MetricCard label="Facturado" value={formatCurrency(billed)} helper="Total vendido" />
+          <MetricCard label="Por cobrar" value={formatCurrency(pendingBalance)} helper="Saldo abierto" />
         </div>
       </div>
 
       <div className="px-4 py-5 sm:px-7 sm:py-6">
-        <div className="grid gap-6">
+        <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr] xl:items-start">
           <section className="space-y-6">
             <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50/85 p-4 sm:rounded-[1.8rem] sm:p-5">
               <div>
@@ -165,6 +183,10 @@ export function ClientDetailsPanel({
                 <DataCard
                   label="Observaciones"
                   value={client.notes ?? "Sin observaciones registradas"}
+                />
+                <DataCard
+                  label="Ultimo pedido"
+                  value={lastOrder ? `${lastOrder.order_number} - ${formatDateTime(lastOrder.created_at)}` : "Sin historial"}
                 />
               </div>
             </div>
@@ -200,6 +222,11 @@ export function ClientDetailsPanel({
                         <p className="shrink-0 text-sm font-semibold text-slate-900">
                           {formatCurrency(order.total_amount)}
                         </p>
+                      </div>
+                      <div className="mt-3 grid gap-2 text-xs font-semibold text-slate-500 sm:grid-cols-3">
+                        <span>Abono: {formatCurrency(order.deposit_amount)}</span>
+                        <span>Saldo: {formatCurrency(order.pending_amount)}</span>
+                        <span>Pago: {order.payment_status}</span>
                       </div>
                     </div>
                   ))
