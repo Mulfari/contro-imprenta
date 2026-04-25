@@ -172,49 +172,9 @@ type CustomerDashboardProps = {
   isSigningOut: boolean;
 };
 
-function formatDateTime(value: string | null) {
-  if (!value) {
-    return "Sin fecha";
-  }
-
-  const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("es-VE", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(parsed);
-}
-
 function getOrderProgress(status: CustomerOrder["status"]) {
   const currentIndex = orderStatusSteps.indexOf(status);
   return Math.round(((currentIndex + 1) / orderStatusSteps.length) * 100);
-}
-
-function DashboardMetric({
-  label,
-  value,
-  helper,
-}: {
-  label: string;
-  value: string;
-  helper: string;
-}) {
-  return (
-    <div className="rounded-[1.55rem] border border-slate-200 bg-white p-4 shadow-[0_16px_36px_rgba(15,23,42,0.05)] sm:p-5">
-      <p className="text-[11px] font-semibold uppercase text-slate-400">{label}</p>
-      <p className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">
-        {value}
-      </p>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{helper}</p>
-    </div>
-  );
 }
 
 function AccountDetail({
@@ -329,24 +289,12 @@ function CustomerDashboard({
     }
   };
 
-  const allPayments = orders.flatMap((order) =>
-    order.payments.map((payment) => ({
-      ...payment,
-      orderNumber: order.order_number,
-      orderTitle: order.title,
-    })),
-  );
-  const allArtFiles = orders.flatMap((order) =>
-    order.files
-      .filter((file) => file.attachment_type === "arte_cliente")
-      .map((file) => ({
-        ...file,
-        orderNumber: order.order_number,
-        orderTitle: order.title,
-      })),
-  );
   const activeOrders = orders.filter((order) => order.status !== "entregado").length;
-  const pendingPayments = allPayments.filter((payment) => payment.status === "por_validar").length;
+  const pendingPayments = orders.reduce(
+    (sum, order) =>
+      sum + order.payments.filter((payment) => payment.status === "por_validar").length,
+    0,
+  );
   const openOrders = orders.filter((order) => order.status !== "entregado");
   const pendingBalance = openOrders.reduce(
     (sum, order) => sum + Number(order.pending_amount ?? 0),
@@ -375,7 +323,7 @@ function CustomerDashboard({
               {displayName}
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">
-              Revisa tus pedidos, pagos, saldo pendiente y artes digitales desde un solo lugar.
+              Revisa tus pedidos activos, pagos pendientes y archivos de produccion.
             </p>
             <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold">
               <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
@@ -408,26 +356,8 @@ function CustomerDashboard({
         </div>
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <DashboardMetric
-          label="Pedidos"
-          value={String(orders.length)}
-          helper={`${activeOrders} en proceso y ${orders.length - activeOrders} entregados.`}
-        />
-        <DashboardMetric
-          label="Saldo"
-          value={formatCurrency(pendingBalance)}
-          helper="Monto pendiente de pedidos activos."
-        />
-        <DashboardMetric
-          label="Pagos"
-          value={String(allPayments.length)}
-          helper={`${pendingPayments} en revision.`}
-        />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
-        <aside className="space-y-6">
+      <div className="grid gap-6 xl:grid-cols-[0.64fr_1.36fr]">
+        <aside className="space-y-6 xl:sticky xl:top-6 xl:self-start">
           <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -447,42 +377,6 @@ function CustomerDashboard({
               <AccountDetail label="Correo" value={email || "Pendiente"} />
               <AccountDetail label="Telefono" value={profile?.phone?.trim() || "Pendiente"} />
               <AccountDetail label="Cliente desde" value={formatDate(profile?.created_at ?? null)} />
-            </div>
-          </section>
-
-          <section
-            id="customer-art"
-            className="scroll-mt-24 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6"
-          >
-            <p className="text-[11px] font-semibold uppercase text-slate-400">
-              Artes digitales
-            </p>
-            <h2 className="mt-2 text-2xl font-black text-slate-950">
-              Archivos usados
-            </h2>
-            <div className="mt-5 space-y-3">
-              {allArtFiles.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-500">
-                  Aun no tienes artes cargadas. Cuando subas archivos a un pedido apareceran aqui.
-                </p>
-              ) : (
-                allArtFiles.slice(0, 6).map((file) => (
-                  <a
-                    key={file.id}
-                    href={file.signed_url ?? "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-slate-300 hover:bg-white"
-                  >
-                    <span className="block break-words text-sm font-black text-slate-900">
-                      {file.file_name}
-                    </span>
-                    <span className="mt-1 block text-xs font-semibold text-slate-500">
-                      {file.orderNumber ?? "Pedido web"} - {formatDate(file.created_at)}
-                    </span>
-                  </a>
-                ))
-              )}
             </div>
           </section>
         </aside>
@@ -717,51 +611,6 @@ function CustomerDashboard({
                 })}
               </div>
             )}
-          </section>
-
-          <section
-            id="customer-payments"
-            className="scroll-mt-24 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6"
-          >
-            <p className="text-[11px] font-semibold uppercase text-slate-400">
-              Historial de pagos
-            </p>
-            <h2 className="mt-2 text-2xl font-black text-slate-950">
-              Movimientos y validaciones
-            </h2>
-            <div className="mt-5 space-y-3">
-              {allPayments.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-500">
-                  Todavia no hay pagos registrados. Cuando cargues un comprobante, podras seguir su validacion aqui.
-                </p>
-              ) : (
-                allPayments.map((payment) => (
-                  <div
-                    key={payment.id}
-                    className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto] md:items-center"
-                  >
-                    <div>
-                      <p className="text-sm font-black text-slate-950">
-                        {payment.orderNumber ?? "Pedido web"} - {payment.orderTitle}
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">
-                        {payment.bank || "Banco no indicado"} - Ref. {payment.reference || "sin referencia"} - {formatDateTime(payment.created_at)}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                      <span className="text-lg font-black text-slate-950">
-                        {formatCurrency(Number(payment.amount))}
-                      </span>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${paymentStatusClass[payment.status]}`}
-                      >
-                        {paymentStatusLabels[payment.status]}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
           </section>
         </main>
       </div>
