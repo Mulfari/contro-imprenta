@@ -82,7 +82,7 @@ function addBusinessDays(days: number) {
   return date.toISOString().slice(0, 10);
 }
 
-function formatOptions(options: Record<string, string>) {
+function formatOptions(options: Record<string, string> = {}) {
   const entries = Object.entries(options).filter(([, value]) => value);
 
   if (entries.length === 0) {
