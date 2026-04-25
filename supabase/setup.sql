@@ -405,6 +405,48 @@ begin
   end if;
 end $$;
 
+alter table public.orders drop constraint if exists orders_status_check;
+alter table public.orders
+  add constraint orders_status_check
+  check (status in ('recibido', 'disenando', 'imprimiendo', 'listo', 'entregado'))
+  not valid;
+
+alter table public.orders drop constraint if exists orders_urgency_check;
+alter table public.orders
+  add constraint orders_urgency_check
+  check (urgency in ('normal', 'prioritaria', 'express'))
+  not valid;
+
+alter table public.orders drop constraint if exists orders_payment_status_check;
+alter table public.orders
+  add constraint orders_payment_status_check
+  check (payment_status in ('pendiente', 'anticipo', 'pagado', 'credito'))
+  not valid;
+
+alter table public.orders drop constraint if exists orders_payment_review_status_check;
+alter table public.orders
+  add constraint orders_payment_review_status_check
+  check (payment_review_status in ('sin_pago', 'por_validar', 'validado', 'rechazado'))
+  not valid;
+
+alter table public.orders drop constraint if exists orders_confirmation_status_check;
+alter table public.orders
+  add constraint orders_confirmation_status_check
+  check (confirmation_status in ('pendiente', 'confirmado', 'rechazado'))
+  not valid;
+
+alter table public.orders drop constraint if exists orders_source_check;
+alter table public.orders
+  add constraint orders_source_check
+  check (source in ('admin', 'storefront'))
+  not valid;
+
+alter table public.orders drop constraint if exists orders_priority_check;
+alter table public.orders
+  add constraint orders_priority_check
+  check (priority in ('baja', 'media', 'alta', 'urgente'))
+  not valid;
+
 create index if not exists orders_customer_user_id_idx
   on public.orders (customer_user_id);
 
