@@ -292,6 +292,41 @@ function CatalogProductCard({
   );
 }
 
+function CatalogProductSkeleton() {
+  return (
+    <article className="overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:rounded-[1.35rem]">
+      <div className="relative flex h-44 w-full items-center justify-center overflow-hidden bg-slate-100 p-4 sm:h-56 sm:p-5">
+        <div className="absolute left-4 top-4 h-6 w-24 animate-pulse rounded-full bg-white/80" />
+        <div className="h-28 w-36 animate-pulse rounded-[1.5rem] bg-slate-200 sm:h-36 sm:w-44" />
+      </div>
+      <div className="space-y-4 p-4 sm:p-5">
+        <div>
+          <div className="flex items-start justify-between gap-3">
+            <div className="h-6 w-44 max-w-full animate-pulse rounded-full bg-slate-200" />
+            <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-slate-200" />
+          </div>
+          <div className="mt-3 h-4 w-full animate-pulse rounded-full bg-slate-200" />
+          <div className="mt-2 h-4 w-3/4 animate-pulse rounded-full bg-slate-200" />
+        </div>
+        <div className="flex gap-2">
+          <div className="h-7 w-24 animate-pulse rounded-full bg-slate-200" />
+          <div className="h-7 w-28 animate-pulse rounded-full bg-slate-200" />
+        </div>
+        <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="h-3 w-14 animate-pulse rounded-full bg-slate-200" />
+            <div className="mt-2 h-8 w-24 animate-pulse rounded-full bg-slate-200" />
+          </div>
+          <div className="flex w-full gap-2 sm:w-auto">
+            <div className="h-10 flex-1 animate-pulse rounded-xl bg-slate-200 sm:w-16 sm:flex-none" />
+            <div className="h-10 flex-1 animate-pulse rounded-xl bg-slate-200 sm:w-20 sm:flex-none" />
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function ProductPreviewModal({
   product,
   selectedOptions,
@@ -846,6 +881,7 @@ export function StorefrontShell() {
     message: string;
     tone: "error" | "success";
   } | null>(null);
+  const [catalogLoading, setCatalogLoading] = useState(false);
   const [storageReady, setStorageReady] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -940,6 +976,18 @@ export function StorefrontShell() {
   }, [accountOpen]);
 
   const isCatalogVisible = catalogOpen || Boolean(debouncedQuery);
+  const isCatalogSettling = isCatalogVisible && searchQuery.trim() !== debouncedQuery;
+  const showCatalogSkeleton = catalogLoading || isCatalogSettling;
+
+  useEffect(() => {
+    if (!catalogLoading) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setCatalogLoading(false), 260);
+
+    return () => window.clearTimeout(timeout);
+  }, [catalogLoading]);
 
   const filteredProducts = useMemo(() => {
     if (!isCatalogVisible) {
@@ -987,6 +1035,7 @@ export function StorefrontShell() {
     setSearchQuery("");
     setDebouncedQuery("");
     setCatalogOpen(true);
+    setCatalogLoading(true);
     setAccountOpen(false);
     setActivePanel(null);
     setMobileFilterOpen(false);
@@ -1003,6 +1052,7 @@ export function StorefrontShell() {
     setSearchQuery(query);
     setDebouncedQuery(query);
     setCatalogOpen(true);
+    setCatalogLoading(true);
     setAccountOpen(false);
     setActivePanel(null);
     setMobileFilterOpen(false);
@@ -1027,6 +1077,7 @@ export function StorefrontShell() {
 
     if (value.trim()) {
       setCatalogOpen(true);
+      setCatalogLoading(true);
       setAccountOpen(false);
     }
   };
@@ -1186,6 +1237,7 @@ export function StorefrontShell() {
     setSearchQuery("");
     setDebouncedQuery("");
     setCatalogOpen(true);
+    setCatalogLoading(true);
     setMobileFilterOpen(false);
     setActivePanel(null);
     setAccountOpen(false);
@@ -1202,6 +1254,7 @@ export function StorefrontShell() {
     setSearchQuery(query);
     setDebouncedQuery(query);
     setCatalogOpen(true);
+    setCatalogLoading(true);
     setMobileFilterOpen(false);
     setActivePanel(null);
     setAccountOpen(false);
@@ -1216,6 +1269,7 @@ export function StorefrontShell() {
 
   const openMobileFilters = () => {
     setCatalogOpen(true);
+    setCatalogLoading(true);
     setActivePanel(null);
     setAccountOpen(false);
     setMobileFilterOpen(true);
@@ -1293,6 +1347,7 @@ export function StorefrontShell() {
                     setSearchQuery("");
                     setDebouncedQuery("");
                     setCatalogOpen(true);
+                    setCatalogLoading(true);
                   }}
                   className={`mt-5 w-full cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold transition ${
                     debouncedQuery
@@ -1315,6 +1370,7 @@ export function StorefrontShell() {
                               setSearchQuery(item);
                               setDebouncedQuery(item);
                               setCatalogOpen(true);
+                              setCatalogLoading(true);
                             }}
                             className={`block w-full cursor-pointer rounded-lg px-2 py-2.5 text-left text-sm transition ${
                               debouncedQuery.toLowerCase() === item.toLowerCase()
@@ -1335,15 +1391,23 @@ export function StorefrontShell() {
                 <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 sm:tracking-[0.32em]">
-                      {debouncedQuery ? "Resultados de busqueda" : "Catalogo completo"}
+                      {showCatalogSkeleton
+                        ? "Preparando catalogo"
+                        : debouncedQuery
+                          ? "Resultados de busqueda"
+                          : "Catalogo completo"}
                     </p>
                     <h2 className="mt-2 text-[1.55rem] font-black leading-tight tracking-tight text-slate-950 sm:text-4xl">
-                      {debouncedQuery || "Productos de impresion"}
+                      {showCatalogSkeleton
+                        ? searchQuery.trim() || "Productos de impresion"
+                        : debouncedQuery || "Productos de impresion"}
                     </h2>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 sm:text-sm">
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                      {filteredProducts.length} producto{filteredProducts.length === 1 ? "" : "s"}
+                      {showCatalogSkeleton
+                        ? "Cargando..."
+                        : `${filteredProducts.length} producto${filteredProducts.length === 1 ? "" : "s"}`}
                     </span>
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
                       {cartCount} en carrito
@@ -1351,7 +1415,13 @@ export function StorefrontShell() {
                   </div>
                 </div>
 
-                {filteredProducts.length > 0 ? (
+                {showCatalogSkeleton ? (
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                    {[0, 1, 2, 3, 4, 5].map((item) => (
+                      <CatalogProductSkeleton key={item} />
+                    ))}
+                  </div>
+                ) : filteredProducts.length > 0 ? (
                   <div className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                     {filteredProducts.map((product) => (
                       <CatalogProductCard

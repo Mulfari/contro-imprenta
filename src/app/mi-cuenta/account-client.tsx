@@ -264,6 +264,119 @@ function AccountDetail({
   );
 }
 
+function SkeletonBlock({ className }: { className: string }) {
+  return <div className={`animate-pulse rounded-full bg-slate-200 ${className}`} />;
+}
+
+function CustomerDashboardSkeleton({ compact = false }: { compact?: boolean }) {
+  if (compact) {
+    return (
+      <div className="space-y-4 p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-4">
+          <SkeletonBlock className="h-3 w-24" />
+          <SkeletonBlock className="h-10 w-10" />
+        </div>
+        <div className="rounded-[1.45rem] border border-slate-200 bg-slate-50/70 p-5">
+          <SkeletonBlock className="h-7 w-44" />
+          <SkeletonBlock className="mt-3 h-4 w-56 max-w-full" />
+        </div>
+        <div className="rounded-[1.45rem] border border-slate-200 bg-white p-5">
+          <SkeletonBlock className="h-3 w-28" />
+          <div className="mt-4 space-y-3">
+            {[0, 1, 2].map((item) => (
+              <div key={item} className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4">
+                <SkeletonBlock className="h-3 w-20" />
+                <SkeletonBlock className="mt-3 h-4 w-40" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <SkeletonBlock className="h-12 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-[2rem] bg-slate-950 shadow-[0_28px_80px_rgba(15,23,42,0.2)]">
+        <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.35fr_0.65fr] lg:p-8">
+          <div>
+            <div className="h-3 w-32 animate-pulse rounded-full bg-white/20" />
+            <div className="mt-4 h-11 w-64 max-w-full animate-pulse rounded-full bg-white/20" />
+            <div className="mt-4 h-4 w-full max-w-xl animate-pulse rounded-full bg-white/15" />
+            <div className="mt-5 flex flex-wrap gap-2">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="h-8 w-32 animate-pulse rounded-full bg-white/15" />
+              ))}
+            </div>
+          </div>
+          <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
+            <div className="h-4 w-28 animate-pulse rounded-full bg-white/20" />
+            <div className="mt-3 h-9 w-36 animate-pulse rounded-full bg-white/20" />
+            <div className="mt-4 h-4 w-full animate-pulse rounded-full bg-white/15" />
+            <div className="mt-5 h-12 w-full animate-pulse rounded-2xl bg-white/15" />
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[0.64fr_1.36fr]">
+        <aside className="space-y-6">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
+            <SkeletonBlock className="h-3 w-36" />
+            <SkeletonBlock className="mt-4 h-8 w-32" />
+            <div className="mt-5 grid gap-3">
+              {[0, 1, 2, 3].map((item) => (
+                <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <SkeletonBlock className="h-3 w-20" />
+                  <SkeletonBlock className="mt-3 h-4 w-40" />
+                </div>
+              ))}
+            </div>
+          </section>
+        </aside>
+
+        <main>
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <SkeletonBlock className="h-3 w-36" />
+                <SkeletonBlock className="mt-4 h-8 w-52" />
+              </div>
+              <SkeletonBlock className="h-12 w-40 rounded-2xl" />
+            </div>
+            <div className="mt-5 space-y-4">
+              {[0, 1].map((item) => (
+                <div key={item} className="rounded-[1.65rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                  <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+                    <div>
+                      <SkeletonBlock className="h-3 w-28" />
+                      <SkeletonBlock className="mt-4 h-7 w-56" />
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {[0, 1, 2].map((pill) => (
+                          <SkeletonBlock key={pill} className="h-7 w-24" />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 lg:min-w-44">
+                      <SkeletonBlock className="h-4 w-16" />
+                      <SkeletonBlock className="mt-3 h-8 w-28" />
+                    </div>
+                  </div>
+                  <SkeletonBlock className="mt-5 h-16 w-full rounded-2xl" />
+                  <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                    <SkeletonBlock className="h-36 w-full rounded-2xl" />
+                    <SkeletonBlock className="h-36 w-full rounded-2xl" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 function CustomerDashboard({
   displayName,
   email,
@@ -377,11 +490,7 @@ function CustomerDashboard({
   ).length;
 
   if (isLoading) {
-    return (
-      <div className="rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-[0_24px_60px_rgba(15,23,42,0.06)]">
-        <p className="text-sm font-semibold text-slate-500">Cargando tu cuenta...</p>
-      </div>
-    );
+    return <CustomerDashboardSkeleton />;
   }
 
   return (
@@ -936,6 +1045,14 @@ export function CustomerAccountClient({
   const isDropdown = variant === "dropdown";
   const canSwitchMode = showModeSwitch ?? !isDropdown;
 
+  if (!isDropdown && hasPublicAuth && isLoading) {
+    return (
+      <section className="mx-auto w-full max-w-[118rem] px-4 pb-12 pt-5 sm:px-6 lg:px-8 2xl:px-10">
+        <CustomerDashboardSkeleton />
+      </section>
+    );
+  }
+
   if (!isDropdown && hasPublicAuth && !isLoading && session) {
     return (
       <section className="mx-auto w-full max-w-[118rem] px-4 pb-12 pt-5 sm:px-6 lg:px-8 2xl:px-10">
@@ -1001,9 +1118,7 @@ export function CustomerAccountClient({
               </div>
             </div>
           ) : isLoading ? (
-            <div className="flex min-h-[26rem] items-center justify-center p-8 text-sm font-medium text-slate-500">
-              Cargando cuenta...
-            </div>
+            <CustomerDashboardSkeleton compact />
           ) : session ? (
             <div className="space-y-4 p-5 sm:p-6">
               <div className="flex items-center justify-between gap-4">
