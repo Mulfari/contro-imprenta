@@ -156,12 +156,6 @@ const paymentReviewLabels: Record<CustomerOrder["payment_review_status"], string
   rechazado: "Pago rechazado",
 };
 
-const confirmationLabels: Record<CustomerOrder["confirmation_status"], string> = {
-  pendiente: "Pendiente por confirmar",
-  confirmado: "Confirmado",
-  rechazado: "Rechazado",
-};
-
 const orderStatusSteps: CustomerOrder["status"][] = [
   "recibido",
   "disenando",
@@ -235,40 +229,6 @@ function AccountDetail({
       <p className="text-[11px] font-semibold uppercase text-slate-400">{label}</p>
       <p className="mt-1 break-words text-sm font-semibold text-slate-900">{value}</p>
     </div>
-  );
-}
-
-function CustomerActionCard({
-  label,
-  title,
-  body,
-  href,
-  tone = "slate",
-}: {
-  label: string;
-  title: string;
-  body: string;
-  href: string;
-  tone?: "slate" | "amber" | "blue" | "emerald";
-}) {
-  const toneClass =
-    tone === "amber"
-      ? "border-amber-200 bg-amber-50 text-amber-900"
-      : tone === "blue"
-        ? "border-blue-200 bg-blue-50 text-blue-900"
-        : tone === "emerald"
-          ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-          : "border-slate-200 bg-white text-slate-900";
-
-  return (
-    <Link
-      href={href}
-      className={`block rounded-[1.35rem] border p-4 transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)] ${toneClass}`}
-    >
-      <p className="text-[11px] font-semibold uppercase opacity-70">{label}</p>
-      <p className="mt-2 text-base font-black">{title}</p>
-      <p className="mt-1 text-sm leading-6 opacity-75">{body}</p>
-    </Link>
   );
 }
 
@@ -387,73 +347,11 @@ function CustomerDashboard({
   );
   const activeOrders = orders.filter((order) => order.status !== "entregado").length;
   const pendingPayments = allPayments.filter((payment) => payment.status === "por_validar").length;
-  const approvedPayments = allPayments.filter((payment) => payment.status === "aprobado").length;
-  const rejectedPayments = allPayments.filter((payment) => payment.status === "rechazado").length;
-  const approvedAmount = allPayments.reduce(
-    (sum, payment) =>
-      payment.status === "aprobado" ? sum + Number(payment.amount ?? 0) : sum,
-    0,
-  );
   const openOrders = orders.filter((order) => order.status !== "entregado");
   const pendingBalance = openOrders.reduce(
     (sum, order) => sum + Number(order.pending_amount ?? 0),
     0,
   );
-  const ordersMissingArt = openOrders.filter(
-    (order) => !order.files.some((file) => file.attachment_type === "arte_cliente"),
-  );
-  const ordersNeedingPayment = openOrders.filter((order) => {
-    const pendingAmount = Number(order.pending_amount ?? order.total_amount ?? 0);
-    const hasPaymentUnderReview = order.payments.some(
-      (payment) => payment.status === "por_validar",
-    );
-
-    return pendingAmount > 0 && !hasPaymentUnderReview;
-  });
-  const nextOrder = openOrders[0] ?? orders[0] ?? null;
-  const latestOrder = orders[0] ?? null;
-  const dashboardActions = [
-    ordersNeedingPayment.length > 0
-      ? {
-          label: "Pago pendiente",
-          title: `${ordersNeedingPayment.length} pedido${ordersNeedingPayment.length === 1 ? "" : "s"} por pagar`,
-          body: "Registra un pago movil para que administracion valide el pedido.",
-          href: "#customer-orders",
-          tone: "amber" as const,
-        }
-      : null,
-    ordersMissingArt.length > 0
-      ? {
-          label: "Arte digital",
-          title: `${ordersMissingArt.length} arte${ordersMissingArt.length === 1 ? "" : "s"} por cargar`,
-          body: "Sube el archivo final o referencia para avanzar con produccion.",
-          href: "#customer-orders",
-          tone: "blue" as const,
-        }
-      : null,
-    pendingPayments > 0
-      ? {
-          label: "Validacion",
-          title: `${pendingPayments} pago${pendingPayments === 1 ? "" : "s"} en revision`,
-          body: "Te avisaremos cuando caja confirme el comprobante.",
-          href: "#customer-payments",
-          tone: "emerald" as const,
-        }
-      : null,
-    {
-      label: "Catalogo",
-      title: "Crear otro pedido",
-      body: "Explora productos y arma una nueva orden desde el carrito.",
-      href: "/#catalogo",
-      tone: "slate" as const,
-    },
-  ].filter(Boolean) as Array<{
-    label: string;
-    title: string;
-    body: string;
-    href: string;
-    tone: "slate" | "amber" | "blue" | "emerald";
-  }>;
 
   if (isLoading) {
     return (
@@ -492,26 +390,12 @@ function CustomerDashboard({
             </div>
           </div>
           <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
-            <p className="text-sm font-semibold text-slate-300">Siguiente paso</p>
-            {nextOrder ? (
-              <>
-                <p className="mt-2 text-2xl font-black">{nextOrder.title}</p>
-                <p className="mt-3 text-sm leading-6 text-slate-300">
-                  Estado: {orderStatusLabels[nextOrder.status]}. Pago: {paymentReviewLabels[nextOrder.payment_review_status]}.
-                </p>
-                <div className="mt-4 rounded-2xl bg-white/10 p-3">
-                  <p className="text-xs font-semibold uppercase text-slate-300">Saldo abierto</p>
-                  <p className="mt-1 text-2xl font-black">{formatCurrency(pendingBalance)}</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="mt-2 text-2xl font-black">Sin pedidos activos</p>
-                <p className="mt-3 text-sm leading-6 text-slate-300">
-                  Explora el catalogo y crea tu primer pedido cuando quieras.
-                </p>
-              </>
-            )}
+            <p className="text-sm font-semibold text-slate-300">Saldo pendiente</p>
+            <p className="mt-2 text-3xl font-black">{formatCurrency(pendingBalance)}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              {activeOrders} pedido{activeOrders === 1 ? "" : "s"} activo{activeOrders === 1 ? "" : "s"}.
+              {pendingPayments > 0 ? ` ${pendingPayments} pago${pendingPayments === 1 ? "" : "s"} en revision.` : ""}
+            </p>
             <button
               type="button"
               onClick={onSignOut}
@@ -524,85 +408,27 @@ function CustomerDashboard({
         </div>
       </section>
 
-      <section className="grid gap-3 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="rounded-[1.7rem] border border-slate-200 bg-white p-5 shadow-[0_18px_44px_rgba(15,23,42,0.05)] sm:p-6">
-          <p className="text-[11px] font-semibold uppercase text-slate-400">
-            Panel de seguimiento
-          </p>
-          <h2 className="mt-2 text-2xl font-black text-slate-950">
-            Que necesita tu atencion
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Usa estas acciones para mantener tus pedidos listos para produccion.
-          </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {dashboardActions.map((action) => (
-              <CustomerActionCard key={`${action.label}-${action.title}`} {...action} />
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-[1.7rem] border border-slate-200 bg-white p-5 shadow-[0_18px_44px_rgba(15,23,42,0.05)] sm:p-6">
-          <p className="text-[11px] font-semibold uppercase text-slate-400">
-            Estado financiero
-          </p>
-          <h2 className="mt-2 text-2xl font-black text-slate-950">
-            Pagos y saldo
-          </h2>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase text-slate-400">Pagado validado</p>
-              <p className="mt-2 text-2xl font-black text-slate-950">
-                {formatCurrency(approvedAmount)}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase text-slate-400">Saldo pendiente</p>
-              <p className="mt-2 text-2xl font-black text-slate-950">
-                {formatCurrency(pendingBalance)}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase text-slate-400">En revision</p>
-              <p className="mt-2 text-2xl font-black text-slate-950">{pendingPayments}</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase text-slate-400">Rechazados</p>
-              <p className="mt-2 text-2xl font-black text-slate-950">{rejectedPayments}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-3">
         <DashboardMetric
-          label="Pedidos totales"
+          label="Pedidos"
           value={String(orders.length)}
           helper={`${activeOrders} en proceso y ${orders.length - activeOrders} entregados.`}
         />
         <DashboardMetric
-          label="Pagos registrados"
+          label="Saldo"
+          value={formatCurrency(pendingBalance)}
+          helper="Monto pendiente de pedidos activos."
+        />
+        <DashboardMetric
+          label="Pagos"
           value={String(allPayments.length)}
-          helper={`${approvedPayments} aprobados, ${pendingPayments} en revision.`}
-        />
-        <DashboardMetric
-          label="Artes cargadas"
-          value={String(allArtFiles.length)}
-          helper="Archivos digitales asociados a tus pedidos."
-        />
-        <DashboardMetric
-          label="Ultimo pedido"
-          value={latestOrder ? orderStatusLabels[latestOrder.status] : "Sin pedidos"}
-          helper={latestOrder ? latestOrder.title : "Aun no has creado una orden."}
+          helper={`${pendingPayments} en revision.`}
         />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
         <aside className="space-y-6">
-          <section
-            id="customer-art"
-            className="scroll-mt-24 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6"
-          >
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase text-slate-400">
@@ -625,7 +451,7 @@ function CustomerDashboard({
           </section>
 
           <section
-            id="customer-orders"
+            id="customer-art"
             className="scroll-mt-24 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6"
           >
             <p className="text-[11px] font-semibold uppercase text-slate-400">
@@ -662,7 +488,10 @@ function CustomerDashboard({
         </aside>
 
         <main className="space-y-6">
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
+          <section
+            id="customer-orders"
+            className="scroll-mt-24 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6"
+          >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase text-slate-400">
@@ -717,9 +546,6 @@ function CustomerDashboard({
                             </span>
                             <span className="rounded-full bg-amber-50 px-3 py-1.5 text-amber-700">
                               {paymentReviewLabels[order.payment_review_status]}
-                            </span>
-                            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700">
-                              {confirmationLabels[order.confirmation_status]}
                             </span>
                             <span className="rounded-full bg-white px-3 py-1.5 text-slate-600">
                               Entrega {formatDate(order.promised_delivery_at)}
