@@ -177,6 +177,78 @@ function getOrderProgress(status: CustomerOrder["status"]) {
   return Math.round(((currentIndex + 1) / orderStatusSteps.length) * 100);
 }
 
+function getCustomerOrderFlow(order: CustomerOrder, artFiles: CustomerOrderFile[]) {
+  if (order.confirmation_status === "rechazado") {
+    return {
+      label: "Solicitud por revisar",
+      description: "Administracion marco esta solicitud para revision antes de producir.",
+      action: "Espera contacto del equipo",
+      tone: "rose",
+    };
+  }
+
+  if (order.payment_review_status === "rechazado") {
+    return {
+      label: "Pago rechazado",
+      description: "El comprobante no pudo validarse. Registra un nuevo pago movil.",
+      action: "Registrar otro pago",
+      tone: "rose",
+    };
+  }
+
+  if (artFiles.length === 0) {
+    return {
+      label: "Falta arte digital",
+      description: "Sube el archivo final o una referencia para que el equipo revise el trabajo.",
+      action: "Subir arte",
+      tone: "amber",
+    };
+  }
+
+  if (order.payment_review_status === "sin_pago") {
+    return {
+      label: "Falta registrar pago",
+      description: "Registra tu pago movil para que administracion pueda validarlo.",
+      action: "Registrar pago",
+      tone: "amber",
+    };
+  }
+
+  if (order.payment_review_status === "por_validar") {
+    return {
+      label: "Pago en validacion",
+      description: "El equipo revisara el comprobante antes de confirmar produccion.",
+      action: "Pendiente por administracion",
+      tone: "blue",
+    };
+  }
+
+  if (order.confirmation_status === "pendiente") {
+    return {
+      label: "Solicitud en revision",
+      description: "Ya hay arte y pago validado. Administracion confirmara el pedido.",
+      action: "Pendiente por administracion",
+      tone: "blue",
+    };
+  }
+
+  if (order.status === "entregado") {
+    return {
+      label: "Pedido entregado",
+      description: "Este trabajo ya fue marcado como entregado.",
+      action: "Finalizado",
+      tone: "emerald",
+    };
+  }
+
+  return {
+    label: orderStatusLabels[order.status],
+    description: "Pedido confirmado y en flujo de produccion.",
+    action: `Area actual: ${order.current_area ?? "Por asignar"}`,
+    tone: "emerald",
+  };
+}
+
 function AccountDetail({
   label,
   value,
@@ -300,6 +372,9 @@ function CustomerDashboard({
     (sum, order) => sum + Number(order.pending_amount ?? 0),
     0,
   );
+  const ordersMissingArt = openOrders.filter(
+    (order) => !order.files.some((file) => file.attachment_type === "arte_cliente"),
+  ).length;
 
   if (isLoading) {
     return (
@@ -323,7 +398,7 @@ function CustomerDashboard({
               {displayName}
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">
-              Revisa tus pedidos activos, pagos pendientes y archivos de produccion.
+              Gestiona lo pendiente de cada solicitud: arte, pago y seguimiento de produccion.
             </p>
             <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold">
               <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
@@ -335,14 +410,17 @@ function CustomerDashboard({
               <span className="rounded-full bg-[#ffd45f] px-3 py-1.5 text-slate-950">
                 {pendingPayments} pago{pendingPayments === 1 ? "" : "s"} en revision
               </span>
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
+                {ordersMissingArt} arte{ordersMissingArt === 1 ? "" : "s"} pendiente{ordersMissingArt === 1 ? "" : "s"}
+              </span>
             </div>
           </div>
           <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
             <p className="text-sm font-semibold text-slate-300">Saldo pendiente</p>
             <p className="mt-2 text-3xl font-black">{formatCurrency(pendingBalance)}</p>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              {activeOrders} pedido{activeOrders === 1 ? "" : "s"} activo{activeOrders === 1 ? "" : "s"}.
-              {pendingPayments > 0 ? ` ${pendingPayments} pago${pendingPayments === 1 ? "" : "s"} en revision.` : ""}
+              {activeOrders} solicitud{activeOrders === 1 ? "" : "es"} activa{activeOrders === 1 ? "" : "s"}.
+              {ordersMissingArt > 0 ? ` ${ordersMissingArt} necesita${ordersMissingArt === 1 ? "" : "n"} arte.` : ""}
             </p>
             <button
               type="button"
@@ -420,6 +498,15 @@ function CustomerDashboard({
                     (file) => file.attachment_type === "comprobante_pago",
                   );
                   const isPaymentOpen = activePaymentOrderId === order.id;
+                  const flow = getCustomerOrderFlow(order, artFiles);
+                  const flowClass =
+                    flow.tone === "rose"
+                      ? "border-rose-200 bg-rose-50 text-rose-800"
+                      : flow.tone === "amber"
+                        ? "border-amber-200 bg-amber-50 text-amber-800"
+                        : flow.tone === "blue"
+                          ? "border-blue-200 bg-blue-50 text-blue-800"
+                          : "border-emerald-200 bg-emerald-50 text-emerald-800";
 
                   return (
                     <article
@@ -454,6 +541,20 @@ function CustomerDashboard({
                           <p className="mt-1 text-xs text-slate-400">
                             Total {formatCurrency(order.total_amount)}
                           </p>
+                        </div>
+                      </div>
+
+                      <div className={`mt-5 rounded-2xl border px-4 py-4 ${flowClass}`}>
+                        <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                          <div>
+                            <p className="text-sm font-black">{flow.label}</p>
+                            <p className="mt-1 text-sm leading-6 opacity-85">
+                              {flow.description}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-white/70 px-3 py-1.5 text-xs font-black">
+                            {flow.action}
+                          </span>
                         </div>
                       </div>
 

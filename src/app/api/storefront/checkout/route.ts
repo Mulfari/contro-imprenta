@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       orders,
-      message: "Pedido creado. Ahora puedes subir tu arte y registrar el pago movil.",
+      message: "Solicitud creada. Sube el arte y registra el pago movil desde Mi cuenta.",
     });
   } catch (error) {
     const message = getCheckoutErrorMessage(error);

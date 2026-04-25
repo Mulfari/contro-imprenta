@@ -817,10 +817,10 @@ function CommerceDrawer({
               disabled={isCheckingOut}
               className="mt-4 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isCheckingOut ? "Creando pedido..." : "Continuar pedido"}
+              {isCheckingOut ? "Creando solicitud..." : "Crear solicitud"}
             </button>
             <p className="mt-3 text-center text-xs leading-5 text-slate-400">
-              El total final puede variar segun arte, medidas y acabados.
+              Luego podras subir el arte y registrar el pago movil desde Mi cuenta.
             </p>
           </div>
         ) : null}
@@ -842,6 +842,10 @@ export function StorefrontShell() {
   const [customerSession, setCustomerSession] = useState<Session | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState("");
+  const [checkoutNotice, setCheckoutNotice] = useState<{
+    message: string;
+    tone: "error" | "success";
+  } | null>(null);
   const [storageReady, setStorageReady] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -1117,6 +1121,7 @@ export function StorefrontShell() {
 
     if (cartItems.length === 0) {
       setCheckoutMessage("Agrega productos al carrito antes de continuar.");
+      setCheckoutNotice(null);
       showToast("Agrega productos al carrito antes de continuar.", "info");
       return;
     }
@@ -1124,6 +1129,7 @@ export function StorefrontShell() {
     if (!customerSession) {
       const message = "Necesitas iniciar sesion o registrarte para continuar con el pedido.";
       setCheckoutMessage(message);
+      setCheckoutNotice({ message, tone: "error" });
       showToast(message, "error");
       setAccountOpen(true);
       setActivePanel(null);
@@ -1157,14 +1163,19 @@ export function StorefrontShell() {
       }
 
       setCartItems([]);
-      setCheckoutMessage(payload.message || "Pedido creado.");
-      showToast(payload.message || "Pedido creado.", "success");
+      const message =
+        payload.message ||
+        "Solicitud creada. Sube el arte y registra el pago movil desde Mi cuenta.";
+      setCheckoutMessage(message);
+      setCheckoutNotice({ message, tone: "success" });
+      showToast(message, "success");
       setActivePanel(null);
       setAccountOpen(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       const message = error instanceof Error ? error.message : "No se pudo crear el pedido.";
       setCheckoutMessage(message);
+      setCheckoutNotice({ message, tone: "error" });
       showToast(message, "error");
     } finally {
       setIsCheckingOut(false);
@@ -1259,6 +1270,7 @@ export function StorefrontShell() {
               variant="dropdown"
               initialMode="login"
               showModeSwitch={false}
+              initialNotice={checkoutNotice}
             />
           </div>
         </div>

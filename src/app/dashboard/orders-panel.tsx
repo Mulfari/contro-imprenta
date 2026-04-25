@@ -200,7 +200,7 @@ function StatusBadge({
   tone = "slate",
 }: {
   label: string;
-  tone?: "slate" | "blue" | "amber" | "emerald";
+  tone?: "slate" | "blue" | "amber" | "emerald" | "rose";
 }) {
   const toneClass =
     tone === "blue"
@@ -209,6 +209,8 @@ function StatusBadge({
         ? "border-amber-200 bg-amber-50 text-amber-700"
         : tone === "emerald"
           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+          : tone === "rose"
+            ? "border-rose-200 bg-rose-50 text-rose-700"
           : "border-slate-200 bg-slate-50 text-slate-700";
 
   return (
@@ -216,6 +218,95 @@ function StatusBadge({
       {label}
     </span>
   );
+}
+
+function QueueCard({
+  label,
+  value,
+  description,
+  tone,
+}: {
+  label: string;
+  value: number;
+  description: string;
+  tone: "blue" | "amber" | "emerald" | "rose";
+}) {
+  const toneClass =
+    tone === "blue"
+      ? "border-blue-200 bg-blue-50 text-blue-900"
+      : tone === "amber"
+        ? "border-amber-200 bg-amber-50 text-amber-900"
+        : tone === "emerald"
+          ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+          : "border-rose-200 bg-rose-50 text-rose-900";
+
+  return (
+    <div className={`rounded-2xl border px-4 py-4 ${toneClass}`}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-70">
+        {label}
+      </p>
+      <p className="mt-2 text-3xl font-black">{value}</p>
+      <p className="mt-2 text-sm leading-5 opacity-80">{description}</p>
+    </div>
+  );
+}
+
+function getAdminOrderFlow(order: OrderWithClient, orderFiles: OrderFile[]) {
+  const hasArt = orderFiles.some((file) => file.attachment_type === "arte_cliente");
+
+  if (order.confirmation_status === "rechazado") {
+    return {
+      label: "Solicitud rechazada",
+      description: "Revisar con el cliente antes de continuar.",
+      tone: "rose" as const,
+    };
+  }
+
+  if (!hasArt) {
+    return {
+      label: "Falta arte",
+      description: "El cliente debe subir arte o referencia.",
+      tone: "amber" as const,
+    };
+  }
+
+  if (order.payment_review_status === "sin_pago") {
+    return {
+      label: "Falta pago",
+      description: "Esperando comprobante de pago movil.",
+      tone: "amber" as const,
+    };
+  }
+
+  if (order.payment_review_status === "por_validar") {
+    return {
+      label: "Pago por aceptar",
+      description: "Caja debe validar el comprobante.",
+      tone: "blue" as const,
+    };
+  }
+
+  if (order.payment_review_status === "rechazado") {
+    return {
+      label: "Pago rechazado",
+      description: "Cliente debe registrar otro pago.",
+      tone: "rose" as const,
+    };
+  }
+
+  if (order.confirmation_status === "pendiente") {
+    return {
+      label: "Listo para confirmar",
+      description: "Pago y arte listos para aprobar produccion.",
+      tone: "emerald" as const,
+    };
+  }
+
+  return {
+    label: "En flujo",
+    description: `Area actual: ${order.current_area ?? "Sin area"}.`,
+    tone: "emerald" as const,
+  };
 }
 
 export function OrdersPanel(props: OrdersPanelProps) {
@@ -233,6 +324,27 @@ export function OrdersPanel(props: OrdersPanelProps) {
     deleteOrderFileAction,
     isAdmin,
   } = props;
+  const activeFilteredOrders = filteredOrders.filter(
+    (order) => order.status !== "entregado",
+  );
+  const newRequests = activeFilteredOrders.filter(
+    (order) => order.source === "storefront" && order.confirmation_status === "pendiente",
+  ).length;
+  const missingArt = activeFilteredOrders.filter((order) => {
+    const files = orderFilesByOrderId.get(order.id) ?? [];
+    return !files.some((file) => file.attachment_type === "arte_cliente");
+  }).length;
+  const paymentsToReview = activeFilteredOrders.filter(
+    (order) => order.payment_review_status === "por_validar",
+  ).length;
+  const readyForProduction = activeFilteredOrders.filter((order) => {
+    const files = orderFilesByOrderId.get(order.id) ?? [];
+    return (
+      order.confirmation_status === "pendiente" &&
+      order.payment_review_status === "validado" &&
+      files.some((file) => file.attachment_type === "arte_cliente")
+    );
+  }).length;
 
   return (
     <section className="grid gap-4 sm:gap-6 xl:grid-cols-[0.95fr_1.25fr]">
@@ -639,6 +751,33 @@ export function OrdersPanel(props: OrdersPanelProps) {
               );
             })}
           </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <QueueCard
+              label="Solicitudes web"
+              value={newRequests}
+              description="Entradas pendientes de confirmacion administrativa."
+              tone="blue"
+            />
+            <QueueCard
+              label="Falta arte"
+              value={missingArt}
+              description="Pedidos activos sin archivo de cliente."
+              tone="amber"
+            />
+            <QueueCard
+              label="Pagos por validar"
+              value={paymentsToReview}
+              description="Comprobantes enviados por clientes."
+              tone="amber"
+            />
+            <QueueCard
+              label="Listos"
+              value={readyForProduction}
+              description="Con arte y pago validado para confirmar."
+              tone="emerald"
+            />
+          </div>
         </div>
 
         <div className="mt-6 space-y-4">
@@ -650,6 +789,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
             filteredOrders.map((order) => {
               const historyEntries = orderHistoryByOrderId.get(order.id) ?? [];
               const orderFiles = orderFilesByOrderId.get(order.id) ?? [];
+              const adminFlow = getAdminOrderFlow(order, orderFiles);
 
               return (
                 <article
@@ -678,6 +818,10 @@ export function OrdersPanel(props: OrdersPanelProps) {
                             label={confirmationLabels[order.confirmation_status]}
                             tone={order.confirmation_status === "confirmado" ? "emerald" : "amber"}
                           />
+                          <StatusBadge
+                            label={adminFlow.label}
+                            tone={adminFlow.tone}
+                          />
                         </div>
 
                         <h3 className="mt-3 text-xl font-semibold text-slate-950">
@@ -685,6 +829,23 @@ export function OrdersPanel(props: OrdersPanelProps) {
                         </h3>
                         <p className="mt-1 text-sm text-slate-500">
                           Cliente: {order.client?.name ?? "Sin cliente"} - Cantidad {order.quantity}
+                        </p>
+                      </div>
+
+                      <div
+                        className={`rounded-2xl border px-4 py-4 ${
+                          adminFlow.tone === "rose"
+                            ? "border-rose-200 bg-rose-50 text-rose-800"
+                            : adminFlow.tone === "amber"
+                              ? "border-amber-200 bg-amber-50 text-amber-800"
+                              : adminFlow.tone === "blue"
+                                ? "border-blue-200 bg-blue-50 text-blue-800"
+                                : "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        }`}
+                      >
+                        <p className="text-sm font-black">{adminFlow.label}</p>
+                        <p className="mt-1 text-sm leading-6 opacity-85">
+                          {adminFlow.description}
                         </p>
                       </div>
 
