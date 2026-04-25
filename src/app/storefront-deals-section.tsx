@@ -12,6 +12,7 @@ type DealImage = {
 
 const deals = [
   {
+    productId: "tarjetas-premium",
     title: "Tarjetas ejecutivas",
     price: "$16",
     previousPrice: "$19",
@@ -28,6 +29,7 @@ const deals = [
     },
   },
   {
+    productId: "stickers-troquelados",
     title: "Stickers troquelados",
     price: "$19",
     previousPrice: "$23",
@@ -63,7 +65,13 @@ function DealArt({ tint, image }: { tint: string; image: DealImage }) {
   );
 }
 
-export function StorefrontDealsSection() {
+export function StorefrontDealsSection({
+  onPreviewProduct,
+  onAddProduct,
+}: {
+  onPreviewProduct: (productId: string) => void;
+  onAddProduct: (productId: string) => void;
+}) {
   return (
     <section id="promociones" className="mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 pb-10 sm:px-6 sm:pb-14 lg:px-8 2xl:px-10">
       <div className="grid gap-5 sm:gap-6 xl:grid-cols-[1.45fr_420px]">
@@ -131,12 +139,20 @@ export function StorefrontDealsSection() {
                     <span>★</span>
                     <span>★</span>
                   </div>
-                  <div className="mt-4 sm:mt-5">
+                  <div className="mt-4 flex flex-wrap gap-2 sm:mt-5">
                     <button
                       type="button"
+                      onClick={() => onPreviewProduct(deal.productId)}
                       className="cursor-pointer rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:border-slate-300 hover:bg-slate-50"
                     >
                       Ver producto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onAddProduct(deal.productId)}
+                      className="cursor-pointer rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    >
+                      Anadir
                     </button>
                   </div>
                 </div>

@@ -16,6 +16,7 @@ import {
   NotificationCenterButton,
   type DashboardNotificationItem,
 } from "@/app/dashboard/notification-center-button";
+import { InventoryPanel } from "@/app/dashboard/inventory-panel";
 import { OrdersPanel } from "@/app/dashboard/orders-panel";
 import { PaymentsPanel } from "@/app/dashboard/payments-panel";
 import { TeamUserModal } from "@/app/dashboard/team-user-modal";
@@ -1899,21 +1900,18 @@ export default async function DashboardPage({
             </section>
           ) : null}
 
-          {(activeView === "inventario" || activeView === "proveedores") &&
-          session.role === "admin" ? (
+          {activeView === "inventario" && session.role === "admin" ? (
+            <InventoryPanel orders={orders} />
+          ) : null}
+
+          {activeView === "proveedores" && session.role === "admin" ? (
             <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
               <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-xl font-semibold">
-                      {activeView === "inventario"
-                        ? "Inventario"
-                        : "Proveedores"}
-                    </h2>
+                    <h2 className="text-xl font-semibold">Proveedores</h2>
                     <p className="mt-2 text-sm text-slate-500">
-                      {activeView === "inventario"
-                        ? "Organiza materiales, stock y movimientos internos de la imprenta."
-                        : "Centraliza los datos de talleres, distribuidores y aliados del negocio."}
+                      Centraliza los datos de talleres, distribuidores y aliados del negocio.
                     </p>
                   </div>
                   <span className="rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
@@ -1937,18 +1935,11 @@ export default async function DashboardPage({
                   Lo siguiente aqui
                 </h3>
                 <div className="mt-5 space-y-3">
-                  {(activeView === "inventario"
-                    ? [
-                        "Registrar materiales y productos base",
-                        "Controlar entradas, salidas y stock actual",
-                        "Relacionar inventario con pedidos en produccion",
-                      ]
-                    : [
-                        "Guardar datos de contacto y categoria del proveedor",
-                        "Registrar servicios, materiales y observaciones",
-                        "Consultar rapidamente proveedores frecuentes",
-                      ]
-                  ).map((item) => (
+                  {[
+                    "Guardar datos de contacto y categoria del proveedor",
+                    "Registrar servicios, materiales y observaciones",
+                    "Consultar rapidamente proveedores frecuentes",
+                  ].map((item) => (
                     <div
                       key={item}
                       className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600"

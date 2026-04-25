@@ -1034,6 +1034,17 @@ export function StorefrontShell() {
     setMobileFilterOpen(false);
   };
 
+  const openPreviewById = (productId: string) => {
+    const product = getProductById(productId);
+
+    if (!product) {
+      showToast("No se encontro ese producto.", "error");
+      return;
+    }
+
+    openPreview(product);
+  };
+
   const toggleWishlist = (productId: string) => {
     setWishlistIds((current) => {
       const next = new Set(current);
@@ -1072,6 +1083,18 @@ export function StorefrontShell() {
     });
     setActivePanel("cart");
     setMobileFilterOpen(false);
+    showToast(`${product.title} agregado al carrito.`, "success");
+  };
+
+  const addProductById = (productId: string) => {
+    const product = getProductById(productId);
+
+    if (!product) {
+      showToast("No se encontro ese producto.", "error");
+      return;
+    }
+
+    addToCart(product);
   };
 
   const removeCartItem = (key: string) => {
@@ -1348,8 +1371,14 @@ export function StorefrontShell() {
         <>
           <StorefrontHero />
           <StorefrontCategoryStrip onCategorySelect={openCatalogWithQuery} />
-          <StorefrontPromoPanels />
-          <StorefrontDealsSection />
+          <StorefrontPromoPanels
+            onPreviewProduct={openPreviewById}
+            onAddProduct={addProductById}
+          />
+          <StorefrontDealsSection
+            onPreviewProduct={openPreviewById}
+            onAddProduct={addProductById}
+          />
           <StorefrontFeatureGridSection />
           <StorefrontBusinessSection />
           <StorefrontTestimonialsSection />

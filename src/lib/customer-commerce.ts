@@ -42,7 +42,16 @@ export type CustomerDashboardOrder = Order & {
 export type AdminPayment = OrderPayment & {
   order: Pick<
     Order,
-    "id" | "order_number" | "title" | "total_amount" | "pending_amount" | "payment_status"
+    | "id"
+    | "order_number"
+    | "title"
+    | "total_amount"
+    | "pending_amount"
+    | "payment_status"
+    | "payment_review_status"
+    | "confirmation_status"
+    | "source"
+    | "current_area"
   > | null;
   client: {
     id: string;
@@ -374,7 +383,7 @@ export async function listAdminPayments() {
     orderIds.length > 0
       ? await supabase
           .from("orders")
-          .select("id, client_id, order_number, title, total_amount, pending_amount, payment_status")
+          .select("id, client_id, order_number, title, total_amount, pending_amount, payment_status, payment_review_status, confirmation_status, source, current_area")
           .in("id", orderIds)
       : { data: [], error: null };
 
@@ -383,7 +392,20 @@ export async function listAdminPayments() {
   }
 
   const orders = (ordersData ?? []) as Array<
-    Pick<Order, "id" | "client_id" | "order_number" | "title" | "total_amount" | "pending_amount" | "payment_status">
+    Pick<
+      Order,
+      | "id"
+      | "client_id"
+      | "order_number"
+      | "title"
+      | "total_amount"
+      | "pending_amount"
+      | "payment_status"
+      | "payment_review_status"
+      | "confirmation_status"
+      | "source"
+      | "current_area"
+    >
   >;
   const clientIds = [...new Set(orders.map((order) => order.client_id).filter(Boolean))];
 

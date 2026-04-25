@@ -42,6 +42,15 @@ function formatDate(value: string) {
 export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
   const pendingPayments = payments.filter((payment) => payment.status === "por_validar");
   const reviewedPayments = payments.filter((payment) => payment.status !== "por_validar");
+  const pendingAmount = pendingPayments.reduce(
+    (sum, payment) => sum + Number(payment.amount ?? 0),
+    0,
+  );
+  const approvedAmount = payments.reduce(
+    (sum, payment) =>
+      payment.status === "aprobado" ? sum + Number(payment.amount ?? 0) : sum,
+    0,
+  );
 
   return (
     <section className="grid gap-4 sm:gap-6">
@@ -53,14 +62,18 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
               Valida pagos moviles enviados por clientes antes de mover el pedido a produccion.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
               <p className="text-xs uppercase tracking-[0.2em] text-amber-600">Pendientes</p>
               <p className="mt-2 text-2xl font-semibold text-amber-900">{pendingPayments.length}</p>
             </div>
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3">
+              <p className="text-xs uppercase tracking-[0.2em] text-blue-600">Por validar</p>
+              <p className="mt-2 text-2xl font-semibold text-blue-900">{formatCurrency(pendingAmount)}</p>
+            </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-950">{payments.length}</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Aprobado</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-950">{formatCurrency(approvedAmount)}</p>
             </div>
           </div>
         </div>
@@ -81,6 +94,9 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
                         {paymentStatusLabels[payment.status]}
+                      </span>
+                      <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                        {payment.order?.source === "storefront" ? "Pedido web" : "Pedido admin"}
                       </span>
                       <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
                         {formatDate(payment.created_at)}
@@ -109,6 +125,12 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Referencia</p>
                         <p className="mt-2 font-semibold text-slate-950">{payment.reference || "Sin dato"}</p>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:col-span-2 xl:col-span-4">
+                        <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Pedido</p>
+                        <p className="mt-2 font-semibold text-slate-950">
+                          Saldo actual: {formatCurrency(Number(payment.order?.pending_amount ?? 0))} - Area: {payment.order?.current_area ?? "Caja"}
+                        </p>
                       </div>
                     </div>
 

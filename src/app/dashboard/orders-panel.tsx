@@ -87,6 +87,19 @@ const paymentStatusLabels: Record<PaymentStatus, string> = {
   credito: "Credito",
 };
 
+const paymentReviewLabels: Record<string, string> = {
+  sin_pago: "Sin pago web",
+  por_validar: "Pago por aceptar",
+  validado: "Pago validado",
+  rechazado: "Pago rechazado",
+};
+
+const confirmationLabels: Record<string, string> = {
+  pendiente: "Sin confirmar",
+  confirmado: "Confirmado",
+  rechazado: "Rechazado",
+};
+
 const priorityLabels: Record<OrderPriority, string> = {
   baja: "Baja",
   media: "Media",
@@ -653,13 +666,25 @@ export function OrdersPanel(props: OrdersPanelProps) {
                             label={paymentStatusLabels[order.payment_status]}
                             tone={order.payment_status === "pagado" ? "emerald" : "amber"}
                           />
+                          <StatusBadge
+                            label={order.source === "storefront" ? "Pedido web" : "Pedido admin"}
+                            tone={order.source === "storefront" ? "blue" : "slate"}
+                          />
+                          <StatusBadge
+                            label={paymentReviewLabels[order.payment_review_status]}
+                            tone={order.payment_review_status === "validado" ? "emerald" : "amber"}
+                          />
+                          <StatusBadge
+                            label={confirmationLabels[order.confirmation_status]}
+                            tone={order.confirmation_status === "confirmado" ? "emerald" : "amber"}
+                          />
                         </div>
 
                         <h3 className="mt-3 text-xl font-semibold text-slate-950">
                           {order.product_type}
                         </h3>
                         <p className="mt-1 text-sm text-slate-500">
-                          Cliente: {order.client?.name ?? "Sin cliente"} · Cantidad {order.quantity}
+                          Cliente: {order.client?.name ?? "Sin cliente"} - Cantidad {order.quantity}
                         </p>
                       </div>
 

@@ -8,6 +8,8 @@ function PromoTile({
   theme,
   compact = false,
   image,
+  onPreview,
+  onAddToCart,
 }: {
   title: string;
   eyebrow: string;
@@ -21,6 +23,8 @@ function PromoTile({
     className?: string;
     frameClassName?: string;
   };
+  onPreview: () => void;
+  onAddToCart: () => void;
 }) {
   const palette =
     theme === "sun"
@@ -76,12 +80,23 @@ function PromoTile({
             >
               {title}
             </h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={onPreview}
+                className="inline-flex cursor-pointer items-center rounded-xl bg-white/88 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-sm backdrop-blur-sm transition hover:bg-white sm:rounded-2xl sm:px-5 sm:py-3 sm:text-sm"
+              >
+                Ver producto
+              </button>
+              <button
+                type="button"
+                onClick={onAddToCart}
+                className="inline-flex cursor-pointer items-center rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-sm"
+              >
+                Anadir
+              </button>
+            </div>
           </div>
-
-          <span className="mt-5 inline-flex w-fit items-center gap-2 rounded-xl bg-white/88 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-sm backdrop-blur-sm sm:mt-6 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-sm">
-            Ver mas
-            <span aria-hidden="true">›</span>
-          </span>
         </div>
 
         <div className={`relative ${compact ? image ? "flex min-h-[9rem] items-center justify-center sm:min-h-[10.5rem] lg:min-h-[11.5rem] xl:min-h-[8.5rem]" : "min-h-[8.5rem] sm:min-h-[12rem]" : image ? "flex min-h-[10.25rem] items-center justify-center sm:min-h-[12.5rem] xl:min-h-[19rem]" : "min-h-[10rem] sm:min-h-[19rem]"}`}>
@@ -117,6 +132,7 @@ function PromoTile({
 
 const promoTiles = [
   {
+    productId: "tarjetas-premium",
     title: "Tarjetas\nPremium",
     eyebrow: "Acabados destacados",
     theme: "sun" as const,
@@ -130,6 +146,7 @@ const promoTiles = [
     },
   },
   {
+    productId: "stickers-troquelados",
     title: "Stickers y\nEtiquetas",
     eyebrow: "Marca y packaging",
     theme: "sky" as const,
@@ -142,6 +159,7 @@ const promoTiles = [
     },
   },
   {
+    productId: "pendon-publicitario",
     title: "Pendones,\nafiches",
     eyebrow: "Gran formato",
     theme: "ink" as const,
@@ -156,6 +174,7 @@ const promoTiles = [
     },
   },
   {
+    productId: "talonarios-fiscales",
     title: "Talonarios,\nrecibos",
     eyebrow: "Impresion diaria",
     theme: "paper" as const,
@@ -171,7 +190,13 @@ const promoTiles = [
   },
 ];
 
-export function StorefrontPromoPanels() {
+export function StorefrontPromoPanels({
+  onPreviewProduct,
+  onAddProduct,
+}: {
+  onPreviewProduct: (productId: string) => void;
+  onAddProduct: (productId: string) => void;
+}) {
   return (
     <section id="destacados" className="mx-auto w-full max-w-[112rem] scroll-mt-6 pb-7 sm:px-4 sm:pb-10 lg:px-6 xl:px-4 2xl:px-10">
       <div className="sm:hidden">
@@ -186,7 +211,11 @@ export function StorefrontPromoPanels() {
               key={tile.title}
               className="w-[78vw] max-w-[19rem] shrink-0 snap-center"
             >
-              <PromoTile {...tile} />
+              <PromoTile
+                {...tile}
+                onPreview={() => onPreviewProduct(tile.productId)}
+                onAddToCart={() => onAddProduct(tile.productId)}
+              />
             </div>
           ))}
         </div>
@@ -194,17 +223,38 @@ export function StorefrontPromoPanels() {
 
       <div className="hidden grid-cols-2 gap-4 sm:grid lg:gap-5 xl:hidden">
         {promoTiles.map((tile) => (
-          <PromoTile key={tile.title} {...tile} />
+          <PromoTile
+            key={tile.title}
+            {...tile}
+            onPreview={() => onPreviewProduct(tile.productId)}
+            onAddToCart={() => onAddProduct(tile.productId)}
+          />
         ))}
       </div>
 
       <div className="hidden gap-4 px-4 sm:px-6 lg:px-8 xl:grid xl:grid-cols-[1.02fr_1.22fr_1fr] xl:px-4 2xl:px-0">
-        <PromoTile {...promoTiles[0]} />
-        <PromoTile {...promoTiles[1]} />
+        <PromoTile
+          {...promoTiles[0]}
+          onPreview={() => onPreviewProduct(promoTiles[0].productId)}
+          onAddToCart={() => onAddProduct(promoTiles[0].productId)}
+        />
+        <PromoTile
+          {...promoTiles[1]}
+          onPreview={() => onPreviewProduct(promoTiles[1].productId)}
+          onAddToCart={() => onAddProduct(promoTiles[1].productId)}
+        />
 
         <div className="grid gap-4">
-          <PromoTile {...promoTiles[2]} />
-          <PromoTile {...promoTiles[3]} />
+          <PromoTile
+            {...promoTiles[2]}
+            onPreview={() => onPreviewProduct(promoTiles[2].productId)}
+            onAddToCart={() => onAddProduct(promoTiles[2].productId)}
+          />
+          <PromoTile
+            {...promoTiles[3]}
+            onPreview={() => onPreviewProduct(promoTiles[3].productId)}
+            onAddToCart={() => onAddProduct(promoTiles[3].productId)}
+          />
         </div>
       </div>
     </section>
