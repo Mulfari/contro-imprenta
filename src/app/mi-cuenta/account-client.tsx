@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -143,7 +143,95 @@ const paymentStatusLabels: Record<CustomerPayment["status"], string> = {
   rechazado: "Rechazado",
 };
 
-function CustomerDashboard() {
+const paymentStatusClass: Record<CustomerPayment["status"], string> = {
+  por_validar: "bg-amber-50 text-amber-700 ring-amber-200",
+  aprobado: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  rechazado: "bg-rose-50 text-rose-700 ring-rose-200",
+};
+
+const orderStatusSteps: CustomerOrder["status"][] = [
+  "recibido",
+  "disenando",
+  "imprimiendo",
+  "listo",
+  "entregado",
+];
+
+type CustomerDashboardProps = {
+  displayName: string;
+  email: string | null | undefined;
+  profile: CustomerProfile | null;
+  onSignOut: () => void;
+  isSigningOut: boolean;
+};
+
+function formatDateTime(value: string | null) {
+  if (!value) {
+    return "Sin fecha";
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("es-VE", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(parsed);
+}
+
+function getOrderProgress(status: CustomerOrder["status"]) {
+  const currentIndex = orderStatusSteps.indexOf(status);
+  return Math.round(((currentIndex + 1) / orderStatusSteps.length) * 100);
+}
+
+function DashboardMetric({
+  label,
+  value,
+  helper,
+}: {
+  label: string;
+  value: string;
+  helper: string;
+}) {
+  return (
+    <div className="rounded-[1.55rem] border border-slate-200 bg-white p-4 shadow-[0_16px_36px_rgba(15,23,42,0.05)] sm:p-5">
+      <p className="text-[11px] font-semibold uppercase text-slate-400">{label}</p>
+      <p className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">
+        {value}
+      </p>
+      <p className="mt-2 text-sm leading-6 text-slate-500">{helper}</p>
+    </div>
+  );
+}
+
+function AccountDetail({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <p className="text-[11px] font-semibold uppercase text-slate-400">{label}</p>
+      <p className="mt-1 break-words text-sm font-semibold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+function CustomerDashboard({
+  displayName,
+  email,
+  profile,
+  onSignOut,
+  isSigningOut,
+}: CustomerDashboardProps) {
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState("");
@@ -207,7 +295,7 @@ function CustomerDashboard() {
     }
   };
 
-  const registerPayment = async (event: React.FormEvent<HTMLFormElement>) => {
+  const registerPayment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
@@ -234,231 +322,440 @@ function CustomerDashboard() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="rounded-[1.45rem] border border-slate-200 bg-slate-50 px-5 py-8 text-center text-sm font-medium text-slate-500">
-        Cargando tus pedidos...
-      </div>
-    );
-  }
-
-  const pendingPayments = orders.flatMap((order) =>
-    order.payments.filter((payment) => payment.status === "por_validar"),
-  ).length;
+  const allPayments = orders.flatMap((order) =>
+    order.payments.map((payment) => ({
+      ...payment,
+      orderNumber: order.order_number,
+      orderTitle: order.title,
+    })),
+  );
+  const allArtFiles = orders.flatMap((order) =>
+    order.files
+      .filter((file) => file.attachment_type === "arte_cliente")
+      .map((file) => ({
+        ...file,
+        orderNumber: order.order_number,
+        orderTitle: order.title,
+      })),
+  );
+  const activeOrders = orders.filter((order) => order.status !== "entregado").length;
+  const pendingPayments = allPayments.filter((payment) => payment.status === "por_validar").length;
+  const approvedPayments = allPayments.filter((payment) => payment.status === "aprobado").length;
   const pendingBalance = orders.reduce(
     (sum, order) => sum + Number(order.pending_amount ?? order.total_amount ?? 0),
     0,
   );
+  const latestOrder = orders[0] ?? null;
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-[0_24px_60px_rgba(15,23,42,0.06)]">
+        <p className="text-sm font-semibold text-slate-500">Cargando tu cuenta...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {actionMessage ? <MessageBox message={actionMessage} tone="success" /> : null}
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Pedidos
-          </p>
-          <p className="mt-2 text-2xl font-black text-slate-950">{orders.length}</p>
+      <section className="overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-[0_28px_80px_rgba(15,23,42,0.2)]">
+        <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.35fr_0.65fr] lg:p-8">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase text-[#ffd45f]">
+              Panel de cliente
+            </p>
+            <h1 className="mt-3 text-3xl font-black sm:text-4xl lg:text-5xl">
+              {displayName}
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">
+              Revisa tus pedidos, pagos, saldo pendiente y artes digitales desde un solo lugar.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold">
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
+                {email || "Correo pendiente"}
+              </span>
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
+                {activeOrders} pedido{activeOrders === 1 ? "" : "s"} activo{activeOrders === 1 ? "" : "s"}
+              </span>
+              <span className="rounded-full bg-[#ffd45f] px-3 py-1.5 text-slate-950">
+                {pendingPayments} pago{pendingPayments === 1 ? "" : "s"} en revision
+              </span>
+            </div>
+          </div>
+          <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
+            <p className="text-sm font-semibold text-slate-300">Saldo por confirmar</p>
+            <p className="mt-2 text-3xl font-black">
+              {formatCurrency(pendingBalance)}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              Los pagos se aplican cuando administracion valida el comprobante.
+            </p>
+            <button
+              type="button"
+              onClick={onSignOut}
+              disabled={isSigningOut}
+              className="mt-5 inline-flex w-full cursor-pointer items-center justify-center rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSigningOut ? "Cerrando..." : "Cerrar sesion"}
+            </button>
+          </div>
         </div>
-        <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Pagos en revision
-          </p>
-          <p className="mt-2 text-2xl font-black text-slate-950">{pendingPayments}</p>
-        </div>
-        <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Saldo pendiente
-          </p>
-          <p className="mt-2 text-2xl font-black text-slate-950">
-            {formatCurrency(pendingBalance)}
-          </p>
-        </div>
+      </section>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <DashboardMetric
+          label="Pedidos totales"
+          value={String(orders.length)}
+          helper={`${activeOrders} en proceso y ${orders.length - activeOrders} entregados.`}
+        />
+        <DashboardMetric
+          label="Pagos registrados"
+          value={String(allPayments.length)}
+          helper={`${approvedPayments} aprobados, ${pendingPayments} en revision.`}
+        />
+        <DashboardMetric
+          label="Artes cargadas"
+          value={String(allArtFiles.length)}
+          helper="Archivos digitales asociados a tus pedidos."
+        />
+        <DashboardMetric
+          label="Ultimo pedido"
+          value={latestOrder ? orderStatusLabels[latestOrder.status] : "Sin pedidos"}
+          helper={latestOrder ? latestOrder.title : "Aun no has creado una orden."}
+        />
       </div>
 
-      {orders.length === 0 ? (
-        <div className="rounded-[1.45rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
-          <p className="font-semibold text-slate-950">Aun no tienes pedidos.</p>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Agrega productos al carrito y continua el pedido para verlos aqui.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {orders.map((order) => {
-            const artFiles = order.files.filter((file) => file.attachment_type === "arte_cliente");
-            const paymentFiles = order.files.filter((file) => file.attachment_type === "comprobante_pago");
-            const isPaymentOpen = activePaymentOrderId === order.id;
+      <div className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
+        <aside className="space-y-6">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase text-slate-400">
+                  Informacion de cuenta
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950">
+                  Tus datos
+                </h2>
+              </div>
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+                Activa
+              </span>
+            </div>
+            <div className="mt-5 grid gap-3">
+              <AccountDetail label="Nombre" value={profile?.full_name?.trim() || "Pendiente"} />
+              <AccountDetail label="Correo" value={email || "Pendiente"} />
+              <AccountDetail label="Telefono" value={profile?.phone?.trim() || "Pendiente"} />
+              <AccountDetail label="Cliente desde" value={formatDate(profile?.created_at ?? null)} />
+            </div>
+          </section>
 
-            return (
-              <article key={order.id} className="rounded-[1.45rem] border border-slate-200 bg-white p-4">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                      {order.order_number ?? "Pedido web"}
-                    </p>
-                    <h3 className="mt-2 text-xl font-black tracking-tight text-slate-950">
-                      {order.title}
-                    </h3>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">
-                        {orderStatusLabels[order.status]}
-                      </span>
-                      <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-700">
-                        Pago {order.payment_review_status.replace("_", " ")}
-                      </span>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">
-                        Entrega {formatDate(order.promised_delivery_at)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 lg:text-right">
-                    <p className="text-sm font-semibold text-slate-500">Saldo</p>
-                    <p className="mt-1 text-2xl font-black text-slate-950">
-                      {formatCurrency(order.pending_amount)}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-400">
-                      Total {formatCurrency(order.total_amount)}
-                    </p>
-                  </div>
-                </div>
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
+            <p className="text-[11px] font-semibold uppercase text-slate-400">
+              Artes digitales
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">
+              Archivos usados
+            </h2>
+            <div className="mt-5 space-y-3">
+              {allArtFiles.length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-500">
+                  Aun no tienes artes cargadas. Cuando subas archivos a un pedido apareceran aqui.
+                </p>
+              ) : (
+                allArtFiles.slice(0, 6).map((file) => (
+                  <a
+                    key={file.id}
+                    href={file.signed_url ?? "#"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-slate-300 hover:bg-white"
+                  >
+                    <span className="block break-words text-sm font-black text-slate-900">
+                      {file.file_name}
+                    </span>
+                    <span className="mt-1 block text-xs font-semibold text-slate-500">
+                      {file.orderNumber ?? "Pedido web"} - {formatDate(file.created_at)}
+                    </span>
+                  </a>
+                ))
+              )}
+            </div>
+          </section>
+        </aside>
 
-                <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-black text-slate-950">Arte digital</p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          Sube el archivo final o referencia para este producto.
-                        </p>
-                      </div>
-                      <label className="cursor-pointer rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">
-                        Subir arte
-                        <input
-                          type="file"
-                          className="hidden"
-                          onChange={(event) => {
-                            void uploadArt(order.id, event.target.files?.[0] ?? null);
-                            event.currentTarget.value = "";
-                          }}
-                        />
-                      </label>
-                    </div>
-                    <div className="mt-3 space-y-2">
-                      {artFiles.length === 0 ? (
-                        <p className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-3 text-sm text-slate-500">
-                          Sin arte cargado.
-                        </p>
-                      ) : (
-                        artFiles.map((file) => (
-                          <a
-                            key={file.id}
-                            href={file.signed_url ?? "#"}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="block rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
-                          >
-                            {file.file_name}
-                          </a>
-                        ))
-                      )}
-                    </div>
-                  </div>
+        <main className="space-y-6">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase text-slate-400">
+                  Historial de pedidos
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950">
+                  Ordenes y produccion
+                </h2>
+              </div>
+              <Link
+                href="/#catalogo"
+                className="inline-flex items-center justify-center rounded-2xl bg-[#ffd45f] px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+              >
+                Crear otro pedido
+              </Link>
+            </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-black text-slate-950">Pago movil</p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          Registra el pago para que administracion lo valide.
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setActivePaymentOrderId(isPaymentOpen ? null : order.id)}
-                        className="cursor-pointer rounded-xl bg-[#ffd45f] px-3 py-2 text-xs font-black text-slate-950 transition hover:bg-[#ffcd41]"
-                      >
-                        Registrar
-                      </button>
-                    </div>
+            {orders.length === 0 ? (
+              <div className="mt-5 rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+                <p className="font-black text-slate-950">Aun no tienes pedidos.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Agrega productos al carrito y continua el pedido para verlos aqui.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5 space-y-4">
+                {orders.map((order) => {
+                  const artFiles = order.files.filter(
+                    (file) => file.attachment_type === "arte_cliente",
+                  );
+                  const paymentFiles = order.files.filter(
+                    (file) => file.attachment_type === "comprobante_pago",
+                  );
+                  const isPaymentOpen = activePaymentOrderId === order.id;
 
-                    {isPaymentOpen ? (
-                      <form className="mt-4 grid gap-3" onSubmit={registerPayment}>
-                        <input type="hidden" name="orderId" value={order.id} />
-                        <input
-                          name="amount"
-                          type="number"
-                          min="1"
-                          step="0.01"
-                          placeholder="Monto"
-                          defaultValue={Number(order.pending_amount ?? order.total_amount ?? 0) || ""}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
-                          required
-                        />
-                        <input
-                          name="bank"
-                          placeholder="Banco"
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
-                        />
-                        <input
-                          name="payerPhone"
-                          placeholder="Telefono emisor"
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
-                        />
-                        <input
-                          name="reference"
-                          placeholder="Referencia"
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
-                        />
-                        <label className="cursor-pointer rounded-xl border border-dashed border-slate-300 bg-white px-3 py-3 text-sm font-semibold text-slate-600">
-                          Comprobante
-                          <input name="proofFile" type="file" className="mt-2 block text-xs" />
-                        </label>
-                        <button
-                          type="submit"
-                          className="cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                        >
-                          Enviar pago
-                        </button>
-                      </form>
-                    ) : null}
-
-                    <div className="mt-3 space-y-2">
-                      {order.payments.length === 0 ? (
-                        <p className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-3 text-sm text-slate-500">
-                          Sin pagos registrados.
-                        </p>
-                      ) : (
-                        order.payments.map((payment) => (
-                          <div key={payment.id} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm">
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="font-semibold text-slate-950">
-                                {formatCurrency(Number(payment.amount))}
-                              </span>
-                              <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
-                                {paymentStatusLabels[payment.status]}
-                              </span>
-                            </div>
-                            <p className="mt-1 text-xs text-slate-500">
-                              Ref. {payment.reference || "sin referencia"} - {formatDate(payment.created_at)}
-                            </p>
+                  return (
+                    <article
+                      key={order.id}
+                      className="rounded-[1.65rem] border border-slate-200 bg-slate-50 p-4 sm:p-5"
+                    >
+                      <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-semibold uppercase text-slate-400">
+                            {order.order_number ?? "Pedido web"}
+                          </p>
+                          <h3 className="mt-2 break-words text-xl font-black text-slate-950 sm:text-2xl">
+                            {order.title}
+                          </h3>
+                          <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                            <span className="rounded-full bg-blue-50 px-3 py-1.5 text-blue-700">
+                              {orderStatusLabels[order.status]}
+                            </span>
+                            <span className="rounded-full bg-amber-50 px-3 py-1.5 text-amber-700">
+                              Pago {order.payment_review_status.replace("_", " ")}
+                            </span>
+                            <span className="rounded-full bg-white px-3 py-1.5 text-slate-600">
+                              Entrega {formatDate(order.promised_delivery_at)}
+                            </span>
                           </div>
-                        ))
-                      )}
-                      {paymentFiles.length > 0 ? (
-                        <p className="text-xs font-semibold text-slate-400">
-                          {paymentFiles.length} comprobante{paymentFiles.length === 1 ? "" : "s"} cargado{paymentFiles.length === 1 ? "" : "s"}
-                        </p>
-                      ) : null}
+                        </div>
+                        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 lg:min-w-44 lg:text-right">
+                          <p className="text-sm font-semibold text-slate-500">Saldo</p>
+                          <p className="mt-1 text-2xl font-black text-slate-950">
+                            {formatCurrency(order.pending_amount)}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-400">
+                            Total {formatCurrency(order.total_amount)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-5">
+                        <div className="h-2 overflow-hidden rounded-full bg-white">
+                          <div
+                            className="h-full rounded-full bg-[#ffd45f]"
+                            style={{ width: `${getOrderProgress(order.status)}%` }}
+                          />
+                        </div>
+                        <div className="mt-2 flex flex-wrap justify-between gap-2 text-[11px] font-semibold text-slate-500">
+                          {orderStatusSteps.map((status) => (
+                            <span key={status}>{orderStatusLabels[status]}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <p className="text-sm font-black text-slate-950">Arte digital</p>
+                              <p className="mt-1 text-xs leading-5 text-slate-500">
+                                Sube el archivo final o referencias para produccion.
+                              </p>
+                            </div>
+                            <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">
+                              Subir arte
+                              <input
+                                type="file"
+                                className="hidden"
+                                onChange={(event) => {
+                                  void uploadArt(order.id, event.target.files?.[0] ?? null);
+                                  event.currentTarget.value = "";
+                                }}
+                              />
+                            </label>
+                          </div>
+                          <div className="mt-3 space-y-2">
+                            {artFiles.length === 0 ? (
+                              <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-500">
+                                Sin arte cargado.
+                              </p>
+                            ) : (
+                              artFiles.map((file) => (
+                                <a
+                                  key={file.id}
+                                  href={file.signed_url ?? "#"}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="block rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
+                                >
+                                  {file.file_name}
+                                </a>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <p className="text-sm font-black text-slate-950">Pago movil</p>
+                              <p className="mt-1 text-xs leading-5 text-slate-500">
+                                Registra un abono para que administracion lo valide.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setActivePaymentOrderId(isPaymentOpen ? null : order.id)}
+                              className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-[#ffd45f] px-3 py-2 text-xs font-black text-slate-950 transition hover:bg-[#ffcd41]"
+                            >
+                              {isPaymentOpen ? "Cerrar" : "Registrar pago"}
+                            </button>
+                          </div>
+
+                          {isPaymentOpen ? (
+                            <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={registerPayment}>
+                              <input type="hidden" name="orderId" value={order.id} />
+                              <input
+                                name="amount"
+                                type="number"
+                                min="1"
+                                step="0.01"
+                                placeholder="Monto"
+                                defaultValue={Number(order.pending_amount ?? order.total_amount ?? 0) || ""}
+                                className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+                                required
+                              />
+                              <input
+                                name="bank"
+                                placeholder="Banco"
+                                className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+                              />
+                              <input
+                                name="payerPhone"
+                                placeholder="Telefono emisor"
+                                className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+                              />
+                              <input
+                                name="reference"
+                                placeholder="Referencia"
+                                className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+                              />
+                              <label className="cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-600 sm:col-span-2">
+                                Comprobante
+                                <input name="proofFile" type="file" className="mt-2 block text-xs" />
+                              </label>
+                              <button
+                                type="submit"
+                                className="cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 sm:col-span-2"
+                              >
+                                Enviar pago
+                              </button>
+                            </form>
+                          ) : null}
+
+                          <div className="mt-3 space-y-2">
+                            {order.payments.length === 0 ? (
+                              <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-500">
+                                Sin pagos registrados.
+                              </p>
+                            ) : (
+                              order.payments.map((payment) => (
+                                <div
+                                  key={payment.id}
+                                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm"
+                                >
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="font-semibold text-slate-950">
+                                      {formatCurrency(Number(payment.amount))}
+                                    </span>
+                                    <span
+                                      className={`rounded-full px-2 py-1 text-xs font-semibold ring-1 ${paymentStatusClass[payment.status]}`}
+                                    >
+                                      {paymentStatusLabels[payment.status]}
+                                    </span>
+                                  </div>
+                                  <p className="mt-1 text-xs text-slate-500">
+                                    Ref. {payment.reference || "sin referencia"} - {formatDate(payment.created_at)}
+                                  </p>
+                                </div>
+                              ))
+                            )}
+                            {paymentFiles.length > 0 ? (
+                              <p className="text-xs font-semibold text-slate-400">
+                                {paymentFiles.length} comprobante{paymentFiles.length === 1 ? "" : "s"} cargado{paymentFiles.length === 1 ? "" : "s"}
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
+            <p className="text-[11px] font-semibold uppercase text-slate-400">
+              Historial de pagos
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">
+              Movimientos y validaciones
+            </h2>
+            <div className="mt-5 space-y-3">
+              {allPayments.length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-500">
+                  Todavia no hay pagos registrados. Cuando cargues un comprobante, podras seguir su validacion aqui.
+                </p>
+              ) : (
+                allPayments.map((payment) => (
+                  <div
+                    key={payment.id}
+                    className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto] md:items-center"
+                  >
+                    <div>
+                      <p className="text-sm font-black text-slate-950">
+                        {payment.orderNumber ?? "Pedido web"} - {payment.orderTitle}
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">
+                        {payment.bank || "Banco no indicado"} - Ref. {payment.reference || "sin referencia"} - {formatDateTime(payment.created_at)}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                      <span className="text-lg font-black text-slate-950">
+                        {formatCurrency(Number(payment.amount))}
+                      </span>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${paymentStatusClass[payment.status]}`}
+                      >
+                        {paymentStatusLabels[payment.status]}
+                      </span>
                     </div>
                   </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
+                ))
+              )}
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   );
 }
@@ -561,7 +858,7 @@ export function CustomerAccountClient({
     return () => subscription.unsubscribe();
   }, [hasPublicAuth]);
 
-  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!hasPublicAuth) {
@@ -593,7 +890,7 @@ export function CustomerAccountClient({
     }
   }
 
-  async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
+  async function handleRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!hasPublicAuth) {
@@ -680,6 +977,23 @@ export function CustomerAccountClient({
   const isDropdown = variant === "dropdown";
   const canSwitchMode = showModeSwitch ?? !isDropdown;
 
+  if (!isDropdown && hasPublicAuth && !isLoading && session) {
+    return (
+      <section className="mx-auto w-full max-w-[118rem] px-4 pb-12 pt-5 sm:px-6 lg:px-8 2xl:px-10">
+        <div className="space-y-5">
+          {message ? <MessageBox message={message} tone={messageTone} /> : null}
+          <CustomerDashboard
+            displayName={displayName}
+            email={session.user.email}
+            profile={profile}
+            onSignOut={handleSignOut}
+            isSigningOut={isSubmitting}
+          />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       className={
@@ -761,7 +1075,7 @@ export function CustomerAccountClient({
               <div className="rounded-[1.45rem] border border-slate-200 bg-slate-50/70 p-5">
                 <div className="space-y-3">
                   <div>
-                    <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-[1.7rem]">
+                    <h2 className="text-xl font-semibold text-slate-950 sm:text-[1.7rem]">
                       {displayName}
                     </h2>
                     <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
@@ -811,9 +1125,7 @@ export function CustomerAccountClient({
                   >
                     Ver mis pedidos, pagos y artes
                   </Link>
-                ) : (
-                  <CustomerDashboard />
-                )}
+                ) : null}
 
                 <button
                   type="button"
