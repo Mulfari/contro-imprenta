@@ -381,6 +381,30 @@ alter table public.orders add column if not exists internal_notes text null;
 alter table public.orders add column if not exists created_at timestamptz default now();
 alter table public.orders add column if not exists created_by uuid null;
 
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'orders'
+      and column_name = 'customer_id'
+  ) then
+    update public.orders
+    set client_id = customer_id
+    where client_id is null
+      and customer_id is not null;
+
+    update public.orders
+    set customer_id = client_id
+    where customer_id is null
+      and client_id is not null;
+
+    alter table public.orders
+      alter column customer_id drop not null;
+  end if;
+end $$;
+
 create index if not exists orders_customer_user_id_idx
   on public.orders (customer_user_id);
 
