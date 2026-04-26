@@ -92,6 +92,21 @@ function formatOptions(options: Record<string, string> = {}) {
   return entries.map(([key, value]) => `${key}: ${value}`).join("\n");
 }
 
+function formatCheckoutItem(item: StorefrontCheckoutItem, index: number) {
+  const quantity = Math.max(1, Number(item.quantity) || 1);
+  const unitPrice = Math.max(0, Number(item.unitPrice) || 0);
+  const lineTotal = unitPrice * quantity;
+
+  return [
+    `${index + 1}. ${item.title}`,
+    `Categoria: ${item.productType || item.title}`,
+    `Cantidad: ${quantity}`,
+    `Precio unitario: $${unitPrice.toFixed(2)}`,
+    `Subtotal: $${lineTotal.toFixed(2)}`,
+    `Opciones:\n${formatOptions(item.options)}`,
+  ].join("\n");
+}
+
 async function ensureCustomerClient(input: {
   userId: string;
   email: string;
@@ -150,73 +165,90 @@ export async function createStorefrontCheckout(input: {
 
   const client = await ensureCustomerClient(input);
   const supabase = createSupabaseAdminClient();
-  const createdOrders: Order[] = [];
-
-  for (const item of input.items) {
+  const orderNumber = await createOrderNumber();
+  const normalizedItems = input.items.map((item) => {
     const quantity = Math.max(1, Number(item.quantity) || 1);
     const unitPrice = Math.max(0, Number(item.unitPrice) || 0);
-    const totalAmount = unitPrice * quantity;
-    const orderNumber = await createOrderNumber();
-    const description = [
-      `Pedido web creado desde carrito.`,
-      `Producto: ${item.title}`,
-      `Opciones:\n${formatOptions(item.options)}`,
-      normalizeText(input.notes) ? `Notas del cliente: ${normalizeText(input.notes)}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n\n");
 
-    const { data, error } = await supabase
-      .from("orders")
-      .insert({
-        client_id: client.id,
-        customer_user_id: input.userId,
-        order_number: orderNumber,
-        title: item.title,
-        product_type: item.productType || item.title,
-        description,
-        quantity,
-        material: item.options.Material ?? null,
-        size: item.options.Tamano ?? item.options.Medida ?? null,
-        lamination_finish: item.options.Acabado ?? null,
-        includes_design: false,
-        includes_installation: false,
-        urgency: "normal",
-        branch: null,
-        quoted_price: unitPrice || null,
-        discount_amount: null,
-        total_amount: totalAmount || null,
-        deposit_amount: 0,
-        pending_amount: totalAmount || null,
-        payment_method: "Pago movil",
-        payment_status: "pendiente",
-        payment_review_status: "sin_pago",
-        confirmation_status: "pendiente",
-        promised_delivery_at: addBusinessDays(5),
-        priority: "media",
-        current_area: "Caja",
-        status: "recibido",
-        source: "storefront",
-        internal_notes: "Esperando arte digital y validacion de pago movil.",
-      })
-      .select("*")
-      .single<Order>();
+    return {
+      ...item,
+      quantity,
+      unitPrice,
+      lineTotal: unitPrice * quantity,
+    };
+  });
+  const totalQuantity = normalizedItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalAmount = normalizedItems.reduce((sum, item) => sum + item.lineTotal, 0);
+  const categories = [...new Set(normalizedItems.map((item) => item.productType).filter(Boolean))];
+  const firstItem = normalizedItems[0];
+  const title =
+    normalizedItems.length === 1
+      ? firstItem.title
+      : `Pedido web (${normalizedItems.length} productos)`;
+  const productType =
+    normalizedItems.length === 1
+      ? firstItem.productType || firstItem.title
+      : categories.length === 1
+        ? categories[0]
+        : "Pedido mixto";
+  const description = [
+    `Pedido web creado desde checkout.`,
+    `Productos del pedido:\n${normalizedItems.map(formatCheckoutItem).join("\n\n")}`,
+    normalizeText(input.notes) ? `Notas del cliente: ${normalizeText(input.notes)}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
-    if (error) {
-      throw error;
-    }
+  const singleOptions = normalizedItems.length === 1 ? firstItem.options : {};
 
-    await createOrderHistoryEntry({
-      orderId: data.id,
-      detail: `Pedido web ${orderNumber} creado por el cliente. Pendiente por validar pago movil.`,
-      eventType: "storefront",
-      changedBy: null,
-    });
+  const { data, error } = await supabase
+    .from("orders")
+    .insert({
+      client_id: client.id,
+      customer_user_id: input.userId,
+      order_number: orderNumber,
+      title,
+      product_type: productType,
+      description,
+      quantity: totalQuantity,
+      material: singleOptions.Material ?? null,
+      size: singleOptions.Tamano ?? singleOptions.Medida ?? null,
+      lamination_finish: singleOptions.Acabado ?? null,
+      includes_design: false,
+      includes_installation: false,
+      urgency: "normal",
+      branch: null,
+      quoted_price: totalAmount || null,
+      discount_amount: null,
+      total_amount: totalAmount || null,
+      deposit_amount: 0,
+      pending_amount: totalAmount || null,
+      payment_method: "Pago movil",
+      payment_status: "pendiente",
+      payment_review_status: "sin_pago",
+      confirmation_status: "pendiente",
+      promised_delivery_at: addBusinessDays(5),
+      priority: "media",
+      current_area: "Caja",
+      status: "recibido",
+      source: "storefront",
+      internal_notes: "Pedido web agrupado. Validar arte digital y pago movil antes de producir.",
+    })
+    .select("*")
+    .single<Order>();
 
-    createdOrders.push(data);
+  if (error) {
+    throw error;
   }
 
-  return createdOrders;
+  await createOrderHistoryEntry({
+    orderId: data.id,
+    detail: `Pedido web ${orderNumber} creado con ${normalizedItems.length} producto${normalizedItems.length === 1 ? "" : "s"}. Pendiente por validar pago movil.`,
+    eventType: "storefront",
+    changedBy: null,
+  });
+
+  return [data];
 }
 
 export async function getCustomerDashboard(userId: string) {

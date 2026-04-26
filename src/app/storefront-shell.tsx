@@ -1,10 +1,24 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
+import {
+  cartStorageKey,
+  getCartKey,
+  getDefaultOptions,
+  getProductById,
+  parsePrice,
+  restoreStoredCart,
+  restoreStoredWishlist,
+  serializeCartItems,
+  wishlistStorageKey,
+  type CartItem,
+  type StoredCartItem,
+} from "@/app/storefront-cart";
 import { storefrontProducts, type StorefrontProduct } from "@/app/storefront-data";
 import { StorefrontBusinessSection } from "@/app/storefront-business-section";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
@@ -18,29 +32,13 @@ import { StorefrontTestimonialsSection } from "@/app/storefront-testimonials-sec
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
-type CartItem = {
-  key: string;
-  product: StorefrontProduct;
-  quantity: number;
-  options: Record<string, string>;
-};
-
 type CommercePanel = "wishlist" | "cart" | null;
-
-type StoredCartItem = {
-  productId: string;
-  quantity: number;
-  options: Record<string, string>;
-};
 
 type ToastMessage = {
   id: number;
   message: string;
   tone: "info" | "success" | "error";
 };
-
-const cartStorageKey = "express-printer-cart";
-const wishlistStorageKey = "express-printer-wishlist";
 
 const categoryGroups = [
   {
@@ -60,83 +58,6 @@ const categoryGroups = [
     items: ["Premium", "Corporativas", "Autocopiativos", "Personalizados"],
   },
 ];
-
-function getDefaultOptions(product: StorefrontProduct) {
-  return Object.fromEntries(
-    product.options.map((group) => [group.name, group.values[0] ?? ""]),
-  );
-}
-
-function getCartKey(product: StorefrontProduct, options: Record<string, string>) {
-  return `${product.id}:${Object.entries(options)
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([key, value]) => `${key}-${value}`)
-    .join("|")}`;
-}
-
-function parsePrice(price: string) {
-  return Number(price.replace(/[^\d.]/g, "")) || 0;
-}
-
-function getProductById(productId: string) {
-  return storefrontProducts.find((product) => product.id === productId) ?? null;
-}
-
-function restoreStoredCart(value: string | null) {
-  if (!value) {
-    return [] as CartItem[];
-  }
-
-  try {
-    const parsed = JSON.parse(value) as StoredCartItem[];
-
-    if (!Array.isArray(parsed)) {
-      return [] as CartItem[];
-    }
-
-    return parsed.flatMap((item) => {
-      const product = getProductById(item.productId);
-
-      if (!product) {
-        return [];
-      }
-
-      const options = item.options && typeof item.options === "object"
-        ? item.options
-        : getDefaultOptions(product);
-
-      return [
-        {
-          key: getCartKey(product, options),
-          product,
-          quantity: Math.max(1, Number(item.quantity) || 1),
-          options,
-        },
-      ];
-    });
-  } catch {
-    return [] as CartItem[];
-  }
-}
-
-function restoreStoredWishlist(value: string | null) {
-  if (!value) {
-    return new Set<string>();
-  }
-
-  try {
-    const parsed = JSON.parse(value) as string[];
-
-    if (!Array.isArray(parsed)) {
-      return new Set<string>();
-    }
-
-    const validIds = new Set(storefrontProducts.map((product) => product.id));
-    return new Set(parsed.filter((productId) => validIds.has(productId)));
-  } catch {
-    return new Set<string>();
-  }
-}
 
 function StorefrontToast({
   toast,
@@ -660,7 +581,6 @@ function CommerceDrawer({
   onRemoveCartItem,
   onQuantityChange,
   onCheckout,
-  isCheckingOut,
   checkoutMessage,
 }: {
   panel: CommercePanel;
@@ -673,7 +593,6 @@ function CommerceDrawer({
   onRemoveCartItem: (key: string) => void;
   onQuantityChange: (key: string, quantity: number) => void;
   onCheckout: () => void;
-  isCheckingOut: boolean;
   checkoutMessage: string;
 }) {
   if (!panel) {
@@ -849,13 +768,12 @@ function CommerceDrawer({
             <button
               type="button"
               onClick={onCheckout}
-              disabled={isCheckingOut}
-              className="mt-4 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
             >
-              {isCheckingOut ? "Creando solicitud..." : "Crear solicitud"}
+              Preparar pedido
             </button>
             <p className="mt-3 text-center text-xs leading-5 text-slate-400">
-              Luego podras subir el arte y registrar el pago movil desde Mi cuenta.
+              Revisaras arte, pago movil y total antes de enviar la solicitud.
             </p>
           </div>
         ) : null}
@@ -865,6 +783,7 @@ function CommerceDrawer({
 }
 
 export function StorefrontShell() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [catalogOpen, setCatalogOpen] = useState(false);
@@ -875,7 +794,6 @@ export function StorefrontShell() {
   const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [customerSession, setCustomerSession] = useState<Session | null>(null);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState("");
   const [checkoutNotice, setCheckoutNotice] = useState<{
     message: string;
@@ -886,6 +804,7 @@ export function StorefrontShell() {
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const accountDropdownRef = useRef<HTMLDivElement | null>(null);
+  const toastIdRef = useRef(0);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -916,9 +835,13 @@ export function StorefrontShell() {
   }, []);
 
   useEffect(() => {
-    setWishlistIds(restoreStoredWishlist(window.localStorage.getItem(wishlistStorageKey)));
-    setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey)));
-    setStorageReady(true);
+    const timeout = window.setTimeout(() => {
+      setWishlistIds(restoreStoredWishlist(window.localStorage.getItem(wishlistStorageKey)));
+      setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey)));
+      setStorageReady(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -937,11 +860,7 @@ export function StorefrontShell() {
       return;
     }
 
-    const storedItems: StoredCartItem[] = cartItems.map((item) => ({
-      productId: item.product.id,
-      quantity: item.quantity,
-      options: item.options,
-    }));
+    const storedItems: StoredCartItem[] = serializeCartItems(cartItems);
 
     window.localStorage.setItem(cartStorageKey, JSON.stringify(storedItems));
   }, [cartItems, storageReady]);
@@ -1024,8 +943,10 @@ export function StorefrontShell() {
   const publicAuthEnabled = hasSupabasePublicConfig();
 
   const showToast = (message: string, tone: ToastMessage["tone"] = "info") => {
+    toastIdRef.current += 1;
+
     setToast({
-      id: Date.now(),
+      id: toastIdRef.current,
       message,
       tone,
     });
@@ -1188,49 +1109,8 @@ export function StorefrontShell() {
       return;
     }
 
-    setIsCheckingOut(true);
-
-    try {
-      const response = await fetch("/api/storefront/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: cartItems.map((item) => ({
-            productId: item.product.id,
-            title: item.product.title,
-            productType: item.product.category,
-            quantity: item.quantity,
-            unitPrice: parsePrice(item.product.price),
-            options: item.options,
-          })),
-        }),
-      });
-      const payload = (await response.json()) as { error?: string; message?: string };
-
-      if (!response.ok) {
-        throw new Error(payload.error || "No se pudo crear el pedido.");
-      }
-
-      setCartItems([]);
-      const message =
-        payload.message ||
-        "Solicitud creada. Sube el arte y registra el pago movil desde Mi cuenta.";
-      setCheckoutMessage(message);
-      setCheckoutNotice({ message, tone: "success" });
-      showToast(message, "success");
-      setActivePanel(null);
-      setAccountOpen(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "No se pudo crear el pedido.";
-      setCheckoutMessage(message);
-      setCheckoutNotice({ message, tone: "error" });
-      showToast(message, "error");
-    } finally {
-      setIsCheckingOut(false);
-    }
+    setActivePanel(null);
+    router.push("/checkout");
   };
 
   const clearCatalogFilters = () => {
@@ -1496,7 +1376,6 @@ export function StorefrontShell() {
         onRemoveCartItem={removeCartItem}
         onQuantityChange={changeCartQuantity}
         onCheckout={handleCheckout}
-        isCheckingOut={isCheckingOut}
         checkoutMessage={checkoutMessage}
       />
 
