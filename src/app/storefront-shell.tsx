@@ -41,6 +41,19 @@ type ToastMessage = {
   tone: "info" | "success" | "error";
 };
 
+type AccountActivity = {
+  activeCount: number;
+  needsAttention: boolean;
+};
+
+type AccountActivityOrder = {
+  status: string;
+  payment_review_status: string;
+  files?: Array<{
+    attachment_type: string;
+  }>;
+};
+
 const categoryGroups = [
   {
     title: "Papeleria comercial",
@@ -795,6 +808,7 @@ export function StorefrontShell() {
   const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [customerSession, setCustomerSession] = useState<Session | null>(null);
+  const [accountActivity, setAccountActivity] = useState<AccountActivity | null>(null);
   const [checkoutMessage, setCheckoutMessage] = useState("");
   const [checkoutNotice, setCheckoutNotice] = useState<{
     message: string;
@@ -834,6 +848,62 @@ export function StorefrontShell() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!customerSession) {
+      setAccountActivity(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadAccountActivity() {
+      try {
+        const response = await fetch("/api/storefront/account", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("No se pudo cargar la actividad de cuenta.");
+        }
+
+        const payload = (await response.json()) as {
+          orders?: AccountActivityOrder[];
+        };
+        const activeOrders = (payload.orders ?? []).filter(
+          (order) => order.status !== "entregado",
+        );
+        const needsAttention = activeOrders.some((order) => {
+          const hasArt = order.files?.some(
+            (file) => file.attachment_type === "arte_cliente",
+          );
+
+          return (
+            !hasArt ||
+            order.payment_review_status === "sin_pago" ||
+            order.payment_review_status === "rechazado"
+          );
+        });
+
+        if (isMounted) {
+          setAccountActivity({
+            activeCount: activeOrders.length,
+            needsAttention,
+          });
+        }
+      } catch {
+        if (isMounted) {
+          setAccountActivity(null);
+        }
+      }
+    }
+
+    void loadAccountActivity();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [customerSession]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -1195,6 +1265,7 @@ export function StorefrontShell() {
         onSearchQueryChange={handleSearchQueryChange}
         hasActiveSearch={isCatalogVisible}
         isAccountActive={accountOpen}
+        accountActivity={accountActivity ?? undefined}
         onAccountClick={() => {
           setAccountOpen((current) => !current);
           setActivePanel(null);

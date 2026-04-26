@@ -18,6 +18,7 @@ import {
 import { storefrontProducts, type StorefrontProduct } from "@/app/storefront-data";
 import { StorefrontFooter } from "@/app/storefront-footer";
 import { StorefrontHeader } from "@/app/storefront-header";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 type StorefrontAuthShellProps = {
   hasPublicAuth: boolean;
@@ -29,6 +30,19 @@ type StorefrontAuthShellProps = {
 };
 
 type AuthCommercePanel = "wishlist" | "cart" | null;
+
+type AccountActivity = {
+  activeCount: number;
+  needsAttention: boolean;
+};
+
+type AccountActivityOrder = {
+  status: string;
+  payment_review_status: string;
+  files?: Array<{
+    attachment_type: string;
+  }>;
+};
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-VE", {
@@ -231,6 +245,7 @@ export function StorefrontAuthShell({
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => new Set());
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [storageReady, setStorageReady] = useState(false);
+  const [accountActivity, setAccountActivity] = useState<AccountActivity | null>(null);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -263,6 +278,80 @@ export function StorefrontAuthShell({
       JSON.stringify(serializeCartItems(cartItems)),
     );
   }, [cartItems, storageReady]);
+
+  useEffect(() => {
+    if (!hasPublicAuth) {
+      return;
+    }
+
+    let isMounted = true;
+    const supabase = createBrowserSupabaseClient();
+
+    async function loadAccountActivity() {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          if (isMounted) {
+            setAccountActivity(null);
+          }
+          return;
+        }
+
+        const response = await fetch("/api/storefront/account", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("No se pudo cargar la actividad de cuenta.");
+        }
+
+        const payload = (await response.json()) as {
+          orders?: AccountActivityOrder[];
+        };
+        const activeOrders = (payload.orders ?? []).filter(
+          (order) => order.status !== "entregado",
+        );
+        const needsAttention = activeOrders.some((order) => {
+          const hasArt = order.files?.some(
+            (file) => file.attachment_type === "arte_cliente",
+          );
+
+          return (
+            !hasArt ||
+            order.payment_review_status === "sin_pago" ||
+            order.payment_review_status === "rechazado"
+          );
+        });
+
+        if (isMounted) {
+          setAccountActivity({
+            activeCount: activeOrders.length,
+            needsAttention,
+          });
+        }
+      } catch {
+        if (isMounted) {
+          setAccountActivity(null);
+        }
+      }
+    }
+
+    void loadAccountActivity();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      void loadAccountActivity();
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [hasPublicAuth]);
 
   const wishlistProducts = useMemo(
     () => storefrontProducts.filter((product) => wishlistIds.has(product.id)),
@@ -312,6 +401,7 @@ export function StorefrontAuthShell({
         onSearchQueryChange={handleSearchQueryChange}
         hasActiveSearch={false}
         isAccountActive={accountOpen}
+        accountActivity={accountActivity ?? undefined}
         onAccountClick={() => {
           setAccountOpen((current) => !current);
           setActivePanel(null);

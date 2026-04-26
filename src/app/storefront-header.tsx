@@ -40,6 +40,10 @@ type StorefrontHeaderProps = {
   onSearchQueryChange: (value: string) => void;
   hasActiveSearch: boolean;
   isAccountActive: boolean;
+  accountActivity?: {
+    activeCount: number;
+    needsAttention: boolean;
+  };
   onAccountClick: () => void;
   wishlistCount: number;
   cartCount: number;
@@ -54,6 +58,7 @@ export function StorefrontHeader({
   onSearchQueryChange,
   hasActiveSearch,
   isAccountActive,
+  accountActivity,
   onAccountClick,
   wishlistCount,
   cartCount,
@@ -66,6 +71,10 @@ export function StorefrontHeader({
   const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
   const categoryAreaRef = useRef<HTMLDivElement | null>(null);
   const categoryPanelRef = useRef<HTMLDivElement | null>(null);
+  const hasAccountActivity = Boolean(accountActivity && accountActivity.activeCount > 0);
+  const accountIndicatorClass = accountActivity?.needsAttention
+    ? "bg-[#ffd45f] text-slate-950"
+    : "bg-blue-500 text-white";
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -137,9 +146,13 @@ export function StorefrontHeader({
                 onClick={onAccountClick}
                 aria-label="Mi cuenta"
                 data-account-trigger="true"
-                className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border transition ${
+                className={`relative inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border transition ${
                   isAccountActive
                     ? "border-slate-950 bg-slate-950 text-white"
+                    : accountActivity?.needsAttention
+                      ? "border-amber-300 bg-amber-50 text-slate-950 shadow-[0_0_0_4px_rgba(253,224,71,0.18)]"
+                      : hasAccountActivity
+                        ? "border-blue-200 bg-blue-50 text-blue-700"
                     : "border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                 }`}
               >
@@ -156,6 +169,11 @@ export function StorefrontHeader({
                   <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
                   <path d="M5 20a7 7 0 0 1 14 0" />
                 </svg>
+                {hasAccountActivity ? (
+                  <span className={`absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.66rem] font-black ${accountIndicatorClass} ${accountActivity?.needsAttention ? "animate-pulse" : ""}`}>
+                    {accountActivity?.activeCount}
+                  </span>
+                ) : null}
               </button>
               <button
                 type="button"
@@ -439,6 +457,10 @@ export function StorefrontHeader({
                 className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
                   isAccountActive
                     ? "border-slate-950 bg-slate-950 text-white"
+                    : accountActivity?.needsAttention
+                      ? "border-amber-300 bg-amber-50 text-slate-950 shadow-[0_0_0_4px_rgba(253,224,71,0.14)]"
+                      : hasAccountActivity
+                        ? "border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-300 hover:bg-blue-100"
                     : "border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                 }`}
               >
@@ -456,6 +478,13 @@ export function StorefrontHeader({
                   <path d="M5 20a7 7 0 0 1 14 0" />
                 </svg>
                 Mi cuenta
+                {hasAccountActivity ? (
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-black ${accountIndicatorClass} ${accountActivity?.needsAttention ? "animate-pulse" : ""}`}>
+                    {accountActivity?.needsAttention
+                      ? "Revisar"
+                      : `${accountActivity?.activeCount} en proceso`}
+                  </span>
+                ) : null}
               </button>
               <button
                 type="button"
