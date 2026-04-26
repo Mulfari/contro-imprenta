@@ -638,7 +638,6 @@ function CustomerMiniOrderProgress({ order }: { order: CustomerOrder }) {
 function CustomerAccountDropdownSummary({
   displayName,
   email,
-  profile,
   onClose,
   onSignOut,
   isSigningOut,
@@ -647,7 +646,6 @@ function CustomerAccountDropdownSummary({
 }: {
   displayName: string;
   email: string | null | undefined;
-  profile: CustomerProfile | null;
   onClose?: () => void;
   onSignOut: () => void;
   isSigningOut: boolean;
@@ -656,7 +654,6 @@ function CustomerAccountDropdownSummary({
 }) {
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
-  const [contactOpen, setContactOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -693,20 +690,6 @@ function CustomerAccountDropdownSummary({
 
   const activeOrders = orders.filter((order) => order.status !== "entregado");
   const quickOrders = activeOrders.slice(0, 2);
-  const pendingPaymentOrders = activeOrders.filter(
-    (order) => order.payment_review_status === "sin_pago" || order.payment_review_status === "rechazado",
-  );
-  const missingArtOrders = activeOrders.filter(
-    (order) => getArtFiles(order).length === 0,
-  );
-  const attentionMessage =
-    missingArtOrders.length > 0
-      ? `${missingArtOrders.length} pedido${missingArtOrders.length === 1 ? "" : "s"} necesita${missingArtOrders.length === 1 ? "" : "n"} arte.`
-      : pendingPaymentOrders.length > 0
-        ? `${pendingPaymentOrders.length} pedido${pendingPaymentOrders.length === 1 ? "" : "s"} pendiente${pendingPaymentOrders.length === 1 ? "" : "s"} de pago.`
-        : activeOrders.length > 0
-          ? "Tus pedidos activos estan en seguimiento."
-          : "No tienes pedidos activos.";
 
   return (
     <div className="p-4 sm:p-5">
@@ -748,28 +731,16 @@ function CustomerAccountDropdownSummary({
         </div>
       ) : null}
 
-      <div className="mt-4 rounded-[1.35rem] border border-slate-200 bg-slate-50 p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Estado actual
-            </p>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
-              {attentionMessage}
-            </p>
-          </div>
-          <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-950 ring-1 ring-slate-200">
-            {activeOrders.length} activo{activeOrders.length === 1 ? "" : "s"}
-          </span>
-        </div>
-      </div>
-
-      <section className="mt-4 rounded-[1.35rem] border border-slate-200 bg-white p-4">
+      <section className="mt-4 rounded-[1.45rem] border border-slate-200 bg-slate-50 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-black text-slate-950">Vista rapida</p>
-            <p className="mt-1 text-xs leading-5 text-slate-500">
-              Pedidos activos y pendientes principales.
+            <p className="text-sm font-black text-slate-950">
+              Pedidos en curso
+            </p>
+            <p className="mt-1 text-xs font-semibold text-slate-500">
+              {activeOrders.length > 0
+                ? `${activeOrders.length} pedido${activeOrders.length === 1 ? "" : "s"} activo${activeOrders.length === 1 ? "" : "s"}`
+                : "Sin pedidos activos"}
             </p>
           </div>
           <Link
@@ -777,7 +748,7 @@ function CustomerAccountDropdownSummary({
             onClick={onClose}
             className="shrink-0 rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"
           >
-            Ver todo
+            Dashboard
           </Link>
         </div>
 
@@ -806,46 +777,16 @@ function CustomerAccountDropdownSummary({
         </div>
       </section>
 
-      <details
-        className="mt-3 rounded-[1.25rem] border border-slate-200 bg-slate-50"
-        open={contactOpen}
-        onToggle={(event) => setContactOpen(event.currentTarget.open)}
-      >
-        <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-700">
-          Datos de contacto
-        </summary>
-        <div className="space-y-2 border-t border-slate-200 px-4 py-3 text-sm">
-          <div className="flex justify-between gap-3">
-            <span className="text-slate-500">Nombre</span>
-            <span className="text-right font-semibold text-slate-950">
-              {profile?.full_name?.trim() || "Pendiente"}
-            </span>
-          </div>
-          <div className="flex justify-between gap-3">
-            <span className="text-slate-500">Correo</span>
-            <span className="min-w-0 truncate text-right font-semibold text-slate-950">
-              {email || "Pendiente"}
-            </span>
-          </div>
-          <div className="flex justify-between gap-3">
-            <span className="text-slate-500">Telefono</span>
-            <span className="text-right font-semibold text-slate-950">
-              {profile?.phone?.trim() || "Pendiente"}
-            </span>
-          </div>
-        </div>
-      </details>
-
       <div className="mt-4 grid gap-2">
         <Link
           href="/mi-cuenta"
           onClick={onClose}
           className="inline-flex w-full items-center justify-center rounded-2xl bg-[#ffd45f] px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
         >
-          Ver mis pedidos, pagos y artes
+          Ver dashboard
         </Link>
         <p className="px-2 text-center text-xs leading-5 text-slate-400">
-          Entra al panel completo para subir arte, revisar pagos y ver el historial.
+          Entra para revisar pedidos, subir arte y consultar pagos.
         </p>
         <button
           type="button"
@@ -1727,7 +1668,6 @@ export function CustomerAccountClient({
             <CustomerAccountDropdownSummary
               displayName={displayName}
               email={session.user.email}
-              profile={profile}
               onClose={onClose}
               onSignOut={handleSignOut}
               isSigningOut={isSubmitting}
