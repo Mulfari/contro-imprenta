@@ -685,7 +685,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
       window.localStorage.removeItem(cartStorageKey);
       setCartItems([]);
       router.push(
-        `/?account=dashboard&tone=success&message=${encodeURIComponent(
+        `/mi-cuenta?tone=success&message=${encodeURIComponent(
           payload.message || "Pedido enviado. Revisaremos el pago y el arte.",
         )}`,
       );

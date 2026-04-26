@@ -597,7 +597,7 @@ function CustomerMiniOrderProgress({ order }: { order: CustomerOrder }) {
 
   return (
     <Link
-      href="/?account=dashboard"
+      href="/mi-cuenta"
       className="block rounded-[1.2rem] border border-slate-200 bg-slate-50 p-3 transition hover:border-slate-300 hover:bg-white"
     >
       <div className="flex items-start gap-3">
@@ -744,7 +744,7 @@ function CustomerAccountDropdownSummary({
             </p>
           </div>
           <Link
-            href="/?account=dashboard"
+            href="/mi-cuenta"
             onClick={onClose}
             className="shrink-0 rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"
           >
@@ -779,7 +779,7 @@ function CustomerAccountDropdownSummary({
 
       <div className="mt-4 grid gap-2">
         <Link
-          href="/?account=dashboard"
+          href="/mi-cuenta"
           onClick={onClose}
           className="inline-flex w-full items-center justify-center rounded-2xl bg-[#ffd45f] px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
         >
@@ -1892,7 +1892,7 @@ export function CustomerAccountClient({
                         <p className="text-center text-sm text-slate-500">
                           Ya tienes cuenta?{" "}
                           <Link
-                            href="/?account=open"
+                            href="/mi-cuenta"
                             className="font-semibold text-slate-900 transition hover:text-slate-700"
                           >
                             Iniciar sesion
