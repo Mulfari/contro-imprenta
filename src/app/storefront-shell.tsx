@@ -8,6 +8,7 @@ import type { Session } from "@supabase/supabase-js";
 import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import {
   cartStorageKey,
+  catalogQueryStorageKey,
   getCartKey,
   getDefaultOptions,
   getProductById,
@@ -986,6 +987,26 @@ export function StorefrontShell() {
     }, 0);
   };
 
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (window.location.hash !== "#catalogo") {
+        return;
+      }
+
+      const storedQuery = window.sessionStorage.getItem(catalogQueryStorageKey) ?? "";
+      window.sessionStorage.removeItem(catalogQueryStorageKey);
+
+      if (storedQuery.trim()) {
+        openCatalogWithQuery(storedQuery.trim());
+        return;
+      }
+
+      openCatalog();
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, []);
+
   const closeCatalogForHomeSection = () => {
     setCatalogOpen(false);
     setActivePanel(null);
@@ -1189,7 +1210,7 @@ export function StorefrontShell() {
           setAccountOpen(false);
         }}
         onCatalogClick={openCatalog}
-        onSectionNavigate={closeCatalogForHomeSection}
+        onSectionNavigate={() => closeCatalogForHomeSection()}
       />
 
       {accountOpen ? (

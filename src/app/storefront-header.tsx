@@ -46,7 +46,7 @@ type StorefrontHeaderProps = {
   onWishlistClick: () => void;
   onCartClick: () => void;
   onCatalogClick: () => void;
-  onSectionNavigate: () => void;
+  onSectionNavigate: (href: string) => void;
 };
 
 export function StorefrontHeader({
@@ -92,7 +92,7 @@ export function StorefrontHeader({
     const sectionId = href.slice(1);
 
     onSearchQueryChange("");
-    onSectionNavigate();
+    onSectionNavigate(href);
     setCategoryOpen(false);
     setActiveCategoryIndex(null);
     window.history.pushState(null, "", href);

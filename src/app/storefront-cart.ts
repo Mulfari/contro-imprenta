@@ -15,6 +15,7 @@ export type StoredCartItem = {
 
 export const cartStorageKey = "express-printer-cart";
 export const wishlistStorageKey = "express-printer-wishlist";
+export const catalogQueryStorageKey = "express-printer-catalog-query";
 
 export function getDefaultOptions(product: StorefrontProduct) {
   return Object.fromEntries(

@@ -435,12 +435,20 @@ function CustomerAccountDropdownSummary({
 
   const activeOrders = orders.filter((order) => order.status !== "entregado");
   const quickOrders = activeOrders.slice(0, 2);
-  const pendingPayments = activeOrders.filter(
+  const pendingPaymentOrders = activeOrders.filter(
     (order) => order.payment_review_status === "sin_pago" || order.payment_review_status === "rechazado",
-  ).length;
-  const missingArt = activeOrders.filter(
+  );
+  const missingArtOrders = activeOrders.filter(
     (order) => !order.files.some((file) => file.attachment_type === "arte_cliente"),
-  ).length;
+  );
+  const attentionMessage =
+    missingArtOrders.length > 0
+      ? `${missingArtOrders.length} pedido${missingArtOrders.length === 1 ? "" : "s"} necesita${missingArtOrders.length === 1 ? "" : "n"} arte.`
+      : pendingPaymentOrders.length > 0
+        ? `${pendingPaymentOrders.length} pedido${pendingPaymentOrders.length === 1 ? "" : "s"} pendiente${pendingPaymentOrders.length === 1 ? "" : "s"} de pago.`
+        : activeOrders.length > 0
+          ? "Tus pedidos activos estan en seguimiento."
+          : "No tienes pedidos activos.";
 
   return (
     <div className="p-4 sm:p-5">
@@ -482,18 +490,19 @@ function CustomerAccountDropdownSummary({
         </div>
       ) : null}
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-[10px] font-semibold uppercase text-slate-400">Activos</p>
-          <p className="mt-1 text-xl font-black text-slate-950">{activeOrders.length}</p>
-        </div>
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-3">
-          <p className="text-[10px] font-semibold uppercase text-amber-600">Pago</p>
-          <p className="mt-1 text-xl font-black text-amber-900">{pendingPayments}</p>
-        </div>
-        <div className="rounded-2xl border border-blue-200 bg-blue-50 px-3 py-3">
-          <p className="text-[10px] font-semibold uppercase text-blue-600">Arte</p>
-          <p className="mt-1 text-xl font-black text-blue-900">{missingArt}</p>
+      <div className="mt-4 rounded-[1.35rem] border border-slate-200 bg-slate-50 p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Estado actual
+            </p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
+              {attentionMessage}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-950 ring-1 ring-slate-200">
+            {activeOrders.length} activo{activeOrders.length === 1 ? "" : "s"}
+          </span>
         </div>
       </div>
 
