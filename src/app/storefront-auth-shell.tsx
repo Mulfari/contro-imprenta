@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import {
@@ -246,6 +246,7 @@ export function StorefrontAuthShell({
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [storageReady, setStorageReady] = useState(false);
   const [accountActivity, setAccountActivity] = useState<AccountActivity | null>(null);
+  const accountDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -353,6 +354,35 @@ export function StorefrontAuthShell({
     };
   }, [hasPublicAuth]);
 
+  useEffect(() => {
+    if (!accountOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+
+      if (!target) {
+        return;
+      }
+
+      if (
+        accountDropdownRef.current?.contains(target) ||
+        target.closest("[data-account-trigger='true']")
+      ) {
+        return;
+      }
+
+      setAccountOpen(false);
+    };
+
+    window.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      window.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [accountOpen]);
+
   const wishlistProducts = useMemo(
     () => storefrontProducts.filter((product) => wishlistIds.has(product.id)),
     [wishlistIds],
@@ -426,7 +456,10 @@ export function StorefrontAuthShell({
 
       {accountOpen ? (
         <div className="pointer-events-none absolute inset-x-0 top-[7.35rem] z-[70] px-4 sm:px-6 lg:px-8 2xl:px-10">
-          <div className="mx-auto flex w-full max-w-[112rem] justify-end">
+          <div
+            ref={accountDropdownRef}
+            className="mx-auto flex w-full max-w-[112rem] justify-end"
+          >
             <CustomerAccountClient
               hasPublicAuth={hasPublicAuth}
               onClose={() => setAccountOpen(false)}

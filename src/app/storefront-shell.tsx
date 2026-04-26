@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
@@ -798,10 +798,12 @@ function CommerceDrawer({
 
 export function StorefrontShell() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [accountDashboardOpen, setAccountDashboardOpen] = useState(false);
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => new Set());
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [activePanel, setActivePanel] = useState<CommercePanel>(null);
@@ -820,6 +822,42 @@ export function StorefrontShell() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const accountDropdownRef = useRef<HTMLDivElement | null>(null);
   const toastIdRef = useRef(0);
+
+  useEffect(() => {
+    const accountTarget = searchParams.get("account");
+    const message = searchParams.get("message");
+    const tone = searchParams.get("tone") === "error" ? "error" : "success";
+
+    if (message) {
+      const notice = {
+        message,
+        tone: tone as "error" | "success",
+      };
+
+      setCheckoutNotice(notice);
+      showToast(message, tone);
+    }
+
+    if (accountTarget === "dashboard") {
+      setAccountDashboardOpen(true);
+      setAccountOpen(false);
+      setActivePanel(null);
+      setCatalogOpen(false);
+      setSelectedProduct(null);
+      setMobileFilterOpen(false);
+      return;
+    }
+
+    if (accountTarget === "open") {
+      setAccountOpen(true);
+      setAccountDashboardOpen(false);
+      setActivePanel(null);
+      setMobileFilterOpen(false);
+      return;
+    }
+
+    setAccountDashboardOpen(false);
+  }, [searchParams]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -1028,6 +1066,7 @@ export function StorefrontShell() {
     setDebouncedQuery("");
     setCatalogOpen(true);
     setCatalogLoading(true);
+    setAccountDashboardOpen(false);
     setAccountOpen(false);
     setActivePanel(null);
     setMobileFilterOpen(false);
@@ -1045,6 +1084,7 @@ export function StorefrontShell() {
     setDebouncedQuery(query);
     setCatalogOpen(true);
     setCatalogLoading(true);
+    setAccountDashboardOpen(false);
     setAccountOpen(false);
     setActivePanel(null);
     setMobileFilterOpen(false);
@@ -1082,6 +1122,7 @@ export function StorefrontShell() {
     setActivePanel(null);
     setSelectedProduct(null);
     setMobileFilterOpen(false);
+    setAccountDashboardOpen(false);
   };
 
   const handleSearchQueryChange = (value: string) => {
@@ -1090,6 +1131,7 @@ export function StorefrontShell() {
     if (value.trim()) {
       setCatalogOpen(true);
       setCatalogLoading(true);
+      setAccountDashboardOpen(false);
       setAccountOpen(false);
     }
   };
@@ -1209,6 +1251,7 @@ export function StorefrontShell() {
     setDebouncedQuery("");
     setCatalogOpen(true);
     setCatalogLoading(true);
+    setAccountDashboardOpen(false);
     setMobileFilterOpen(false);
     setActivePanel(null);
     setAccountOpen(false);
@@ -1226,6 +1269,7 @@ export function StorefrontShell() {
     setDebouncedQuery(query);
     setCatalogOpen(true);
     setCatalogLoading(true);
+    setAccountDashboardOpen(false);
     setMobileFilterOpen(false);
     setActivePanel(null);
     setAccountOpen(false);
@@ -1241,6 +1285,7 @@ export function StorefrontShell() {
   const openMobileFilters = () => {
     setCatalogOpen(true);
     setCatalogLoading(true);
+    setAccountDashboardOpen(false);
     setActivePanel(null);
     setAccountOpen(false);
     setMobileFilterOpen(true);
@@ -1302,7 +1347,18 @@ export function StorefrontShell() {
         </div>
       ) : null}
 
-      {isCatalogVisible ? (
+      {accountDashboardOpen ? (
+        <>
+          <CustomerAccountClient
+            hasPublicAuth={publicAuthEnabled}
+            initialMode="login"
+            showModeSwitch={false}
+            variant="page"
+            initialNotice={checkoutNotice}
+          />
+          <StorefrontFooter />
+        </>
+      ) : isCatalogVisible ? (
         <>
           <section id="catalogo" className="catalog-enter mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 2xl:px-10">
             <div className="grid gap-4 xl:grid-cols-[300px_1fr] xl:gap-6">
