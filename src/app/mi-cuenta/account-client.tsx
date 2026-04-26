@@ -377,6 +377,253 @@ function CustomerDashboardSkeleton({ compact = false }: { compact?: boolean }) {
   );
 }
 
+function CustomerAccountDropdownSummary({
+  displayName,
+  email,
+  profile,
+  onClose,
+  onSignOut,
+  isSigningOut,
+  message,
+  messageTone,
+}: {
+  displayName: string;
+  email: string | null | undefined;
+  profile: CustomerProfile | null;
+  onClose?: () => void;
+  onSignOut: () => void;
+  isSigningOut: boolean;
+  message: string;
+  messageTone: "error" | "success";
+}) {
+  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const [contactOpen, setContactOpen] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadQuickOrders() {
+      try {
+        const response = await fetch("/api/storefront/account", {
+          cache: "no-store",
+        });
+        const payload = (await response.json()) as {
+          orders?: CustomerOrder[];
+        };
+
+        if (isMounted) {
+          setOrders(payload.orders ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setOrders([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingOrders(false);
+        }
+      }
+    }
+
+    void loadQuickOrders();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const activeOrders = orders.filter((order) => order.status !== "entregado");
+  const quickOrders = activeOrders.slice(0, 2);
+  const pendingPayments = activeOrders.filter(
+    (order) => order.payment_review_status === "sin_pago" || order.payment_review_status === "rechazado",
+  ).length;
+  const missingArt = activeOrders.filter(
+    (order) => !order.files.some((file) => file.attachment_type === "arte_cliente"),
+  ).length;
+
+  return (
+    <div className="p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-400">
+            Mi cuenta
+          </p>
+          <h2 className="mt-2 truncate text-xl font-black text-slate-950">
+            {displayName}
+          </h2>
+          <p className="mt-1 truncate text-sm text-slate-500">{email}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+          aria-label="Cerrar mi cuenta"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {message ? (
+        <div className="mt-4">
+          <MessageBox message={message} tone={messageTone} />
+        </div>
+      ) : null}
+
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
+          <p className="text-[10px] font-semibold uppercase text-slate-400">Activos</p>
+          <p className="mt-1 text-xl font-black text-slate-950">{activeOrders.length}</p>
+        </div>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-3">
+          <p className="text-[10px] font-semibold uppercase text-amber-600">Pago</p>
+          <p className="mt-1 text-xl font-black text-amber-900">{pendingPayments}</p>
+        </div>
+        <div className="rounded-2xl border border-blue-200 bg-blue-50 px-3 py-3">
+          <p className="text-[10px] font-semibold uppercase text-blue-600">Arte</p>
+          <p className="mt-1 text-xl font-black text-blue-900">{missingArt}</p>
+        </div>
+      </div>
+
+      <section className="mt-4 rounded-[1.35rem] border border-slate-200 bg-white p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-black text-slate-950">Vista rapida</p>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Pedidos activos y pendientes principales.
+            </p>
+          </div>
+          <Link
+            href="/mi-cuenta"
+            onClick={onClose}
+            className="shrink-0 rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"
+          >
+            Ver todo
+          </Link>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          {isLoadingOrders ? (
+            [0, 1].map((item) => (
+              <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <SkeletonBlock className="h-3 w-24" />
+                <SkeletonBlock className="mt-3 h-4 w-40" />
+              </div>
+            ))
+          ) : quickOrders.length > 0 ? (
+            quickOrders.map((order) => {
+              const hasArt = order.files.some((file) => file.attachment_type === "arte_cliente");
+              const needsAttention =
+                !hasArt ||
+                order.payment_review_status === "sin_pago" ||
+                order.payment_review_status === "rechazado";
+
+              return (
+                <Link
+                  key={order.id}
+                  href="/mi-cuenta"
+                  onClick={onClose}
+                  className="block rounded-2xl border border-slate-200 bg-slate-50 p-3 transition hover:border-slate-300 hover:bg-white"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-black text-slate-950">
+                        {order.title}
+                      </p>
+                      <p className="mt-1 text-xs font-semibold text-slate-400">
+                        {order.order_number ?? "Pedido web"}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-black ${
+                        needsAttention
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-emerald-100 text-emerald-800"
+                      }`}
+                    >
+                      {needsAttention ? "Pendiente" : "En curso"}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center">
+              <p className="text-sm font-semibold text-slate-950">Sin pedidos activos</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Cuando prepares un pedido aparecera aqui.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <details
+        className="mt-3 rounded-[1.25rem] border border-slate-200 bg-slate-50"
+        open={contactOpen}
+        onToggle={(event) => setContactOpen(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-700">
+          Datos de contacto
+        </summary>
+        <div className="space-y-2 border-t border-slate-200 px-4 py-3 text-sm">
+          <div className="flex justify-between gap-3">
+            <span className="text-slate-500">Nombre</span>
+            <span className="text-right font-semibold text-slate-950">
+              {profile?.full_name?.trim() || "Pendiente"}
+            </span>
+          </div>
+          <div className="flex justify-between gap-3">
+            <span className="text-slate-500">Correo</span>
+            <span className="min-w-0 truncate text-right font-semibold text-slate-950">
+              {email || "Pendiente"}
+            </span>
+          </div>
+          <div className="flex justify-between gap-3">
+            <span className="text-slate-500">Telefono</span>
+            <span className="text-right font-semibold text-slate-950">
+              {profile?.phone?.trim() || "Pendiente"}
+            </span>
+          </div>
+        </div>
+      </details>
+
+      <div className="mt-4 grid gap-2">
+        <Link
+          href="/mi-cuenta"
+          onClick={onClose}
+          className="inline-flex w-full items-center justify-center rounded-2xl bg-[#ffd45f] px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+        >
+          Ver mis pedidos, pagos y artes
+        </Link>
+        <p className="px-2 text-center text-xs leading-5 text-slate-400">
+          Entra al panel completo para subir arte, revisar pagos y ver el historial.
+        </p>
+        <button
+          type="button"
+          onClick={onSignOut}
+          disabled={isSigningOut}
+          className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSigningOut ? "Cerrando..." : "Cerrar sesion"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CustomerDashboard({
   displayName,
   email,
@@ -1120,97 +1367,16 @@ export function CustomerAccountClient({
           ) : isLoading ? (
             <CustomerDashboardSkeleton compact />
           ) : session ? (
-            <div className="space-y-4 p-5 sm:p-6">
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                  Mi cuenta
-                </p>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
-                >
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M18 6 6 18" />
-                    <path d="m6 6 12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="rounded-[1.45rem] border border-slate-200 bg-slate-50/70 p-5">
-                <div className="space-y-3">
-                  <div>
-                    <h2 className="text-xl font-semibold text-slate-950 sm:text-[1.7rem]">
-                      {displayName}
-                    </h2>
-                    <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
-                  </div>
-                </div>
-              </div>
-
-              {message ? <MessageBox message={message} tone={messageTone} /> : null}
-
-              <div className="grid gap-3">
-                <div className="rounded-[1.45rem] border border-slate-200 bg-white p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-400">
-                    Datos de contacto
-                  </p>
-                  <div className="mt-4 space-y-3">
-                    <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                        Nombre
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-slate-900">
-                        {profile?.full_name?.trim() || "Pendiente"}
-                      </p>
-                    </div>
-                    <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                        Correo
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-slate-900">
-                        {session.user.email}
-                      </p>
-                    </div>
-                    <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                        Telefono
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-slate-900">
-                        {profile?.phone?.trim() || "Pendiente"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {isDropdown ? (
-                  <Link
-                    href="/mi-cuenta"
-                    className="inline-flex w-full items-center justify-center rounded-2xl bg-[#ffd45f] px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
-                  >
-                    Ver mis pedidos, pagos y artes
-                  </Link>
-                ) : null}
-
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  disabled={isSubmitting}
-                  className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Cerrar sesion
-                </button>
-              </div>
-            </div>
+            <CustomerAccountDropdownSummary
+              displayName={displayName}
+              email={session.user.email}
+              profile={profile}
+              onClose={onClose}
+              onSignOut={handleSignOut}
+              isSigningOut={isSubmitting}
+              message={message}
+              messageTone={messageTone}
+            />
           ) : (
             <div className="space-y-4 p-5 sm:p-6">
               <div className="flex items-center justify-between gap-4">
