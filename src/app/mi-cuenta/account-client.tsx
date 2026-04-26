@@ -19,6 +19,8 @@ type CustomerOrderFile = {
   order_id: string;
   attachment_type: "arte_cliente" | "prueba_aprobada" | "imagen_referencia" | "comprobante_pago";
   file_name: string;
+  file_type: string | null;
+  file_size: number | null;
   signed_url: string | null;
   created_at: string;
 };
@@ -172,9 +174,216 @@ type CustomerDashboardProps = {
   isSigningOut: boolean;
 };
 
-function getOrderProgress(status: CustomerOrder["status"]) {
-  const currentIndex = orderStatusSteps.indexOf(status);
-  return Math.round(((currentIndex + 1) / orderStatusSteps.length) * 100);
+type CustomerOrderView = "active" | "past";
+
+function getArtFiles(order: CustomerOrder) {
+  return order.files.filter((file) => file.attachment_type === "arte_cliente");
+}
+
+function getPrimaryArtFile(order: CustomerOrder) {
+  return getArtFiles(order)[0] ?? null;
+}
+
+function isImageFile(file: CustomerOrderFile | null) {
+  if (!file) {
+    return false;
+  }
+
+  const type = file.file_type?.toLowerCase() ?? "";
+  const name = file.file_name.toLowerCase();
+
+  return (
+    type.startsWith("image/") ||
+    name.endsWith(".png") ||
+    name.endsWith(".jpg") ||
+    name.endsWith(".jpeg") ||
+    name.endsWith(".webp") ||
+    name.endsWith(".gif")
+  );
+}
+
+function getOrderActionLabel(order: CustomerOrder) {
+  const hasArt = getArtFiles(order).length > 0;
+
+  if (!hasArt) {
+    return "Falta arte";
+  }
+
+  if (order.payment_review_status === "sin_pago") {
+    return "Falta pago";
+  }
+
+  if (order.payment_review_status === "rechazado") {
+    return "Revisar pago";
+  }
+
+  if (order.payment_review_status === "por_validar") {
+    return "Pago en revision";
+  }
+
+  if (order.confirmation_status === "pendiente") {
+    return "Por confirmar";
+  }
+
+  if (order.status === "entregado") {
+    return "Entregado";
+  }
+
+  return orderStatusLabels[order.status];
+}
+
+function CustomerArtPreview({
+  file,
+  size = "md",
+  interactive = true,
+}: {
+  file: CustomerOrderFile | null;
+  size?: "sm" | "md" | "lg";
+  interactive?: boolean;
+}) {
+  const sizeClass =
+    size === "sm"
+      ? "h-14 w-14 rounded-2xl"
+      : size === "lg"
+        ? "h-52 w-full rounded-[1.45rem]"
+        : "h-20 w-20 rounded-[1.35rem]";
+  const iconClass = size === "lg" ? "h-8 w-8" : "h-5 w-5";
+
+  if (file && file.signed_url && isImageFile(file)) {
+    const preview = (
+      <>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={file.signed_url}
+          alt={file.file_name}
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+        />
+        <span className="absolute inset-x-0 bottom-0 bg-slate-950/70 px-2 py-1 text-[10px] font-semibold text-white">
+          Arte
+        </span>
+      </>
+    );
+
+    return interactive ? (
+      <a
+        href={file.signed_url}
+        target="_blank"
+        rel="noreferrer"
+        className={`${sizeClass} group relative block shrink-0 overflow-hidden border border-slate-200 bg-slate-100`}
+        title={file.file_name}
+      >
+        {preview}
+      </a>
+    ) : (
+      <div
+        className={`${sizeClass} group relative block shrink-0 overflow-hidden border border-slate-200 bg-slate-100`}
+        title={file.file_name}
+      >
+        {preview}
+      </div>
+    );
+  }
+
+  if (file) {
+    const preview = (
+      <>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className={`${iconClass} text-slate-400`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+          <path d="M14 2v6h6" />
+          <path d="M8 13h8" />
+          <path d="M8 17h5" />
+        </svg>
+        {size === "lg" ? (
+          <span className="mt-3 max-w-[12rem] truncate text-xs font-semibold">
+            {file.file_name}
+          </span>
+        ) : null}
+      </>
+    );
+
+    return interactive ? (
+      <a
+        href={file.signed_url ?? "#"}
+        target="_blank"
+        rel="noreferrer"
+        className={`${sizeClass} flex shrink-0 flex-col items-center justify-center border border-slate-200 bg-white text-center text-slate-500 transition hover:border-slate-300`}
+        title={file.file_name}
+      >
+        {preview}
+      </a>
+    ) : (
+      <div
+        className={`${sizeClass} flex shrink-0 flex-col items-center justify-center border border-slate-200 bg-white text-center text-slate-500`}
+        title={file.file_name}
+      >
+        {preview}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${sizeClass} flex shrink-0 flex-col items-center justify-center border border-dashed border-slate-300 bg-slate-50 text-center text-slate-400`}
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className={iconClass}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M4 7h16" />
+        <path d="M7 4h10" />
+        <path d="M6 7v13h12V7" />
+        <path d="M10 12h4" />
+      </svg>
+      <span className={`${size === "lg" ? "mt-3 text-sm" : "mt-1 text-[10px]"} font-semibold`}>
+        Sin arte
+      </span>
+    </div>
+  );
+}
+
+function CustomerOrderProgressLine({ order }: { order: CustomerOrder }) {
+  const currentIndex = Math.max(0, orderStatusSteps.indexOf(order.status));
+
+  return (
+    <div className="grid grid-cols-5 items-start gap-1">
+      {orderStatusSteps.map((status, index) => {
+        const isComplete = index <= currentIndex;
+        const isCurrent = index === currentIndex;
+
+        return (
+          <div key={status} className="min-w-0">
+            <div
+              className={`mx-auto h-2 w-full rounded-full ${
+                isComplete ? (isCurrent ? "bg-[#ffd45f]" : "bg-slate-950") : "bg-slate-200"
+              }`}
+            />
+            <p
+              className={`mt-1 truncate text-center text-[9px] font-semibold sm:text-[10px] ${
+                isCurrent ? "text-slate-950" : "text-slate-400"
+              }`}
+            >
+              {orderStatusLabels[status]}
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function getCustomerOrderFlow(order: CustomerOrder, artFiles: CustomerOrderFile[]) {
@@ -378,76 +587,49 @@ function CustomerDashboardSkeleton({ compact = false }: { compact?: boolean }) {
 }
 
 function CustomerMiniOrderProgress({ order }: { order: CustomerOrder }) {
-  const currentIndex = Math.max(0, orderStatusSteps.indexOf(order.status));
-  const hasArt = order.files.some((file) => file.attachment_type === "arte_cliente");
+  const artFile = getPrimaryArtFile(order);
+  const hasArt = Boolean(artFile);
   const needsAction =
     !hasArt ||
     order.payment_review_status === "sin_pago" ||
     order.payment_review_status === "rechazado";
-  const nextAction = !hasArt
-    ? "Subir arte"
-    : order.payment_review_status === "sin_pago"
-      ? "Registrar pago"
-      : order.payment_review_status === "rechazado"
-        ? "Revisar pago"
-        : "En proceso";
+  const nextAction = getOrderActionLabel(order);
 
   return (
     <Link
       href="/mi-cuenta"
       className="block rounded-[1.2rem] border border-slate-200 bg-slate-50 p-3 transition hover:border-slate-300 hover:bg-white"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-black text-slate-950">
-            {order.title}
-          </p>
-          <p className="mt-1 text-xs font-semibold text-slate-400">
-            {order.order_number ?? "Pedido web"}
-          </p>
-        </div>
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${
-            needsAction
-              ? "bg-amber-100 text-amber-800"
-              : "bg-blue-100 text-blue-800"
-          }`}
-        >
-          {nextAction}
-        </span>
-      </div>
+      <div className="flex items-start gap-3">
+        <CustomerArtPreview file={artFile} size="sm" interactive={false} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-black text-slate-950">
+                {order.title}
+              </p>
+              <p className="mt-1 text-xs font-semibold text-slate-400">
+                {order.order_number ?? "Pedido web"}
+              </p>
+            </div>
+            <span
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${
+                needsAction
+                  ? "bg-amber-100 text-amber-800"
+                  : "bg-blue-100 text-blue-800"
+              }`}
+            >
+              {nextAction}
+            </span>
+          </div>
 
-      <div className="mt-4">
-        <div className="grid grid-cols-5 items-center gap-1">
-          {orderStatusSteps.map((status, index) => {
-            const isComplete = index <= currentIndex;
-            const isCurrent = index === currentIndex;
-
-            return (
-              <div key={status} className="min-w-0">
-                <div
-                  className={`mx-auto h-2 w-full rounded-full ${
-                    isComplete
-                      ? isCurrent
-                        ? "bg-[#ffd45f]"
-                        : "bg-slate-950"
-                      : "bg-slate-200"
-                  }`}
-                />
-                <p
-                  className={`mt-1 truncate text-center text-[9px] font-semibold ${
-                    isCurrent ? "text-slate-950" : "text-slate-400"
-                  }`}
-                >
-                  {orderStatusLabels[status]}
-                </p>
-              </div>
-            );
-          })}
+          <div className="mt-4">
+            <CustomerOrderProgressLine order={order} />
+            <p className="mt-3 text-xs font-semibold text-slate-600">
+              Va por {orderStatusLabels[order.status].toLowerCase()}
+            </p>
+          </div>
         </div>
-        <p className="mt-3 text-xs font-semibold text-slate-600">
-          Va por {orderStatusLabels[order.status].toLowerCase()}
-        </p>
       </div>
     </Link>
   );
@@ -515,7 +697,7 @@ function CustomerAccountDropdownSummary({
     (order) => order.payment_review_status === "sin_pago" || order.payment_review_status === "rechazado",
   );
   const missingArtOrders = activeOrders.filter(
-    (order) => !order.files.some((file) => file.attachment_type === "arte_cliente"),
+    (order) => getArtFiles(order).length === 0,
   );
   const attentionMessage =
     missingArtOrders.length > 0
@@ -688,7 +870,10 @@ function CustomerDashboard({
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState("");
+  const [actionTone, setActionTone] = useState<"error" | "success">("success");
   const [activePaymentOrderId, setActivePaymentOrderId] = useState<string | null>(null);
+  const [orderView, setOrderView] = useState<CustomerOrderView>("active");
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   const loadOrders = async () => {
     setIsLoading(true);
@@ -707,7 +892,9 @@ function CustomerDashboard({
       }
 
       setOrders(payload.orders ?? []);
+      setActionTone("success");
     } catch (error) {
+      setActionTone("error");
       setActionMessage(
         error instanceof Error ? error.message : "No se pudieron cargar tus pedidos.",
       );
@@ -719,6 +906,25 @@ function CustomerDashboard({
   useEffect(() => {
     void loadOrders();
   }, []);
+
+  const openOrders = orders.filter((order) => order.status !== "entregado");
+  const pastOrders = orders.filter((order) => order.status === "entregado");
+  const visibleOrders = orderView === "active" ? openOrders : pastOrders;
+  const selectedOrder =
+    visibleOrders.find((order) => order.id === selectedOrderId) ??
+    visibleOrders[0] ??
+    null;
+
+  useEffect(() => {
+    if (visibleOrders.length === 0) {
+      setSelectedOrderId(null);
+      return;
+    }
+
+    if (!selectedOrderId || !visibleOrders.some((order) => order.id === selectedOrderId)) {
+      setSelectedOrderId(visibleOrders[0].id);
+    }
+  }, [selectedOrderId, visibleOrders]);
 
   const uploadArt = async (orderId: string, file: File | null) => {
     if (!file) {
@@ -741,9 +947,11 @@ function CustomerDashboard({
         throw new Error(payload.error || "No se pudo subir el arte.");
       }
 
+      setActionTone("success");
       setActionMessage(payload.message || "Arte cargado.");
       await loadOrders();
     } catch (error) {
+      setActionTone("error");
       setActionMessage(error instanceof Error ? error.message : "No se pudo subir el arte.");
     }
   };
@@ -764,11 +972,13 @@ function CustomerDashboard({
         throw new Error(payload.error || "No se pudo registrar el pago.");
       }
 
+      setActionTone("success");
       setActionMessage(payload.message || "Pago registrado.");
       setActivePaymentOrderId(null);
       form.reset();
       await loadOrders();
     } catch (error) {
+      setActionTone("error");
       setActionMessage(
         error instanceof Error ? error.message : "No se pudo registrar el pago.",
       );
@@ -781,22 +991,36 @@ function CustomerDashboard({
       sum + order.payments.filter((payment) => payment.status === "por_validar").length,
     0,
   );
-  const openOrders = orders.filter((order) => order.status !== "entregado");
   const pendingBalance = openOrders.reduce(
     (sum, order) => sum + Number(order.pending_amount ?? 0),
     0,
   );
   const ordersMissingArt = openOrders.filter(
-    (order) => !order.files.some((file) => file.attachment_type === "arte_cliente"),
+    (order) => getArtFiles(order).length === 0,
   ).length;
 
   if (isLoading) {
     return <CustomerDashboardSkeleton />;
   }
 
+  const selectedArtFiles = selectedOrder ? getArtFiles(selectedOrder) : [];
+  const selectedPaymentFiles =
+    selectedOrder?.files.filter((file) => file.attachment_type === "comprobante_pago") ?? [];
+  const selectedFlow = selectedOrder
+    ? getCustomerOrderFlow(selectedOrder, selectedArtFiles)
+    : null;
+  const selectedFlowClass =
+    selectedFlow?.tone === "rose"
+      ? "border-rose-200 bg-rose-50 text-rose-800"
+      : selectedFlow?.tone === "amber"
+        ? "border-amber-200 bg-amber-50 text-amber-800"
+        : selectedFlow?.tone === "blue"
+          ? "border-blue-200 bg-blue-50 text-blue-800"
+          : "border-emerald-200 bg-emerald-50 text-emerald-800";
+
   return (
     <div className="space-y-6">
-      {actionMessage ? <MessageBox message={actionMessage} tone="success" /> : null}
+      {actionMessage ? <MessageBox message={actionMessage} tone={actionTone} /> : null}
 
       <section className="overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-[0_28px_80px_rgba(15,23,42,0.2)]">
         <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.35fr_0.65fr] lg:p-8">
@@ -817,20 +1041,20 @@ function CustomerDashboard({
               <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
                 {activeOrders} pedido{activeOrders === 1 ? "" : "s"} activo{activeOrders === 1 ? "" : "s"}
               </span>
-              <span className="rounded-full bg-[#ffd45f] px-3 py-1.5 text-slate-950">
-                {pendingPayments} pago{pendingPayments === 1 ? "" : "s"} en revision
-              </span>
-              <span className="rounded-full bg-white/10 px-3 py-1.5 text-white">
-                {ordersMissingArt} arte{ordersMissingArt === 1 ? "" : "s"} pendiente{ordersMissingArt === 1 ? "" : "s"}
-              </span>
+              {ordersMissingArt > 0 ? (
+                <span className="rounded-full bg-[#ffd45f] px-3 py-1.5 text-slate-950">
+                  {ordersMissingArt} requiere{ordersMissingArt === 1 ? "" : "n"} arte
+                </span>
+              ) : null}
             </div>
           </div>
           <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
             <p className="text-sm font-semibold text-slate-300">Saldo pendiente</p>
             <p className="mt-2 text-3xl font-black">{formatCurrency(pendingBalance)}</p>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              {activeOrders} solicitud{activeOrders === 1 ? "" : "es"} activa{activeOrders === 1 ? "" : "s"}.
-              {ordersMissingArt > 0 ? ` ${ordersMissingArt} necesita${ordersMissingArt === 1 ? "" : "n"} arte.` : ""}
+              {pendingPayments > 0
+                ? `${pendingPayments} pago${pendingPayments === 1 ? "" : "s"} en revision.`
+                : "Pagos y pedidos sincronizados con administracion."}
             </p>
             <button
               type="button"
@@ -872,7 +1096,7 @@ function CustomerDashboard({
         <main className="space-y-6">
           <section
             id="customer-orders"
-            className="scroll-mt-24 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6"
+            className="scroll-mt-24 rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -883,12 +1107,33 @@ function CustomerDashboard({
                   Ordenes y produccion
                 </h2>
               </div>
-              <Link
-                href="/#catalogo"
-                className="inline-flex items-center justify-center rounded-2xl bg-[#ffd45f] px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
-              >
-                Crear otro pedido
-              </Link>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
+                  {([
+                    ["active", `En curso (${openOrders.length})`],
+                    ["past", `Anteriores (${pastOrders.length})`],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setOrderView(value)}
+                      className={`cursor-pointer rounded-[0.9rem] px-3 py-2 text-xs font-black transition sm:px-4 ${
+                        orderView === value
+                          ? "bg-slate-950 text-white shadow-sm"
+                          : "text-slate-500 hover:text-slate-950"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <Link
+                  href="/#catalogo"
+                  className="inline-flex items-center justify-center rounded-2xl bg-[#ffd45f] px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+                >
+                  Crear pedido
+                </Link>
+              </div>
             </div>
 
             {orders.length === 0 ? (
@@ -899,87 +1144,129 @@ function CustomerDashboard({
                 </p>
               </div>
             ) : (
-              <div className="mt-5 space-y-4">
-                {orders.map((order) => {
-                  const artFiles = order.files.filter(
-                    (file) => file.attachment_type === "arte_cliente",
-                  );
-                  const paymentFiles = order.files.filter(
-                    (file) => file.attachment_type === "comprobante_pago",
-                  );
-                  const isPaymentOpen = activePaymentOrderId === order.id;
-                  const flow = getCustomerOrderFlow(order, artFiles);
-                  const flowClass =
-                    flow.tone === "rose"
-                      ? "border-rose-200 bg-rose-50 text-rose-800"
-                      : flow.tone === "amber"
-                        ? "border-amber-200 bg-amber-50 text-amber-800"
-                        : flow.tone === "blue"
-                          ? "border-blue-200 bg-blue-50 text-blue-800"
-                          : "border-emerald-200 bg-emerald-50 text-emerald-800";
+              <div className="mt-5 grid gap-5 xl:grid-cols-[0.86fr_1.14fr]">
+                <div className="space-y-3">
+                  {visibleOrders.length === 0 ? (
+                    <div className="rounded-[1.45rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
+                      <p className="font-black text-slate-950">
+                        {orderView === "active" ? "No hay pedidos en curso." : "No hay pedidos anteriores."}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        {orderView === "active"
+                          ? "Cuando prepares un pedido aparecera en esta lista."
+                          : "Los pedidos entregados se guardaran aqui."}
+                      </p>
+                    </div>
+                  ) : (
+                    visibleOrders.map((order) => {
+                      const artFile = getPrimaryArtFile(order);
+                      const isSelected = selectedOrder?.id === order.id;
 
-                  return (
-                    <article
-                      key={order.id}
-                      className="rounded-[1.65rem] border border-slate-200 bg-slate-50 p-4 sm:p-5"
-                    >
-                      <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+                      return (
+                        <button
+                          key={order.id}
+                          type="button"
+                          onClick={() => setSelectedOrderId(order.id)}
+                          className={`w-full cursor-pointer rounded-[1.45rem] border p-3 text-left transition ${
+                            isSelected
+                              ? "border-slate-950 bg-slate-950 text-white shadow-[0_18px_44px_rgba(15,23,42,0.16)]"
+                              : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white"
+                          }`}
+                        >
+                          <div className="flex gap-3">
+                            <CustomerArtPreview file={artFile} size="sm" interactive={false} />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p
+                                    className={`truncate text-[11px] font-semibold uppercase ${
+                                      isSelected ? "text-white/55" : "text-slate-400"
+                                    }`}
+                                  >
+                                    {order.order_number ?? "Pedido web"}
+                                  </p>
+                                  <h3 className="mt-1 truncate text-sm font-black sm:text-base">
+                                    {order.title}
+                                  </h3>
+                                </div>
+                                <span
+                                  className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${
+                                    isSelected
+                                      ? "bg-white/10 text-white"
+                                      : getArtFiles(order).length === 0 ||
+                                          order.payment_review_status === "sin_pago" ||
+                                          order.payment_review_status === "rechazado"
+                                        ? "bg-amber-100 text-amber-800"
+                                        : "bg-blue-100 text-blue-800"
+                                  }`}
+                                >
+                                  {getOrderActionLabel(order)}
+                                </span>
+                              </div>
+                              <div className="mt-3">
+                                <CustomerOrderProgressLine order={order} />
+                              </div>
+                              <div
+                                className={`mt-3 flex flex-wrap gap-2 text-[11px] font-semibold ${
+                                  isSelected ? "text-white/70" : "text-slate-500"
+                                }`}
+                              >
+                                <span>Entrega {formatDate(order.promised_delivery_at)}</span>
+                                <span>Saldo {formatCurrency(order.pending_amount)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  {selectedOrder && selectedFlow ? (
+                    <article className="rounded-[1.65rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                      <div className="grid gap-4 lg:grid-cols-[13rem_1fr]">
+                        <CustomerArtPreview file={getPrimaryArtFile(selectedOrder)} size="lg" />
                         <div className="min-w-0">
                           <p className="text-[11px] font-semibold uppercase text-slate-400">
-                            {order.order_number ?? "Pedido web"}
+                            {selectedOrder.order_number ?? "Pedido web"}
                           </p>
-                          <h3 className="mt-2 break-words text-xl font-black text-slate-950 sm:text-2xl">
-                            {order.title}
+                          <h3 className="mt-2 break-words text-2xl font-black text-slate-950">
+                            {selectedOrder.title}
                           </h3>
                           <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
                             <span className="rounded-full bg-blue-50 px-3 py-1.5 text-blue-700">
-                              {orderStatusLabels[order.status]}
+                              {orderStatusLabels[selectedOrder.status]}
                             </span>
                             <span className="rounded-full bg-amber-50 px-3 py-1.5 text-amber-700">
-                              {paymentReviewLabels[order.payment_review_status]}
-                            </span>
-                            <span className="rounded-full bg-white px-3 py-1.5 text-slate-600">
-                              Entrega {formatDate(order.promised_delivery_at)}
+                              {paymentReviewLabels[selectedOrder.payment_review_status]}
                             </span>
                           </div>
-                        </div>
-                        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 lg:min-w-44 lg:text-right">
-                          <p className="text-sm font-semibold text-slate-500">Saldo</p>
-                          <p className="mt-1 text-2xl font-black text-slate-950">
-                            {formatCurrency(order.pending_amount)}
-                          </p>
-                          <p className="mt-1 text-xs text-slate-400">
-                            Total {formatCurrency(order.total_amount)}
-                          </p>
+                          <div className="mt-5">
+                            <CustomerOrderProgressLine order={selectedOrder} />
+                          </div>
                         </div>
                       </div>
 
-                      <div className={`mt-5 rounded-2xl border px-4 py-4 ${flowClass}`}>
+                      <div className={`mt-5 rounded-2xl border px-4 py-4 ${selectedFlowClass}`}>
                         <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
                           <div>
-                            <p className="text-sm font-black">{flow.label}</p>
+                            <p className="text-sm font-black">{selectedFlow.label}</p>
                             <p className="mt-1 text-sm leading-6 opacity-85">
-                              {flow.description}
+                              {selectedFlow.description}
                             </p>
                           </div>
                           <span className="rounded-full bg-white/70 px-3 py-1.5 text-xs font-black">
-                            {flow.action}
+                            {selectedFlow.action}
                           </span>
                         </div>
                       </div>
 
-                      <div className="mt-5">
-                        <div className="h-2 overflow-hidden rounded-full bg-white">
-                          <div
-                            className="h-full rounded-full bg-[#ffd45f]"
-                            style={{ width: `${getOrderProgress(order.status)}%` }}
-                          />
-                        </div>
-                        <div className="mt-2 flex flex-wrap justify-between gap-2 text-[11px] font-semibold text-slate-500">
-                          {orderStatusSteps.map((status) => (
-                            <span key={status}>{orderStatusLabels[status]}</span>
-                          ))}
-                        </div>
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        <AccountDetail label="Entrega" value={formatDate(selectedOrder.promised_delivery_at)} />
+                        <AccountDetail label="Area" value={selectedOrder.current_area ?? "Por asignar"} />
+                        <AccountDetail label="Total" value={formatCurrency(selectedOrder.total_amount)} />
+                        <AccountDetail label="Saldo" value={formatCurrency(selectedOrder.pending_amount)} />
                       </div>
 
                       <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -988,36 +1275,39 @@ function CustomerDashboard({
                             <div>
                               <p className="text-sm font-black text-slate-950">Arte digital</p>
                               <p className="mt-1 text-xs leading-5 text-slate-500">
-                                Sube el archivo final o referencias para produccion.
+                                Archivo del pedido para revision y produccion.
                               </p>
                             </div>
-                            <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">
-                              Subir arte
-                              <input
-                                type="file"
-                                className="hidden"
-                                onChange={(event) => {
-                                  void uploadArt(order.id, event.target.files?.[0] ?? null);
-                                  event.currentTarget.value = "";
-                                }}
-                              />
-                            </label>
+                            {selectedOrder.status !== "entregado" ? (
+                              <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">
+                                Subir arte
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  onChange={(event) => {
+                                    void uploadArt(selectedOrder.id, event.target.files?.[0] ?? null);
+                                    event.currentTarget.value = "";
+                                  }}
+                                />
+                              </label>
+                            ) : null}
                           </div>
                           <div className="mt-3 space-y-2">
-                            {artFiles.length === 0 ? (
-                              <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-500">
-                                Sin arte cargado.
-                              </p>
+                            {selectedArtFiles.length === 0 ? (
+                              <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-sm text-slate-500">
+                                Este pedido aun no tiene arte cargado.
+                              </div>
                             ) : (
-                              artFiles.map((file) => (
+                              selectedArtFiles.map((file) => (
                                 <a
                                   key={file.id}
                                   href={file.signed_url ?? "#"}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="block rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
+                                  className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
                                 >
-                                  {file.file_name}
+                                  <CustomerArtPreview file={file} size="sm" interactive={false} />
+                                  <span className="min-w-0 flex-1 truncate">{file.file_name}</span>
                                 </a>
                               ))
                             )}
@@ -1029,28 +1319,34 @@ function CustomerDashboard({
                             <div>
                               <p className="text-sm font-black text-slate-950">Pago movil</p>
                               <p className="mt-1 text-xs leading-5 text-slate-500">
-                                Registra un abono para que administracion lo valide.
+                                Administracion valida el pago antes de producir.
                               </p>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => setActivePaymentOrderId(isPaymentOpen ? null : order.id)}
-                              className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-[#ffd45f] px-3 py-2 text-xs font-black text-slate-950 transition hover:bg-[#ffcd41]"
-                            >
-                              {isPaymentOpen ? "Cerrar" : "Registrar pago"}
-                            </button>
+                            {selectedOrder.status !== "entregado" ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setActivePaymentOrderId(
+                                    activePaymentOrderId === selectedOrder.id ? null : selectedOrder.id,
+                                  )
+                                }
+                                className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-[#ffd45f] px-3 py-2 text-xs font-black text-slate-950 transition hover:bg-[#ffcd41]"
+                              >
+                                {activePaymentOrderId === selectedOrder.id ? "Cerrar" : "Registrar pago"}
+                              </button>
+                            ) : null}
                           </div>
 
-                          {isPaymentOpen ? (
+                          {activePaymentOrderId === selectedOrder.id ? (
                             <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={registerPayment}>
-                              <input type="hidden" name="orderId" value={order.id} />
+                              <input type="hidden" name="orderId" value={selectedOrder.id} />
                               <input
                                 name="amount"
                                 type="number"
                                 min="1"
                                 step="0.01"
                                 placeholder="Monto"
-                                defaultValue={Number(order.pending_amount ?? order.total_amount ?? 0) || ""}
+                                defaultValue={Number(selectedOrder.pending_amount ?? selectedOrder.total_amount ?? 0) || ""}
                                 className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
                                 required
                               />
@@ -1083,12 +1379,12 @@ function CustomerDashboard({
                           ) : null}
 
                           <div className="mt-3 space-y-2">
-                            {order.payments.length === 0 ? (
+                            {selectedOrder.payments.length === 0 ? (
                               <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-500">
                                 Sin pagos registrados.
                               </p>
                             ) : (
-                              order.payments.map((payment) => (
+                              selectedOrder.payments.map((payment) => (
                                 <div
                                   key={payment.id}
                                   className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm"
@@ -1109,17 +1405,24 @@ function CustomerDashboard({
                                 </div>
                               ))
                             )}
-                            {paymentFiles.length > 0 ? (
+                            {selectedPaymentFiles.length > 0 ? (
                               <p className="text-xs font-semibold text-slate-400">
-                                {paymentFiles.length} comprobante{paymentFiles.length === 1 ? "" : "s"} cargado{paymentFiles.length === 1 ? "" : "s"}
+                                {selectedPaymentFiles.length} comprobante{selectedPaymentFiles.length === 1 ? "" : "s"} cargado{selectedPaymentFiles.length === 1 ? "" : "s"}
                               </p>
                             ) : null}
                           </div>
                         </div>
                       </div>
                     </article>
-                  );
-                })}
+                  ) : (
+                    <div className="rounded-[1.45rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+                      <p className="font-black text-slate-950">Selecciona un pedido.</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        Aqui veras el arte, pagos y avance del pedido elegido.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </section>
