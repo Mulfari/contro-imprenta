@@ -19,7 +19,8 @@ export type OrderStatus =
   | "disenando"
   | "imprimiendo"
   | "listo"
-  | "entregado";
+  | "entregado"
+  | "rechazado";
 
 export type PaymentStatus =
   | "pendiente"
@@ -82,6 +83,9 @@ export type Order = {
   current_area: string | null;
   due_date: string | null;
   status: OrderStatus;
+  rejected_by: string | null;
+  rejected_at: string | null;
+  rejection_reason: string | null;
   internal_notes: string | null;
   created_at: string;
   created_by: string | null;
@@ -304,7 +308,7 @@ export async function listOrders() {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, client_id, customer_user_id, order_number, title, product_type, description, quantity, measurements, material, size, lamination_finish, color_profile, includes_design, includes_installation, urgency, branch, quoted_price, discount_amount, total_amount, deposit_amount, pending_amount, payment_method, payment_status, payment_review_status, confirmation_status, source, promised_delivery_at, priority, current_owner, current_area, due_date, status, internal_notes, created_at, created_by",
+      "id, client_id, customer_user_id, order_number, title, product_type, description, quantity, measurements, material, size, lamination_finish, color_profile, includes_design, includes_installation, urgency, branch, quoted_price, discount_amount, total_amount, deposit_amount, pending_amount, payment_method, payment_status, payment_review_status, confirmation_status, source, promised_delivery_at, priority, current_owner, current_area, due_date, status, rejected_by, rejected_at, rejection_reason, internal_notes, created_at, created_by",
     )
     .order("created_at", { ascending: false });
 
@@ -501,6 +505,65 @@ export async function updateOrderStatus(input: {
       detail: `Estado cambiado de ${previousOrder.status} a ${input.status} en ${previousOrder.order_number}.`,
       eventType: "estado",
       changedBy: input.changedBy ?? null,
+    });
+  }
+
+  return data;
+}
+
+export async function rejectOrder(input: {
+  orderId: string;
+  rejectedBy: string;
+  reason?: string;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const reason = normalizeText(input.reason ?? "");
+
+  if (!input.orderId) {
+    throw new Error("No se encontro el pedido.");
+  }
+
+  if (!input.rejectedBy) {
+    throw new Error("No se pudo identificar quien rechaza el pedido.");
+  }
+
+  const { data: previousOrder, error: previousError } = await supabase
+    .from("orders")
+    .select("id, order_number, status")
+    .eq("id", input.orderId)
+    .single<{ id: string; order_number: string; status: OrderStatus }>();
+
+  if (previousError) {
+    throw previousError;
+  }
+
+  const rejectedAt = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("orders")
+    .update({
+      status: "rechazado",
+      confirmation_status: "rechazado",
+      rejected_by: input.rejectedBy,
+      rejected_at: rejectedAt,
+      rejection_reason: reason || null,
+      current_area: "Rechazados",
+    })
+    .eq("id", input.orderId)
+    .select("*")
+    .single<Order>();
+
+  if (error) {
+    throw error;
+  }
+
+  if (previousOrder.status !== "rechazado") {
+    await createOrderHistoryEntry({
+      orderId: input.orderId,
+      detail: reason
+        ? `Pedido ${previousOrder.order_number} rechazado. Motivo: ${reason}.`
+        : `Pedido ${previousOrder.order_number} rechazado sin motivo especificado.`,
+      eventType: "rechazo",
+      changedBy: input.rejectedBy,
     });
   }
 

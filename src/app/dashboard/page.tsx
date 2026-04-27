@@ -39,6 +39,7 @@ import {
   type OrderStatus,
   type OrderUrgency,
   type PaymentStatus,
+  rejectOrder,
   updateClient,
   updateOrderStatus,
 } from "@/lib/business";
@@ -80,13 +81,14 @@ import {
   updateUser,
 } from "@/lib/users";
 
-const orderStatuses: OrderStatus[] = [
+const productionOrderStatuses: OrderStatus[] = [
   "recibido",
   "disenando",
   "imprimiendo",
   "listo",
   "entregado",
 ];
+const orderStatuses: OrderStatus[] = [...productionOrderStatuses, "rechazado"];
 
 const dashboardViews = [
   "resumen",
@@ -124,6 +126,7 @@ const orderStatusLabels: Record<OrderStatus, string> = {
   imprimiendo: "Imprimiendo",
   listo: "Listo",
   entregado: "Entregado",
+  rechazado: "Rechazado",
 };
 
 async function createUserAction(formData: FormData) {
@@ -440,11 +443,23 @@ async function updateOrderStatusAction(formData: FormData) {
   const activeStatus = String(formData.get("activeStatus") ?? "todos");
 
   try {
-    await updateOrderStatus({
-      orderId,
-      status,
-      changedBy: session.userId,
-    });
+    if (status === "rechazado") {
+      if (session.role !== "admin") {
+        throw new Error("Solo los administradores pueden rechazar pedidos.");
+      }
+
+      await rejectOrder({
+        orderId,
+        rejectedBy: session.userId,
+        reason: "",
+      });
+    } else {
+      await updateOrderStatus({
+        orderId,
+        status,
+        changedBy: session.userId,
+      });
+    }
   } catch (error) {
     const message =
       error instanceof Error
@@ -457,6 +472,43 @@ async function updateOrderStatusAction(formData: FormData) {
   revalidatePath("/dashboard");
   redirect(
     buildDashboardUrl("pedidos", "Estado actualizado") + `&status=${activeStatus}`,
+  );
+}
+
+async function rejectOrderAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const orderId = String(formData.get("orderId") ?? "");
+  const activeStatus = String(formData.get("activeStatus") ?? "todos");
+  const reason = String(formData.get("rejectionReason") ?? "");
+
+  try {
+    await rejectOrder({
+      orderId,
+      rejectedBy: session.userId,
+      reason,
+    });
+    await createSecurityAlert({
+      userId: session.userId,
+      username: session.username,
+      detail: `Rechazo el pedido ${orderId}.`,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo rechazar el pedido.";
+
+    redirect(buildDashboardUrl("pedidos", message) + `&status=${activeStatus}`);
+  }
+
+  revalidatePath("/dashboard");
+  redirect(
+    buildDashboardUrl("pedidos", "Pedido rechazado") + `&status=${activeStatus}`,
   );
 }
 
@@ -876,7 +928,9 @@ export default async function DashboardPage({
     resolveValue(params.view),
     session.role === "admin",
   );
-  const activeOrders = orders.filter((order) => order.status !== "entregado");
+  const activeOrders = orders.filter(
+    (order) => order.status !== "entregado" && order.status !== "rechazado",
+  );
   const todayKey = getDateKey(new Date());
   const userSideItems = sideNavItems.filter((item) =>
     userSideNavViews.includes(item.view),
@@ -908,7 +962,9 @@ export default async function DashboardPage({
     });
   const orderSummary = {
     total: orders.length,
-    active: orders.filter((order) => order.status !== "entregado").length,
+    active: orders.filter(
+      (order) => order.status !== "entregado" && order.status !== "rechazado",
+    ).length,
     ready: orders.filter((order) => order.status === "listo").length,
     delivered: orders.filter((order) => order.status === "entregado").length,
   };
@@ -1012,7 +1068,7 @@ export default async function DashboardPage({
 
     clientOrderCounts.set(order.client_id, (clientOrderCounts.get(order.client_id) ?? 0) + 1);
 
-    if (order.status !== "entregado") {
+    if (order.status !== "entregado" && order.status !== "rechazado") {
       clientActiveOrderCounts.set(
         order.client_id,
         (clientActiveOrderCounts.get(order.client_id) ?? 0) + 1,
@@ -1031,7 +1087,7 @@ export default async function DashboardPage({
       clientLastOrderDates.set(order.client_id, order.created_at);
     }
 
-    if (order.status === "entregado") {
+    if (order.status === "entregado" || order.status === "rechazado") {
       continue;
     }
 
@@ -1714,7 +1770,7 @@ export default async function DashboardPage({
                   defaultValue="recibido"
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 >
-                  {orderStatuses.map((status) => (
+                  {productionOrderStatuses.map((status) => (
                     <option key={status} value={status}>
                       {status}
                     </option>
@@ -1868,7 +1924,7 @@ export default async function DashboardPage({
                           defaultValue={order.status}
                           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                         >
-                          {orderStatuses.map((status) => (
+                          {productionOrderStatuses.map((status) => (
                             <option key={status} value={status}>
                               {orderStatusLabels[status]}
                             </option>
@@ -1904,6 +1960,7 @@ export default async function DashboardPage({
               orderHistoryByOrderId={orderHistoryByOrderId}
               createAction={createOrderAction}
               updateStatusAction={updateOrderStatusAction}
+              rejectAction={rejectOrderAction}
               deleteOrderFileAction={deleteOrderFileAction}
               isAdmin={session.role === "admin"}
             />

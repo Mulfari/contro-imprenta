@@ -28,17 +28,19 @@ type OrdersPanelProps = {
   orderHistoryByOrderId: Map<string, OrderHistoryEntry[]>;
   createAction: (formData: FormData) => void | Promise<void>;
   updateStatusAction: (formData: FormData) => void | Promise<void>;
+  rejectAction: (formData: FormData) => void | Promise<void>;
   deleteOrderFileAction: (formData: FormData) => void | Promise<void>;
   isAdmin: boolean;
 };
 
-const orderStatuses: OrderStatus[] = [
+const productionOrderStatuses: OrderStatus[] = [
   "recibido",
   "disenando",
   "imprimiendo",
   "listo",
   "entregado",
 ];
+const orderStatuses: OrderStatus[] = [...productionOrderStatuses, "rechazado"];
 
 const paymentStatuses: PaymentStatus[] = [
   "pendiente",
@@ -78,6 +80,7 @@ const orderStatusLabels: Record<OrderStatus, string> = {
   imprimiendo: "Impresion",
   listo: "Listo",
   entregado: "Entregado",
+  rechazado: "Rechazado",
 };
 
 const paymentStatusLabels: Record<PaymentStatus, string> = {
@@ -254,6 +257,14 @@ function QueueCard({
 function getAdminOrderFlow(order: OrderWithClient, orderFiles: OrderFile[]) {
   const hasArt = orderFiles.some((file) => file.attachment_type === "arte_cliente");
 
+  if (order.status === "rechazado") {
+    return {
+      label: "Pedido rechazado",
+      description: order.rejection_reason || "Este pedido fue rechazado por administracion.",
+      tone: "rose" as const,
+    };
+  }
+
   if (order.confirmation_status === "rechazado") {
     return {
       label: "Solicitud rechazada",
@@ -321,11 +332,12 @@ export function OrdersPanel(props: OrdersPanelProps) {
     orderHistoryByOrderId,
     createAction,
     updateStatusAction,
+    rejectAction,
     deleteOrderFileAction,
     isAdmin,
   } = props;
   const activeFilteredOrders = filteredOrders.filter(
-    (order) => order.status !== "entregado",
+    (order) => order.status !== "entregado" && order.status !== "rechazado",
   );
   const newRequests = activeFilteredOrders.filter(
     (order) => order.source === "storefront" && order.confirmation_status === "pendiente",
@@ -665,7 +677,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
                 defaultValue="recibido"
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               >
-                {orderStatuses.map((status) => (
+                {productionOrderStatuses.map((status) => (
                   <option key={status} value={status}>
                     Estado {orderStatusLabels[status]}
                   </option>
@@ -907,6 +919,30 @@ export function OrdersPanel(props: OrdersPanelProps) {
                         </div>
                       ) : null}
 
+                      {order.status === "rechazado" ? (
+                        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 text-rose-800">
+                          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-rose-500">
+                            Pedido rechazado
+                          </p>
+                          <div className="mt-3 grid gap-3 text-sm leading-6 md:grid-cols-2">
+                            <p>
+                              <span className="font-black">Fecha:</span>{" "}
+                              {order.rejected_at ? formatDateTime(order.rejected_at) : "Sin fecha"}
+                            </p>
+                            {isAdmin ? (
+                              <p>
+                                <span className="font-black">Rechazado por:</span>{" "}
+                                {users.find((user) => user.id === order.rejected_by)?.display_name ?? "Usuario no disponible"}
+                              </p>
+                            ) : null}
+                            <p className="md:col-span-2">
+                              <span className="font-black">Motivo:</span>{" "}
+                              {order.rejection_reason || "Sin motivo especificado."}
+                            </p>
+                          </div>
+                        </div>
+                      ) : null}
+
                       <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
                         <h4 className="text-sm font-semibold text-slate-900">Adjuntos</h4>
                         <p className="mt-1 text-xs text-slate-500">
@@ -950,33 +986,65 @@ export function OrdersPanel(props: OrdersPanelProps) {
                       </div>
                     </div>
 
-                    <form
-                      action={updateStatusAction}
-                      className="flex w-full flex-col gap-3 rounded-[1.3rem] border border-slate-200 bg-slate-50 p-4 sm:rounded-[1.5rem] xl:sticky xl:top-5 xl:min-w-[250px]"
-                    >
-                      <input type="hidden" name="orderId" value={order.id} />
-                      <input type="hidden" name="activeStatus" value={activeStatus} />
-                      <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        Estado actual
-                      </label>
-                      <select
-                        name="status"
-                        defaultValue={order.status}
-                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                      >
-                        {orderStatuses.map((status) => (
-                          <option key={status} value={status}>
-                            {orderStatusLabels[status]}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="submit"
-                        className="rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-                      >
-                        Actualizar estado
-                      </button>
-                    </form>
+                    <div className="flex w-full flex-col gap-3 xl:sticky xl:top-5 xl:min-w-[250px]">
+                      {order.status === "rechazado" ? (
+                        <div className="rounded-[1.3rem] border border-rose-200 bg-rose-50 p-4 text-sm font-semibold leading-6 text-rose-800 sm:rounded-[1.5rem]">
+                          Este pedido quedo cerrado como rechazado.
+                        </div>
+                      ) : (
+                        <form
+                          action={updateStatusAction}
+                          className="flex flex-col gap-3 rounded-[1.3rem] border border-slate-200 bg-slate-50 p-4 sm:rounded-[1.5rem]"
+                        >
+                          <input type="hidden" name="orderId" value={order.id} />
+                          <input type="hidden" name="activeStatus" value={activeStatus} />
+                          <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                            Estado actual
+                          </label>
+                          <select
+                            name="status"
+                            defaultValue={order.status}
+                            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          >
+                            {productionOrderStatuses.map((status) => (
+                              <option key={status} value={status}>
+                                {orderStatusLabels[status]}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="submit"
+                            className="rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                          >
+                            Actualizar estado
+                          </button>
+                        </form>
+                      )}
+
+                      {isAdmin && order.status !== "rechazado" ? (
+                        <form
+                          action={rejectAction}
+                          className="flex flex-col gap-3 rounded-[1.3rem] border border-rose-200 bg-rose-50 p-4 sm:rounded-[1.5rem]"
+                        >
+                          <input type="hidden" name="orderId" value={order.id} />
+                          <input type="hidden" name="activeStatus" value={activeStatus} />
+                          <label className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-500">
+                            Rechazar pedido
+                          </label>
+                          <textarea
+                            name="rejectionReason"
+                            className="min-h-24 rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-rose-300 focus:ring-2 focus:ring-rose-100"
+                            placeholder="Motivo opcional para el cliente"
+                          />
+                          <button
+                            type="submit"
+                            className="rounded-full bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700"
+                          >
+                            Rechazar
+                          </button>
+                        </form>
+                      ) : null}
+                    </div>
                   </div>
                 </article>
               );

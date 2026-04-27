@@ -52,6 +52,7 @@ export type AdminPayment = OrderPayment & {
     | "confirmation_status"
     | "source"
     | "current_area"
+    | "status"
   > | null;
   client: {
     id: string;
@@ -256,7 +257,7 @@ export async function getCustomerDashboard(userId: string) {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, client_id, customer_user_id, order_number, title, product_type, description, quantity, measurements, material, size, lamination_finish, color_profile, includes_design, includes_installation, urgency, branch, quoted_price, discount_amount, total_amount, deposit_amount, pending_amount, payment_method, payment_status, payment_review_status, confirmation_status, source, promised_delivery_at, priority, current_owner, current_area, due_date, status, internal_notes, created_at, created_by",
+      "id, client_id, customer_user_id, order_number, title, product_type, description, quantity, measurements, material, size, lamination_finish, color_profile, includes_design, includes_installation, urgency, branch, quoted_price, discount_amount, total_amount, deposit_amount, pending_amount, payment_method, payment_status, payment_review_status, confirmation_status, source, promised_delivery_at, priority, current_owner, current_area, due_date, status, rejected_by, rejected_at, rejection_reason, internal_notes, created_at, created_by",
     )
     .eq("customer_user_id", userId)
     .order("created_at", { ascending: false });
@@ -380,7 +381,7 @@ async function assertCustomerOwnsOrder(userId: string, orderId: string) {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from("orders")
-    .select("id")
+    .select("id, status")
     .eq("id", orderId)
     .eq("customer_user_id", userId)
     .maybeSingle();
@@ -391,6 +392,10 @@ async function assertCustomerOwnsOrder(userId: string, orderId: string) {
 
   if (!data) {
     throw new Error("No se encontro este pedido en tu cuenta.");
+  }
+
+  if (data.status === "rechazado") {
+    throw new Error("Este pedido fue rechazado y ya no permite nuevos archivos o pagos.");
   }
 }
 
@@ -415,7 +420,7 @@ export async function listAdminPayments() {
     orderIds.length > 0
       ? await supabase
           .from("orders")
-          .select("id, client_id, order_number, title, total_amount, pending_amount, payment_status, payment_review_status, confirmation_status, source, current_area")
+          .select("id, client_id, order_number, title, total_amount, pending_amount, payment_status, payment_review_status, confirmation_status, source, current_area, status")
           .in("id", orderIds)
       : { data: [], error: null };
 
@@ -437,6 +442,7 @@ export async function listAdminPayments() {
       | "confirmation_status"
       | "source"
       | "current_area"
+      | "status"
     >
   >;
   const clientIds = [...new Set(orders.map((order) => order.client_id).filter(Boolean))];

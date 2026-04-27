@@ -871,7 +871,7 @@ export function StorefrontShell() {
           orders?: AccountActivityOrder[];
         };
         const activeOrders = (payload.orders ?? []).filter(
-          (order) => order.status !== "entregado",
+          (order) => order.status !== "entregado" && order.status !== "rechazado",
         );
         const needsAttention = activeOrders.some((order) => {
           const hasArt = order.files?.some(

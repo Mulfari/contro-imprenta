@@ -78,7 +78,9 @@ function InventoryMetric({
 }
 
 export function InventoryPanel({ orders }: InventoryPanelProps) {
-  const activeOrders = orders.filter((order) => order.status !== "entregado");
+  const activeOrders = orders.filter(
+    (order) => order.status !== "entregado" && order.status !== "rechazado",
+  );
   const pendingMaterialOrders = activeOrders.filter(
     (order) => !order.material && !order.size && !order.lamination_finish,
   );

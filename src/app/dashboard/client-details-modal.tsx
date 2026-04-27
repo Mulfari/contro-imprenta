@@ -49,6 +49,7 @@ const orderStatusLabels: Record<string, string> = {
   imprimiendo: "Imprimiendo",
   listo: "Listo",
   entregado: "Entregado",
+  rechazado: "Rechazado",
 };
 
 function DataCard({
@@ -104,7 +105,9 @@ export function ClientDetailsPanel({
 }: ClientDetailsModalProps) {
   const payments = orders.filter((order) => order.total_amount !== null);
   const billed = payments.reduce((sum, order) => sum + (order.total_amount ?? 0), 0);
-  const activeOrders = orders.filter((order) => order.status !== "entregado");
+  const activeOrders = orders.filter(
+    (order) => order.status !== "entregado" && order.status !== "rechazado",
+  );
   const pendingBalance = activeOrders.reduce(
     (sum, order) => sum + Number(order.pending_amount ?? order.total_amount ?? 0),
     0,

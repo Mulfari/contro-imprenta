@@ -49,9 +49,11 @@ type CustomerOrder = {
   payment_status: "pendiente" | "anticipo" | "pagado" | "credito";
   payment_review_status: "sin_pago" | "por_validar" | "validado" | "rechazado";
   confirmation_status: "pendiente" | "confirmado" | "rechazado";
-  status: "recibido" | "disenando" | "imprimiendo" | "listo" | "entregado";
+  status: "recibido" | "disenando" | "imprimiendo" | "listo" | "entregado" | "rechazado";
   current_area: string | null;
   promised_delivery_at: string | null;
+  rejected_at: string | null;
+  rejection_reason: string | null;
   created_at: string;
   files: CustomerOrderFile[];
   payments: CustomerPayment[];
@@ -137,6 +139,7 @@ const orderStatusLabels: Record<CustomerOrder["status"], string> = {
   imprimiendo: "Impresion",
   listo: "Listo",
   entregado: "Entregado",
+  rechazado: "Rechazado",
 };
 
 const paymentStatusLabels: Record<CustomerPayment["status"], string> = {
@@ -204,6 +207,10 @@ function isImageFile(file: CustomerOrderFile | null) {
 
 function getOrderActionLabel(order: CustomerOrder) {
   const hasArt = getArtFiles(order).length > 0;
+
+  if (order.status === "rechazado") {
+    return "Rechazado";
+  }
 
   if (!hasArt) {
     return "Falta arte";
@@ -357,6 +364,14 @@ function CustomerArtPreview({
 }
 
 function CustomerOrderProgressLine({ order }: { order: CustomerOrder }) {
+  if (order.status === "rechazado") {
+    return (
+      <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-center text-xs font-black text-rose-700">
+        Pedido rechazado
+      </div>
+    );
+  }
+
   const currentIndex = Math.max(0, orderStatusSteps.indexOf(order.status));
 
   return (
@@ -387,6 +402,15 @@ function CustomerOrderProgressLine({ order }: { order: CustomerOrder }) {
 }
 
 function getCustomerOrderFlow(order: CustomerOrder, artFiles: CustomerOrderFile[]) {
+  if (order.status === "rechazado") {
+    return {
+      label: "Pedido rechazado",
+      description: order.rejection_reason || "Este pedido fue rechazado por administracion.",
+      action: order.rejected_at ? `Fecha: ${formatDate(order.rejected_at)}` : "Sin fecha de rechazo",
+      tone: "rose",
+    };
+  }
+
   if (order.confirmation_status === "rechazado") {
     return {
       label: "Solicitud por revisar",
@@ -688,7 +712,9 @@ function CustomerAccountDropdownSummary({
     };
   }, []);
 
-  const activeOrders = orders.filter((order) => order.status !== "entregado");
+  const activeOrders = orders.filter(
+    (order) => order.status !== "entregado" && order.status !== "rechazado",
+  );
   const quickOrders = activeOrders.slice(0, 2);
 
   return (
@@ -848,8 +874,12 @@ function CustomerDashboard({
     void loadOrders();
   }, []);
 
-  const openOrders = orders.filter((order) => order.status !== "entregado");
-  const pastOrders = orders.filter((order) => order.status === "entregado");
+  const openOrders = orders.filter(
+    (order) => order.status !== "entregado" && order.status !== "rechazado",
+  );
+  const pastOrders = orders.filter(
+    (order) => order.status === "entregado" || order.status === "rechazado",
+  );
   const visibleOrders = orderView === "active" ? openOrders : pastOrders;
   const selectedOrder =
     visibleOrders.find((order) => order.id === selectedOrderId) ??
@@ -926,10 +956,14 @@ function CustomerDashboard({
     }
   };
 
-  const activeOrders = orders.filter((order) => order.status !== "entregado").length;
+  const activeOrders = orders.filter(
+    (order) => order.status !== "entregado" && order.status !== "rechazado",
+  ).length;
   const pendingPayments = orders.reduce(
     (sum, order) =>
-      sum + order.payments.filter((payment) => payment.status === "por_validar").length,
+      order.status === "rechazado"
+        ? sum
+        : sum + order.payments.filter((payment) => payment.status === "por_validar").length,
     0,
   );
   const pendingBalance = openOrders.reduce(
@@ -1210,6 +1244,19 @@ function CustomerDashboard({
                         <AccountDetail label="Saldo" value={formatCurrency(selectedOrder.pending_amount)} />
                       </div>
 
+                      {selectedOrder.status === "rechazado" ? (
+                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                          <AccountDetail
+                            label="Fecha de rechazo"
+                            value={formatDate(selectedOrder.rejected_at)}
+                          />
+                          <AccountDetail
+                            label="Motivo"
+                            value={selectedOrder.rejection_reason ?? ""}
+                          />
+                        </div>
+                      ) : null}
+
                       <div className="mt-5 grid gap-4 lg:grid-cols-2">
                         <div className="rounded-2xl border border-slate-200 bg-white p-4">
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1219,7 +1266,7 @@ function CustomerDashboard({
                                 Archivo del pedido para revision y produccion.
                               </p>
                             </div>
-                            {selectedOrder.status !== "entregado" ? (
+                            {selectedOrder.status !== "entregado" && selectedOrder.status !== "rechazado" ? (
                               <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">
                                 Subir arte
                                 <input
@@ -1263,7 +1310,7 @@ function CustomerDashboard({
                                 Administracion valida el pago antes de producir.
                               </p>
                             </div>
-                            {selectedOrder.status !== "entregado" ? (
+                            {selectedOrder.status !== "entregado" && selectedOrder.status !== "rechazado" ? (
                               <button
                                 type="button"
                                 onClick={() =>

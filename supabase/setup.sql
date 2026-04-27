@@ -318,7 +318,7 @@ create table if not exists public.orders (
   branch text null,
   quoted_price numeric(12,2) null,
   discount_amount numeric(12,2) null,
-  status text not null check (status in ('recibido', 'disenando', 'imprimiendo', 'listo', 'entregado')),
+  status text not null check (status in ('recibido', 'disenando', 'imprimiendo', 'listo', 'entregado', 'rechazado')),
   total_amount numeric(12,2) null,
   deposit_amount numeric(12,2) null,
   pending_amount numeric(12,2) null,
@@ -332,6 +332,9 @@ create table if not exists public.orders (
   current_owner text null,
   current_area text null,
   due_date date null,
+  rejected_by uuid null references public.app_users(id) on delete set null,
+  rejected_at timestamptz null,
+  rejection_reason text null,
   internal_notes text null,
   created_at timestamptz not null default now(),
   created_by uuid null references public.app_users(id) on delete set null
@@ -377,6 +380,9 @@ alter table public.orders add column if not exists promised_delivery_at date nul
 alter table public.orders add column if not exists priority text default 'media';
 alter table public.orders add column if not exists current_owner text null;
 alter table public.orders add column if not exists current_area text null;
+alter table public.orders add column if not exists rejected_by uuid null;
+alter table public.orders add column if not exists rejected_at timestamptz null;
+alter table public.orders add column if not exists rejection_reason text null;
 alter table public.orders add column if not exists internal_notes text null;
 alter table public.orders add column if not exists created_at timestamptz default now();
 alter table public.orders add column if not exists created_by uuid null;
@@ -408,7 +414,7 @@ end $$;
 alter table public.orders drop constraint if exists orders_status_check;
 alter table public.orders
   add constraint orders_status_check
-  check (status in ('recibido', 'disenando', 'imprimiendo', 'listo', 'entregado'))
+  check (status in ('recibido', 'disenando', 'imprimiendo', 'listo', 'entregado', 'rechazado'))
   not valid;
 
 alter table public.orders drop constraint if exists orders_urgency_check;
@@ -452,6 +458,9 @@ create index if not exists orders_customer_user_id_idx
 
 create index if not exists orders_payment_review_status_idx
   on public.orders (payment_review_status);
+
+create index if not exists orders_rejected_at_idx
+  on public.orders (rejected_at desc);
 
 create unique index if not exists orders_order_number_idx
   on public.orders (order_number)
@@ -616,6 +625,15 @@ begin
     alter table public.orders
       add constraint orders_created_by_fkey
       foreign key (created_by) references public.app_users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'orders_rejected_by_fkey'
+  ) then
+    alter table public.orders
+      add constraint orders_rejected_by_fkey
+      foreign key (rejected_by) references public.app_users(id) on delete set null;
   end if;
 
   if not exists (
