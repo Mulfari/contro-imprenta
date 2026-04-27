@@ -399,12 +399,12 @@ begin
     update public.orders
     set client_id = customer_id
     where client_id is null
-      and customer_id is not null;
-
-    update public.orders
-    set customer_id = client_id
-    where customer_id is null
-      and client_id is not null;
+      and customer_id is not null
+      and exists (
+        select 1
+        from public.clients
+        where clients.id = orders.customer_id
+      );
 
     alter table public.orders
       alter column customer_id drop not null;
