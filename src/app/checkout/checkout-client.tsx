@@ -73,6 +73,56 @@ function getPrepStatus(prep: CheckoutPrep) {
   return "Falta arte";
 }
 
+function formatFileSize(value: number) {
+  if (value < 1024 * 1024) {
+    return `${Math.max(1, Math.round(value / 1024))} KB`;
+  }
+
+  return `${(value / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function getFileBadge(file: File) {
+  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+    return "PDF";
+  }
+
+  const extension = file.name.split(".").pop()?.trim();
+
+  return extension ? extension.slice(0, 4).toUpperCase() : "FILE";
+}
+
+function CheckoutFilePreview({ file }: { file: File }) {
+  const isImage = file.type.startsWith("image/");
+  const previewUrl = useMemo(
+    () => (isImage ? URL.createObjectURL(file) : null),
+    [file, isImage],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  if (previewUrl) {
+    return (
+      <div
+        className="h-16 w-16 shrink-0 rounded-xl border border-slate-200 bg-cover bg-center shadow-sm"
+        style={{ backgroundImage: `url(${previewUrl})` }}
+        aria-label={`Miniatura de ${file.name}`}
+      />
+    );
+  }
+
+  return (
+    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-black text-slate-500 shadow-sm">
+      {getFileBadge(file)}
+    </div>
+  );
+}
+
 function CheckoutSkeleton() {
   return (
     <main className="min-h-screen bg-[#f3f5f8] px-4 py-5 text-slate-950 sm:px-6 lg:px-8">
@@ -366,14 +416,17 @@ function ActiveProductPreparation({
                 prep.files.map((file) => (
                   <div
                     key={`${file.name}-${file.size}-${file.lastModified}`}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2 text-sm"
+                    className="grid grid-cols-[4rem_1fr] gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm"
                   >
-                    <span className="min-w-0 truncate font-semibold text-slate-700">
-                      {file.name}
-                    </span>
-                    <span className="shrink-0 text-xs font-semibold text-slate-400">
-                      {(file.size / 1024 / 1024).toFixed(1)} MB
-                    </span>
+                    <CheckoutFilePreview file={file} />
+                    <div className="min-w-0 self-center">
+                      <p className="truncate font-semibold text-slate-800">
+                        {file.name}
+                      </p>
+                      <p className="mt-1 text-xs font-semibold text-slate-400">
+                        {formatFileSize(file.size)}
+                      </p>
+                    </div>
                   </div>
                 ))
               ) : (
