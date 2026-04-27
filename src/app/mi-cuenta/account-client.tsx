@@ -1112,22 +1112,21 @@ function CustomerDashboard({
                   Agrega productos al carrito y continua el pedido para verlos aqui.
                 </p>
               </div>
+            ) : visibleOrders.length === 0 ? (
+              <div className="mt-5 rounded-[1.7rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-14 text-center sm:px-8">
+                <p className="text-lg font-black text-slate-950">
+                  {orderView === "active" ? "No hay pedidos en curso." : "No hay pedidos anteriores."}
+                </p>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+                  {orderView === "active"
+                    ? "Cuando prepares un pedido aparecera en esta area."
+                    : "Los pedidos entregados o rechazados se guardaran aqui."}
+                </p>
+              </div>
             ) : (
               <div className="mt-5 grid gap-5 xl:grid-cols-[0.86fr_1.14fr]">
                 <div className="space-y-3">
-                  {visibleOrders.length === 0 ? (
-                    <div className="rounded-[1.45rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
-                      <p className="font-black text-slate-950">
-                        {orderView === "active" ? "No hay pedidos en curso." : "No hay pedidos anteriores."}
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
-                        {orderView === "active"
-                          ? "Cuando prepares un pedido aparecera en esta lista."
-                          : "Los pedidos entregados se guardaran aqui."}
-                      </p>
-                    </div>
-                  ) : (
-                    visibleOrders.map((order) => {
+                  {visibleOrders.map((order) => {
                       const artFile = getPrimaryArtFile(order);
                       const isSelected = selectedOrder?.id === order.id;
 
@@ -1187,8 +1186,7 @@ function CustomerDashboard({
                           </div>
                         </button>
                       );
-                    })
-                  )}
+                    })}
                 </div>
 
                 <div className="min-w-0">
