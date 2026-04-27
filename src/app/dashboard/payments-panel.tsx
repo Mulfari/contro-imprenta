@@ -84,7 +84,10 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
               No hay pagos pendientes por validar.
             </div>
           ) : (
-            pendingPayments.map((payment) => (
+            pendingPayments.map((payment) => {
+              const isTopUp = payment.purpose === "balance_topup" || !payment.order;
+
+              return (
               <article
                 key={payment.id}
                 className="rounded-[1.3rem] border border-slate-200 bg-white p-4 sm:rounded-[1.5rem] sm:p-5"
@@ -96,7 +99,11 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                         {paymentStatusLabels[payment.status]}
                       </span>
                       <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                        {payment.order?.source === "storefront" ? "Pedido web" : "Pedido admin"}
+                        {isTopUp
+                          ? "Recarga de saldo"
+                          : payment.order?.source === "storefront"
+                            ? "Pedido web"
+                            : "Pedido admin"}
                       </span>
                       <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
                         {formatDate(payment.created_at)}
@@ -106,7 +113,9 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                       {payment.client?.name ?? "Cliente storefront"}
                     </h3>
                     <p className="mt-1 text-sm text-slate-500">
-                      {payment.order?.order_number ?? "Sin numero"} - {payment.order?.title ?? "Pedido"}
+                      {isTopUp
+                        ? "Pago para aumentar saldo de cuenta"
+                        : `${payment.order?.order_number ?? "Sin numero"} - ${payment.order?.title ?? "Pedido"}`}
                     </p>
 
                     <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -127,9 +136,13 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                         <p className="mt-2 font-semibold text-slate-950">{payment.reference || "Sin dato"}</p>
                       </div>
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:col-span-2 xl:col-span-4">
-                        <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Pedido</p>
+                        <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                          {isTopUp ? "Destino" : "Pedido"}
+                        </p>
                         <p className="mt-2 font-semibold text-slate-950">
-                          Saldo actual: {formatCurrency(Number(payment.order?.pending_amount ?? 0))} - Area: {payment.order?.current_area ?? "Caja"}
+                          {isTopUp
+                            ? "Sumar al saldo del cliente al aprobar."
+                            : `Saldo actual: ${formatCurrency(Number(payment.order?.pending_amount ?? 0))} - Area: ${payment.order?.current_area ?? "Caja"}`}
                         </p>
                       </div>
                     </div>
@@ -170,7 +183,8 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                   </div>
                 </div>
               </article>
-            ))
+              );
+            })
           )}
         </div>
       </article>
@@ -191,7 +205,9 @@ export function PaymentsPanel({ payments, reviewAction }: PaymentsPanelProps) {
                       {payment.client?.name ?? "Cliente"} - {formatCurrency(Number(payment.amount))}
                     </p>
                     <p className="mt-1 text-sm text-slate-500">
-                      {payment.order?.order_number ?? "Sin numero"} - {formatDate(payment.created_at)}
+                      {payment.purpose === "balance_topup" || !payment.order
+                        ? `Recarga de saldo - ${formatDate(payment.created_at)}`
+                        : `${payment.order?.order_number ?? "Sin numero"} - ${formatDate(payment.created_at)}`}
                     </p>
                   </div>
                   <span className={`rounded-full px-3 py-1 text-xs font-semibold ${

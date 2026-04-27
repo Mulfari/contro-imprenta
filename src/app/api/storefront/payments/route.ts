@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { createCustomerPayment } from "@/lib/customer-commerce";
+import {
+  createCustomerBalanceTopUp,
+  createCustomerPayment,
+} from "@/lib/customer-commerce";
 import { getCurrentCustomer } from "@/lib/customer-auth";
 
 export async function POST(request: Request) {
@@ -16,20 +19,35 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("proofFile");
-    const payment = await createCustomerPayment({
-      userId: user.id,
-      orderId: String(formData.get("orderId") ?? ""),
-      amount: String(formData.get("amount") ?? ""),
-      bank: String(formData.get("bank") ?? ""),
-      payerPhone: String(formData.get("payerPhone") ?? ""),
-      reference: String(formData.get("reference") ?? ""),
-      notes: String(formData.get("notes") ?? ""),
-      proofFile: file instanceof File ? file : null,
-    });
+    const paymentPurpose = String(formData.get("paymentPurpose") ?? "order_payment");
+    const payment =
+      paymentPurpose === "balance_topup"
+        ? await createCustomerBalanceTopUp({
+            userId: user.id,
+            amount: String(formData.get("amount") ?? ""),
+            bank: String(formData.get("bank") ?? ""),
+            payerPhone: String(formData.get("payerPhone") ?? ""),
+            reference: String(formData.get("reference") ?? ""),
+            notes: String(formData.get("notes") ?? ""),
+            proofFile: file instanceof File ? file : null,
+          })
+        : await createCustomerPayment({
+            userId: user.id,
+            orderId: String(formData.get("orderId") ?? ""),
+            amount: String(formData.get("amount") ?? ""),
+            bank: String(formData.get("bank") ?? ""),
+            payerPhone: String(formData.get("payerPhone") ?? ""),
+            reference: String(formData.get("reference") ?? ""),
+            notes: String(formData.get("notes") ?? ""),
+            proofFile: file instanceof File ? file : null,
+          });
 
     return NextResponse.json({
       payment,
-      message: "Pago registrado. Administracion lo validara antes de producir.",
+      message:
+        paymentPurpose === "balance_topup"
+          ? "Recarga registrada. Administracion validara el pago y actualizara tu saldo."
+          : "Pago registrado. Administracion lo validara antes de producir.",
     });
   } catch (error) {
     const message =

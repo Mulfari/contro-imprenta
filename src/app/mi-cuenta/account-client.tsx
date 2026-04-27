@@ -10,6 +10,7 @@ type CustomerProfile = {
   id: string;
   full_name: string | null;
   phone: string | null;
+  account_balance: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -27,13 +28,14 @@ type CustomerOrderFile = {
 
 type CustomerPayment = {
   id: string;
-  order_id: string;
+  order_id: string | null;
   amount: number;
   method: string;
   bank: string | null;
   payer_phone: string | null;
   reference: string | null;
   status: "por_validar" | "aprobado" | "rechazado";
+  purpose?: "order_payment" | "balance_topup";
   created_at: string;
 };
 
@@ -168,6 +170,7 @@ const orderStatusSteps: CustomerOrder["status"][] = [
   "listo",
   "entregado",
 ];
+const whatsappHelpNumber = "584243390487";
 
 type CustomerDashboardProps = {
   displayName: string;
@@ -185,6 +188,13 @@ function getArtFiles(order: CustomerOrder) {
 
 function getPrimaryArtFile(order: CustomerOrder) {
   return getArtFiles(order)[0] ?? null;
+}
+
+function getOrderWhatsappHelpHref(order: CustomerOrder) {
+  const reference = order.order_number ?? order.id.slice(0, 8);
+  const message = `Hola, necesito ayuda con mi pedido ${reference} en Express Printer.`;
+
+  return `https://wa.me/${whatsappHelpNumber}?text=${encodeURIComponent(message)}`;
 }
 
 function isImageFile(file: CustomerOrderFile | null) {
@@ -265,9 +275,6 @@ function CustomerArtPreview({
           alt={file.file_name}
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
-        <span className="absolute inset-x-0 bottom-0 bg-slate-950/70 px-2 py-1 text-[10px] font-semibold text-white">
-          Arte
-        </span>
       </>
     );
 
@@ -833,6 +840,8 @@ function CustomerDashboard({
   const [actionMessage, setActionMessage] = useState("");
   const [actionTone, setActionTone] = useState<"error" | "success">("success");
   const [activePaymentOrderId, setActivePaymentOrderId] = useState<string | null>(null);
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [accountProfile, setAccountProfile] = useState<CustomerProfile | null>(profile);
   const [orderView, setOrderView] = useState<CustomerOrderView>("active");
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
@@ -845,6 +854,7 @@ function CustomerDashboard({
       });
       const payload = (await response.json()) as {
         orders?: CustomerOrder[];
+        profile?: CustomerProfile | null;
         error?: string;
       };
 
@@ -853,6 +863,7 @@ function CustomerDashboard({
       }
 
       setOrders(payload.orders ?? []);
+      setAccountProfile(payload.profile ?? profile);
       setActionTone("success");
     } catch (error) {
       setActionTone("error");
@@ -867,6 +878,10 @@ function CustomerDashboard({
   useEffect(() => {
     void loadOrders();
   }, []);
+
+  useEffect(() => {
+    setAccountProfile(profile);
+  }, [profile]);
 
   const openOrders = orders.filter(
     (order) => order.status !== "entregado" && order.status !== "rechazado",
@@ -940,6 +955,9 @@ function CustomerDashboard({
       setActionTone("success");
       setActionMessage(payload.message || "Pago registrado.");
       setActivePaymentOrderId(null);
+      if (formData.get("paymentPurpose") === "balance_topup") {
+        setIsTopUpOpen(false);
+      }
       form.reset();
       await loadOrders();
     } catch (error) {
@@ -964,6 +982,7 @@ function CustomerDashboard({
     (sum, order) => sum + Number(order.pending_amount ?? 0),
     0,
   );
+  const accountBalance = Number(accountProfile?.account_balance ?? 0);
   const ordersMissingArt = openOrders.filter(
     (order) => getArtFiles(order).length === 0,
   ).length;
@@ -1018,24 +1037,95 @@ function CustomerDashboard({
             </div>
           </div>
           <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
-            <p className="text-sm font-semibold text-slate-300">Saldo pendiente</p>
-            <p className="mt-2 text-3xl font-black">{formatCurrency(pendingBalance)}</p>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
-              {pendingPayments > 0
-                ? `${pendingPayments} pago${pendingPayments === 1 ? "" : "s"} en revision.`
-                : "Pagos y pedidos sincronizados con administracion."}
+            <p className="text-sm font-semibold text-slate-300">Saldo de cuenta</p>
+            <p className={`mt-2 text-3xl font-black ${accountBalance < 0 ? "text-rose-200" : "text-white"}`}>
+              {formatCurrency(accountBalance)}
             </p>
-            <button
-              type="button"
-              onClick={onSignOut}
-              disabled={isSigningOut}
-              className="mt-5 inline-flex w-full cursor-pointer items-center justify-center rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSigningOut ? "Cerrando..." : "Cerrar sesion"}
-            </button>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              {accountBalance < 0
+                ? "Cubre el saldo para crear nuevos pedidos."
+                : pendingPayments > 0
+                ? `${pendingPayments} pago${pendingPayments === 1 ? "" : "s"} en revision.`
+                : pendingBalance > 0
+                  ? `Saldo pendiente en pedidos: ${formatCurrency(pendingBalance)}.`
+                  : "Pagos y pedidos sincronizados con administracion."}
+            </p>
+            <div className="mt-5 grid gap-2">
+              <button
+                type="button"
+                onClick={() => setIsTopUpOpen((current) => !current)}
+                className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-[#ffd45f] px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+              >
+                {isTopUpOpen ? "Cerrar recarga" : "Aumentar saldo"}
+              </button>
+              <button
+                type="button"
+                onClick={onSignOut}
+                disabled={isSigningOut}
+                className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSigningOut ? "Cerrando..." : "Cerrar sesion"}
+              </button>
+            </div>
           </div>
         </div>
       </section>
+
+      {isTopUpOpen ? (
+        <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase text-slate-400">
+                Recarga de saldo
+              </p>
+              <h2 className="mt-2 text-2xl font-black text-slate-950">
+                Registrar pago movil
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Administracion valida la referencia y al aprobarla el monto se suma a tu saldo.
+              </p>
+            </div>
+            <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-950">
+              Actual: {formatCurrency(accountBalance)}
+            </p>
+          </div>
+          <form className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5" onSubmit={registerPayment}>
+            <input type="hidden" name="paymentPurpose" value="balance_topup" />
+            <input
+              name="amount"
+              type="number"
+              min="1"
+              step="0.01"
+              placeholder="Monto"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+              required
+            />
+            <input
+              name="bank"
+              placeholder="Banco"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+            />
+            <input
+              name="payerPhone"
+              placeholder="Telefono emisor"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+              required
+            />
+            <input
+              name="reference"
+              placeholder="Referencia"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+              required
+            />
+            <button
+              type="submit"
+              className="cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Enviar recarga
+            </button>
+          </form>
+        </section>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[0.64fr_1.36fr]">
         <aside className="space-y-6 xl:sticky xl:top-6 xl:self-start">
@@ -1054,10 +1144,10 @@ function CustomerDashboard({
               </span>
             </div>
             <div className="mt-5 grid gap-3">
-              <AccountDetail label="Nombre" value={profile?.full_name?.trim() || "Pendiente"} />
+              <AccountDetail label="Nombre" value={accountProfile?.full_name?.trim() || "Pendiente"} />
               <AccountDetail label="Correo" value={email || "Pendiente"} />
-              <AccountDetail label="Telefono" value={profile?.phone?.trim() || "Pendiente"} />
-              <AccountDetail label="Cliente desde" value={formatDate(profile?.created_at ?? null)} />
+              <AccountDetail label="Telefono" value={accountProfile?.phone?.trim() || "Pendiente"} />
+              <AccountDetail label="Cliente desde" value={formatDate(accountProfile?.created_at ?? null)} />
             </div>
           </section>
         </aside>
@@ -1212,6 +1302,14 @@ function CustomerDashboard({
                           <div className="mt-5">
                             <CustomerOrderProgressLine order={selectedOrder} />
                           </div>
+                          <a
+                            href={getOrderWhatsappHelpHref(selectedOrder)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-5 inline-flex w-full items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 transition hover:bg-emerald-100 sm:w-fit"
+                          >
+                            Necesitas ayuda en tu pedido?
+                          </a>
                         </div>
                       </div>
 
@@ -1339,11 +1437,13 @@ function CustomerDashboard({
                                 name="payerPhone"
                                 placeholder="Telefono emisor"
                                 className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+                                required
                               />
                               <input
                                 name="reference"
                                 placeholder="Referencia"
                                 className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+                                required
                               />
                               <label className="cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-600 sm:col-span-2">
                                 Comprobante

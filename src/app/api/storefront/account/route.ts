@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getCustomerDashboard } from "@/lib/customer-commerce";
+import { getCustomerAccount, getCustomerDashboard } from "@/lib/customer-commerce";
 import { getCurrentCustomer } from "@/lib/customer-auth";
 
 export async function GET() {
@@ -14,9 +14,12 @@ export async function GET() {
   }
 
   try {
-    const orders = await getCustomerDashboard(user.id);
+    const [account, orders] = await Promise.all([
+      getCustomerAccount(user.id),
+      getCustomerDashboard(user.id),
+    ]);
 
-    return NextResponse.json({ orders });
+    return NextResponse.json({ orders, profile: account.profile });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "No se pudo cargar tu cuenta.";

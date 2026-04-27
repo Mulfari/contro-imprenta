@@ -34,6 +34,12 @@ type PaymentFields = {
   reference: string;
 };
 
+type CheckoutPaymentMethod = "account_balance" | "pago_movil" | "stripe";
+
+type CheckoutAccountProfile = {
+  account_balance?: number | null;
+};
+
 const emptyPrep: CheckoutPrep = {
   files: [],
   sendLater: false,
@@ -152,7 +158,7 @@ function CheckoutSkeleton() {
 }
 
 function CheckoutHeader({ currentStep }: { currentStep: number }) {
-  const steps = ["Productos", "Arte por producto", "Pago movil"];
+  const steps = ["Productos", "Arte por producto", "Pago"];
 
   return (
     <header className="rounded-[1.6rem] border border-slate-200 bg-white px-4 py-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:px-6">
@@ -611,6 +617,9 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
     payerPhone: "",
     reference: "",
   });
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>("pago_movil");
+  const [accountBalance, setAccountBalance] = useState<number | null>(null);
+  const [isLoadingAccount, setIsLoadingAccount] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [messageTone, setMessageTone] = useState<"error" | "success" | "info">("info");
@@ -671,6 +680,46 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
     return () => subscription.unsubscribe();
   }, [hasPublicAuth]);
 
+  useEffect(() => {
+    if (!session) {
+      setAccountBalance(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadAccountBalance() {
+      setIsLoadingAccount(true);
+
+      try {
+        const response = await fetch("/api/storefront/account", {
+          cache: "no-store",
+        });
+        const payload = (await response.json()) as {
+          profile?: CheckoutAccountProfile;
+        };
+
+        if (isMounted) {
+          setAccountBalance(Number(payload.profile?.account_balance ?? 0));
+        }
+      } catch {
+        if (isMounted) {
+          setAccountBalance(0);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingAccount(false);
+        }
+      }
+    }
+
+    void loadAccountBalance();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session]);
+
   const subtotal = useMemo(
     () => cartItems.reduce((sum, item) => sum + getItemTotal(item), 0),
     [cartItems],
@@ -688,6 +737,14 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   const allItemsConfirmed = cartItems.length > 0 && preparedCount === cartItems.length;
   const activeItem = cartItems[activeIndex] ?? null;
   const currentStep = !allItemsConfirmed ? 2 : 3;
+  const balanceValue = accountBalance ?? 0;
+  const balanceAfterOrder = Number((balanceValue - subtotal).toFixed(2));
+  const hasNegativeBalance = balanceValue < 0;
+  const canSubmitOrder =
+    allItemsConfirmed &&
+    !hasNegativeBalance &&
+    !isLoadingAccount &&
+    paymentMethod !== "stripe";
 
   const changeQuantity = (key: string, quantity: number) => {
     if (quantity <= 0) {
@@ -761,17 +818,29 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
       return;
     }
 
+    if (hasNegativeBalance) {
+      setMessageTone("error");
+      setMessage("Tu cuenta tiene saldo negativo. Registra un pago y espera aprobacion antes de crear otro pedido.");
+      return;
+    }
+
+    if (paymentMethod === "stripe") {
+      setMessageTone("info");
+      setMessage("Stripe estara disponible mas adelante.");
+      return;
+    }
+
     const amount = Number(paymentFields.amount);
     const reference = paymentFields.reference.trim();
     const payerPhone = paymentFields.payerPhone.trim();
 
-    if (!Number.isFinite(amount) || amount <= 0) {
+    if (paymentMethod === "pago_movil" && (!Number.isFinite(amount) || amount <= 0)) {
       setMessageTone("error");
       setMessage("Escribe el monto del pago movil.");
       return;
     }
 
-    if (!payerPhone || !reference) {
+    if (paymentMethod === "pago_movil" && (!payerPhone || !reference)) {
       setMessageTone("error");
       setMessage("Indica el telefono emisor y la referencia del pago movil.");
       return;
@@ -822,6 +891,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
       "artIntent",
       cartItems.some((item) => getPrep(prepByKey, item.key).sendLater) ? "later" : "now",
     );
+    formData.set("paymentMethod", paymentMethod);
     formData.set("amount", paymentFields.amount);
     formData.set("bank", paymentFields.bank);
     formData.set("payerPhone", payerPhone);
@@ -1032,101 +1102,175 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                 </div>
 
                 <div className={`mt-5 rounded-[1.35rem] border p-4 ${
-                  allItemsConfirmed
+                  canSubmitOrder
                     ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-amber-200 bg-amber-50 text-amber-900"
+                    : hasNegativeBalance
+                      ? "border-rose-200 bg-rose-50 text-rose-800"
+                      : "border-amber-200 bg-amber-50 text-amber-900"
                 }`}>
                   <p className="text-sm font-black">
-                    {allItemsConfirmed ? "Listo para pago" : "Termina de preparar los productos"}
+                    {hasNegativeBalance
+                      ? "Saldo negativo"
+                      : allItemsConfirmed
+                        ? "Escoge como pagar"
+                        : "Termina de preparar los productos"}
                   </p>
                   <p className="mt-2 text-sm leading-6 opacity-85">
-                    {allItemsConfirmed
-                      ? "Ahora registra el pago movil para enviar la orden a revision."
+                    {hasNegativeBalance
+                      ? "Primero registra un pago desde Mi cuenta y espera aprobacion para volver a crear pedidos."
+                      : allItemsConfirmed
+                        ? "El pedido descontara el total del saldo de tu cuenta y quedara sincronizado con administracion."
                       : "El pago se desbloquea cuando cada producto tenga arte o quede marcado como pendiente."}
                   </p>
                 </div>
 
                 <div className="mt-5 grid gap-3">
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    name="amount"
-                    value={paymentFields.amount}
-                    onChange={(event) =>
-                      setPaymentFields((current) => ({
-                        ...current,
-                        amount: event.target.value,
-                      }))
-                    }
-                    required
-                    disabled={!allItemsConfirmed}
-                    className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
-                    placeholder="Monto pagado"
-                  />
-                  <input
-                    type="text"
-                    name="bank"
-                    value={paymentFields.bank}
-                    onChange={(event) =>
-                      setPaymentFields((current) => ({
-                        ...current,
-                        bank: event.target.value,
-                      }))
-                    }
-                    disabled={!allItemsConfirmed}
-                    className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
-                    placeholder="Banco emisor"
-                  />
-                  <input
-                    type="tel"
-                    name="payerPhone"
-                    value={paymentFields.payerPhone}
-                    onChange={(event) =>
-                      setPaymentFields((current) => ({
-                        ...current,
-                        payerPhone: event.target.value,
-                      }))
-                    }
-                    required
-                    disabled={!allItemsConfirmed}
-                    className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
-                    placeholder="Telefono emisor"
-                  />
-                  <input
-                    type="text"
-                    name="reference"
-                    value={paymentFields.reference}
-                    onChange={(event) =>
-                      setPaymentFields((current) => ({
-                        ...current,
-                        reference: event.target.value,
-                      }))
-                    }
-                    required
-                    disabled={!allItemsConfirmed}
-                    className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
-                    placeholder="Referencia del pago"
-                  />
-                  <label className={`block rounded-2xl border border-dashed px-4 py-4 text-center text-sm font-semibold transition ${
-                    allItemsConfirmed
-                      ? "cursor-pointer border-slate-300 bg-slate-50 text-slate-700 hover:border-slate-400 hover:bg-white"
-                      : "border-slate-200 bg-slate-50 text-slate-400"
-                  }`}>
-                    Adjuntar comprobante
-                    <span className="mt-1 block text-xs font-medium text-slate-500">
-                      Opcional, recomendado
-                    </span>
-                    <input
-                      type="file"
-                      name="proofFile"
-                      disabled={!allItemsConfirmed}
-                      className="sr-only"
-                    />
-                  </label>
+                  <div className="grid gap-2">
+                    {([
+                      ["account_balance", "Saldo", `Saldo actual: ${isLoadingAccount ? "cargando..." : formatCurrency(balanceValue)}`],
+                      ["pago_movil", "Pago movil", "Registra referencia y telefono emisor."],
+                      ["stripe", "Stripe", "Disponible mas adelante."],
+                    ] as const).map(([value, label, description]) => {
+                      const isSelected = paymentMethod === value;
+                      const isDisabled = !allItemsConfirmed || value === "stripe";
+
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => {
+                            if (!isDisabled) {
+                              setPaymentMethod(value);
+                            }
+                          }}
+                          disabled={isDisabled}
+                          className={`cursor-pointer rounded-2xl border px-4 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-55 ${
+                            isSelected
+                              ? "border-slate-950 bg-slate-950 text-white"
+                              : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
+                          }`}
+                        >
+                          <span className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-black">{label}</span>
+                            {isSelected ? (
+                              <span className="rounded-full bg-white/15 px-2 py-1 text-[10px] font-black">
+                                Seleccionado
+                              </span>
+                            ) : null}
+                          </span>
+                          <span className={`mt-1 block text-xs leading-5 ${
+                            isSelected ? "text-white/70" : "text-slate-500"
+                          }`}>
+                            {description}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {paymentMethod === "account_balance" ? (
+                    <div className={`rounded-2xl border px-4 py-4 ${
+                      balanceAfterOrder < 0
+                        ? "border-amber-200 bg-amber-50 text-amber-900"
+                        : "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    }`}>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-semibold">Saldo despues del pedido</span>
+                        <span className="text-lg font-black">{formatCurrency(balanceAfterOrder)}</span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 opacity-80">
+                        {balanceAfterOrder < 0
+                          ? "Puedes crear este pedido, pero no podras crear otro hasta aprobar un pago que cubra el saldo."
+                          : "El pedido quedara cubierto con tu saldo disponible."}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {paymentMethod === "pago_movil" ? (
+                    <>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        name="amount"
+                        value={paymentFields.amount}
+                        onChange={(event) =>
+                          setPaymentFields((current) => ({
+                            ...current,
+                            amount: event.target.value,
+                          }))
+                        }
+                        required={paymentMethod === "pago_movil"}
+                        disabled={!allItemsConfirmed}
+                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                        placeholder="Monto pagado"
+                      />
+                      <input
+                        type="text"
+                        name="bank"
+                        value={paymentFields.bank}
+                        onChange={(event) =>
+                          setPaymentFields((current) => ({
+                            ...current,
+                            bank: event.target.value,
+                          }))
+                        }
+                        disabled={!allItemsConfirmed}
+                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                        placeholder="Banco emisor"
+                      />
+                      <input
+                        type="tel"
+                        name="payerPhone"
+                        value={paymentFields.payerPhone}
+                        onChange={(event) =>
+                          setPaymentFields((current) => ({
+                            ...current,
+                            payerPhone: event.target.value,
+                          }))
+                        }
+                        required={paymentMethod === "pago_movil"}
+                        disabled={!allItemsConfirmed}
+                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                        placeholder="Telefono emisor"
+                      />
+                      <input
+                        type="text"
+                        name="reference"
+                        value={paymentFields.reference}
+                        onChange={(event) =>
+                          setPaymentFields((current) => ({
+                            ...current,
+                            reference: event.target.value,
+                          }))
+                        }
+                        required={paymentMethod === "pago_movil"}
+                        disabled={!allItemsConfirmed}
+                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                        placeholder="Referencia del pago"
+                      />
+                      <label className={`block rounded-2xl border border-dashed px-4 py-4 text-center text-sm font-semibold transition ${
+                        allItemsConfirmed
+                          ? "cursor-pointer border-slate-300 bg-slate-50 text-slate-700 hover:border-slate-400 hover:bg-white"
+                          : "border-slate-200 bg-slate-50 text-slate-400"
+                      }`}>
+                        Adjuntar comprobante
+                        <span className="mt-1 block text-xs font-medium text-slate-500">
+                          Opcional, recomendado
+                        </span>
+                        <input
+                          type="file"
+                          name="proofFile"
+                          disabled={!allItemsConfirmed}
+                          className="sr-only"
+                        />
+                      </label>
+                    </>
+                  ) : null}
+
                   <button
                     type="submit"
-                    disabled={isSubmitting || !allItemsConfirmed}
+                    disabled={isSubmitting || !canSubmitOrder}
                     className="mt-2 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-5 py-4 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSubmitting ? "Enviando pedido..." : "Enviar pedido a revision"}

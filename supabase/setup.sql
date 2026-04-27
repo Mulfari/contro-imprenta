@@ -4,6 +4,7 @@ create table if not exists public.customer_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text null,
   phone text null,
+  account_balance numeric(12,2) not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -12,8 +13,14 @@ alter table public.customer_profiles enable row level security;
 
 alter table public.customer_profiles add column if not exists full_name text null;
 alter table public.customer_profiles add column if not exists phone text null;
+alter table public.customer_profiles add column if not exists account_balance numeric(12,2) default 0;
 alter table public.customer_profiles add column if not exists created_at timestamptz default now();
 alter table public.customer_profiles add column if not exists updated_at timestamptz default now();
+alter table public.customer_profiles alter column account_balance set default 0;
+update public.customer_profiles
+  set account_balance = 0
+  where account_balance is null;
+alter table public.customer_profiles alter column account_balance set not null;
 
 create or replace function public.handle_customer_profile_updated_at()
 returns trigger
@@ -522,7 +529,7 @@ alter table public.order_files add column if not exists customer_uploaded_by uui
 
 create table if not exists public.order_payments (
   id uuid primary key default gen_random_uuid(),
-  order_id uuid not null references public.orders(id) on delete cascade,
+  order_id uuid null references public.orders(id) on delete cascade,
   customer_user_id uuid null references auth.users(id) on delete set null,
   amount numeric(12,2) not null check (amount > 0),
   method text not null default 'pago_movil',
@@ -530,6 +537,7 @@ create table if not exists public.order_payments (
   payer_phone text null,
   reference text null,
   status text not null default 'por_validar' check (status in ('por_validar', 'aprobado', 'rechazado')),
+  purpose text not null default 'order_payment' check (purpose in ('order_payment', 'balance_topup')),
   proof_file_id uuid null references public.order_files(id) on delete set null,
   notes text null,
   reviewed_by uuid null references public.app_users(id) on delete set null,
@@ -540,6 +548,7 @@ create table if not exists public.order_payments (
 alter table public.order_payments enable row level security;
 
 alter table public.order_payments add column if not exists order_id uuid null;
+alter table public.order_payments alter column order_id drop not null;
 alter table public.order_payments add column if not exists customer_user_id uuid null;
 alter table public.order_payments add column if not exists amount numeric(12,2);
 alter table public.order_payments add column if not exists method text default 'pago_movil';
@@ -547,6 +556,7 @@ alter table public.order_payments add column if not exists bank text null;
 alter table public.order_payments add column if not exists payer_phone text null;
 alter table public.order_payments add column if not exists reference text null;
 alter table public.order_payments add column if not exists status text default 'por_validar';
+alter table public.order_payments add column if not exists purpose text default 'order_payment';
 alter table public.order_payments add column if not exists proof_file_id uuid null;
 alter table public.order_payments add column if not exists notes text null;
 alter table public.order_payments add column if not exists reviewed_by uuid null;
@@ -561,6 +571,40 @@ create index if not exists order_payments_status_idx
 
 create index if not exists order_payments_customer_user_id_idx
   on public.order_payments (customer_user_id);
+
+create index if not exists order_payments_purpose_idx
+  on public.order_payments (purpose);
+
+create table if not exists public.customer_balance_transactions (
+  id uuid primary key default gen_random_uuid(),
+  customer_user_id uuid not null references auth.users(id) on delete cascade,
+  order_id uuid null references public.orders(id) on delete set null,
+  payment_id uuid null references public.order_payments(id) on delete set null,
+  amount numeric(12,2) not null,
+  balance_after numeric(12,2) not null,
+  transaction_type text not null check (transaction_type in ('order_debit', 'payment_credit', 'balance_topup', 'manual_adjustment')),
+  description text not null,
+  created_at timestamptz not null default now(),
+  created_by uuid null references public.app_users(id) on delete set null
+);
+
+alter table public.customer_balance_transactions enable row level security;
+
+alter table public.customer_balance_transactions add column if not exists customer_user_id uuid null;
+alter table public.customer_balance_transactions add column if not exists order_id uuid null;
+alter table public.customer_balance_transactions add column if not exists payment_id uuid null;
+alter table public.customer_balance_transactions add column if not exists amount numeric(12,2);
+alter table public.customer_balance_transactions add column if not exists balance_after numeric(12,2);
+alter table public.customer_balance_transactions add column if not exists transaction_type text;
+alter table public.customer_balance_transactions add column if not exists description text;
+alter table public.customer_balance_transactions add column if not exists created_at timestamptz default now();
+alter table public.customer_balance_transactions add column if not exists created_by uuid null;
+
+create index if not exists customer_balance_transactions_customer_user_id_idx
+  on public.customer_balance_transactions (customer_user_id);
+
+create index if not exists customer_balance_transactions_created_at_idx
+  on public.customer_balance_transactions (created_at desc);
 
 do $$
 begin
@@ -796,6 +840,60 @@ begin
     alter table public.order_payments
       add constraint order_payments_amount_check
       check (amount > 0);
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'order_payments_purpose_check'
+  ) then
+    alter table public.order_payments
+      add constraint order_payments_purpose_check
+      check (purpose in ('order_payment', 'balance_topup'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'customer_balance_transactions_customer_user_id_fkey'
+  ) then
+    alter table public.customer_balance_transactions
+      add constraint customer_balance_transactions_customer_user_id_fkey
+      foreign key (customer_user_id) references auth.users(id) on delete cascade;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'customer_balance_transactions_order_id_fkey'
+  ) then
+    alter table public.customer_balance_transactions
+      add constraint customer_balance_transactions_order_id_fkey
+      foreign key (order_id) references public.orders(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'customer_balance_transactions_payment_id_fkey'
+  ) then
+    alter table public.customer_balance_transactions
+      add constraint customer_balance_transactions_payment_id_fkey
+      foreign key (payment_id) references public.order_payments(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'customer_balance_transactions_created_by_fkey'
+  ) then
+    alter table public.customer_balance_transactions
+      add constraint customer_balance_transactions_created_by_fkey
+      foreign key (created_by) references public.app_users(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'customer_balance_transactions_transaction_type_check'
+  ) then
+    alter table public.customer_balance_transactions
+      add constraint customer_balance_transactions_transaction_type_check
+      check (transaction_type in ('order_debit', 'payment_credit', 'balance_topup', 'manual_adjustment'));
   end if;
 
   if not exists (

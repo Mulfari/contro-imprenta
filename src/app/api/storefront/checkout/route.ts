@@ -4,6 +4,7 @@ import {
   createStorefrontCheckout,
   createCustomerPayment,
   uploadCustomerOrderFile,
+  type CheckoutPaymentMethod,
   type StorefrontCheckoutItem,
 } from "@/lib/customer-commerce";
 import { getCurrentCustomer } from "@/lib/customer-auth";
@@ -75,6 +76,9 @@ async function handleMultipartCheckout(request: Request, user: NonNullable<Await
   const amount = String(formData.get("amount") ?? "");
   const reference = String(formData.get("reference") ?? "").trim();
   const payerPhone = String(formData.get("payerPhone") ?? "").trim();
+  const paymentMethod = String(
+    formData.get("paymentMethod") ?? "pago_movil",
+  ) as CheckoutPaymentMethod;
   const proofFile = formData.get("proofFile");
 
   if (items.length === 0) {
@@ -85,7 +89,11 @@ async function handleMultipartCheckout(request: Request, user: NonNullable<Await
     throw new Error("Sube el arte digital o indica que lo enviaras despues.");
   }
 
-  if (!amount || !reference || !payerPhone) {
+  if (paymentMethod === "stripe") {
+    throw new Error("Stripe estara disponible mas adelante.");
+  }
+
+  if (paymentMethod === "pago_movil" && (!amount || !reference || !payerPhone)) {
     throw new Error("Completa el monto, telefono emisor y referencia del pago movil.");
   }
 
@@ -96,6 +104,7 @@ async function handleMultipartCheckout(request: Request, user: NonNullable<Await
     phone: String(user.user_metadata.phone ?? ""),
     notes,
     items,
+    paymentMethod,
   });
   const order = orders[0];
 
@@ -114,23 +123,27 @@ async function handleMultipartCheckout(request: Request, user: NonNullable<Await
     ),
   );
 
-  await createCustomerPayment({
-    userId: user.id,
-    orderId: order.id,
-    amount,
-    bank: String(formData.get("bank") ?? ""),
-    payerPhone,
-    reference,
-    notes: artIntent === "later"
-      ? "Cliente indico que enviara el arte despues."
-      : "Pago enviado desde checkout web.",
-    proofFile: proofFile instanceof File ? proofFile : null,
-  });
+  if (paymentMethod === "pago_movil") {
+    await createCustomerPayment({
+      userId: user.id,
+      orderId: order.id,
+      amount,
+      bank: String(formData.get("bank") ?? ""),
+      payerPhone,
+      reference,
+      notes: artIntent === "later"
+        ? "Cliente indico que enviara el arte despues."
+        : "Pago enviado desde checkout web.",
+      proofFile: proofFile instanceof File ? proofFile : null,
+    });
+  }
 
   return NextResponse.json({
     orders,
     message:
-      artFiles.length > 0
+      paymentMethod === "account_balance"
+        ? "Pedido enviado. El saldo de tu cuenta fue aplicado y administracion revisara el arte."
+        : artFiles.length > 0
         ? "Pedido enviado. Administracion validara el pago y el arte."
         : "Pedido enviado. Administracion validara el pago; queda pendiente el arte.",
   });
@@ -162,6 +175,7 @@ export async function POST(request: Request) {
       phone: String(user.user_metadata.phone ?? ""),
       notes: payload.notes ?? "",
       items,
+      paymentMethod: "pago_movil",
     });
 
     return NextResponse.json({
