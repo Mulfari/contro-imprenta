@@ -764,9 +764,13 @@ function CustomerAccountDropdownSummary({
               Pedidos en curso
             </p>
             <p className="mt-1 text-xs font-semibold text-slate-500">
-              {activeOrders.length > 0
-                ? `${activeOrders.length} pedido${activeOrders.length === 1 ? "" : "s"} activo${activeOrders.length === 1 ? "" : "s"}`
-                : "Sin pedidos activos"}
+              {isLoadingOrders ? (
+                <SkeletonBlock className="h-3 w-28" />
+              ) : activeOrders.length > 0 ? (
+                `${activeOrders.length} pedido${activeOrders.length === 1 ? "" : "s"} activo${activeOrders.length === 1 ? "" : "s"}`
+              ) : (
+                "Sin pedidos activos"
+              )}
             </p>
           </div>
           <Link
