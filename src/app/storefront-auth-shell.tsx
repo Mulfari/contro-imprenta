@@ -447,6 +447,12 @@ export function StorefrontAuthShell({
           setAccountOpen(false);
         }}
         onCatalogClick={() => openCatalog()}
+        onHomeClick={() => {
+          setSearchQuery("");
+          setAccountOpen(false);
+          setActivePanel(null);
+          router.push("/");
+        }}
         onSectionNavigate={(href) => {
           setAccountOpen(false);
           setActivePanel(null);

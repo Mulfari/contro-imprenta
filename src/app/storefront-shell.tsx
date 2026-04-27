@@ -1040,6 +1040,21 @@ export function StorefrontShell() {
     }, 0);
   };
 
+  const goToHome = () => {
+    setSearchQuery("");
+    setDebouncedQuery("");
+    setCatalogOpen(false);
+    setCatalogLoading(false);
+    setAccountOpen(false);
+    setActivePanel(null);
+    setSelectedProduct(null);
+    setMobileFilterOpen(false);
+    window.history.pushState(null, "", "/");
+    window.setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 0);
+  };
+
   const openCatalogWithQuery = (query: string) => {
     setSearchQuery(query);
     setDebouncedQuery(query);
@@ -1281,6 +1296,7 @@ export function StorefrontShell() {
           setAccountOpen(false);
         }}
         onCatalogClick={openCatalog}
+        onHomeClick={goToHome}
         onSectionNavigate={() => closeCatalogForHomeSection()}
       />
 

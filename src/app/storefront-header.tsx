@@ -50,6 +50,7 @@ type StorefrontHeaderProps = {
   onWishlistClick: () => void;
   onCartClick: () => void;
   onCatalogClick: () => void;
+  onHomeClick?: () => void;
   onSectionNavigate: (href: string) => void;
 };
 
@@ -65,6 +66,7 @@ export function StorefrontHeader({
   onWishlistClick,
   onCartClick,
   onCatalogClick,
+  onHomeClick,
   onSectionNavigate,
 }: StorefrontHeaderProps) {
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -113,6 +115,17 @@ export function StorefrontHeader({
     }, 0);
   };
 
+  const handleHomeClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (!onHomeClick) {
+      return;
+    }
+
+    event.preventDefault();
+    onHomeClick();
+    setCategoryOpen(false);
+    setActiveCategoryIndex(null);
+  };
+
   return (
     <>
       <div className="hidden border-b border-slate-800 bg-slate-950 text-white sm:block">
@@ -124,7 +137,7 @@ export function StorefrontHeader({
       <header className="relative z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[112rem] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
           <div className="flex items-center justify-between gap-4 lg:hidden">
-            <Link href="/" className="relative flex items-center">
+            <Link href="/" onClick={handleHomeClick} className="relative flex items-center">
               <div
                 className="h-[2.5rem] w-[8.8rem]"
                 aria-label="Express Printer"
@@ -229,7 +242,11 @@ export function StorefrontHeader({
           </div>
 
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <Link href="/" className="relative hidden items-center lg:ml-16 lg:flex">
+            <Link
+              href="/"
+              onClick={handleHomeClick}
+              className="relative hidden items-center lg:ml-16 lg:flex"
+            >
               <div
                 className="h-[2.9rem] w-[10.4rem]"
                 aria-label="Express Printer"
