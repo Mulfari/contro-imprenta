@@ -758,7 +758,7 @@ function CustomerAccountDropdownSummary({
       ) : null}
 
       <section className="mt-4 rounded-[1.45rem] border border-slate-200 bg-slate-50 p-4">
-        <div className="flex items-center justify-between gap-3">
+        <div>
           <div>
             <p className="text-sm font-black text-slate-950">
               Pedidos en curso
@@ -773,13 +773,6 @@ function CustomerAccountDropdownSummary({
               )}
             </p>
           </div>
-          <Link
-            href="/mi-cuenta"
-            onClick={onClose}
-            className="shrink-0 rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"
-          >
-            Dashboard
-          </Link>
         </div>
 
         <div className="mt-4 space-y-2">
@@ -815,9 +808,6 @@ function CustomerAccountDropdownSummary({
         >
           Ver dashboard
         </Link>
-        <p className="px-2 text-center text-xs leading-5 text-slate-400">
-          Entra para revisar pedidos, subir arte y consultar pagos.
-        </p>
         <button
           type="button"
           onClick={onSignOut}
