@@ -620,6 +620,10 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>("pago_movil");
   const [accountBalance, setAccountBalance] = useState<number | null>(null);
   const [isLoadingAccount, setIsLoadingAccount] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [messageTone, setMessageTone] = useState<"error" | "success" | "info">("info");
@@ -720,6 +724,38 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
     };
   }, [session]);
 
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadContactDefaults() {
+      try {
+        const response = await fetch("/api/storefront/account", {
+          cache: "no-store",
+        });
+        const payload = (await response.json()) as {
+          profile?: { full_name?: string | null; phone?: string | null };
+        };
+
+        if (isMounted && payload.profile) {
+          setContactName((current) => current || payload.profile?.full_name || "");
+          setContactPhone((current) => current || payload.profile?.phone || "");
+        }
+      } catch {
+        // Pre-fill is best-effort
+      }
+    }
+
+    void loadContactDefaults();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session]);
+
   const subtotal = useMemo(
     () => cartItems.reduce((sum, item) => sum + getItemTotal(item), 0),
     [cartItems],
@@ -802,6 +838,24 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
       return;
     }
 
+    if (!contactName.trim()) {
+      setMessageTone("error");
+      setMessage("Escribe el nombre de contacto para la entrega.");
+      return;
+    }
+
+    if (!contactPhone.trim()) {
+      setMessageTone("error");
+      setMessage("Escribe el telefono de contacto para la entrega.");
+      return;
+    }
+
+    if (deliveryMethod === "delivery" && !deliveryAddress.trim()) {
+      setMessageTone("error");
+      setMessage("Escribe la direccion de entrega.");
+      return;
+    }
+
     if (cartItems.length === 0) {
       setMessageTone("error");
       setMessage("Tu carrito esta vacio.");
@@ -878,9 +932,21 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
         })),
       ),
     );
+    const deliveryInfo = [
+      `Contacto: ${contactName.trim()}`,
+      `Telefono contacto: ${contactPhone.trim()}`,
+      `Entrega: ${deliveryMethod === "delivery" ? "Delivery" : "Retiro en tienda"}`,
+      deliveryMethod === "delivery" && deliveryAddress.trim()
+        ? `Direccion: ${deliveryAddress.trim()}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
     formData.set(
       "notes",
       [
+        `Datos de entrega:\n${deliveryInfo}`,
         globalNotes ? `Notas generales: ${globalNotes}` : "",
         `Preparacion por producto:\n${preparedNotes.join("\n\n")}`,
       ]
@@ -891,6 +957,10 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
       "artIntent",
       cartItems.some((item) => getPrep(prepByKey, item.key).sendLater) ? "later" : "now",
     );
+    formData.set("contactName", contactName.trim());
+    formData.set("contactPhone", contactPhone.trim());
+    formData.set("deliveryMethod", deliveryMethod);
+    formData.set("deliveryAddress", deliveryMethod === "delivery" ? deliveryAddress.trim() : "");
     formData.set("paymentMethod", paymentMethod);
     formData.set("amount", paymentFields.amount);
     formData.set("bank", paymentFields.bank);
@@ -1063,6 +1133,95 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
 
             <aside className="space-y-5 xl:sticky xl:top-5">
               {message ? <MessageBox message={message} tone={messageTone} /> : null}
+
+              <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.08)] sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Entrega
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950">
+                  Datos de entrega
+                </h2>
+
+                <div className="mt-5 grid gap-3">
+                  <div>
+                    <label htmlFor="contactName" className="mb-1.5 block text-xs font-semibold text-slate-500">
+                      Nombre de contacto
+                    </label>
+                    <input
+                      id="contactName"
+                      type="text"
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                      placeholder="Nombre completo"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="contactPhone" className="mb-1.5 block text-xs font-semibold text-slate-500">
+                      Telefono de contacto
+                    </label>
+                    <input
+                      id="contactPhone"
+                      type="tel"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      placeholder="04XX-XXXXXXX"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+                      Metodo de entrega
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {([
+                        ["pickup", "Retiro en tienda"],
+                        ["delivery", "Delivery"],
+                      ] as const).map(([value, label]) => {
+                        const isSelected = deliveryMethod === value;
+
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setDeliveryMethod(value)}
+                            className={`rounded-2xl border px-4 py-3 text-sm font-black transition ${
+                              isSelected
+                                ? "border-slate-950 bg-slate-950 text-white"
+                                : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {deliveryMethod === "delivery" ? (
+                    <div>
+                      <label htmlFor="deliveryAddress" className="mb-1.5 block text-xs font-semibold text-slate-500">
+                        Direccion de entrega
+                      </label>
+                      <textarea
+                        id="deliveryAddress"
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        rows={3}
+                        placeholder="Direccion completa, punto de referencia..."
+                        className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                      />
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                      <p className="text-xs font-semibold text-slate-500">
+                        Retira tu pedido en nuestra tienda una vez que este listo. Te notificaremos por telefono.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </section>
 
               <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.08)] sm:p-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
