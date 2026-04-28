@@ -131,34 +131,39 @@ function CatalogProductCard({
     <button
       type="button"
       onClick={onPreview}
-      className="catalog-enter-card group block w-full cursor-pointer overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white text-left shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_38px_rgba(15,23,42,0.08)] sm:rounded-[1.35rem]"
+      className="catalog-enter-card group block h-full w-full cursor-pointer rounded-[1.25rem] border border-slate-200 bg-white p-3 text-left shadow-[0_10px_28px_rgba(15,23,42,0.035)] transition hover:-translate-y-1 hover:border-slate-300 hover:bg-slate-50/40 hover:shadow-[0_22px_42px_rgba(15,23,42,0.08)]"
     >
-      <div className={`relative flex h-44 w-full items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-4 sm:h-56 sm:p-5`}>
-        <div className="absolute inset-x-10 bottom-6 h-10 rounded-full bg-slate-900/12 blur-2xl" />
+      <div className={`relative flex aspect-[1.22] w-full items-center justify-center overflow-hidden rounded-[1rem] bg-gradient-to-br ${product.tint} p-4`}>
+        <div className="absolute inset-x-8 bottom-5 h-8 rounded-full bg-slate-900/10 blur-2xl" />
         <Image
           src={product.image}
           alt={product.imageAlt}
           width={1000}
           height={760}
           sizes="(min-width: 1280px) 22vw, (min-width: 768px) 40vw, 88vw"
-          className="relative z-10 h-auto max-h-[88%] w-auto max-w-[86%] object-contain drop-shadow-[0_22px_34px_rgba(15,23,42,0.18)] transition duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02]"
+          className="relative z-10 h-auto max-h-[84%] w-auto max-w-[84%] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] transition duration-300 group-hover:-translate-y-1 group-hover:scale-[1.025]"
         />
       </div>
 
-      <div className="p-4 sm:p-5">
+      <div className="flex min-h-[10.8rem] flex-col px-1 pb-1 pt-4">
         <h3 className="text-lg font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-[#3558ff]">
           {product.title}
         </h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <p
+          className="mt-2 text-sm leading-6 text-slate-500"
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
           {product.description}
         </p>
-        <div className="mt-4 border-t border-slate-100 pt-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Desde
-            </p>
-            <p className="text-2xl font-black tracking-tight text-slate-950">{product.price}</p>
-          </div>
+        <div className="mt-auto pt-5">
+          <p className="text-sm font-semibold text-slate-400">
+            Desde <span className="text-2xl font-black tracking-tight text-slate-950">{product.price}</span>
+          </p>
         </div>
       </div>
     </button>
@@ -167,21 +172,18 @@ function CatalogProductCard({
 
 function CatalogProductSkeleton() {
   return (
-    <article className="overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:rounded-[1.35rem]">
-      <div className="relative flex h-44 w-full items-center justify-center overflow-hidden bg-slate-100 p-4 sm:h-56 sm:p-5">
-        <div className="h-28 w-36 animate-pulse rounded-[1.5rem] bg-slate-200 sm:h-36 sm:w-44" />
+    <article className="rounded-[1.25rem] border border-slate-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.035)]">
+      <div className="relative flex aspect-[1.22] w-full items-center justify-center overflow-hidden rounded-[1rem] bg-slate-100 p-4">
+        <div className="h-28 w-36 animate-pulse rounded-[1.5rem] bg-slate-200 sm:h-32 sm:w-40" />
       </div>
-      <div className="space-y-4 p-4 sm:p-5">
+      <div className="flex min-h-[10.8rem] flex-col px-1 pb-1 pt-4">
         <div>
           <div className="h-6 w-44 max-w-full animate-pulse rounded-full bg-slate-200" />
           <div className="mt-3 h-4 w-full animate-pulse rounded-full bg-slate-200" />
           <div className="mt-2 h-4 w-3/4 animate-pulse rounded-full bg-slate-200" />
         </div>
-        <div className="border-t border-slate-100 pt-4">
-          <div>
-            <div className="h-3 w-14 animate-pulse rounded-full bg-slate-200" />
-            <div className="mt-2 h-8 w-24 animate-pulse rounded-full bg-slate-200" />
-          </div>
+        <div className="mt-auto pt-5">
+          <div className="h-8 w-28 animate-pulse rounded-full bg-slate-200" />
         </div>
       </div>
     </article>
