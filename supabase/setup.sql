@@ -4,6 +4,10 @@ create table if not exists public.customer_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text null,
   phone text null,
+  preferred_delivery_method text null check (preferred_delivery_method in ('pickup', 'delivery')),
+  delivery_recipient_name text null,
+  delivery_recipient_phone text null,
+  delivery_address text null,
   account_balance numeric(12,2) not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -13,6 +17,10 @@ alter table public.customer_profiles enable row level security;
 
 alter table public.customer_profiles add column if not exists full_name text null;
 alter table public.customer_profiles add column if not exists phone text null;
+alter table public.customer_profiles add column if not exists preferred_delivery_method text null;
+alter table public.customer_profiles add column if not exists delivery_recipient_name text null;
+alter table public.customer_profiles add column if not exists delivery_recipient_phone text null;
+alter table public.customer_profiles add column if not exists delivery_address text null;
 alter table public.customer_profiles add column if not exists account_balance numeric(12,2) default 0;
 alter table public.customer_profiles add column if not exists created_at timestamptz default now();
 alter table public.customer_profiles add column if not exists updated_at timestamptz default now();
@@ -21,6 +29,18 @@ update public.customer_profiles
   set account_balance = 0
   where account_balance is null;
 alter table public.customer_profiles alter column account_balance set not null;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'customer_profiles_preferred_delivery_method_check'
+  ) then
+    alter table public.customer_profiles
+      add constraint customer_profiles_preferred_delivery_method_check
+      check (preferred_delivery_method in ('pickup', 'delivery') or preferred_delivery_method is null);
+  end if;
+end $$;
 
 create or replace function public.handle_customer_profile_updated_at()
 returns trigger

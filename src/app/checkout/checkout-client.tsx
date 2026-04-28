@@ -37,7 +37,13 @@ type PaymentFields = {
 type CheckoutPaymentMethod = "account_balance" | "pago_movil" | "stripe";
 
 type CheckoutAccountProfile = {
+  full_name?: string | null;
+  phone?: string | null;
   account_balance?: number | null;
+  preferred_delivery_method?: "pickup" | "delivery" | null;
+  delivery_recipient_name?: string | null;
+  delivery_recipient_phone?: string | null;
+  delivery_address?: string | null;
 };
 
 const emptyPrep: CheckoutPrep = {
@@ -663,7 +669,11 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup");
+  const [recipientMode, setRecipientMode] = useState<"self" | "third_party">("self");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientPhone, setRecipientPhone] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [isPreparationCollapsed, setIsPreparationCollapsed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [messageTone, setMessageTone] = useState<"error" | "success" | "info">("info");
@@ -777,12 +787,29 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
           cache: "no-store",
         });
         const payload = (await response.json()) as {
-          profile?: { full_name?: string | null; phone?: string | null };
+          profile?: CheckoutAccountProfile;
         };
 
         if (isMounted && payload.profile) {
-          setContactName((current) => current || payload.profile?.full_name || "");
-          setContactPhone((current) => current || payload.profile?.phone || "");
+          const profile = payload.profile;
+          const defaultName = profile.full_name || "";
+          const defaultPhone = profile.phone || "";
+          const savedRecipientName = profile.delivery_recipient_name || "";
+          const savedRecipientPhone = profile.delivery_recipient_phone || "";
+
+          setContactName((current) => current || defaultName);
+          setContactPhone((current) => current || defaultPhone);
+          setDeliveryMethod(profile.preferred_delivery_method === "delivery" ? "delivery" : "pickup");
+          setDeliveryAddress((current) => current || profile.delivery_address || "");
+          setRecipientName((current) => current || savedRecipientName);
+          setRecipientPhone((current) => current || savedRecipientPhone);
+
+          if (
+            savedRecipientName &&
+            savedRecipientName.trim().toLowerCase() !== defaultName.trim().toLowerCase()
+          ) {
+            setRecipientMode("third_party");
+          }
         }
       } catch {
         // Pre-fill is best-effort
@@ -816,11 +843,19 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   const balanceValue = accountBalance ?? 0;
   const balanceAfterOrder = Number((balanceValue - subtotal).toFixed(2));
   const hasNegativeBalance = balanceValue < 0;
+  const effectiveRecipientName =
+    recipientMode === "third_party" ? recipientName.trim() : contactName.trim();
+  const effectiveRecipientPhone =
+    recipientMode === "third_party" ? recipientPhone.trim() : contactPhone.trim();
   const canSubmitOrder =
     allItemsConfirmed &&
     !hasNegativeBalance &&
     !isLoadingAccount &&
     paymentMethod !== "stripe";
+
+  useEffect(() => {
+    setIsPreparationCollapsed(allItemsConfirmed);
+  }, [allItemsConfirmed]);
 
   const changeQuantity = (key: string, quantity: number) => {
     if (quantity <= 0) {
@@ -880,13 +915,19 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
 
     if (!contactName.trim()) {
       setMessageTone("error");
-      setMessage("Escribe el nombre de contacto para la entrega.");
+      setMessage("Escribe el nombre del cliente para la entrega.");
       return;
     }
 
-    if (!contactPhone.trim()) {
+    if (recipientMode === "third_party" && !recipientName.trim()) {
       setMessageTone("error");
-      setMessage("Escribe el telefono de contacto para la entrega.");
+      setMessage("Escribe el nombre de la persona que retira o recibe.");
+      return;
+    }
+
+    if (recipientMode === "third_party" && !recipientPhone.trim()) {
+      setMessageTone("error");
+      setMessage("Escribe el telefono de la persona autorizada.");
       return;
     }
 
@@ -973,9 +1014,11 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
       ),
     );
     const deliveryInfo = [
-      `Contacto: ${contactName.trim()}`,
-      `Telefono contacto: ${contactPhone.trim()}`,
+      `Cliente: ${contactName.trim()}`,
+      contactPhone.trim() ? `Telefono cliente: ${contactPhone.trim()}` : "",
       `Entrega: ${deliveryMethod === "delivery" ? "Delivery" : "Retiro en tienda"}`,
+      `Recibe/retira: ${effectiveRecipientName}`,
+      effectiveRecipientPhone ? `Telefono receptor: ${effectiveRecipientPhone}` : "",
       deliveryMethod === "delivery" && deliveryAddress.trim()
         ? `Direccion: ${deliveryAddress.trim()}`
         : "",
@@ -1001,6 +1044,9 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
     formData.set("contactPhone", contactPhone.trim());
     formData.set("deliveryMethod", deliveryMethod);
     formData.set("deliveryAddress", deliveryMethod === "delivery" ? deliveryAddress.trim() : "");
+    formData.set("recipientMode", recipientMode);
+    formData.set("recipientName", effectiveRecipientName);
+    formData.set("recipientPhone", effectiveRecipientPhone);
     formData.set("paymentMethod", paymentMethod);
     formData.set("amount", paymentFields.amount);
     formData.set("bank", paymentFields.bank);
@@ -1113,91 +1159,116 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
         ) : (
           <form onSubmit={handleSubmit} className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start">
             <div className="space-y-4">
-              <section className="rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-[0_14px_34px_rgba(15,23,42,0.045)] sm:p-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                      Preparacion de imprenta
-                    </p>
-                    <h1 className="mt-1 text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
-                      Confirma el arte de cada producto
-                    </h1>
+              {isPreparationCollapsed ? (
+                <section className="rounded-[1.5rem] border border-emerald-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.045)] sm:p-5">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-600">
+                        Pedido listo
+                      </p>
+                      <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950">
+                        Ya puedes revisar entrega y pago.
+                      </h1>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                        Los {cartItems.length} producto{cartItems.length === 1 ? "" : "s"} del pedido ya tienen arte cargado o quedaron marcados como pendiente.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsPreparationCollapsed(false)}
+                        className="cursor-pointer rounded-full border border-slate-200 px-4 py-2.5 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                      >
+                        Revisar productos
+                      </button>
+                      <span className="inline-flex rounded-full bg-emerald-50 px-4 py-2.5 text-xs font-black text-emerald-700">
+                        Continua en resumen y pago
+                      </span>
+                    </div>
                   </div>
-                  <Link
-                    href="/#catalogo"
-                    className="inline-flex w-fit rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-                  >
-                    Seguir comprando
-                  </Link>
-                </div>
+                </section>
+              ) : (
+                <>
+                  <section className="rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-[0_14px_34px_rgba(15,23,42,0.045)] sm:p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                          Preparacion de imprenta
+                        </p>
+                        <h1 className="mt-1 text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+                          Confirma el arte de cada producto
+                        </h1>
+                      </div>
+                      <Link
+                        href="/#catalogo"
+                        className="inline-flex w-fit rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                      >
+                        Seguir comprando
+                      </Link>
+                    </div>
 
-                <div className="mt-4 grid gap-2 lg:grid-cols-2 2xl:grid-cols-3">
-                  {cartItems.map((item, index) => (
-                    <ProductQueueItem
-                      key={item.key}
-                      item={item}
-                      index={index}
-                      isActive={activeIndex === index}
-                      prep={getPrep(prepByKey, item.key)}
-                      onClick={() => setActiveIndex(index)}
+                    <div className="mt-4 grid gap-2 lg:grid-cols-2 2xl:grid-cols-3">
+                      {cartItems.map((item, index) => (
+                        <ProductQueueItem
+                          key={item.key}
+                          item={item}
+                          index={index}
+                          isActive={activeIndex === index}
+                          prep={getPrep(prepByKey, item.key)}
+                          onClick={() => setActiveIndex(index)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+
+                  {activeItem ? (
+                    <ActiveProductPreparation
+                      item={activeItem}
+                      index={activeIndex}
+                      totalItems={cartItems.length}
+                      prep={getPrep(prepByKey, activeItem.key)}
+                      onPrepChange={(next) => updatePrep(activeItem.key, next)}
+                      onQuantityChange={(quantity) => changeQuantity(activeItem.key, quantity)}
+                      onRemove={() => removeItem(activeItem.key)}
+                      onConfirm={confirmCurrentItem}
+                      onPrevious={() => setActiveIndex((current) => Math.max(0, current - 1))}
+                      onNext={() =>
+                        setActiveIndex((current) => Math.min(cartItems.length - 1, current + 1))
+                      }
                     />
-                  ))}
-                </div>
-              </section>
+                  ) : null}
 
-              {activeItem ? (
-                <ActiveProductPreparation
-                  item={activeItem}
-                  index={activeIndex}
-                  totalItems={cartItems.length}
-                  prep={getPrep(prepByKey, activeItem.key)}
-                  onPrepChange={(next) => updatePrep(activeItem.key, next)}
-                  onQuantityChange={(quantity) => changeQuantity(activeItem.key, quantity)}
-                  onRemove={() => removeItem(activeItem.key)}
-                  onConfirm={confirmCurrentItem}
-                  onPrevious={() => setActiveIndex((current) => Math.max(0, current - 1))}
-                  onNext={() =>
-                    setActiveIndex((current) => Math.min(cartItems.length - 1, current + 1))
-                  }
-                />
-              ) : null}
-
-              <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.045)] sm:p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  Detalles adicionales
-                </p>
-                <h2 className="mt-1 text-lg font-black text-slate-950">
-                  Indicaciones para produccion
-                </h2>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  Agrega aqui cualquier detalle que no este en el archivo: colores, cortes, direccion de entrega o comentarios para administracion.
-                </p>
-                <textarea
-                  name="globalNotes"
-                  rows={3}
-                  placeholder="Escribe una indicacion especial..."
-                  className="mt-3 w-full resize-none rounded-[1.15rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
-                />
-              </section>
+                  <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.045)] sm:p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      Detalles adicionales
+                    </p>
+                    <h2 className="mt-1 text-lg font-black text-slate-950">
+                      Indicaciones para produccion
+                    </h2>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">
+                      Agrega aqui cualquier detalle que no este en el archivo: colores, cortes, direccion de entrega o comentarios para administracion.
+                    </p>
+                    <textarea
+                      name="globalNotes"
+                      rows={3}
+                      placeholder="Escribe una indicacion especial..."
+                      className="mt-3 w-full resize-none rounded-[1.15rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                    />
+                  </section>
+                </>
+              )}
             </div>
 
             <aside className="space-y-4 xl:sticky xl:top-4">
               {message ? <MessageBox message={message} tone={messageTone} /> : null}
 
               <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                      Entrega
-                    </p>
-                    <h2 className="mt-1 text-lg font-black text-slate-950">
-                      Datos del pedido
-                    </h2>
-                  </div>
-                  <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-black text-slate-500">
-                    Requerido
-                  </span>
-                </div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Entrega y pago
+                </p>
+                <h2 className="mt-1 text-lg font-black text-slate-950">
+                  Finalizar pedido
+                </h2>
 
                 <div className="mt-4 rounded-[1.15rem] border border-slate-200 bg-slate-50 p-2">
                   <div className="grid grid-cols-2 gap-2">
@@ -1228,63 +1299,106 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                 <div className="mt-3 grid gap-3">
                   <label className="block">
                     <span className="mb-1.5 block text-xs font-semibold text-slate-500">
-                      Nombre de contacto
+                      Cliente
                     </span>
                     <input
                       id="contactName"
                       type="text"
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
-                      placeholder="Nombre completo"
+                      placeholder="Nombre del cliente"
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                     />
                   </label>
 
-                  <label className="block">
-                    <span className="mb-1.5 block text-xs font-semibold text-slate-500">
-                      Telefono
-                    </span>
-                    <input
-                      id="contactPhone"
-                      type="tel"
-                      value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                      placeholder="04XX-XXXXXXX"
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
-                    />
-                  </label>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      {([
+                        ["self", deliveryMethod === "delivery" ? "Recibo yo" : "Retiro yo"],
+                        ["third_party", "Otra persona"],
+                      ] as const).map(([value, label]) => {
+                        const isSelected = recipientMode === value;
+
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setRecipientMode(value)}
+                            className={`rounded-lg px-3 py-2 text-xs font-black transition ${
+                              isSelected
+                                ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200"
+                                : "text-slate-500 hover:bg-white hover:text-slate-950"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {recipientMode === "third_party" ? (
+                    <div className="grid gap-3">
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-semibold text-slate-500">
+                          Nombre autorizado
+                        </span>
+                        <input
+                          type="text"
+                          value={recipientName}
+                          onChange={(e) => setRecipientName(e.target.value)}
+                          placeholder="Nombre completo"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-semibold text-slate-500">
+                          Telefono autorizado
+                        </span>
+                        <input
+                          type="tel"
+                          value={recipientPhone}
+                          onChange={(e) => setRecipientPhone(e.target.value)}
+                          placeholder="04XX-XXXXXXX"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                      <p className="text-xs font-semibold leading-5 text-slate-500">
+                        {deliveryMethod === "delivery"
+                          ? "El cliente de la cuenta recibira el pedido."
+                          : "Retiro en tienda a nombre del cliente de la cuenta."}
+                      </p>
+                    </div>
+                  )}
 
                   {deliveryMethod === "delivery" ? (
                     <label className="block">
                       <span className="mb-1.5 block text-xs font-semibold text-slate-500">
                         Direccion de entrega
                       </span>
-                      <textarea
+                      <input
                         id="deliveryAddress"
+                        type="text"
                         value={deliveryAddress}
                         onChange={(e) => setDeliveryAddress(e.target.value)}
-                        rows={3}
-                        placeholder="Direccion completa, punto de referencia..."
-                        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                        placeholder="Direccion completa"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                       />
                     </label>
-                  ) : (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                      <p className="text-xs font-semibold leading-5 text-slate-500">
-                        Te avisaremos cuando el pedido este listo para retirar en tienda.
-                      </p>
-                    </div>
-                  )}
+                  ) : null}
                 </div>
-              </section>
 
-              <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  Resumen
-                </p>
-                <h2 className="mt-1 text-lg font-black text-slate-950">
-                  Total y pago
-                </h2>
+                <div className="mt-4 border-t border-slate-200 pt-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm font-semibold text-slate-500">Retira/recibe</span>
+                    <span className="max-w-[11rem] truncate text-right text-sm font-black text-slate-950">
+                      {effectiveRecipientName || contactName || "Por confirmar"}
+                    </span>
+                  </div>
+                </div>
 
                 <div className="mt-4 rounded-[1.15rem] border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center justify-between gap-4">

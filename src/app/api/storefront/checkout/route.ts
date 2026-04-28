@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   createStorefrontCheckout,
   createCustomerPayment,
+  updateCustomerCheckoutPreferences,
   uploadCustomerOrderFile,
   type CheckoutPaymentMethod,
   type StorefrontCheckoutItem,
@@ -80,6 +81,14 @@ async function handleMultipartCheckout(request: Request, user: NonNullable<Await
     formData.get("paymentMethod") ?? "pago_movil",
   ) as CheckoutPaymentMethod;
   const proofFile = formData.get("proofFile");
+  const contactName = String(formData.get("contactName") ?? user.user_metadata.full_name ?? "").trim();
+  const contactPhone = String(formData.get("contactPhone") ?? user.user_metadata.phone ?? "").trim();
+  const deliveryMethod = String(formData.get("deliveryMethod") ?? "pickup") === "delivery"
+    ? "delivery"
+    : "pickup";
+  const recipientName = String(formData.get("recipientName") ?? contactName).trim();
+  const recipientPhone = String(formData.get("recipientPhone") ?? contactPhone).trim();
+  const deliveryAddress = String(formData.get("deliveryAddress") ?? "").trim();
 
   if (items.length === 0) {
     throw new Error("Agrega al menos un producto al carrito.");
@@ -97,11 +106,21 @@ async function handleMultipartCheckout(request: Request, user: NonNullable<Await
     throw new Error("Completa el monto, telefono emisor y referencia del pago movil.");
   }
 
+  await updateCustomerCheckoutPreferences({
+    userId: user.id,
+    contactName,
+    contactPhone,
+    deliveryMethod,
+    recipientName,
+    recipientPhone,
+    deliveryAddress,
+  });
+
   const orders = await createStorefrontCheckout({
     userId: user.id,
     email: user.email ?? "",
-    fullName: String(user.user_metadata.full_name ?? ""),
-    phone: String(user.user_metadata.phone ?? ""),
+    fullName: contactName,
+    phone: contactPhone || recipientPhone,
     notes,
     items,
     paymentMethod,

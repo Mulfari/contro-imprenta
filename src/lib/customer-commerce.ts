@@ -42,6 +42,10 @@ export type CustomerAccountProfile = {
   full_name: string | null;
   phone: string | null;
   account_balance: number;
+  preferred_delivery_method: "pickup" | "delivery" | null;
+  delivery_recipient_name: string | null;
+  delivery_recipient_phone: string | null;
+  delivery_address: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -75,8 +79,8 @@ export type AdminPayment = OrderPayment & {
   proof_file: OrderFile | null;
 };
 
-function normalizeText(value: string) {
-  return value.trim().replace(/\s+/g, " ");
+function normalizeText(value: string | null | undefined) {
+  return String(value ?? "").trim().replace(/\s+/g, " ");
 }
 
 function parseAmount(value: string) {
@@ -168,7 +172,7 @@ async function ensureCustomerAccountProfile(userId: string) {
   const supabase = createSupabaseAdminClient();
   const { data: existingProfile, error: existingError } = await supabase
     .from("customer_profiles")
-    .select("id, full_name, phone, account_balance, created_at, updated_at")
+    .select("id, full_name, phone, account_balance, preferred_delivery_method, delivery_recipient_name, delivery_recipient_phone, delivery_address, created_at, updated_at")
     .eq("id", userId)
     .maybeSingle<CustomerAccountProfile>();
 
@@ -189,7 +193,7 @@ async function ensureCustomerAccountProfile(userId: string) {
       id: userId,
       account_balance: 0,
     })
-    .select("id, full_name, phone, account_balance, created_at, updated_at")
+    .select("id, full_name, phone, account_balance, preferred_delivery_method, delivery_recipient_name, delivery_recipient_phone, delivery_address, created_at, updated_at")
     .single<CustomerAccountProfile>();
 
   if (error) {
@@ -200,6 +204,54 @@ async function ensureCustomerAccountProfile(userId: string) {
     ...data,
     account_balance: Number(data.account_balance ?? 0),
   };
+}
+
+export async function updateCustomerCheckoutPreferences(input: {
+  userId: string;
+  contactName: string;
+  contactPhone: string;
+  deliveryMethod: "pickup" | "delivery";
+  recipientName: string;
+  recipientPhone: string;
+  deliveryAddress: string;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const contactName = normalizeText(input.contactName);
+  const contactPhone = normalizeText(input.contactPhone);
+  const recipientName = normalizeText(input.recipientName);
+  const recipientPhone = normalizeText(input.recipientPhone);
+  const deliveryAddress = normalizeText(input.deliveryAddress);
+
+  await ensureCustomerAccountProfile(input.userId);
+
+  const { error: profileError } = await supabase
+    .from("customer_profiles")
+    .update({
+      full_name: contactName || null,
+      phone: contactPhone || null,
+      preferred_delivery_method: input.deliveryMethod,
+      delivery_recipient_name: recipientName || contactName || null,
+      delivery_recipient_phone: recipientPhone || contactPhone || null,
+      delivery_address: input.deliveryMethod === "delivery" ? deliveryAddress || null : null,
+    })
+    .eq("id", input.userId);
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  const { error: clientError } = await supabase
+    .from("clients")
+    .update({
+      name: contactName || recipientName || "Cliente storefront",
+      phone: contactPhone || recipientPhone || null,
+      address: input.deliveryMethod === "delivery" ? deliveryAddress || null : null,
+    })
+    .eq("customer_user_id", input.userId);
+
+  if (clientError) {
+    throw clientError;
+  }
 }
 
 async function applyCustomerBalanceChange(input: {
