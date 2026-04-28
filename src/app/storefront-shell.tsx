@@ -131,26 +131,26 @@ function CatalogProductCard({
     <button
       type="button"
       onClick={onPreview}
-      className="catalog-enter-card group block h-full w-full cursor-pointer rounded-[1.25rem] border border-slate-200 bg-white p-3 text-left shadow-[0_10px_28px_rgba(15,23,42,0.035)] transition hover:-translate-y-1 hover:border-slate-300 hover:bg-slate-50/40 hover:shadow-[0_22px_42px_rgba(15,23,42,0.08)]"
+      className="catalog-enter-card group grid h-full w-full cursor-pointer grid-cols-[7.5rem_1fr] gap-3 rounded-[1.15rem] border border-slate-200 bg-white p-3 text-left shadow-[0_10px_28px_rgba(15,23,42,0.035)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50/60 hover:shadow-[0_18px_34px_rgba(15,23,42,0.075)] sm:grid-cols-[9rem_1fr] sm:gap-4"
     >
-      <div className={`relative flex aspect-[1.22] w-full items-center justify-center overflow-hidden rounded-[1rem] bg-gradient-to-br ${product.tint} p-4`}>
-        <div className="absolute inset-x-8 bottom-5 h-8 rounded-full bg-slate-900/10 blur-2xl" />
+      <div className={`relative flex min-h-32 items-center justify-center overflow-hidden rounded-[0.9rem] bg-gradient-to-br ${product.tint} p-3 sm:min-h-36`}>
+        <div className="absolute inset-x-5 bottom-4 h-7 rounded-full bg-slate-900/10 blur-2xl" />
         <Image
           src={product.image}
           alt={product.imageAlt}
           width={1000}
           height={760}
-          sizes="(min-width: 1280px) 22vw, (min-width: 768px) 40vw, 88vw"
-          className="relative z-10 h-auto max-h-[84%] w-auto max-w-[84%] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] transition duration-300 group-hover:-translate-y-1 group-hover:scale-[1.025]"
+          sizes="(min-width: 1280px) 10rem, (min-width: 768px) 9rem, 7.5rem"
+          className="relative z-10 h-auto max-h-[86%] w-auto max-w-[88%] object-contain drop-shadow-[0_16px_24px_rgba(15,23,42,0.15)] transition duration-300 group-hover:-translate-y-0.5 group-hover:scale-[1.025]"
         />
       </div>
 
-      <div className="flex min-h-[10.8rem] flex-col px-1 pb-1 pt-4">
-        <h3 className="text-lg font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-[#3558ff]">
+      <div className="flex min-w-0 flex-col py-1 pr-1">
+        <h3 className="text-base font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-[#3558ff] sm:text-lg">
           {product.title}
         </h3>
         <p
-          className="mt-2 text-sm leading-6 text-slate-500"
+          className="mt-2 text-sm leading-5 text-slate-500"
           style={{
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -160,9 +160,12 @@ function CatalogProductCard({
         >
           {product.description}
         </p>
-        <div className="mt-auto pt-5">
-          <p className="text-sm font-semibold text-slate-400">
-            Desde <span className="text-2xl font-black tracking-tight text-slate-950">{product.price}</span>
+        <div className="mt-auto pt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+            Desde
+          </p>
+          <p className="mt-0.5 text-2xl font-black tracking-tight text-slate-950">
+            {product.price}
           </p>
         </div>
       </div>
@@ -172,18 +175,19 @@ function CatalogProductCard({
 
 function CatalogProductSkeleton() {
   return (
-    <article className="rounded-[1.25rem] border border-slate-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.035)]">
-      <div className="relative flex aspect-[1.22] w-full items-center justify-center overflow-hidden rounded-[1rem] bg-slate-100 p-4">
-        <div className="h-28 w-36 animate-pulse rounded-[1.5rem] bg-slate-200 sm:h-32 sm:w-40" />
+    <article className="grid grid-cols-[7.5rem_1fr] gap-3 rounded-[1.15rem] border border-slate-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.035)] sm:grid-cols-[9rem_1fr] sm:gap-4">
+      <div className="relative flex min-h-32 items-center justify-center overflow-hidden rounded-[0.9rem] bg-slate-100 p-3 sm:min-h-36">
+        <div className="h-20 w-24 animate-pulse rounded-[1.2rem] bg-slate-200 sm:h-24 sm:w-28" />
       </div>
-      <div className="flex min-h-[10.8rem] flex-col px-1 pb-1 pt-4">
+      <div className="flex min-w-0 flex-col py-1 pr-1">
         <div>
-          <div className="h-6 w-44 max-w-full animate-pulse rounded-full bg-slate-200" />
+          <div className="h-5 w-40 max-w-full animate-pulse rounded-full bg-slate-200" />
           <div className="mt-3 h-4 w-full animate-pulse rounded-full bg-slate-200" />
           <div className="mt-2 h-4 w-3/4 animate-pulse rounded-full bg-slate-200" />
         </div>
-        <div className="mt-auto pt-5">
-          <div className="h-8 w-28 animate-pulse rounded-full bg-slate-200" />
+        <div className="mt-auto pt-4">
+          <div className="h-3 w-14 animate-pulse rounded-full bg-slate-200" />
+          <div className="mt-2 h-8 w-20 animate-pulse rounded-full bg-slate-200" />
         </div>
       </div>
     </article>
@@ -1491,13 +1495,13 @@ export function StorefrontShell() {
                     onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
                   />
                 ) : showCatalogSkeleton ? (
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                  <div className="mt-5 grid gap-3 lg:grid-cols-2">
                     {[0, 1, 2, 3, 4, 5].map((item) => (
                       <CatalogProductSkeleton key={item} />
                     ))}
                   </div>
                 ) : filteredProducts.length > 0 ? (
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                  <div className="mt-5 grid gap-3 lg:grid-cols-2">
                     {filteredProducts.map((product) => (
                       <CatalogProductCard
                         key={product.id}
