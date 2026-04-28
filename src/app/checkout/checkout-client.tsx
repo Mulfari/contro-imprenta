@@ -111,7 +111,7 @@ function CheckoutFilePreview({
   );
   const sizeClass =
     variant === "featured"
-      ? "h-56 w-full rounded-[1.45rem] sm:h-64"
+      ? "h-40 w-full rounded-[1.15rem] sm:h-48"
       : "h-14 w-14 rounded-xl";
   const badgeClass = variant === "featured" ? "text-2xl" : "text-xs";
 
@@ -142,15 +142,15 @@ function CheckoutFilePreview({
 
 function CheckoutSkeleton() {
   return (
-    <main className="min-h-screen bg-[#f3f5f8] px-4 py-5 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[112rem] space-y-5">
-        <div className="h-20 animate-pulse rounded-[1.6rem] bg-white" />
-        <div className="grid gap-5 xl:grid-cols-[1fr_28rem]">
-          <div className="space-y-5">
-            <div className="h-52 animate-pulse rounded-[2rem] bg-white" />
-            <div className="h-72 animate-pulse rounded-[2rem] bg-white" />
+    <main className="min-h-screen bg-[#f6f7f9] px-4 py-4 text-slate-950 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[96rem] space-y-4">
+        <div className="h-24 animate-pulse rounded-[1.35rem] bg-white" />
+        <div className="grid gap-4 xl:grid-cols-[1fr_24rem]">
+          <div className="space-y-4">
+            <div className="h-28 animate-pulse rounded-[1.35rem] bg-white" />
+            <div className="h-80 animate-pulse rounded-[1.5rem] bg-white" />
           </div>
-          <div className="h-96 animate-pulse rounded-[2rem] bg-white" />
+          <div className="h-[34rem] animate-pulse rounded-[1.5rem] bg-white" />
         </div>
       </div>
     </main>
@@ -173,16 +173,16 @@ function CheckoutHeader({
       : `${preparedCount}/${totalItems} productos preparados`;
 
   return (
-    <header className="overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.05)]">
-      <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+    <header className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_14px_32px_rgba(15,23,42,0.045)]">
+      <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4">
         <Link
           href="/"
-          className="inline-flex w-fit items-center rounded-xl border border-slate-200 bg-white px-3 py-2 transition hover:border-slate-300 hover:bg-slate-50"
+          className="inline-flex min-w-0 items-center rounded-xl px-2 py-1.5 transition hover:bg-slate-50"
           aria-label="Volver al inicio de Express Printer"
         >
           <span
             aria-hidden="true"
-            className="block h-10 w-40 max-w-[52vw]"
+            className="block h-9 w-36 max-w-[50vw]"
             style={{
               backgroundImage: "url('/express-printer-logo.webp')",
               backgroundRepeat: "no-repeat",
@@ -194,36 +194,36 @@ function CheckoutHeader({
 
         <Link
           href="/"
-          className="inline-flex w-fit items-center justify-center rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+          className="inline-flex shrink-0 items-center justify-center rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
         >
-          Volver al inicio
+          Volver
         </Link>
       </div>
 
-      <div className="border-t border-slate-200 bg-slate-50 px-4 py-4 sm:px-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="border-t border-slate-200 bg-slate-50/80 px-3 py-3 sm:px-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
               Checkout
             </p>
-            <p className="mt-1 text-lg font-black text-slate-950">
-              Prepara tu pedido antes de enviarlo a revision
+            <p className="mt-0.5 text-base font-black text-slate-950 sm:text-lg">
+              Arte, entrega y pago en un solo lugar
             </p>
           </div>
-          <span className="inline-flex w-fit rounded-full bg-white px-4 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200">
+          <span className="inline-flex w-fit rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-600 ring-1 ring-slate-200">
             {statusText}
           </span>
         </div>
-        <div className="mt-4 grid gap-2 sm:grid-cols-4">
+        <div className="mt-3 grid gap-2 sm:grid-cols-4">
           {steps.map((step, index) => {
             const stepNumber = index + 1;
             const isActive = stepNumber === currentStep;
             const isDone = stepNumber < currentStep;
 
             return (
-              <div key={step} className="flex items-center gap-2">
+              <div key={step} className="flex items-center gap-2 overflow-hidden">
                 <span
-                  className={`h-2 flex-1 rounded-full ${
+                  className={`h-1.5 flex-1 rounded-full ${
                     isActive || isDone ? "bg-[#ffd45f]" : "bg-slate-200"
                   }`}
                 />
@@ -284,15 +284,15 @@ function ProductQueueItem({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full cursor-pointer rounded-[1.3rem] border p-3 text-left transition ${
+      className={`w-full cursor-pointer rounded-[1.05rem] border px-3 py-2.5 text-left transition ${
         isActive
-          ? "border-slate-950 bg-slate-950 text-white shadow-[0_18px_44px_rgba(15,23,42,0.16)]"
-          : "border-slate-200 bg-white hover:border-slate-300"
+          ? "border-slate-950 bg-slate-950 text-white shadow-[0_14px_32px_rgba(15,23,42,0.13)]"
+          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
       }`}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-black ${
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
             prep.confirmed
               ? "bg-emerald-100 text-emerald-700"
               : isActive
@@ -300,29 +300,29 @@ function ProductQueueItem({
                 : "bg-slate-100 text-slate-600"
           }`}
         >
-          {prep.confirmed ? "OK" : index + 1}
+          {prep.confirmed ? "OK" : String(index + 1).padStart(2, "0")}
         </span>
         <div className="min-w-0 flex-1">
           <p className={`truncate text-sm font-black ${isActive ? "text-white" : "text-slate-950"}`}>
             {item.product.title}
           </p>
-          <p className={`mt-1 text-xs font-semibold ${isActive ? "text-white/60" : "text-slate-400"}`}>
+          <p className={`mt-0.5 text-xs font-semibold ${isActive ? "text-white/60" : "text-slate-400"}`}>
             {item.quantity} unidad{item.quantity === 1 ? "" : "es"} / {formatCurrency(getItemTotal(item))}
           </p>
-          <span
-            className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black ${
-              prep.confirmed
-                ? "bg-emerald-100 text-emerald-700"
-                : ready
-                  ? "bg-amber-100 text-amber-800"
-                  : isActive
-                    ? "bg-white/10 text-white"
-                    : "bg-slate-100 text-slate-500"
-            }`}
-          >
-            {status}
-          </span>
         </div>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${
+            prep.confirmed
+              ? "bg-emerald-100 text-emerald-700"
+              : ready
+                ? "bg-amber-100 text-amber-800"
+                : isActive
+                  ? "bg-white/10 text-white"
+                  : "bg-slate-100 text-slate-500"
+          }`}
+        >
+          {status}
+        </span>
       </div>
     </button>
   );
@@ -364,36 +364,36 @@ function ActiveProductPreparation({
     });
 
   return (
-    <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
-      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[12rem_1fr] lg:items-center">
-        <div className={`flex min-h-44 items-center justify-center overflow-hidden rounded-[1.45rem] bg-gradient-to-br ${item.product.tint} p-4`}>
+    <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.045)] sm:p-5">
+      <div className="grid gap-4 lg:grid-cols-[10rem_1fr] lg:items-center">
+        <div className={`flex min-h-36 items-center justify-center overflow-hidden rounded-[1.15rem] bg-gradient-to-br ${item.product.tint} p-3`}>
           <Image
             src={item.product.image}
             alt={item.product.imageAlt}
             width={420}
             height={320}
-            sizes="14rem"
-            className="h-auto max-h-40 w-auto max-w-full object-contain drop-shadow-[0_20px_34px_rgba(15,23,42,0.18)]"
+            sizes="10rem"
+            className="h-auto max-h-32 w-auto max-w-full object-contain drop-shadow-[0_16px_28px_rgba(15,23,42,0.16)]"
           />
         </div>
 
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
             Producto {index + 1} de {totalItems}
           </p>
-          <h1 className="mt-2 break-words text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+          <h1 className="mt-1.5 break-words text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
             {item.product.title}
           </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-slate-500">
             {Object.entries(item.options).map(([key, value]) => `${key}: ${value}`).join(" / ")}
           </p>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+          <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-center">
             <div className="flex w-fit items-center rounded-full border border-slate-200">
               <button
                 type="button"
                 onClick={() => onQuantityChange(item.quantity - 1)}
-                className="h-11 w-11 cursor-pointer text-slate-500 transition hover:text-slate-950"
+                className="h-10 w-10 cursor-pointer text-slate-500 transition hover:text-slate-950"
               >
                 -
               </button>
@@ -401,7 +401,7 @@ function ActiveProductPreparation({
               <button
                 type="button"
                 onClick={() => onQuantityChange(item.quantity + 1)}
-                className="h-11 w-11 cursor-pointer text-slate-500 transition hover:text-slate-950"
+                className="h-10 w-10 cursor-pointer text-slate-500 transition hover:text-slate-950"
               >
                 +
               </button>
@@ -420,13 +420,13 @@ function ActiveProductPreparation({
         </div>
       </div>
 
-      <div className="mt-6 rounded-[1.55rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+      <div className="mt-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 sm:p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
               Arte del producto
             </p>
-            <h2 className="mt-1 text-xl font-black text-slate-950">
+            <h2 className="mt-1 text-lg font-black text-slate-950">
               {hasFiles ? "Diseno cargado" : prep.sendLater ? "Arte pendiente" : "Prepara el arte"}
             </h2>
           </div>
@@ -444,10 +444,10 @@ function ActiveProductPreparation({
         </div>
 
         {hasFiles && primaryFile ? (
-          <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
-            <div className="rounded-[1.55rem] border border-slate-200 bg-white p-3 sm:p-4">
+          <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_16rem]">
+            <div className="rounded-[1.25rem] border border-slate-200 bg-white p-3">
               <CheckoutFilePreview file={primaryFile} variant="featured" />
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-black text-slate-950">
                     {primaryFile.name}
@@ -526,26 +526,26 @@ function ActiveProductPreparation({
                     confirmed: false,
                   })
                 }
-                rows={7}
+                rows={6}
                 placeholder="Notas para este producto..."
-                className="w-full resize-none rounded-[1.35rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                className="w-full resize-none rounded-[1.15rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
               />
-              <p className="rounded-[1.2rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold leading-5 text-emerald-700">
+              <p className="rounded-[1.1rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold leading-5 text-emerald-700">
                 Revisa que el archivo corresponda a este producto antes de confirmar.
               </p>
             </div>
           </div>
         ) : (
-          <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
-            <label className={`block rounded-[1.55rem] border border-dashed px-5 py-10 text-center transition ${
+          <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_16rem]">
+            <label className={`block rounded-[1.25rem] border border-dashed px-5 py-7 text-center transition ${
               prep.sendLater
                 ? "border-slate-200 bg-white text-slate-400"
                 : "cursor-pointer border-slate-300 bg-white text-slate-700 hover:border-slate-400"
             }`}>
-              <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950 text-2xl font-black text-white">
+              <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-xl font-black text-white">
                 +
               </span>
-              <span className="mt-4 block text-base font-black text-slate-950">
+              <span className="mt-3 block text-base font-black text-slate-950">
                 Subir arte del producto
               </span>
               <span className="mx-auto mt-2 block max-w-md text-sm leading-6 text-slate-500">
@@ -569,7 +569,7 @@ function ActiveProductPreparation({
             </label>
 
             <div className="grid gap-3">
-              <label className="flex cursor-pointer items-start gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-4 py-4">
+              <label className="flex cursor-pointer items-start gap-3 rounded-[1.15rem] border border-slate-200 bg-white px-4 py-4">
                 <input
                   type="checkbox"
                   checked={prep.sendLater}
@@ -604,20 +604,20 @@ function ActiveProductPreparation({
                 }
                 rows={6}
                 placeholder="Notas para este producto..."
-                className="w-full resize-none rounded-[1.35rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                className="w-full resize-none rounded-[1.15rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
               />
             </div>
           </div>
         )}
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-2">
           <button
             type="button"
             onClick={onPrevious}
             disabled={index === 0}
-            className="cursor-pointer rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Anterior
           </button>
@@ -625,7 +625,7 @@ function ActiveProductPreparation({
             type="button"
             onClick={onNext}
             disabled={index >= totalItems - 1}
-            className="cursor-pointer rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Siguiente
           </button>
@@ -634,7 +634,7 @@ function ActiveProductPreparation({
           type="button"
           onClick={onConfirm}
           disabled={!ready}
-          className="cursor-pointer rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+          className="cursor-pointer rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {prep.confirmed ? "Producto confirmado" : index >= totalItems - 1 ? "Confirmar producto" : "Confirmar y seguir"}
         </button>
@@ -1047,8 +1047,8 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f3f5f8] px-4 py-5 text-slate-950 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="mx-auto max-w-[112rem] space-y-5">
+    <main className="min-h-screen bg-[#f6f7f9] px-4 py-4 text-slate-950 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[96rem] space-y-4">
         <CheckoutHeader
           currentStep={currentStep}
           preparedCount={preparedCount}
@@ -1111,56 +1111,37 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
             </Link>
           </section>
         ) : (
-          <form onSubmit={handleSubmit} className="grid gap-5 xl:grid-cols-[1fr_28rem] xl:items-start">
-            <div className="space-y-5">
-              <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.05)]">
-                <div className="border-b border-slate-200 bg-slate-950 p-5 text-white sm:p-6">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#ffd45f]">
-                        Archivos del pedido
-                      </p>
-                      <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
-                        Prepara cada producto
-                      </h1>
-                      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-                        Confirma el arte de cada articulo antes de escoger entrega y pago. Si aun no tienes el archivo, puedes dejarlo pendiente.
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase text-slate-300">Avance</p>
-                      <p className="mt-1 text-2xl font-black">
-                        {preparedCount}/{cartItems.length}
-                      </p>
-                    </div>
+          <form onSubmit={handleSubmit} className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start">
+            <div className="space-y-4">
+              <section className="rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-[0_14px_34px_rgba(15,23,42,0.045)] sm:p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      Preparacion de imprenta
+                    </p>
+                    <h1 className="mt-1 text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+                      Confirma el arte de cada producto
+                    </h1>
                   </div>
+                  <Link
+                    href="/#catalogo"
+                    className="inline-flex w-fit rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                  >
+                    Seguir comprando
+                  </Link>
                 </div>
 
-                <div className="p-4 sm:p-5">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm font-semibold leading-6 text-slate-500">
-                      Selecciona un producto, sube su arte y confirma para continuar con el siguiente.
-                    </p>
-                    <Link
-                      href="/#catalogo"
-                      className="inline-flex w-fit rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                    >
-                      Seguir comprando
-                    </Link>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
-                    {cartItems.map((item, index) => (
-                      <ProductQueueItem
-                        key={item.key}
-                        item={item}
-                        index={index}
-                        isActive={activeIndex === index}
-                        prep={getPrep(prepByKey, item.key)}
-                        onClick={() => setActiveIndex(index)}
-                      />
-                    ))}
-                  </div>
+                <div className="mt-4 grid gap-2 lg:grid-cols-2 2xl:grid-cols-3">
+                  {cartItems.map((item, index) => (
+                    <ProductQueueItem
+                      key={item.key}
+                      item={item}
+                      index={index}
+                      isActive={activeIndex === index}
+                      prep={getPrep(prepByKey, item.key)}
+                      onClick={() => setActiveIndex(index)}
+                    />
+                  ))}
                 </div>
               </section>
 
@@ -1181,44 +1162,44 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                 />
               ) : null}
 
-              <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+              <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.045)] sm:p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
                   Detalles adicionales
                 </p>
-                <h2 className="mt-2 text-2xl font-black text-slate-950">
+                <h2 className="mt-1 text-lg font-black text-slate-950">
                   Indicaciones para produccion
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
+                <p className="mt-1 text-sm leading-6 text-slate-500">
                   Agrega aqui cualquier detalle que no este en el archivo: colores, cortes, direccion de entrega o comentarios para administracion.
                 </p>
                 <textarea
                   name="globalNotes"
-                  rows={4}
+                  rows={3}
                   placeholder="Escribe una indicacion especial..."
-                  className="mt-4 w-full resize-none rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                  className="mt-3 w-full resize-none rounded-[1.15rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                 />
               </section>
             </div>
 
-            <aside className="space-y-5 xl:sticky xl:top-5">
+            <aside className="space-y-4 xl:sticky xl:top-4">
               {message ? <MessageBox message={message} tone={messageTone} /> : null}
 
-              <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.08)] sm:p-6">
+              <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      Contacto
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      Entrega
                     </p>
-                    <h2 className="mt-2 text-2xl font-black text-slate-950">
-                      Como te entregamos
+                    <h2 className="mt-1 text-lg font-black text-slate-950">
+                      Datos del pedido
                     </h2>
                   </div>
                   <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-black text-slate-500">
-                    2 min
+                    Requerido
                   </span>
                 </div>
 
-                <div className="mt-5 rounded-[1.45rem] border border-slate-200 bg-slate-50 p-3">
+                <div className="mt-4 rounded-[1.15rem] border border-slate-200 bg-slate-50 p-2">
                   <div className="grid grid-cols-2 gap-2">
                     {([
                       ["pickup", "Retiro"],
@@ -1231,7 +1212,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                           key={value}
                           type="button"
                           onClick={() => setDeliveryMethod(value)}
-                          className={`rounded-[1.15rem] px-4 py-3 text-sm font-black transition ${
+                          className={`rounded-xl px-3 py-2.5 text-sm font-black transition ${
                             isSelected
                               ? "bg-slate-950 text-white shadow-sm"
                               : "text-slate-500 hover:bg-white hover:text-slate-950"
@@ -1244,7 +1225,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                   </div>
                 </div>
 
-                <div className="mt-4 grid gap-3">
+                <div className="mt-3 grid gap-3">
                   <label className="block">
                     <span className="mb-1.5 block text-xs font-semibold text-slate-500">
                       Nombre de contacto
@@ -1255,7 +1236,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
                       placeholder="Nombre completo"
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                     />
                   </label>
 
@@ -1269,7 +1250,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
                       placeholder="04XX-XXXXXXX"
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                     />
                   </label>
 
@@ -1284,11 +1265,11 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                         onChange={(e) => setDeliveryAddress(e.target.value)}
                         rows={3}
                         placeholder="Direccion completa, punto de referencia..."
-                        className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
+                        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                       />
                     </label>
                   ) : (
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                       <p className="text-xs font-semibold leading-5 text-slate-500">
                         Te avisaremos cuando el pedido este listo para retirar en tienda.
                       </p>
@@ -1297,15 +1278,15 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                 </div>
               </section>
 
-              <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.08)] sm:p-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+              <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
                   Resumen
                 </p>
-                <h2 className="mt-2 text-2xl font-black text-slate-950">
+                <h2 className="mt-1 text-lg font-black text-slate-950">
                   Total y pago
                 </h2>
 
-                <div className="mt-5 rounded-[1.35rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="mt-4 rounded-[1.15rem] border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-sm font-semibold text-slate-500">Productos preparados</span>
                     <span className="text-sm font-black text-slate-950">
@@ -1327,14 +1308,14 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                   <div className="mt-4 border-t border-slate-200 pt-4">
                     <div className="flex items-center justify-between gap-4">
                       <span className="text-sm font-semibold text-slate-500">Total a cancelar</span>
-                      <span className="text-3xl font-black text-slate-950">
+                      <span className="text-2xl font-black text-slate-950">
                         {formatCurrency(subtotal)}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className={`mt-5 rounded-[1.35rem] border p-4 ${
+                <div className={`mt-4 rounded-[1.15rem] border p-3 ${
                   canSubmitOrder
                     ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                     : hasNegativeBalance
@@ -1348,7 +1329,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                         ? "Escoge como pagar"
                         : "Termina de preparar los productos"}
                   </p>
-                  <p className="mt-2 text-sm leading-6 opacity-85">
+                  <p className="mt-1.5 text-xs leading-5 opacity-85">
                     {hasNegativeBalance
                       ? "Primero registra un pago desde Mi cuenta y espera aprobacion para volver a crear pedidos."
                       : allItemsConfirmed
@@ -1357,7 +1338,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                   </p>
                 </div>
 
-                <div className="mt-5 grid gap-3">
+                <div className="mt-4 grid gap-2.5">
                   <div className="grid gap-2">
                     {([
                       ["account_balance", "Saldo", `Saldo actual: ${isLoadingAccount ? "cargando..." : formatCurrency(balanceValue)}`],
@@ -1377,7 +1358,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                             }
                           }}
                           disabled={isDisabled}
-                          className={`cursor-pointer rounded-2xl border px-4 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-55 ${
+                          className={`cursor-pointer rounded-xl border px-3 py-2.5 text-left transition disabled:cursor-not-allowed disabled:opacity-55 ${
                             isSelected
                               ? "border-slate-950 bg-slate-950 text-white"
                               : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
@@ -1402,7 +1383,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                   </div>
 
                   {paymentMethod === "account_balance" ? (
-                    <div className={`rounded-2xl border px-4 py-4 ${
+                    <div className={`rounded-xl border px-3 py-3 ${
                       balanceAfterOrder < 0
                         ? "border-amber-200 bg-amber-50 text-amber-900"
                         : "border-emerald-200 bg-emerald-50 text-emerald-800"
@@ -1435,7 +1416,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                         }
                         required={paymentMethod === "pago_movil"}
                         disabled={!allItemsConfirmed}
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
                         placeholder="Monto pagado"
                       />
                       <input
@@ -1449,7 +1430,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                           }))
                         }
                         disabled={!allItemsConfirmed}
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
                         placeholder="Banco emisor"
                       />
                       <input
@@ -1464,7 +1445,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                         }
                         required={paymentMethod === "pago_movil"}
                         disabled={!allItemsConfirmed}
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
                         placeholder="Telefono emisor"
                       />
                       <input
@@ -1479,10 +1460,10 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                         }
                         required={paymentMethod === "pago_movil"}
                         disabled={!allItemsConfirmed}
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
                         placeholder="Referencia del pago"
                       />
-                      <label className={`block rounded-2xl border border-dashed px-4 py-4 text-center text-sm font-semibold transition ${
+                      <label className={`block rounded-xl border border-dashed px-4 py-3 text-center text-sm font-semibold transition ${
                         allItemsConfirmed
                           ? "cursor-pointer border-slate-300 bg-slate-50 text-slate-700 hover:border-slate-400 hover:bg-white"
                           : "border-slate-200 bg-slate-50 text-slate-400"
@@ -1504,7 +1485,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                   <button
                     type="submit"
                     disabled={isSubmitting || !canSubmitOrder}
-                    className="mt-2 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-5 py-4 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="mt-2 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSubmitting ? "Creando pedido..." : "Crear pedido"}
                   </button>
