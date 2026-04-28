@@ -4,10 +4,10 @@ import Link from "next/link";
 import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 
 const promoTickerItems = [
-  "Impresion express para tarjetas, stickers y pendones",
-  "Pedidos online conectados al panel administrativo",
-  "Cotizaciones rapidas para negocios, marcas y eventos",
-  "Produccion publicitaria, corporativa y gran formato",
+  "Bienvenido a Express Printer",
+  "Horario de atencion: lunes a sabado",
+  "Pedidos online para impresion comercial y publicitaria",
+  "Atencion por WhatsApp para cotizaciones y seguimiento",
 ];
 const categoryMenu = [
   {
@@ -128,9 +128,19 @@ export function StorefrontHeader({
 
   return (
     <>
-      <div className="hidden border-b border-slate-800 bg-slate-950 text-white sm:block">
-        <div className="mx-auto flex w-full max-w-[112rem] px-4 py-3 text-sm sm:px-6 lg:px-8 2xl:px-10">
-          <p>Bienvenido a Express Printer. Impresion comercial, publicitaria y corporativa.</p>
+      <div className="border-b border-slate-800 bg-slate-950 text-white">
+        <div className="mx-auto flex w-full max-w-[112rem] items-center overflow-hidden px-4 py-2.5 sm:px-6 lg:px-8 2xl:px-10">
+          <div className="storefront-marquee flex min-w-max items-center gap-8">
+            {[...promoTickerItems, ...promoTickerItems].map((item, index) => (
+              <div
+                key={`${item}-${index}`}
+                className="flex items-center gap-8 text-xs font-semibold tracking-[0.04em] text-slate-200 sm:text-sm"
+              >
+                <span className="whitespace-nowrap">{item}</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ffd45f]" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -581,25 +591,6 @@ export function StorefrontHeader({
           </div>
         </div>
       </header>
-
-      <section className="border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfe_100%)]">
-        <div className="overflow-hidden">
-          <div className="storefront-marquee flex min-w-max items-center gap-10 px-4 py-3.5 sm:px-6 lg:px-8 2xl:px-10">
-            {[...promoTickerItems, ...promoTickerItems].map((item, index) => (
-              <div
-                key={`${item}-${index}`}
-                className="flex items-center gap-10 text-sm font-medium tracking-[0.02em] text-slate-700"
-              >
-                <span className="whitespace-nowrap rounded-full border border-slate-200/80 bg-white px-4 py-2 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-                  {item}
-                </span>
-                <span className="h-2.5 w-2.5 rounded-full bg-[#ffcf33]" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <a
         href="https://wa.me/584243390487?text=Hola%2C%20necesito%20ayuda%20con%20mi%20pedido%20en%20Express%20Printer."
         target="_blank"
