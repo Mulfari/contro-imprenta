@@ -125,13 +125,11 @@ function CatalogProductCard({
   wished,
   onPreview,
   onToggleWishlist,
-  onAddToCart,
 }: {
   product: StorefrontProduct;
   wished: boolean;
   onPreview: () => void;
   onToggleWishlist: () => void;
-  onAddToCart: () => void;
 }) {
   return (
     <article className="catalog-enter-card group overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_38px_rgba(15,23,42,0.08)] sm:rounded-[1.35rem]">
@@ -157,9 +155,15 @@ function CatalogProductCard({
       <div className="space-y-4 p-4 sm:p-5">
         <div>
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-lg font-semibold leading-tight tracking-tight text-slate-950">
-              {product.title}
-            </h3>
+            <button
+              type="button"
+              onClick={onPreview}
+              className="min-w-0 cursor-pointer text-left"
+            >
+              <h3 className="text-lg font-semibold leading-tight tracking-tight text-slate-950 transition group-hover:text-[#3558ff]">
+                {product.title}
+              </h3>
+            </button>
             <button
               type="button"
               onClick={onToggleWishlist}
@@ -184,7 +188,13 @@ function CatalogProductCard({
               </svg>
             </button>
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{product.description}</p>
+          <button
+            type="button"
+            onClick={onPreview}
+            className="mt-2 block cursor-pointer text-left text-sm leading-6 text-slate-600"
+          >
+            {product.description}
+          </button>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -205,22 +215,13 @@ function CatalogProductCard({
             </p>
             <p className="text-2xl font-black tracking-tight text-slate-950">{product.price}</p>
           </div>
-          <div className="flex w-full gap-2 sm:w-auto">
-            <button
-              type="button"
-              onClick={onPreview}
-              className="min-w-0 flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:border-slate-300 hover:bg-slate-50 sm:flex-none"
-            >
-              Ver
-            </button>
-            <button
-              type="button"
-              onClick={onAddToCart}
-              className="min-w-0 flex-1 cursor-pointer rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:flex-none"
-            >
-              Anadir
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onPreview}
+            className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+          >
+            Seleccionar
+          </button>
         </div>
       </div>
     </article>
@@ -399,6 +400,133 @@ function ProductPreviewModal({
         </article>
       </div>
     </div>
+  );
+}
+
+function CatalogProductDetail({
+  product,
+  selectedOptions,
+  onBack,
+  onOptionChange,
+  onAddToCart,
+  wished,
+  onToggleWishlist,
+}: {
+  product: StorefrontProduct;
+  selectedOptions: Record<string, string>;
+  onBack: () => void;
+  onOptionChange: (group: string, value: string) => void;
+  onAddToCart: () => void;
+  wished: boolean;
+  onToggleWishlist: () => void;
+}) {
+  return (
+    <article className="mt-5 overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white shadow-[0_18px_46px_rgba(15,23,42,0.06)]">
+      <div className="grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <div className={`relative flex min-h-[18rem] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-5 sm:min-h-[24rem] lg:min-h-full`}>
+          <button
+            type="button"
+            onClick={onBack}
+            className="absolute left-4 top-4 z-10 rounded-full bg-white/90 px-4 py-2 text-xs font-black text-slate-700 shadow-sm transition hover:bg-white hover:text-slate-950"
+          >
+            Volver al catalogo
+          </button>
+          <div className="absolute inset-x-12 bottom-8 h-12 rounded-full bg-slate-900/12 blur-2xl" />
+          <Image
+            src={product.image}
+            alt={product.imageAlt}
+            width={1200}
+            height={900}
+            sizes="(min-width: 1024px) 36vw, 88vw"
+            className="relative z-10 h-auto max-h-[78%] w-auto max-w-[86%] object-contain drop-shadow-[0_28px_42px_rgba(15,23,42,0.2)]"
+          />
+        </div>
+
+        <div className="p-5 sm:p-7">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#3558ff]">
+                {product.category}
+              </p>
+              <h2 className="mt-2 text-[2rem] font-black leading-tight tracking-tight text-slate-950 sm:text-[2.65rem]">
+                {product.title}
+              </h2>
+              <p className="mt-3 text-base leading-7 text-slate-600">
+                {product.description}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onToggleWishlist}
+              className={`inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border px-4 py-2.5 text-sm font-black transition ${
+                wished
+                  ? "border-[#ff5b4d] bg-[#ff5b4d] text-white"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+              }`}
+            >
+              {wished ? "Guardado" : "Guardar"}
+            </button>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            {product.highlights.map((item) => (
+              <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-700">
+                {item}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 space-y-5">
+            {product.options.map((group) => (
+              <div key={group.name}>
+                <p className="text-sm font-black text-slate-950">{group.name}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {group.values.map((value) => {
+                    const selected = selectedOptions[group.name] === value;
+
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => onOptionChange(group.name, value)}
+                        className={`cursor-pointer rounded-xl border px-3.5 py-2 text-sm font-semibold transition ${
+                          selected
+                            ? "border-slate-950 bg-slate-950 text-white"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        {value}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-7 rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+            <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Precio base
+                </p>
+                <p className="mt-1 text-3xl font-black text-slate-950">{product.price}</p>
+                <p className="mt-2 text-sm font-semibold text-slate-500">
+                  Entrega estimada: <span className="text-slate-950">{product.turnaround}</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onAddToCart}
+                className="cursor-pointer rounded-xl bg-[#ffd45f] px-6 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+              >
+                Anadir al carrito
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -1030,6 +1158,7 @@ export function StorefrontShell() {
     setCatalogLoading(true);
     setAccountOpen(false);
     setActivePanel(null);
+    setSelectedProduct(null);
     setMobileFilterOpen(false);
     window.history.pushState(null, "", "#catalogo");
     window.setTimeout(() => {
@@ -1062,6 +1191,7 @@ export function StorefrontShell() {
     setCatalogLoading(true);
     setAccountOpen(false);
     setActivePanel(null);
+    setSelectedProduct(null);
     setMobileFilterOpen(false);
     window.history.pushState(null, "", "#catalogo");
     window.setTimeout(() => {
@@ -1101,6 +1231,7 @@ export function StorefrontShell() {
 
   const handleSearchQueryChange = (value: string) => {
     setSearchQuery(value);
+    setSelectedProduct(null);
 
     if (value.trim()) {
       setCatalogOpen(true);
@@ -1114,6 +1245,15 @@ export function StorefrontShell() {
     setSelectedOptions(getDefaultOptions(product));
     setActivePanel(null);
     setMobileFilterOpen(false);
+
+    if (isCatalogVisible) {
+      window.setTimeout(() => {
+        document.getElementById("catalogo")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 0);
+    }
   };
 
   const openPreviewById = (productId: string) => {
@@ -1224,6 +1364,7 @@ export function StorefrontShell() {
     setDebouncedQuery("");
     setCatalogOpen(true);
     setCatalogLoading(true);
+    setSelectedProduct(null);
     setMobileFilterOpen(false);
     setActivePanel(null);
     setAccountOpen(false);
@@ -1241,6 +1382,7 @@ export function StorefrontShell() {
     setDebouncedQuery(query);
     setCatalogOpen(true);
     setCatalogLoading(true);
+    setSelectedProduct(null);
     setMobileFilterOpen(false);
     setActivePanel(null);
     setAccountOpen(false);
@@ -1258,6 +1400,7 @@ export function StorefrontShell() {
     setCatalogLoading(true);
     setActivePanel(null);
     setAccountOpen(false);
+    setSelectedProduct(null);
     setMobileFilterOpen(true);
     window.history.pushState(null, "", "#catalogo");
     window.setTimeout(() => {
@@ -1336,6 +1479,7 @@ export function StorefrontShell() {
                     setDebouncedQuery("");
                     setCatalogOpen(true);
                     setCatalogLoading(true);
+                    setSelectedProduct(null);
                   }}
                   className={`mt-5 w-full cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold transition ${
                     debouncedQuery
@@ -1343,7 +1487,7 @@ export function StorefrontShell() {
                       : "bg-slate-950 text-white hover:bg-slate-800"
                   }`}
                 >
-                  Ver todos
+                  Catalogo completo
                 </button>
                 <div className="mt-5 space-y-5">
                   {categoryGroups.map((group) => (
@@ -1359,6 +1503,7 @@ export function StorefrontShell() {
                               setDebouncedQuery(item);
                               setCatalogOpen(true);
                               setCatalogLoading(true);
+                              setSelectedProduct(null);
                             }}
                             className={`block w-full cursor-pointer rounded-lg px-2 py-2.5 text-left text-sm transition ${
                               debouncedQuery.toLowerCase() === item.toLowerCase()
@@ -1403,7 +1548,22 @@ export function StorefrontShell() {
                   </div>
                 </div>
 
-                {showCatalogSkeleton ? (
+                {selectedProduct ? (
+                  <CatalogProductDetail
+                    product={selectedProduct}
+                    selectedOptions={selectedOptions}
+                    onBack={() => setSelectedProduct(null)}
+                    onOptionChange={(group, value) =>
+                      setSelectedOptions((current) => ({ ...current, [group]: value }))
+                    }
+                    onAddToCart={() => {
+                      addToCart(selectedProduct, selectedOptions);
+                      setSelectedProduct(null);
+                    }}
+                    wished={wishlistIds.has(selectedProduct.id)}
+                    onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
+                  />
+                ) : showCatalogSkeleton ? (
                   <div className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                     {[0, 1, 2, 3, 4, 5].map((item) => (
                       <CatalogProductSkeleton key={item} />
@@ -1418,7 +1578,6 @@ export function StorefrontShell() {
                         wished={wishlistIds.has(product.id)}
                         onPreview={() => openPreview(product)}
                         onToggleWishlist={() => toggleWishlist(product.id)}
-                        onAddToCart={() => addToCart(product)}
                       />
                     ))}
                   </div>
@@ -1456,7 +1615,7 @@ export function StorefrontShell() {
         </>
       )}
 
-      {selectedProduct ? (
+      {selectedProduct && !isCatalogVisible ? (
         <ProductPreviewModal
           product={selectedProduct}
           selectedOptions={selectedOptions}
