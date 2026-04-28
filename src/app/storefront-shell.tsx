@@ -122,25 +122,18 @@ function StorefrontToast({
 
 function CatalogProductCard({
   product,
-  wished,
   onPreview,
-  onToggleWishlist,
 }: {
   product: StorefrontProduct;
-  wished: boolean;
   onPreview: () => void;
-  onToggleWishlist: () => void;
 }) {
   return (
-    <article className="catalog-enter-card group overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_38px_rgba(15,23,42,0.08)] sm:rounded-[1.35rem]">
-      <button
-        type="button"
-        onClick={onPreview}
-        className={`relative flex h-44 w-full cursor-pointer items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-4 text-left sm:h-56 sm:p-5`}
-      >
-        <div className="absolute left-4 top-4 rounded-full bg-white/82 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
-          {product.category}
-        </div>
+    <button
+      type="button"
+      onClick={onPreview}
+      className="catalog-enter-card group block w-full cursor-pointer overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white text-left shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_38px_rgba(15,23,42,0.08)] sm:rounded-[1.35rem]"
+    >
+      <div className={`relative flex h-44 w-full items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-4 sm:h-56 sm:p-5`}>
         <div className="absolute inset-x-10 bottom-6 h-10 rounded-full bg-slate-900/12 blur-2xl" />
         <Image
           src={product.image}
@@ -150,81 +143,25 @@ function CatalogProductCard({
           sizes="(min-width: 1280px) 22vw, (min-width: 768px) 40vw, 88vw"
           className="relative z-10 h-auto max-h-[88%] w-auto max-w-[86%] object-contain drop-shadow-[0_22px_34px_rgba(15,23,42,0.18)] transition duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02]"
         />
-      </button>
+      </div>
 
-      <div className="space-y-4 p-4 sm:p-5">
-        <div>
-          <div className="flex items-start justify-between gap-3">
-            <button
-              type="button"
-              onClick={onPreview}
-              className="min-w-0 cursor-pointer text-left"
-            >
-              <h3 className="text-lg font-semibold leading-tight tracking-tight text-slate-950 transition group-hover:text-[#3558ff]">
-                {product.title}
-              </h3>
-            </button>
-            <button
-              type="button"
-              onClick={onToggleWishlist}
-              aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
-              className={`flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border transition ${
-                wished
-                  ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white"
-                  : "border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-              }`}
-            >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
-              </svg>
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={onPreview}
-            className="mt-2 block cursor-pointer text-left text-sm leading-6 text-slate-600"
-          >
-            {product.description}
-          </button>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {product.highlights.slice(0, 2).map((item) => (
-            <span
-              key={item}
-              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="p-4 sm:p-5">
+        <h3 className="text-lg font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-[#3558ff]">
+          {product.title}
+        </h3>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          {product.description}
+        </p>
+        <div className="mt-4 border-t border-slate-100 pt-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
               Desde
             </p>
             <p className="text-2xl font-black tracking-tight text-slate-950">{product.price}</p>
           </div>
-          <button
-            type="button"
-            onClick={onPreview}
-            className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-          >
-            Seleccionar
-          </button>
         </div>
       </div>
-    </article>
+    </button>
   );
 }
 
@@ -232,30 +169,18 @@ function CatalogProductSkeleton() {
   return (
     <article className="overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:rounded-[1.35rem]">
       <div className="relative flex h-44 w-full items-center justify-center overflow-hidden bg-slate-100 p-4 sm:h-56 sm:p-5">
-        <div className="absolute left-4 top-4 h-6 w-24 animate-pulse rounded-full bg-white/80" />
         <div className="h-28 w-36 animate-pulse rounded-[1.5rem] bg-slate-200 sm:h-36 sm:w-44" />
       </div>
       <div className="space-y-4 p-4 sm:p-5">
         <div>
-          <div className="flex items-start justify-between gap-3">
-            <div className="h-6 w-44 max-w-full animate-pulse rounded-full bg-slate-200" />
-            <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-slate-200" />
-          </div>
+          <div className="h-6 w-44 max-w-full animate-pulse rounded-full bg-slate-200" />
           <div className="mt-3 h-4 w-full animate-pulse rounded-full bg-slate-200" />
           <div className="mt-2 h-4 w-3/4 animate-pulse rounded-full bg-slate-200" />
         </div>
-        <div className="flex gap-2">
-          <div className="h-7 w-24 animate-pulse rounded-full bg-slate-200" />
-          <div className="h-7 w-28 animate-pulse rounded-full bg-slate-200" />
-        </div>
-        <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="border-t border-slate-100 pt-4">
           <div>
             <div className="h-3 w-14 animate-pulse rounded-full bg-slate-200" />
             <div className="mt-2 h-8 w-24 animate-pulse rounded-full bg-slate-200" />
-          </div>
-          <div className="flex w-full gap-2 sm:w-auto">
-            <div className="h-10 flex-1 animate-pulse rounded-xl bg-slate-200 sm:w-16 sm:flex-none" />
-            <div className="h-10 flex-1 animate-pulse rounded-xl bg-slate-200 sm:w-20 sm:flex-none" />
           </div>
         </div>
       </div>
@@ -1575,9 +1500,7 @@ export function StorefrontShell() {
                       <CatalogProductCard
                         key={product.id}
                         product={product}
-                        wished={wishlistIds.has(product.id)}
                         onPreview={() => openPreview(product)}
-                        onToggleWishlist={() => toggleWishlist(product.id)}
                       />
                     ))}
                   </div>
