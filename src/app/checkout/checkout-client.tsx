@@ -157,44 +157,84 @@ function CheckoutSkeleton() {
   );
 }
 
-function CheckoutHeader({ currentStep }: { currentStep: number }) {
-  const steps = ["Productos", "Arte por producto", "Pago"];
+function CheckoutHeader({
+  currentStep,
+  preparedCount,
+  totalItems,
+}: {
+  currentStep: number;
+  preparedCount: number;
+  totalItems: number;
+}) {
+  const steps = ["Carrito", "Archivos", "Entrega", "Pago"];
+  const statusText =
+    currentStep >= steps.length
+      ? "Listo para crear el pedido"
+      : `${preparedCount}/${totalItems} productos preparados`;
 
   return (
-    <header className="rounded-[1.6rem] border border-slate-200 bg-white px-4 py-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:px-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <Link href="/" className="inline-flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-lg font-black text-white">
-            X
-          </span>
-          <span>
-            <span className="block text-lg font-black leading-none text-slate-950">
-              Express
-            </span>
-            <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-              Printer
-            </span>
-          </span>
+    <header className="overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.05)]">
+      <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <Link
+          href="/"
+          className="inline-flex w-fit items-center rounded-xl border border-slate-200 bg-white px-3 py-2 transition hover:border-slate-300 hover:bg-slate-50"
+          aria-label="Volver al inicio de Express Printer"
+        >
+          <span
+            aria-hidden="true"
+            className="block h-10 w-40 max-w-[52vw]"
+            style={{
+              backgroundImage: "url('/express-printer-logo.webp')",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "left center",
+              backgroundSize: "contain",
+            }}
+          />
         </Link>
-        <div className="grid gap-2 text-xs font-semibold text-slate-500 sm:grid-cols-3">
+
+        <Link
+          href="/"
+          className="inline-flex w-fit items-center justify-center rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+        >
+          Volver al inicio
+        </Link>
+      </div>
+
+      <div className="border-t border-slate-200 bg-slate-50 px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+              Checkout
+            </p>
+            <p className="mt-1 text-lg font-black text-slate-950">
+              Prepara tu pedido antes de enviarlo a revision
+            </p>
+          </div>
+          <span className="inline-flex w-fit rounded-full bg-white px-4 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200">
+            {statusText}
+          </span>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-4">
           {steps.map((step, index) => {
             const stepNumber = index + 1;
             const isActive = stepNumber === currentStep;
             const isDone = stepNumber < currentStep;
 
             return (
-              <span
-                key={step}
-                className={`rounded-full border px-3 py-2 text-center ${
-                  isActive
-                    ? "border-slate-950 bg-slate-950 text-white"
-                    : isDone
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : "border-slate-200 bg-slate-50"
-                }`}
-              >
-                {stepNumber}. {step}
-              </span>
+              <div key={step} className="flex items-center gap-2">
+                <span
+                  className={`h-2 flex-1 rounded-full ${
+                    isActive || isDone ? "bg-[#ffd45f]" : "bg-slate-200"
+                  }`}
+                />
+                <span
+                  className={`text-[11px] font-black uppercase ${
+                    isActive ? "text-slate-950" : isDone ? "text-slate-500" : "text-slate-400"
+                  }`}
+                >
+                  {step}
+                </span>
+              </div>
             );
           })}
         </div>
@@ -772,7 +812,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   const preparedCount = cartItems.filter((item) => getPrep(prepByKey, item.key).confirmed).length;
   const allItemsConfirmed = cartItems.length > 0 && preparedCount === cartItems.length;
   const activeItem = cartItems[activeIndex] ?? null;
-  const currentStep = !allItemsConfirmed ? 2 : 3;
+  const currentStep = !allItemsConfirmed ? 2 : 4;
   const balanceValue = accountBalance ?? 0;
   const balanceAfterOrder = Number((balanceValue - subtotal).toFixed(2));
   const hasNegativeBalance = balanceValue < 0;
@@ -1009,7 +1049,11 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   return (
     <main className="min-h-screen bg-[#f3f5f8] px-4 py-5 text-slate-950 sm:px-6 lg:px-8 2xl:px-10">
       <div className="mx-auto max-w-[112rem] space-y-5">
-        <CheckoutHeader currentStep={currentStep} />
+        <CheckoutHeader
+          currentStep={currentStep}
+          preparedCount={preparedCount}
+          totalItems={cartItems.length}
+        />
 
         {!hasPublicAuth ? (
           <MessageBox
@@ -1069,35 +1113,54 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
         ) : (
           <form onSubmit={handleSubmit} className="grid gap-5 xl:grid-cols-[1fr_28rem] xl:items-start">
             <div className="space-y-5">
-              <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      Preparacion guiada
-                    </p>
-                    <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                      Revisa un producto a la vez
-                    </h1>
+              <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.05)]">
+                <div className="border-b border-slate-200 bg-slate-950 p-5 text-white sm:p-6">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#ffd45f]">
+                        Archivos del pedido
+                      </p>
+                      <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
+                        Prepara cada producto
+                      </h1>
+                      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
+                        Confirma el arte de cada articulo antes de escoger entrega y pago. Si aun no tienes el archivo, puedes dejarlo pendiente.
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase text-slate-300">Avance</p>
+                      <p className="mt-1 text-2xl font-black">
+                        {preparedCount}/{cartItems.length}
+                      </p>
+                    </div>
                   </div>
-                  <Link
-                    href="/#catalogo"
-                    className="inline-flex w-fit rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                  >
-                    Seguir comprando
-                  </Link>
                 </div>
 
-                <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
-                  {cartItems.map((item, index) => (
-                    <ProductQueueItem
-                      key={item.key}
-                      item={item}
-                      index={index}
-                      isActive={activeIndex === index}
-                      prep={getPrep(prepByKey, item.key)}
-                      onClick={() => setActiveIndex(index)}
-                    />
-                  ))}
+                <div className="p-4 sm:p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-semibold leading-6 text-slate-500">
+                      Selecciona un producto, sube su arte y confirma para continuar con el siguiente.
+                    </p>
+                    <Link
+                      href="/#catalogo"
+                      className="inline-flex w-fit rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                    >
+                      Seguir comprando
+                    </Link>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+                    {cartItems.map((item, index) => (
+                      <ProductQueueItem
+                        key={item.key}
+                        item={item}
+                        index={index}
+                        isActive={activeIndex === index}
+                        prep={getPrep(prepByKey, item.key)}
+                        onClick={() => setActiveIndex(index)}
+                      />
+                    ))}
+                  </div>
                 </div>
               </section>
 
@@ -1120,12 +1183,18 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
 
               <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] sm:p-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Notas generales
+                  Detalles adicionales
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950">
+                  Indicaciones para produccion
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Agrega aqui cualquier detalle que no este en el archivo: colores, cortes, direccion de entrega o comentarios para administracion.
                 </p>
                 <textarea
                   name="globalNotes"
                   rows={4}
-                  placeholder="Indicaciones generales de entrega, contacto o produccion..."
+                  placeholder="Escribe una indicacion especial..."
                   className="mt-4 w-full resize-none rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                 />
               </section>
@@ -1135,18 +1204,51 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
               {message ? <MessageBox message={message} tone={messageTone} /> : null}
 
               <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(15,23,42,0.08)] sm:p-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Entrega
-                </p>
-                <h2 className="mt-2 text-2xl font-black text-slate-950">
-                  Datos de entrega
-                </h2>
-
-                <div className="mt-5 grid gap-3">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <label htmlFor="contactName" className="mb-1.5 block text-xs font-semibold text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      Contacto
+                    </p>
+                    <h2 className="mt-2 text-2xl font-black text-slate-950">
+                      Como te entregamos
+                    </h2>
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-black text-slate-500">
+                    2 min
+                  </span>
+                </div>
+
+                <div className="mt-5 rounded-[1.45rem] border border-slate-200 bg-slate-50 p-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      ["pickup", "Retiro"],
+                      ["delivery", "Delivery"],
+                    ] as const).map(([value, label]) => {
+                      const isSelected = deliveryMethod === value;
+
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setDeliveryMethod(value)}
+                          className={`rounded-[1.15rem] px-4 py-3 text-sm font-black transition ${
+                            isSelected
+                              ? "bg-slate-950 text-white shadow-sm"
+                              : "text-slate-500 hover:bg-white hover:text-slate-950"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3">
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-semibold text-slate-500">
                       Nombre de contacto
-                    </label>
+                    </span>
                     <input
                       id="contactName"
                       type="text"
@@ -1155,11 +1257,12 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                       placeholder="Nombre completo"
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                     />
-                  </div>
-                  <div>
-                    <label htmlFor="contactPhone" className="mb-1.5 block text-xs font-semibold text-slate-500">
-                      Telefono de contacto
-                    </label>
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-semibold text-slate-500">
+                      Telefono
+                    </span>
                     <input
                       id="contactPhone"
                       type="tel"
@@ -1168,42 +1271,13 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                       placeholder="04XX-XXXXXXX"
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                     />
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-slate-500">
-                      Metodo de entrega
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {([
-                        ["pickup", "Retiro en tienda"],
-                        ["delivery", "Delivery"],
-                      ] as const).map(([value, label]) => {
-                        const isSelected = deliveryMethod === value;
-
-                        return (
-                          <button
-                            key={value}
-                            type="button"
-                            onClick={() => setDeliveryMethod(value)}
-                            className={`rounded-2xl border px-4 py-3 text-sm font-black transition ${
-                              isSelected
-                                ? "border-slate-950 bg-slate-950 text-white"
-                                : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
-                            }`}
-                          >
-                            {label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  </label>
 
                   {deliveryMethod === "delivery" ? (
-                    <div>
-                      <label htmlFor="deliveryAddress" className="mb-1.5 block text-xs font-semibold text-slate-500">
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-semibold text-slate-500">
                         Direccion de entrega
-                      </label>
+                      </span>
                       <textarea
                         id="deliveryAddress"
                         value={deliveryAddress}
@@ -1212,11 +1286,11 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                         placeholder="Direccion completa, punto de referencia..."
                         className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
                       />
-                    </div>
+                    </label>
                   ) : (
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                      <p className="text-xs font-semibold text-slate-500">
-                        Retira tu pedido en nuestra tienda una vez que este listo. Te notificaremos por telefono.
+                      <p className="text-xs font-semibold leading-5 text-slate-500">
+                        Te avisaremos cuando el pedido este listo para retirar en tienda.
                       </p>
                     </div>
                   )}
@@ -1228,7 +1302,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                   Resumen
                 </p>
                 <h2 className="mt-2 text-2xl font-black text-slate-950">
-                  Pedido completo
+                  Total y pago
                 </h2>
 
                 <div className="mt-5 rounded-[1.35rem] border border-slate-200 bg-slate-50 p-4">
@@ -1278,7 +1352,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                     {hasNegativeBalance
                       ? "Primero registra un pago desde Mi cuenta y espera aprobacion para volver a crear pedidos."
                       : allItemsConfirmed
-                        ? "El pedido descontara el total del saldo de tu cuenta y quedara sincronizado con administracion."
+                        ? "Escoge como quieres cubrir este pedido. Administracion lo vera junto al arte y los datos de entrega."
                       : "El pago se desbloquea cuando cada producto tenga arte o quede marcado como pendiente."}
                   </p>
                 </div>
@@ -1432,11 +1506,11 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
                     disabled={isSubmitting || !canSubmitOrder}
                     className="mt-2 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-5 py-4 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {isSubmitting ? "Enviando pedido..." : "Enviar pedido a revision"}
+                    {isSubmitting ? "Creando pedido..." : "Crear pedido"}
                   </button>
                 </div>
                 <p className="mt-4 text-center text-xs leading-5 text-slate-400">
-                  Una sola orden agrupara estos productos, con detalle de arte por producto.
+                  La orden agrupara todos los productos y conservara el arte de cada uno.
                 </p>
               </section>
             </aside>
