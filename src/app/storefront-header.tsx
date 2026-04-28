@@ -4,10 +4,10 @@ import Link from "next/link";
 import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 
 const promoTickerItems = [
-  "Bienvenido a Express Printer",
-  "Horario de atencion: lunes a sabado",
-  "Pedidos online para impresion comercial y publicitaria",
-  "Atencion por WhatsApp para cotizaciones y seguimiento",
+  "Horario: lunes a sabado",
+  "Pedidos online",
+  "Cotizaciones por WhatsApp",
+  "Impresion comercial y publicitaria",
 ];
 const categoryMenu = [
   {
@@ -129,17 +129,37 @@ export function StorefrontHeader({
   return (
     <>
       <div className="border-b border-slate-800 bg-slate-950 text-white">
-        <div className="mx-auto flex w-full max-w-[112rem] items-center overflow-hidden px-4 py-2.5 sm:px-6 lg:px-8 2xl:px-10">
-          <div className="storefront-marquee flex min-w-max items-center gap-8">
-            {[...promoTickerItems, ...promoTickerItems].map((item, index) => (
-              <div
-                key={`${item}-${index}`}
-                className="flex items-center gap-8 text-xs font-semibold tracking-[0.04em] text-slate-200 sm:text-sm"
+        <div className="mx-auto grid w-full max-w-[112rem] gap-2 px-4 py-2.5 sm:px-6 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center lg:gap-8 lg:px-8 2xl:px-10">
+          <p className="flex min-w-0 items-center gap-2 text-xs font-semibold tracking-[0.02em] text-slate-100 sm:text-sm">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#ffd45f]" />
+            <span className="truncate">
+              Bienvenido a Express Printer
+            </span>
+          </p>
+
+          <div className="hidden min-w-0 items-center justify-end gap-2 lg:flex">
+            {promoTickerItems.map((item) => (
+              <span
+                key={item}
+                className="whitespace-nowrap rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-slate-200"
               >
-                <span className="whitespace-nowrap">{item}</span>
-                <span className="h-1.5 w-1.5 rounded-full bg-[#ffd45f]" />
-              </div>
+                {item}
+              </span>
             ))}
+          </div>
+
+          <div className="min-w-0 overflow-hidden lg:hidden [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
+            <div className="storefront-marquee flex min-w-max items-center gap-7">
+              {[...promoTickerItems, ...promoTickerItems].map((item, index) => (
+                <div
+                  key={`${item}-${index}`}
+                  className="flex items-center gap-7 text-xs font-semibold tracking-[0.04em] text-slate-300"
+                >
+                  <span className="whitespace-nowrap">{item}</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#ffd45f]" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
