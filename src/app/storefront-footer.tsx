@@ -75,12 +75,12 @@ export function StorefrontFooter() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex w-full max-w-[118rem] flex-col gap-3 px-4 py-5 text-sm text-slate-400 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 2xl:px-10">
-          <p>&copy; 2026 Express Printer. Todos los derechos reservados.</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/login" className="transition hover:text-white">
               Panel administrativo
             </Link>
           </div>
+          <p>&copy; 2026 Express Printer. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>
