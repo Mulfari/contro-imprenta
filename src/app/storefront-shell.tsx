@@ -428,27 +428,40 @@ function CatalogProductDetail({
 
   const hasFiles = draftFiles.length > 0;
   const estimatedTotal = parsePrice(product.price) * draftQuantity;
+  const selectedSummary = product.options
+    .map((group) => selectedOptions[group.name])
+    .filter(Boolean)
+    .join(" / ");
 
   return (
-    <article className="mt-5 overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_18px_46px_rgba(15,23,42,0.055)]">
-      <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <div className="flex min-w-0 items-center gap-3">
+    <article className="mt-5 overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.05)]">
+      <div className="grid gap-3 border-b border-slate-200 px-4 py-4 sm:px-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onBack}
-            className="shrink-0 cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+            className="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
           >
             Volver al catalogo
           </button>
-          <div className="min-w-0">
-            <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-              {product.category}
-            </p>
-            <h2 className="truncate text-lg font-black tracking-tight text-slate-950 sm:text-xl">
-              {product.title}
-            </h2>
-          </div>
         </div>
+
+        <div className="min-w-0 lg:text-center">
+          <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Cotizador rapido / {product.category}
+          </p>
+          <h2 className="mt-1 truncate text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+            {product.title}
+          </h2>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 lg:justify-end">
+          <div className="rounded-xl bg-slate-50 px-3 py-2 text-right">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Desde
+            </p>
+            <p className="text-lg font-black text-slate-950">{product.price}</p>
+          </div>
         <button
           type="button"
           onClick={onToggleWishlist}
@@ -472,72 +485,74 @@ function CatalogProductDetail({
             <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
           </svg>
         </button>
+        </div>
       </div>
 
-      <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(22rem,0.55fr)] xl:grid-cols-[minmax(0,1fr)_27rem]">
-        <section className="min-w-0 rounded-[1.2rem] border border-slate-200 bg-slate-50 p-3 sm:p-4">
-          <div className={`relative flex min-h-[16rem] items-center justify-center overflow-hidden rounded-[1rem] bg-gradient-to-br ${product.tint} p-5 sm:min-h-[22rem]`}>
-            <div className="absolute inset-x-10 bottom-7 h-10 rounded-full bg-slate-900/12 blur-2xl" />
+      <div className="grid gap-4 bg-[#f7f8fa] p-4 sm:p-5 xl:grid-cols-[minmax(14rem,0.62fr)_minmax(20rem,0.86fr)_minmax(22rem,0.9fr)]">
+        <section className="rounded-[1rem] border border-slate-200 bg-white p-4">
+          <div className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[0.9rem] bg-gradient-to-br ${product.tint} p-4`}>
+            <div className="absolute inset-x-8 bottom-6 h-8 rounded-full bg-slate-900/10 blur-2xl" />
             <Image
               src={product.image}
               alt={product.imageAlt}
               width={1200}
               height={900}
-              sizes="(min-width: 1280px) 44vw, (min-width: 768px) 48vw, 88vw"
-              className="relative z-10 h-auto max-h-[82%] w-auto max-w-[88%] object-contain drop-shadow-[0_24px_34px_rgba(15,23,42,0.16)]"
+              sizes="(min-width: 1280px) 22vw, (min-width: 768px) 32vw, 88vw"
+              className="relative z-10 h-auto max-h-[86%] w-auto max-w-[88%] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.15)]"
             />
           </div>
 
-          <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#3558ff]">
-                Producto
-              </p>
-              <h3 className="mt-2 text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-4xl">
-                {product.title}
-              </h3>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
-                {product.description}
-              </p>
-            </div>
-
-            <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
-              {product.highlights.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <aside className="rounded-[1.2rem] border border-slate-200 bg-white p-4 shadow-[0_14px_34px_rgba(15,23,42,0.04)] lg:sticky lg:top-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                Preparar pedido
-              </p>
-              <p className="mt-1 text-3xl font-black text-slate-950">{product.price}</p>
-            </div>
-            <p className="rounded-xl bg-slate-50 px-3 py-2 text-right text-xs font-semibold leading-5 text-slate-500">
-              {product.turnaround}
+          <div className="mt-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Producto
+            </p>
+            <h3 className="mt-1 text-xl font-black tracking-tight text-slate-950">
+              {product.title}
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              {product.description}
             </p>
           </div>
 
-          <div className="mt-5 border-t border-slate-200 pt-5">
+          <div className="mt-4 grid gap-2">
+            {product.highlights.slice(0, 3).map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-[#3558ff]" />
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-[1rem] border border-slate-200 bg-white p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Paso 1
+              </p>
+              <h3 className="mt-1 text-xl font-black tracking-tight text-slate-950">
+                Configurar impresion
+              </h3>
+            </div>
+            <span className="rounded-full bg-slate-950 px-3 py-1.5 text-xs font-black text-white">
+              {draftQuantity} und.
+            </span>
+          </div>
+
+          <div className="mt-5 rounded-[0.9rem] border border-slate-200 bg-slate-50 p-3">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-black text-slate-950">Cantidad</p>
-                <p className="text-xs font-semibold text-slate-400">Unidades del pedido</p>
+                <p className="text-xs font-semibold text-slate-400">Ajusta las unidades</p>
               </div>
-              <div className="flex h-11 items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+              <div className="flex h-11 items-center overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <button
                   type="button"
                   onClick={() => setDraftQuantity((current) => Math.max(1, current - 1))}
-                  className="h-full w-11 cursor-pointer text-lg font-black text-slate-500 transition hover:bg-white hover:text-slate-950"
+                  className="h-full w-11 cursor-pointer text-lg font-black text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
                 >
                   -
                 </button>
@@ -554,65 +569,68 @@ function CatalogProductDetail({
                 <button
                   type="button"
                   onClick={() => setDraftQuantity((current) => current + 1)}
-                  className="h-full w-11 cursor-pointer text-lg font-black text-slate-500 transition hover:bg-white hover:text-slate-950"
+                  className="h-full w-11 cursor-pointer text-lg font-black text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
                 >
                   +
                 </button>
               </div>
             </div>
-
-            <div className="mt-5 space-y-4">
-              {product.options.map((group) => (
-                <div key={group.name}>
-                  <p className="text-sm font-black text-slate-950">{group.name}</p>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    {group.values.map((value) => {
-                      const selected = selectedOptions[group.name] === value;
-
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => onOptionChange(group.name, value)}
-                          className={`min-h-11 cursor-pointer rounded-xl border px-3 py-2 text-left text-sm font-semibold transition ${
-                            selected
-                              ? "border-slate-950 bg-slate-950 text-white"
-                              : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
-                          }`}
-                        >
-                          {value}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
-          <div className="mt-5 border-t border-slate-200 pt-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-black text-slate-950">Arte digital</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
-                  Sube el archivo listo para imprimir o una referencia del diseno.
-                </p>
+          <div className="mt-5 space-y-5">
+            {product.options.map((group) => (
+              <div key={group.name}>
+                <p className="text-sm font-black text-slate-950">{group.name}</p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {group.values.map((value) => {
+                    const selected = selectedOptions[group.name] === value;
+
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => onOptionChange(group.name, value)}
+                        className={`min-h-12 cursor-pointer rounded-xl border px-3 py-2 text-left text-sm font-semibold transition ${
+                          selected
+                            ? "border-slate-950 bg-slate-950 text-white shadow-[0_12px_24px_rgba(15,23,42,0.12)]"
+                            : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
+                        }`}
+                      >
+                        {value}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <span
-                className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-black ${
-                  hasFiles ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800"
-                }`}
-              >
-                {hasFiles ? "Cargado" : "Recomendado"}
-              </span>
+            ))}
+          </div>
+        </section>
+
+        <aside className="rounded-[1rem] border border-slate-200 bg-white p-4 xl:sticky xl:top-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Paso 2
+              </p>
+              <h3 className="mt-1 text-xl font-black tracking-tight text-slate-950">
+                Arte y resumen
+              </h3>
             </div>
+            <span
+              className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-black ${
+                hasFiles ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              {hasFiles ? "Arte cargado" : "Arte pendiente"}
+            </span>
+          </div>
 
             {hasFiles ? (
-              <div className="mt-3 space-y-2">
+              <div className="mt-5 space-y-2">
                 {draftFiles.map((file) => (
                   <div
                     key={`${file.name}-${file.lastModified}`}
-                    className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2"
+                    className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/60 p-2"
                   >
                     <CatalogArtPreview file={file} />
                     <div className="min-w-0 flex-1">
@@ -646,11 +664,11 @@ function CatalogProductDetail({
                 </div>
               </div>
             ) : (
-              <label className="mt-3 flex cursor-pointer flex-col items-center justify-center rounded-[1rem] border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition hover:border-slate-400 hover:bg-white">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl font-black text-slate-500 shadow-sm">
+              <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-[0.9rem] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center transition hover:border-slate-400 hover:bg-white">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-xl font-black text-slate-500 shadow-sm">
                   +
                 </span>
-                <span className="mt-3 text-sm font-black text-slate-950">
+                <span className="mt-3 text-base font-black text-slate-950">
                   Subir arte ahora
                 </span>
                 <span className="mt-1 text-xs leading-5 text-slate-500">
@@ -667,17 +685,26 @@ function CatalogProductDetail({
                 />
               </label>
             )}
-          </div>
 
-          <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <div className="flex items-center justify-between gap-3 text-sm">
-              <span className="font-semibold text-slate-500">Estimado</span>
-              <span className="text-xl font-black text-slate-950">
-                ${estimatedTotal}
-              </span>
+          <div className="mt-5 rounded-[0.9rem] border border-slate-200 bg-slate-50 p-4">
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-semibold text-slate-500">Cantidad</span>
+                <span className="font-black text-slate-950">{draftQuantity}</span>
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <span className="font-semibold text-slate-500">Seleccion</span>
+                <span className="text-right font-black text-slate-950">
+                  {selectedSummary || "Por definir"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-3">
+                <span className="font-semibold text-slate-500">Estimado</span>
+                <span className="text-2xl font-black text-slate-950">${estimatedTotal}</span>
+              </div>
             </div>
             <p className="mt-2 text-xs leading-5 text-slate-500">
-              El precio final puede ajustarse si el arte requiere correccion o medidas especiales.
+              Entrega estimada: <span className="font-black text-slate-700">{product.turnaround}</span>
             </p>
           </div>
 
