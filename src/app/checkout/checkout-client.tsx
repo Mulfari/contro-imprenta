@@ -9,6 +9,9 @@ import type { Session } from "@supabase/supabase-js";
 import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import {
   cartStorageKey,
+  clearCartArtFiles,
+  deleteCartArtFiles,
+  loadCartArtFiles,
   parsePrice,
   restoreStoredCart,
   serializeCartItems,
@@ -713,6 +716,56 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   }, [cartItems]);
 
   useEffect(() => {
+    if (!cartItems.length) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadPreparedArt() {
+      const entries = await Promise.all(
+        cartItems.map(async (item) => ({
+          key: item.key,
+          files: await loadCartArtFiles(item.key),
+        })),
+      );
+
+      if (!isMounted) {
+        return;
+      }
+
+      setPrepByKey((current) => {
+        const next = { ...current };
+
+        entries.forEach(({ key, files }) => {
+          if (!files.length) {
+            return;
+          }
+
+          const existing = next[key] ?? { ...emptyPrep };
+
+          if (existing.files.length > 0 || existing.sendLater || existing.confirmed) {
+            return;
+          }
+
+          next[key] = {
+            ...existing,
+            files,
+          };
+        });
+
+        return next;
+      });
+    }
+
+    void loadPreparedArt();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [cartItems]);
+
+  useEffect(() => {
     if (!hasPublicAuth) {
       return;
     }
@@ -860,6 +913,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
   const changeQuantity = (key: string, quantity: number) => {
     if (quantity <= 0) {
       setCartItems((current) => current.filter((item) => item.key !== key));
+      void deleteCartArtFiles(key);
       return;
     }
 
@@ -870,6 +924,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
 
   const removeItem = (key: string) => {
     setCartItems((current) => current.filter((item) => item.key !== key));
+    void deleteCartArtFiles(key);
   };
 
   const updatePrep = (key: string, next: CheckoutPrep) => {
@@ -1074,6 +1129,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
       }
 
       window.localStorage.removeItem(cartStorageKey);
+      void clearCartArtFiles();
       setCartItems([]);
       router.push(
         `/mi-cuenta?tone=success&message=${encodeURIComponent(

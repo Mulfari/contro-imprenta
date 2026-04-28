@@ -9,12 +9,14 @@ import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import {
   cartStorageKey,
   catalogQueryStorageKey,
+  deleteCartArtFiles,
   getCartKey,
   getDefaultOptions,
   getProductById,
   parsePrice,
   restoreStoredCart,
   restoreStoredWishlist,
+  saveCartArtFiles,
   serializeCartItems,
   wishlistStorageKey,
   type CartItem,
@@ -364,6 +366,46 @@ function ProductPreviewModal({
   );
 }
 
+function formatCatalogFileSize(value: number) {
+  if (value < 1024 * 1024) {
+    return `${Math.max(1, Math.round(value / 1024))} KB`;
+  }
+
+  return `${(value / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function CatalogArtPreview({ file }: { file: File }) {
+  const isImage = file.type.startsWith("image/");
+  const previewUrl = useMemo(
+    () => (isImage ? URL.createObjectURL(file) : null),
+    [file, isImage],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  if (previewUrl) {
+    return (
+      <div
+        className="h-16 w-16 shrink-0 rounded-xl border border-slate-200 bg-white bg-contain bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${previewUrl})` }}
+        aria-label={`Miniatura de ${file.name}`}
+      />
+    );
+  }
+
+  return (
+    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-black text-slate-500">
+      {file.name.split(".").pop()?.slice(0, 4).toUpperCase() || "FILE"}
+    </div>
+  );
+}
+
 function CatalogProductDetail({
   product,
   selectedOptions,
@@ -377,179 +419,285 @@ function CatalogProductDetail({
   selectedOptions: Record<string, string>;
   onBack: () => void;
   onOptionChange: (group: string, value: string) => void;
-  onAddToCart: () => void;
+  onAddToCart: (quantity: number, files: File[]) => void;
   wished: boolean;
   onToggleWishlist: () => void;
 }) {
+  const [draftQuantity, setDraftQuantity] = useState(1);
+  const [draftFiles, setDraftFiles] = useState<File[]>([]);
+
+  const hasFiles = draftFiles.length > 0;
+  const estimatedTotal = parsePrice(product.price) * draftQuantity;
+
   return (
-    <article className="mt-5 overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white shadow-[0_18px_46px_rgba(15,23,42,0.06)]">
-      <div className="border-b border-slate-200 px-4 py-4 sm:px-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <article className="mt-5 overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_18px_46px_rgba(15,23,42,0.055)]">
+      <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="w-fit cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+            className="shrink-0 cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-xs font-black text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
           >
             Volver al catalogo
           </button>
-          <div className="flex items-center gap-3">
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-500">
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
               {product.category}
-            </span>
-            <button
-              type="button"
-              onClick={onToggleWishlist}
-              aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
-              className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border transition ${
-                wished
-                  ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white"
-                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-[#ff5b4d]"
-              }`}
-            >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill={wished ? "currentColor" : "none"}
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
-              </svg>
-            </button>
+            </p>
+            <h2 className="truncate text-lg font-black tracking-tight text-slate-950 sm:text-xl">
+              {product.title}
+            </h2>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={onToggleWishlist}
+          aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
+          className={`flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border transition ${
+            wished
+              ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white"
+              : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-[#ff5b4d]"
+          }`}
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill={wished ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
+          </svg>
+        </button>
       </div>
 
-      <div className="grid gap-5 p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start">
-        <div className="min-w-0 space-y-5">
-          <section className="grid gap-5 lg:grid-cols-[minmax(18rem,0.9fr)_minmax(0,1.1fr)] lg:items-center">
-            <div className={`relative flex min-h-[18rem] items-center justify-center overflow-hidden rounded-[1.25rem] bg-gradient-to-br ${product.tint} p-5 sm:min-h-[24rem]`}>
-              <div className="absolute inset-x-12 bottom-8 h-12 rounded-full bg-slate-900/12 blur-2xl" />
-              <Image
-                src={product.image}
-                alt={product.imageAlt}
-                width={1200}
-                height={900}
-                sizes="(min-width: 1280px) 34vw, (min-width: 768px) 45vw, 88vw"
-                className="relative z-10 h-auto max-h-[78%] w-auto max-w-[86%] object-contain drop-shadow-[0_26px_40px_rgba(15,23,42,0.18)]"
-              />
-            </div>
+      <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(22rem,0.55fr)] xl:grid-cols-[minmax(0,1fr)_27rem]">
+        <section className="min-w-0 rounded-[1.2rem] border border-slate-200 bg-slate-50 p-3 sm:p-4">
+          <div className={`relative flex min-h-[16rem] items-center justify-center overflow-hidden rounded-[1rem] bg-gradient-to-br ${product.tint} p-5 sm:min-h-[22rem]`}>
+            <div className="absolute inset-x-10 bottom-7 h-10 rounded-full bg-slate-900/12 blur-2xl" />
+            <Image
+              src={product.image}
+              alt={product.imageAlt}
+              width={1200}
+              height={900}
+              sizes="(min-width: 1280px) 44vw, (min-width: 768px) 48vw, 88vw"
+              className="relative z-10 h-auto max-h-[82%] w-auto max-w-[88%] object-contain drop-shadow-[0_24px_34px_rgba(15,23,42,0.16)]"
+            />
+          </div>
 
+          <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#3558ff]">
-                Producto de imprenta
+                Producto
               </p>
-              <h2 className="mt-2 text-[2rem] font-black leading-tight tracking-tight text-slate-950 sm:text-[2.7rem]">
+              <h3 className="mt-2 text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-4xl">
                 {product.title}
-              </h2>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
+              </h3>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
                 {product.description}
               </p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                {product.highlights.map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
             </div>
-          </section>
 
-          <section className="grid gap-3 sm:grid-cols-3">
-            {[
-              ["1", "Configura el producto", "Elige cantidad, material o acabado antes de anadirlo."],
-              ["2", "Prepara el pedido", "En checkout subiras el arte o lo marcaras como pendiente."],
-              ["3", "Validamos y producimos", "Administracion revisa pago, arte y detalles del pedido."],
-            ].map(([step, title, detail]) => (
-              <div key={step} className="rounded-[1.2rem] border border-slate-200 bg-white p-4">
-                <p className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-xs font-black text-white">
-                  {step}
-                </p>
-                <h3 className="mt-3 text-sm font-black text-slate-950">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p>
-              </div>
-            ))}
-          </section>
-        </div>
+            <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
+              {product.highlights.map((item) => (
+                <div
+                  key={item}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        <aside className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4 shadow-[0_14px_34px_rgba(15,23,42,0.045)] xl:sticky xl:top-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-            Configurar
-          </p>
-          <div className="mt-2 flex items-end justify-between gap-4">
+        <aside className="rounded-[1.2rem] border border-slate-200 bg-white p-4 shadow-[0_14px_34px_rgba(15,23,42,0.04)] lg:sticky lg:top-5">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-slate-500">Precio base</p>
-              <p className="mt-1 text-4xl font-black text-slate-950">{product.price}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                Preparar pedido
+              </p>
+              <p className="mt-1 text-3xl font-black text-slate-950">{product.price}</p>
             </div>
-            <p className="text-right text-xs font-semibold leading-5 text-slate-500">
-              Entrega estimada<br />
-              <span className="text-slate-950">{product.turnaround}</span>
+            <p className="rounded-xl bg-slate-50 px-3 py-2 text-right text-xs font-semibold leading-5 text-slate-500">
+              {product.turnaround}
             </p>
           </div>
 
-          <div className="mt-5 space-y-5 border-t border-slate-200 pt-5">
-            {product.options.map((group) => (
-              <div key={group.name}>
-                <p className="text-sm font-black text-slate-950">{group.name}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {group.values.map((value) => {
-                    const selected = selectedOptions[group.name] === value;
+          <div className="mt-5 border-t border-slate-200 pt-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-black text-slate-950">Cantidad</p>
+                <p className="text-xs font-semibold text-slate-400">Unidades del pedido</p>
+              </div>
+              <div className="flex h-11 items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                <button
+                  type="button"
+                  onClick={() => setDraftQuantity((current) => Math.max(1, current - 1))}
+                  className="h-full w-11 cursor-pointer text-lg font-black text-slate-500 transition hover:bg-white hover:text-slate-950"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  value={draftQuantity}
+                  onChange={(event) =>
+                    setDraftQuantity(Math.max(1, Number(event.target.value) || 1))
+                  }
+                  className="h-full w-14 bg-transparent text-center text-sm font-black text-slate-950 outline-none"
+                  aria-label="Cantidad del producto"
+                />
+                <button
+                  type="button"
+                  onClick={() => setDraftQuantity((current) => current + 1)}
+                  className="h-full w-11 cursor-pointer text-lg font-black text-slate-500 transition hover:bg-white hover:text-slate-950"
+                >
+                  +
+                </button>
+              </div>
+            </div>
 
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => onOptionChange(group.name, value)}
-                        className={`cursor-pointer rounded-xl border px-3.5 py-2 text-sm font-semibold transition ${
-                          selected
-                            ? "border-slate-950 bg-slate-950 text-white"
-                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
-                      >
-                        {value}
-                      </button>
+            <div className="mt-5 space-y-4">
+              {product.options.map((group) => (
+                <div key={group.name}>
+                  <p className="text-sm font-black text-slate-950">{group.name}</p>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {group.values.map((value) => {
+                      const selected = selectedOptions[group.name] === value;
+
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => onOptionChange(group.name, value)}
+                          className={`min-h-11 cursor-pointer rounded-xl border px-3 py-2 text-left text-sm font-semibold transition ${
+                            selected
+                              ? "border-slate-950 bg-slate-950 text-white"
+                              : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
+                          }`}
+                        >
+                          {value}
+                        </button>
                       );
                     })}
                   </div>
                 </div>
               ))}
+            </div>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-3">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">
-              Seleccion actual
-            </p>
-            <div className="mt-3 space-y-2">
-              {product.options.map((group) => (
-                <div key={group.name} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="font-semibold text-slate-500">{group.name}</span>
-                  <span className="text-right font-black text-slate-950">
-                    {selectedOptions[group.name]}
-                  </span>
-                </div>
-              ))}
+          <div className="mt-5 border-t border-slate-200 pt-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-black text-slate-950">Arte digital</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Sube el archivo listo para imprimir o una referencia del diseno.
+                </p>
+              </div>
+              <span
+                className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-black ${
+                  hasFiles ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800"
+                }`}
+              >
+                {hasFiles ? "Cargado" : "Recomendado"}
+              </span>
             </div>
+
+            {hasFiles ? (
+              <div className="mt-3 space-y-2">
+                {draftFiles.map((file) => (
+                  <div
+                    key={`${file.name}-${file.lastModified}`}
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2"
+                  >
+                    <CatalogArtPreview file={file} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-black text-slate-950">{file.name}</p>
+                      <p className="mt-1 text-xs font-semibold text-slate-400">
+                        {formatCatalogFileSize(file.size)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <label className="flex-1 cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-center text-xs font-black text-white transition hover:bg-slate-800">
+                    Cambiar arte
+                    <input
+                      type="file"
+                      multiple
+                      className="sr-only"
+                      onChange={(event) => {
+                        setDraftFiles(Array.from(event.target.files ?? []));
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setDraftFiles([])}
+                    className="cursor-pointer rounded-xl border border-slate-200 px-4 py-3 text-xs font-black text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <label className="mt-3 flex cursor-pointer flex-col items-center justify-center rounded-[1rem] border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition hover:border-slate-400 hover:bg-white">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl font-black text-slate-500 shadow-sm">
+                  +
+                </span>
+                <span className="mt-3 text-sm font-black text-slate-950">
+                  Subir arte ahora
+                </span>
+                <span className="mt-1 text-xs leading-5 text-slate-500">
+                  PDF, PNG, JPG o archivo de diseno. Puedes cargar varios.
+                </span>
+                <input
+                  type="file"
+                  multiple
+                  className="sr-only"
+                  onChange={(event) => {
+                    setDraftFiles(Array.from(event.target.files ?? []));
+                    event.currentTarget.value = "";
+                  }}
+                />
+              </label>
+            )}
+          </div>
+
+          <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <span className="font-semibold text-slate-500">Estimado</span>
+              <span className="text-xl font-black text-slate-950">
+                ${estimatedTotal}
+              </span>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              El precio final puede ajustarse si el arte requiere correccion o medidas especiales.
+            </p>
           </div>
 
           <button
             type="button"
-            onClick={onAddToCart}
-            className="mt-5 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-6 py-4 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+            onClick={() => onAddToCart(draftQuantity, draftFiles)}
+            className="mt-4 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-6 py-4 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
           >
             Anadir al carrito
           </button>
 
-          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <p className="text-xs font-semibold leading-5 text-amber-900">
-              El arte digital se carga despues, durante la preparacion del pedido.
+          {!hasFiles ? (
+            <p className="mt-3 text-center text-xs font-semibold leading-5 text-amber-800">
+              Puedes anadirlo ahora, pero el checkout te pedira completar el arte antes de pagar.
             </p>
-          </div>
+          ) : (
+            <p className="mt-3 text-center text-xs font-semibold leading-5 text-emerald-700">
+              El arte quedara preparado para este producto en el checkout.
+            </p>
+          )}
         </aside>
       </div>
     </article>
@@ -887,6 +1035,11 @@ function CommerceDrawer({
                       <p className="mt-2 text-xs leading-5 text-slate-500">
                         {Object.entries(item.options).map(([key, value]) => `${key}: ${value}`).join(" / ")}
                       </p>
+                      {item.artFileNames?.length ? (
+                        <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+                          Arte cargado: {item.artFileNames.join(", ")}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
@@ -1307,15 +1460,36 @@ export function StorefrontShell() {
     });
   };
 
-  const addToCart = (product: StorefrontProduct, options = getDefaultOptions(product)) => {
+  const addToCart = async (
+    product: StorefrontProduct,
+    options = getDefaultOptions(product),
+    quantity = 1,
+    artFiles: File[] = [],
+  ) => {
     const key = getCartKey(product, options);
+    const safeQuantity = Math.max(1, Number(quantity) || 1);
+    const artFileNames = artFiles.map((file) => file.name);
+
+    if (artFiles.length > 0) {
+      try {
+        await saveCartArtFiles(key, artFiles);
+      } catch {
+        showToast("No se pudo preparar el arte en este navegador.", "error");
+      }
+    }
 
     setCartItems((current) => {
       const existing = current.find((item) => item.key === key);
 
       if (existing) {
         return current.map((item) =>
-          item.key === key ? { ...item, quantity: item.quantity + 1 } : item,
+          item.key === key
+            ? {
+                ...item,
+                quantity: item.quantity + safeQuantity,
+                artFileNames: artFileNames.length > 0 ? artFileNames : item.artFileNames,
+              }
+            : item,
         );
       }
 
@@ -1324,14 +1498,20 @@ export function StorefrontShell() {
         {
           key,
           product,
-          quantity: 1,
+          quantity: safeQuantity,
           options,
+          artFileNames,
         },
       ];
     });
     setActivePanel("cart");
     setMobileFilterOpen(false);
-    showToast(`${product.title} agregado al carrito.`, "success");
+    showToast(
+      artFiles.length > 0
+        ? `${product.title} agregado con arte preparado.`
+        : `${product.title} agregado al carrito.`,
+      "success",
+    );
   };
 
   const addProductById = (productId: string) => {
@@ -1342,11 +1522,12 @@ export function StorefrontShell() {
       return;
     }
 
-    addToCart(product);
+    void addToCart(product);
   };
 
   const removeCartItem = (key: string) => {
     setCartItems((current) => current.filter((item) => item.key !== key));
+    void deleteCartArtFiles(key);
   };
 
   const changeCartQuantity = (key: string, quantity: number) => {
@@ -1576,14 +1757,15 @@ export function StorefrontShell() {
 
                 {selectedProduct ? (
                   <CatalogProductDetail
+                    key={selectedProduct.id}
                     product={selectedProduct}
                     selectedOptions={selectedOptions}
                     onBack={() => setSelectedProduct(null)}
                     onOptionChange={(group, value) =>
                       setSelectedOptions((current) => ({ ...current, [group]: value }))
                     }
-                    onAddToCart={() => {
-                      addToCart(selectedProduct, selectedOptions);
+                    onAddToCart={(quantity, files) => {
+                      void addToCart(selectedProduct, selectedOptions, quantity, files);
                       setSelectedProduct(null);
                     }}
                     wished={wishlistIds.has(selectedProduct.id)}
@@ -1650,7 +1832,7 @@ export function StorefrontShell() {
             setSelectedOptions((current) => ({ ...current, [group]: value }))
           }
           onAddToCart={() => {
-            addToCart(selectedProduct, selectedOptions);
+            void addToCart(selectedProduct, selectedOptions);
             setSelectedProduct(null);
           }}
           wished={wishlistIds.has(selectedProduct.id)}
@@ -1664,7 +1846,7 @@ export function StorefrontShell() {
         wishlistProducts={wishlistProducts}
         onClose={() => setActivePanel(null)}
         onPreview={openPreview}
-        onAddProduct={(product) => addToCart(product)}
+        onAddProduct={(product) => void addToCart(product)}
         onRemoveWishlist={(productId) => toggleWishlist(productId)}
         onRemoveCartItem={removeCartItem}
         onQuantityChange={changeCartQuantity}
