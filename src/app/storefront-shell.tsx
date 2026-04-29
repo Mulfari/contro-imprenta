@@ -425,10 +425,10 @@ function CatalogProductDetail({
 }) {
   const [draftQuantity, setDraftQuantity] = useState(1);
   const [draftFiles, setDraftFiles] = useState<File[]>([]);
-  const [showArtUpload, setShowArtUpload] = useState(false);
 
   const hasFiles = draftFiles.length > 0;
-  const estimatedTotal = parsePrice(product.price) * draftQuantity;
+  const unitPrice = parsePrice(product.price);
+  const estimatedTotal = unitPrice * draftQuantity;
   const selectedSummary = product.options
     .map((group) => selectedOptions[group.name])
     .filter(Boolean)
@@ -436,74 +436,82 @@ function CatalogProductDetail({
 
   return (
     <article className="mt-5">
-      <button
-        type="button"
-        onClick={onBack}
-        className="mb-4 inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m15 18-6-6 6-6" />
-        </svg>
-        Volver al catalogo
-      </button>
+      <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.07)]">
+        <div className={`relative flex min-h-[16rem] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-8 sm:min-h-[22rem] lg:min-h-[26rem]`}>
+          <button
+            type="button"
+            onClick={onBack}
+            className="absolute left-4 top-4 z-20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3.5 py-2 text-xs font-black text-slate-700 shadow-sm backdrop-blur transition hover:bg-white hover:text-slate-950"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Catalogo
+          </button>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-        <div className="space-y-4">
-          <div className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[1.4rem] bg-gradient-to-br ${product.tint} p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)]`}>
-            <button
-              type="button"
-              onClick={onToggleWishlist}
-              aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
-              className={`absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm backdrop-blur transition ${
-                wished
-                  ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white"
-                  : "border-white/70 bg-white/85 text-slate-500 hover:bg-white hover:text-[#ff5b4d]"
-              }`}
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill={wished ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
-              </svg>
-            </button>
-            <div className="absolute inset-x-10 bottom-8 h-10 rounded-full bg-slate-900/10 blur-2xl" />
-            <Image
-              src={product.image}
-              alt={product.imageAlt}
-              width={1200}
-              height={900}
-              sizes="(min-width: 1024px) 48vw, 88vw"
-              className="relative z-10 h-auto max-h-[86%] w-auto max-w-[88%] object-contain drop-shadow-[0_22px_36px_rgba(15,23,42,0.18)]"
-            />
-          </div>
+          <button
+            type="button"
+            onClick={onToggleWishlist}
+            aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
+            className={`absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm backdrop-blur transition ${
+              wished
+                ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white"
+                : "border-white/60 bg-white/80 text-slate-500 hover:bg-white hover:text-[#ff5b4d]"
+            }`}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill={wished ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
+            </svg>
+          </button>
 
-          <div className="flex flex-wrap gap-2">
-            {product.highlights.map((item) => (
-              <span
-                key={item}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-[#3558ff]" />
-                {item}
-              </span>
-            ))}
-          </div>
+          <div className="absolute inset-x-12 bottom-10 h-12 rounded-full bg-slate-900/10 blur-2xl" />
+          <Image
+            src={product.image}
+            alt={product.imageAlt}
+            width={1200}
+            height={900}
+            sizes="(min-width: 1024px) 60vw, 92vw"
+            className="relative z-10 h-auto max-h-[80%] w-auto max-w-[70%] object-contain drop-shadow-[0_28px_48px_rgba(15,23,42,0.2)] sm:max-w-[60%]"
+          />
         </div>
 
-        <div className="flex flex-col">
-          <div className="rounded-[1.4rem] border border-slate-200 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#3558ff]">
-              {product.category}
-            </p>
-            <h2 className="mt-2 text-[1.7rem] font-black leading-tight tracking-tight text-slate-950 sm:text-[2rem]">
+        <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="border-b border-slate-100 p-5 sm:p-7 lg:border-b-0 lg:border-r">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-[#3558ff]/8 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#3558ff]">
+                {product.category}
+              </span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                Entrega: {product.turnaround}
+              </span>
+            </div>
+
+            <h2 className="mt-4 text-[1.85rem] font-black leading-[1.15] tracking-tight text-slate-950 sm:text-[2.2rem]">
               {product.title}
             </h2>
-            <p className="mt-3 text-[0.94rem] leading-7 text-slate-500">
+
+            <p className="mt-3 text-[0.95rem] leading-7 text-slate-500">
               {product.description}
             </p>
 
-            <div className="mt-6 space-y-5">
+            <div className="mt-5 flex flex-wrap gap-2">
+              {product.highlights.map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.8rem] font-semibold text-slate-600"
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-7 space-y-5">
               {product.options.map((group) => (
                 <div key={group.name}>
-                  <p className="text-sm font-black text-slate-950">{group.name}</p>
+                  <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">{group.name}</p>
                   <div className="mt-2.5 flex flex-wrap gap-2">
                     {group.values.map((value) => {
                       const selected = selectedOptions[group.name] === value;
@@ -513,10 +521,10 @@ function CatalogProductDetail({
                           key={value}
                           type="button"
                           onClick={() => onOptionChange(group.name, value)}
-                          className={`cursor-pointer rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+                          className={`cursor-pointer rounded-[0.85rem] border-2 px-4 py-2.5 text-sm font-semibold transition ${
                             selected
-                              ? "border-slate-950 bg-slate-950 text-white shadow-[0_8px_20px_rgba(15,23,42,0.14)]"
-                              : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
+                              ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff] shadow-[0_0_0_1px_rgba(53,88,255,0.15)]"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
                           }`}
                         >
                           {value}
@@ -527,160 +535,104 @@ function CatalogProductDetail({
                 </div>
               ))}
             </div>
+          </div>
 
-            <div className="mt-6 flex items-center justify-between gap-4 rounded-[0.9rem] border border-slate-200 bg-slate-50 p-3">
-              <p className="text-sm font-black text-slate-950">Cantidad</p>
-              <div className="flex h-11 items-center overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div className="flex flex-col p-5 sm:p-7">
+            <div className="flex items-baseline gap-3">
+              <p className="text-[2.4rem] font-black leading-none tracking-tight text-slate-950">
+                ${estimatedTotal}
+              </p>
+              {draftQuantity > 1 && (
+                <p className="text-sm font-semibold text-slate-400">
+                  {product.price}/und
+                </p>
+              )}
+            </div>
+            {selectedSummary && (
+              <p className="mt-2 text-sm font-medium text-slate-400">{selectedSummary}</p>
+            )}
+
+            <div className="mt-6 flex items-center gap-3">
+              <p className="text-sm font-black text-slate-700">Cantidad</p>
+              <div className="flex h-12 items-center overflow-hidden rounded-[0.85rem] border-2 border-slate-200 bg-white">
                 <button
                   type="button"
-                  onClick={() => setDraftQuantity((current) => Math.max(1, current - 1))}
-                  className="h-full w-11 cursor-pointer text-lg font-black text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+                  onClick={() => setDraftQuantity((c) => Math.max(1, c - 1))}
+                  className="flex h-full w-12 cursor-pointer items-center justify-center text-lg font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
                 >
-                  -
+                  {"−"}
                 </button>
                 <input
                   type="number"
                   min={1}
                   value={draftQuantity}
-                  onChange={(event) =>
-                    setDraftQuantity(Math.max(1, Number(event.target.value) || 1))
-                  }
-                  className="h-full w-14 bg-transparent text-center text-sm font-black text-slate-950 outline-none"
+                  onChange={(e) => setDraftQuantity(Math.max(1, Number(e.target.value) || 1))}
+                  className="h-full w-14 bg-transparent text-center text-[0.95rem] font-black text-slate-950 outline-none"
                   aria-label="Cantidad del producto"
                 />
                 <button
                   type="button"
-                  onClick={() => setDraftQuantity((current) => current + 1)}
-                  className="h-full w-11 cursor-pointer text-lg font-black text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+                  onClick={() => setDraftQuantity((c) => c + 1)}
+                  className="flex h-full w-12 cursor-pointer items-center justify-center text-lg font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
                 >
                   +
                 </button>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowArtUpload(!showArtUpload)}
-              className="mt-4 flex w-full cursor-pointer items-center justify-between gap-3 rounded-[0.9rem] border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:border-slate-300 hover:bg-white"
-            >
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm">
-                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                </span>
-                <div>
-                  <p className="text-sm font-black text-slate-950">
-                    {hasFiles ? `${draftFiles.length} archivo${draftFiles.length > 1 ? "s" : ""} cargado${draftFiles.length > 1 ? "s" : ""}` : "Subir arte (opcional)"}
-                  </p>
-                  <p className="text-xs text-slate-500">PDF, PNG, JPG o archivo de diseno</p>
-                </div>
-              </div>
-              <svg aria-hidden="true" viewBox="0 0 24 24" className={`h-4 w-4 text-slate-400 transition ${showArtUpload ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-
-            {showArtUpload && (
-              <div className="mt-3 space-y-3">
-                {hasFiles ? (
-                  <>
-                    {draftFiles.map((file) => (
-                      <div
-                        key={`${file.name}-${file.lastModified}`}
-                        className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/60 p-2.5"
-                      >
-                        <CatalogArtPreview file={file} />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-black text-slate-950">{file.name}</p>
-                          <p className="mt-0.5 text-xs font-semibold text-slate-400">
-                            {formatCatalogFileSize(file.size)}
-                          </p>
-                        </div>
+            <div className="mt-6">
+              {hasFiles ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-black text-slate-700">Arte cargado</p>
+                  {draftFiles.map((file) => (
+                    <div
+                      key={`${file.name}-${file.lastModified}`}
+                      className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5"
+                    >
+                      <CatalogArtPreview file={file} />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-slate-950">{file.name}</p>
+                        <p className="text-xs text-slate-400">{formatCatalogFileSize(file.size)}</p>
                       </div>
-                    ))}
-                    <div className="flex gap-2">
-                      <label className="flex-1 cursor-pointer rounded-xl bg-slate-950 px-4 py-3 text-center text-xs font-black text-white transition hover:bg-slate-800">
-                        Cambiar arte
-                        <input
-                          type="file"
-                          multiple
-                          className="sr-only"
-                          onChange={(event) => {
-                            setDraftFiles(Array.from(event.target.files ?? []));
-                            event.currentTarget.value = "";
-                          }}
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setDraftFiles([])}
-                        className="cursor-pointer rounded-xl border border-slate-200 px-4 py-3 text-xs font-black text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-                      >
-                        Quitar
-                      </button>
                     </div>
-                  </>
-                ) : (
-                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-[0.9rem] border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition hover:border-slate-400 hover:bg-white">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg font-black text-slate-500 shadow-sm">
-                      +
-                    </span>
-                    <span className="mt-2 text-sm font-black text-slate-950">
-                      Seleccionar archivos
-                    </span>
-                    <span className="mt-1 text-xs leading-5 text-slate-500">
-                      Puedes cargar varios archivos a la vez
-                    </span>
-                    <input
-                      type="file"
-                      multiple
-                      className="sr-only"
-                      onChange={(event) => {
-                        setDraftFiles(Array.from(event.target.files ?? []));
-                        event.currentTarget.value = "";
-                      }}
-                    />
-                  </label>
-                )}
-              </div>
-            )}
-
-            <div className="mt-6 rounded-[1rem] border border-slate-100 bg-[#fafbfc] p-4">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-semibold text-slate-500">Seleccion</span>
-                <span className="text-right font-black text-slate-700">
-                  {selectedSummary || "—"}
-                </span>
-              </div>
-              <div className="mt-3 flex items-end justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold text-slate-400">Estimado</p>
-                  <p className="text-[1.75rem] font-black leading-tight text-slate-950">
-                    ${estimatedTotal}
-                  </p>
+                  ))}
+                  <div className="flex gap-2 pt-1">
+                    <label className="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-xs font-black text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                      Cambiar
+                      <input type="file" multiple className="sr-only" onChange={(e) => { setDraftFiles(Array.from(e.target.files ?? [])); e.currentTarget.value = ""; }} />
+                    </label>
+                    <button type="button" onClick={() => setDraftFiles([])} className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-black text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700">
+                      Quitar
+                    </button>
+                  </div>
                 </div>
-                <p className="text-right text-xs font-semibold leading-5 text-slate-400">
-                  Entrega: <span className="text-slate-700">{product.turnaround}</span>
-                </p>
-              </div>
+              ) : (
+                <label className="flex cursor-pointer items-center gap-3 rounded-[0.85rem] border-2 border-dashed border-slate-200 bg-slate-50/60 px-4 py-4 transition hover:border-slate-300 hover:bg-white">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                  </span>
+                  <div>
+                    <p className="text-sm font-black text-slate-700">Subir arte</p>
+                    <p className="text-xs text-slate-400">PDF, PNG, JPG — opcional, puedes enviarlo despues</p>
+                  </div>
+                  <input type="file" multiple className="sr-only" onChange={(e) => { setDraftFiles(Array.from(e.target.files ?? [])); e.currentTarget.value = ""; }} />
+                </label>
+              )}
             </div>
 
-            <button
-              type="button"
-              onClick={() => onAddToCart(draftQuantity, draftFiles)}
-              className="mt-5 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-6 py-4 text-[0.94rem] font-black text-slate-950 shadow-[0_12px_28px_rgba(255,212,95,0.35)] transition hover:bg-[#ffcd41] hover:shadow-[0_16px_36px_rgba(255,212,95,0.45)]"
-            >
-              Anadir al carrito — ${estimatedTotal}
-            </button>
-
-            {!hasFiles && (
-              <p className="mt-3 text-center text-xs font-medium leading-5 text-slate-400">
-                Puedes subir el arte ahora o completarlo en el checkout.
-              </p>
-            )}
+            <div className="mt-auto pt-6">
+              <button
+                type="button"
+                onClick={() => onAddToCart(draftQuantity, draftFiles)}
+                className="w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-6 py-[1.15rem] text-[0.95rem] font-black text-slate-950 shadow-[0_14px_32px_rgba(255,212,95,0.4)] transition hover:bg-[#ffcd41] hover:shadow-[0_18px_40px_rgba(255,212,95,0.5)] active:scale-[0.98]"
+              >
+                Anadir al carrito
+              </button>
+            </div>
           </div>
         </div>
       </div>
