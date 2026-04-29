@@ -748,7 +748,7 @@ function CatalogProductDetail({
   const [activeColor, setActiveColor] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [cardFields, setCardFields] = useState<CardFields>({ name: "", title: "", company: "", phone: "", email: "" });
-  const [showEditor, setShowEditor] = useState(false);
+  const [designMode, setDesignMode] = useState<"choose" | "upload" | "create">("choose");
 
   const artPreviewUrl = useMemo(() => {
     const imageFile = draftFiles.find((f) => f.type.startsWith("image/"));
@@ -818,10 +818,10 @@ function CatalogProductDetail({
                   <div className="pointer-events-none absolute -bottom-1 left-[12%] right-[12%] h-4 rounded-[50%] bg-black/10 blur-md" />
                   <div className="relative transition-transform duration-700" style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
                     <div style={{ backfaceVisibility: "hidden", filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
-                      <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={artPreviewUrl} fields={showEditor ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="front" />
+                      <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={artPreviewUrl} fields={designMode === "create" ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="front" />
                     </div>
                     <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
-                      <CardMockup design={activeDesign} finish={currentFinish} size="large" fields={showEditor ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="back" />
+                      <CardMockup design={activeDesign} finish={currentFinish} size="large" fields={designMode === "create" ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="back" />
                     </div>
                   </div>
                 </div>
@@ -1017,88 +1017,155 @@ function CatalogProductDetail({
 
             {isCardProduct && (
               <div className="mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowEditor(!showEditor)}
-                  className={`flex w-full cursor-pointer items-center gap-3 rounded-[0.85rem] border-2 px-4 py-3.5 transition ${
-                    showEditor
-                      ? "border-[#3558ff] bg-[#3558ff]/5"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-                >
-                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-sm ${showEditor ? "bg-[#3558ff] text-white" : "bg-slate-100 text-slate-500"}`}>
-                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                  </span>
-                  <div className="text-left">
-                    <p className={`text-sm font-bold ${showEditor ? "text-[#3558ff]" : "text-slate-700"}`}>Personalizar tarjeta</p>
-                    <p className="text-xs text-slate-400">Edita los campos y ve el resultado en vivo</p>
-                  </div>
-                </button>
+                <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">Tu diseño</p>
 
-                {showEditor && (
-                  <div className="mt-3 space-y-2.5 rounded-[0.85rem] border border-slate-200 bg-slate-50/60 p-4">
-                    <div className="grid grid-cols-2 gap-2.5">
+                {designMode === "choose" ? (
+                  <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setDesignMode("upload")}
+                      className="flex cursor-pointer flex-col items-center gap-2 rounded-[0.85rem] border-2 border-slate-200 bg-white p-4 text-center transition hover:border-[#3558ff] hover:bg-[#3558ff]/5"
+                    >
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                      </span>
+                      <span className="text-sm font-bold text-slate-700">Ya tengo mi diseño</span>
+                      <span className="text-[0.7rem] text-slate-400">Sube tu archivo listo</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDesignMode("create")}
+                      className="flex cursor-pointer flex-col items-center gap-2 rounded-[0.85rem] border-2 border-slate-200 bg-white p-4 text-center transition hover:border-[#3558ff] hover:bg-[#3558ff]/5"
+                    >
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                      </span>
+                      <span className="text-sm font-bold text-slate-700">Crear mi diseño</span>
+                      <span className="text-[0.7rem] text-slate-400">Usa nuestras plantillas</span>
+                    </button>
+                  </div>
+                ) : designMode === "upload" ? (
+                  <div className="mt-2.5">
+                    {hasFiles ? (
+                      <div className="space-y-2">
+                        {draftFiles.map((file) => (
+                          <div
+                            key={`${file.name}-${file.lastModified}`}
+                            className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5"
+                          >
+                            <CatalogArtPreview file={file} />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-slate-950">{file.name}</p>
+                              <p className="text-xs text-slate-400">{formatCatalogFileSize(file.size)}</p>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="flex gap-2 pt-1">
+                          <label className="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-xs font-black text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                            Cambiar
+                            <input type="file" multiple className="sr-only" onChange={(e) => { setDraftFiles(Array.from(e.target.files ?? [])); e.currentTarget.value = ""; }} />
+                          </label>
+                          <button type="button" onClick={() => { setDraftFiles([]); setDesignMode("choose"); }} className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-black text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700">
+                            Quitar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        <label className="flex cursor-pointer items-center gap-3 rounded-[0.85rem] border-2 border-dashed border-slate-200 bg-slate-50/60 px-4 py-5 transition hover:border-[#3558ff] hover:bg-white">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400 shadow-sm">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                              <polyline points="17 8 12 3 7 8" />
+                              <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                          </span>
+                          <div>
+                            <p className="text-sm font-bold text-slate-600">Arrastra o selecciona tu archivo</p>
+                            <p className="text-xs text-slate-400">PDF, AI, PSD, PNG o JPG</p>
+                          </div>
+                          <input type="file" multiple className="sr-only" onChange={(e) => { setDraftFiles(Array.from(e.target.files ?? [])); e.currentTarget.value = ""; }} />
+                        </label>
+                        <button type="button" onClick={() => setDesignMode("choose")} className="cursor-pointer text-xs font-semibold text-slate-400 transition hover:text-slate-600">
+                          ← Volver a opciones
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-2.5 space-y-3">
+                    <div className="space-y-2.5 rounded-[0.85rem] border border-slate-200 bg-slate-50/60 p-4">
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div>
+                          <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Nombre</label>
+                          <input
+                            type="text"
+                            placeholder="Maria Rodriguez"
+                            value={cardFields.name}
+                            onChange={(e) => setCardFields((prev) => ({ ...prev, name: e.target.value }))}
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Cargo</label>
+                          <input
+                            type="text"
+                            placeholder="Directora Creativa"
+                            value={cardFields.title}
+                            onChange={(e) => setCardFields((prev) => ({ ...prev, title: e.target.value }))}
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                          />
+                        </div>
+                      </div>
                       <div>
-                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Nombre</label>
+                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Empresa</label>
                         <input
                           type="text"
-                          placeholder="Maria Rodriguez"
-                          value={cardFields.name}
-                          onChange={(e) => setCardFields((prev) => ({ ...prev, name: e.target.value }))}
+                          placeholder="Mi Empresa"
+                          value={cardFields.company}
+                          onChange={(e) => setCardFields((prev) => ({ ...prev, company: e.target.value }))}
                           className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
                         />
                       </div>
-                      <div>
-                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Cargo</label>
-                        <input
-                          type="text"
-                          placeholder="Directora Creativa"
-                          value={cardFields.title}
-                          onChange={(e) => setCardFields((prev) => ({ ...prev, title: e.target.value }))}
-                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                        />
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div>
+                          <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Telefono</label>
+                          <input
+                            type="text"
+                            placeholder="+58 412 555 0123"
+                            value={cardFields.phone}
+                            onChange={(e) => setCardFields((prev) => ({ ...prev, phone: e.target.value }))}
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Email</label>
+                          <input
+                            type="text"
+                            placeholder="tu@email.com"
+                            value={cardFields.email}
+                            onChange={(e) => setCardFields((prev) => ({ ...prev, email: e.target.value }))}
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Empresa</label>
-                      <input
-                        type="text"
-                        placeholder="Mi Empresa"
-                        value={cardFields.company}
-                        onChange={(e) => setCardFields((prev) => ({ ...prev, company: e.target.value }))}
-                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div>
-                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Telefono</label>
-                        <input
-                          type="text"
-                          placeholder="+58 412 555 0123"
-                          value={cardFields.phone}
-                          onChange={(e) => setCardFields((prev) => ({ ...prev, phone: e.target.value }))}
-                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Email</label>
-                        <input
-                          type="text"
-                          placeholder="tu@email.com"
-                          value={cardFields.email}
-                          onChange={(e) => setCardFields((prev) => ({ ...prev, email: e.target.value }))}
-                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                        />
-                      </div>
-                    </div>
+                    <button type="button" onClick={() => setDesignMode("choose")} className="cursor-pointer text-xs font-semibold text-slate-400 transition hover:text-slate-600">
+                      ← Volver a opciones
+                    </button>
                   </div>
                 )}
               </div>
             )}
 
+            {!isCardProduct && (
             <div className="mt-6">
               {hasFiles ? (
                 <div className="space-y-2">
@@ -1142,6 +1209,7 @@ function CatalogProductDetail({
                 </label>
               )}
             </div>
+            )}
 
             <div className="mt-auto pt-6">
               <div className="flex items-baseline justify-between gap-3">
