@@ -749,17 +749,30 @@ function CatalogProductDetail({
   const [flipped, setFlipped] = useState(false);
   const [cardFields, setCardFields] = useState<CardFields>({ name: "", title: "", company: "", phone: "", email: "" });
   const [designMode, setDesignMode] = useState<"choose" | "upload" | "create">("choose");
+  const [frontFile, setFrontFile] = useState<File | null>(null);
+  const [backFile, setBackFile] = useState<File | null>(null);
 
-  const artPreviewUrl = useMemo(() => {
-    const imageFile = draftFiles.find((f) => f.type.startsWith("image/"));
-    return imageFile ? URL.createObjectURL(imageFile) : null;
-  }, [draftFiles]);
+  const frontPreviewUrl = useMemo(() => {
+    return frontFile && frontFile.type.startsWith("image/") ? URL.createObjectURL(frontFile) : null;
+  }, [frontFile]);
+
+  const backPreviewUrl = useMemo(() => {
+    return backFile && backFile.type.startsWith("image/") ? URL.createObjectURL(backFile) : null;
+  }, [backFile]);
 
   useEffect(() => {
     return () => {
-      if (artPreviewUrl) URL.revokeObjectURL(artPreviewUrl);
+      if (frontPreviewUrl) URL.revokeObjectURL(frontPreviewUrl);
     };
-  }, [artPreviewUrl]);
+  }, [frontPreviewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (backPreviewUrl) URL.revokeObjectURL(backPreviewUrl);
+    };
+  }, [backPreviewUrl]);
+
+  const artPreviewUrl = frontPreviewUrl;
 
   const hasFiles = draftFiles.length > 0;
   const unitPrice = parsePrice(product.price);
@@ -818,26 +831,21 @@ function CatalogProductDetail({
                   <div className="pointer-events-none absolute -bottom-1 left-[12%] right-[12%] h-4 rounded-[50%] bg-black/10 blur-md" />
                   <div className="relative transition-transform duration-700" style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
                     <div style={{ backfaceVisibility: "hidden", filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
-                      <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={artPreviewUrl} fields={designMode === "create" ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="front" />
+                      <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={designMode === "upload" ? frontPreviewUrl : undefined} fields={designMode === "create" ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="front" />
                     </div>
                     <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
-                      <CardMockup design={activeDesign} finish={currentFinish} size="large" fields={designMode === "create" ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="back" />
+                      <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={designMode === "upload" ? backPreviewUrl : undefined} fields={designMode === "create" ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="back" />
                     </div>
                   </div>
                 </div>
 
-                <p className="mt-4 text-center text-[0.7rem] font-medium text-[#8a8480]/70">
-                  {flipped ? "← Click para ver el frente" : "Click para ver el reverso →"}
-                </p>
+                {(designMode === "upload" && (frontPreviewUrl || backPreviewUrl)) || designMode === "create" ? (
+                  <p className="mt-4 text-center text-[0.7rem] font-medium text-[#8a8480]/70">
+                    {flipped ? "← Click para ver el frente" : "Click para ver el reverso →"}
+                  </p>
+                ) : null}
 
-                {artPreviewUrl ? (
-                  <div className="mt-3 flex items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    Vista previa de tu arte{currentFinish ? ` · Acabado ${currentFinish.toLowerCase()}` : ""}
-                  </div>
-                ) : (
+                {designMode === "create" && (
                   <>
                     <div className="relative mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
                       {(["minimal", "bold", "elegant", "tech", "medical", "gastro"] as CardDesign[]).map((d) => (
@@ -859,7 +867,7 @@ function CatalogProductDetail({
                       ))}
                     </div>
 
-                    <div className="mt-3 flex items-center gap-2">
+                    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                       {COLOR_SCHEMES[activeDesign].map((cs, i) => (
                         <button
                           key={cs.id}
@@ -882,6 +890,21 @@ function CatalogProductDetail({
                       {currentFinish ? ` · ${currentFinish}` : ""}
                     </p>
                   </>
+                )}
+
+                {designMode === "choose" && (
+                  <p className="mt-6 text-center text-xs font-medium text-[#8a8480]">
+                    Tarjeta de presentacion premium{currentFinish ? ` · ${currentFinish}` : ""}
+                  </p>
+                )}
+
+                {designMode === "upload" && (frontPreviewUrl || backPreviewUrl) && (
+                  <div className="mt-3 flex items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Vista previa de tu arte{currentFinish ? ` · Acabado ${currentFinish.toLowerCase()}` : ""}
+                  </div>
                 )}
               </div>
             ) : (
@@ -1052,52 +1075,69 @@ function CatalogProductDetail({
                     </button>
                   </div>
                 ) : designMode === "upload" ? (
-                  <div className="mt-2.5">
-                    {hasFiles ? (
-                      <div className="space-y-2">
-                        {draftFiles.map((file) => (
-                          <div
-                            key={`${file.name}-${file.lastModified}`}
-                            className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5"
-                          >
-                            <CatalogArtPreview file={file} />
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-slate-950">{file.name}</p>
-                              <p className="text-xs text-slate-400">{formatCatalogFileSize(file.size)}</p>
+                  <div className="mt-2.5 space-y-3">
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Frente</p>
+                        {frontFile ? (
+                          <div className="flex flex-col items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5">
+                            <CatalogArtPreview file={frontFile} />
+                            <p className="max-w-full truncate text-[0.65rem] font-medium text-slate-600">{frontFile.name}</p>
+                            <div className="flex gap-1.5">
+                              <label className="cursor-pointer rounded-lg bg-white px-2 py-1 text-[0.65rem] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50">
+                                Cambiar
+                                <input type="file" accept="image/*,.pdf,.ai,.psd" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setFrontFile(f); e.currentTarget.value = ""; }} />
+                              </label>
+                              <button type="button" onClick={() => setFrontFile(null)} className="cursor-pointer rounded-lg px-2 py-1 text-[0.65rem] font-bold text-slate-400 transition hover:text-slate-600">
+                                Quitar
+                              </button>
                             </div>
                           </div>
-                        ))}
-                        <div className="flex gap-2 pt-1">
-                          <label className="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-xs font-black text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-                            Cambiar
-                            <input type="file" multiple className="sr-only" onChange={(e) => { setDraftFiles(Array.from(e.target.files ?? [])); e.currentTarget.value = ""; }} />
-                          </label>
-                          <button type="button" onClick={() => { setDraftFiles([]); setDesignMode("choose"); }} className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-black text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700">
-                            Quitar
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2.5">
-                        <label className="flex cursor-pointer items-center gap-3 rounded-[0.85rem] border-2 border-dashed border-slate-200 bg-slate-50/60 px-4 py-5 transition hover:border-[#3558ff] hover:bg-white">
-                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400 shadow-sm">
-                            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        ) : (
+                          <label className="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 text-center transition hover:border-[#3558ff] hover:bg-white">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                               <polyline points="17 8 12 3 7 8" />
                               <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
-                          </span>
-                          <div>
-                            <p className="text-sm font-bold text-slate-600">Arrastra o selecciona tu archivo</p>
-                            <p className="text-xs text-slate-400">PDF, AI, PSD, PNG o JPG</p>
-                          </div>
-                          <input type="file" multiple className="sr-only" onChange={(e) => { setDraftFiles(Array.from(e.target.files ?? [])); e.currentTarget.value = ""; }} />
-                        </label>
-                        <button type="button" onClick={() => setDesignMode("choose")} className="cursor-pointer text-xs font-semibold text-slate-400 transition hover:text-slate-600">
-                          ← Volver a opciones
-                        </button>
+                            <span className="text-[0.7rem] font-semibold text-slate-500">Subir frente</span>
+                            <input type="file" accept="image/*,.pdf,.ai,.psd" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFrontFile(f); setDraftFiles([f]); } e.currentTarget.value = ""; }} />
+                          </label>
+                        )}
                       </div>
-                    )}
+                      <div>
+                        <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Reverso</p>
+                        {backFile ? (
+                          <div className="flex flex-col items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5">
+                            <CatalogArtPreview file={backFile} />
+                            <p className="max-w-full truncate text-[0.65rem] font-medium text-slate-600">{backFile.name}</p>
+                            <div className="flex gap-1.5">
+                              <label className="cursor-pointer rounded-lg bg-white px-2 py-1 text-[0.65rem] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50">
+                                Cambiar
+                                <input type="file" accept="image/*,.pdf,.ai,.psd" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setBackFile(f); e.currentTarget.value = ""; }} />
+                              </label>
+                              <button type="button" onClick={() => setBackFile(null)} className="cursor-pointer rounded-lg px-2 py-1 text-[0.65rem] font-bold text-slate-400 transition hover:text-slate-600">
+                                Quitar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <label className="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 text-center transition hover:border-[#3558ff] hover:bg-white">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                              <polyline points="17 8 12 3 7 8" />
+                              <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            <span className="text-[0.7rem] font-semibold text-slate-500">Subir reverso</span>
+                            <span className="text-[0.6rem] text-slate-400">Opcional</span>
+                            <input type="file" accept="image/*,.pdf,.ai,.psd" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setBackFile(f); e.currentTarget.value = ""; }} />
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => { setDesignMode("choose"); setFrontFile(null); setBackFile(null); setDraftFiles([]); }} className="cursor-pointer text-xs font-semibold text-slate-400 transition hover:text-slate-600">
+                      ← Volver a opciones
+                    </button>
                   </div>
                 ) : (
                   <div className="mt-2.5 space-y-3">
