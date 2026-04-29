@@ -952,31 +952,43 @@ function CatalogProductDetail({
             </ul>
 
             <div className="mt-6 space-y-5">
-              {otherOptions.map((group) => (
-                <div key={group.name}>
-                  <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">{group.name}</p>
-                  <div className="mt-2.5 flex flex-wrap gap-2">
-                    {group.values.map((value) => {
-                      const selected = selectedOptions[group.name] === value;
+              {otherOptions.map((group) => {
+                const finishDescriptions: Record<string, string> = {
+                  "Mate": "Textura suave sin reflejos, elegante y sobria",
+                  "Brillante": "Acabado espejo con brillo intenso, colores vibrantes",
+                  "Soft touch": "Tacto aterciopelado premium, sensacion de lujo",
+                };
+                const isFinishGroup = group.name === "Acabado";
 
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => onOptionChange(group.name, value)}
-                          className={`cursor-pointer rounded-[0.85rem] border-2 px-4 py-2.5 text-sm font-semibold transition ${
-                            selected
-                              ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff] shadow-[0_0_0_1px_rgba(53,88,255,0.15)]"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-                          }`}
-                        >
-                          {value}
-                        </button>
-                      );
-                    })}
+                return (
+                  <div key={group.name}>
+                    <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">{group.name}</p>
+                    <div className="mt-2.5 flex flex-wrap gap-2">
+                      {group.values.map((value) => {
+                        const selected = selectedOptions[group.name] === value;
+
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => onOptionChange(group.name, value)}
+                            className={`cursor-pointer rounded-[0.85rem] border-2 px-4 py-2.5 text-sm font-semibold transition ${
+                              selected
+                                ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff] shadow-[0_0_0_1px_rgba(53,88,255,0.15)]"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                            }`}
+                          >
+                            {value}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {isFinishGroup && selectedOptions[group.name] && finishDescriptions[selectedOptions[group.name]] && (
+                      <p className="mt-2 text-xs text-slate-400 italic">{finishDescriptions[selectedOptions[group.name]]}</p>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {quantityOption ? (
@@ -1114,7 +1126,7 @@ function CatalogProductDetail({
                             <div className="flex gap-1.5">
                               <label className="cursor-pointer rounded-lg bg-white px-2 py-1 text-[0.65rem] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50">
                                 Cambiar
-                                <input type="file" accept="image/*,.pdf,.ai,.psd" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setBackFile(f); e.currentTarget.value = ""; }} />
+                                <input type="file" accept="image/*,.pdf,.ai,.psd" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setBackFile(f); setFlipped(true); } e.currentTarget.value = ""; }} />
                               </label>
                               <button type="button" onClick={() => setBackFile(null)} className="cursor-pointer rounded-lg px-2 py-1 text-[0.65rem] font-bold text-slate-400 transition hover:text-slate-600">
                                 Quitar
@@ -1130,12 +1142,12 @@ function CatalogProductDetail({
                             </svg>
                             <span className="text-[0.7rem] font-semibold text-slate-500">Subir reverso</span>
                             <span className="text-[0.6rem] text-slate-400">Opcional</span>
-                            <input type="file" accept="image/*,.pdf,.ai,.psd" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setBackFile(f); e.currentTarget.value = ""; }} />
+                            <input type="file" accept="image/*,.pdf,.ai,.psd" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setBackFile(f); setFlipped(true); } e.currentTarget.value = ""; }} />
                           </label>
                         )}
                       </div>
                     </div>
-                    <button type="button" onClick={() => { setDesignMode("choose"); setFrontFile(null); setBackFile(null); setDraftFiles([]); }} className="cursor-pointer text-xs font-semibold text-slate-400 transition hover:text-slate-600">
+                    <button type="button" onClick={() => { setDesignMode("choose"); setFrontFile(null); setBackFile(null); setDraftFiles([]); setFlipped(false); }} className="cursor-pointer text-xs font-semibold text-slate-400 transition hover:text-slate-600">
                       ← Volver a opciones
                     </button>
                   </div>
@@ -1252,6 +1264,36 @@ function CatalogProductDetail({
             )}
 
             <div className="mt-auto pt-6">
+              {isCardProduct && designMode !== "choose" && (
+                <div className="mb-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                  <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Resumen</p>
+                  <div className="space-y-1 text-xs text-slate-600">
+                    <div className="flex justify-between">
+                      <span>Diseño</span>
+                      <span className="font-semibold text-slate-900">{designMode === "upload" ? "Arte propio" : DESIGN_LABELS[activeDesign]}</span>
+                    </div>
+                    {currentFinish && (
+                      <div className="flex justify-between">
+                        <span>Acabado</span>
+                        <span className="font-semibold text-slate-900">{currentFinish}</span>
+                      </div>
+                    )}
+                    {selectedOptions["Cantidad"] && (
+                      <div className="flex justify-between">
+                        <span>Cantidad</span>
+                        <span className="font-semibold text-slate-900">{selectedOptions["Cantidad"]}</span>
+                      </div>
+                    )}
+                    {designMode === "upload" && (
+                      <div className="flex justify-between">
+                        <span>Archivos</span>
+                        <span className="font-semibold text-slate-900">{frontFile ? "Frente ✓" : "Frente ✗"} · {backFile ? "Reverso ✓" : "Reverso ✗"}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-baseline justify-between gap-3">
                 <div className="flex items-baseline gap-2">
                   <p className="text-[2.2rem] font-black leading-none tracking-tight text-slate-950">
@@ -1266,7 +1308,7 @@ function CatalogProductDetail({
               </div>
               <button
                 type="button"
-                onClick={() => onAddToCart(draftQuantity, draftFiles)}
+                onClick={() => onAddToCart(draftQuantity, frontFile ? [frontFile, ...(backFile ? [backFile] : [])] : draftFiles)}
                 className="mt-4 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-6 py-[1.15rem] text-[0.95rem] font-black text-slate-950 shadow-[0_14px_32px_rgba(255,212,95,0.4)] transition hover:bg-[#ffcd41] hover:shadow-[0_18px_40px_rgba(255,212,95,0.5)] active:scale-[0.98]"
               >
                 Anadir al carrito
