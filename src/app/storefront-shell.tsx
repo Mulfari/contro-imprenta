@@ -409,89 +409,102 @@ function CatalogArtPreview({ file }: { file: File }) {
 function CardMockup({
   design,
   finish,
+  size = "large",
 }: {
   design: "minimal" | "bold" | "elegant";
   finish: string;
+  size?: "large" | "thumb";
 }) {
-  const finishOverlay =
-    finish === "Brillante"
-      ? "after:absolute after:inset-0 after:rounded-[0.6rem] after:bg-gradient-to-br after:from-white/40 after:via-transparent after:to-white/10 after:pointer-events-none"
-      : finish === "Soft touch"
-        ? "after:absolute after:inset-0 after:rounded-[0.6rem] after:bg-[url('data:image/svg+xml,%3Csvg%20width%3D%224%22%20height%3D%224%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%224%22%20height%3D%224%22%20fill%3D%22%23000%22%20opacity%3D%220.03%22/%3E%3C/svg%3E')] after:pointer-events-none"
-        : "";
+  const isLarge = size === "large";
+  const pad = isLarge ? "p-[8%]" : "p-[7%]";
+
+  const finishLayer =
+    finish === "Brillante" ? (
+      <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit] bg-gradient-to-br from-white/50 via-white/5 via-60% to-white/20" />
+    ) : finish === "Soft touch" ? (
+      <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit] opacity-40" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='6' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='0.6' fill='%23000' opacity='0.07'/%3E%3C/svg%3E\")" }} />
+    ) : null;
+
+  const edgeShadow = "shadow-[0_1px_0_0_rgba(0,0,0,0.08),0_6px_24px_rgba(0,0,0,0.13),0_16px_48px_rgba(0,0,0,0.08)]";
 
   if (design === "minimal") {
     return (
-      <div className={`relative aspect-[1.75/1] w-full overflow-hidden rounded-[0.6rem] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.12)] ${finishOverlay}`}>
-        <div className="flex h-full flex-col justify-between p-5">
+      <div className={`relative aspect-[9/5] w-full overflow-hidden rounded-[0.5rem] ${edgeShadow}`}>
+        <div className={`relative z-10 flex h-full flex-col justify-between bg-[#fafaf9] ${pad}`}>
           <div>
-            <div className="h-1 w-8 rounded-full bg-slate-900" />
-            <p className="mt-3 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-slate-900">
+            <div className={`${isLarge ? "h-[3px] w-[18%]" : "h-[2px] w-[18%]"} rounded-full bg-[#1a1a1a]`} />
+            <p className={`${isLarge ? "mt-[8%] text-[0.72rem]" : "mt-[7%] text-[0.38rem]"} font-semibold uppercase tracking-[0.28em] text-[#1a1a1a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
               Maria Rodriguez
             </p>
-            <p className="mt-0.5 text-[0.5rem] tracking-[0.15em] text-slate-400">
+            <p className={`${isLarge ? "mt-[2%] text-[0.52rem]" : "mt-[2%] text-[0.28rem]"} font-normal tracking-[0.18em] text-[#999]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
               Directora Creativa
             </p>
           </div>
           <div className="flex items-end justify-between">
-            <div className="space-y-0.5">
-              <p className="text-[0.45rem] text-slate-400">+58 412 555 0123</p>
-              <p className="text-[0.45rem] text-slate-400">maria@estudio.com</p>
+            <div>
+              <p className={`${isLarge ? "text-[0.42rem]" : "text-[0.22rem]"} tracking-[0.04em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>+58 412 555 0123</p>
+              <p className={`${isLarge ? "mt-[1px] text-[0.42rem]" : "text-[0.22rem]"} tracking-[0.04em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>maria@estudio.com</p>
             </div>
-            <p className="text-[0.55rem] font-semibold tracking-[0.1em] text-slate-300">ESTUDIO</p>
+            <p className={`${isLarge ? "text-[0.5rem]" : "text-[0.26rem]"} font-medium tracking-[0.22em] text-[#d4d4d4]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>ESTUDIO</p>
           </div>
         </div>
+        {finishLayer}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[2px] rounded-b-[inherit] bg-gradient-to-r from-[#e5e5e5] via-[#d4d4d4] to-[#e5e5e5]" />
       </div>
     );
   }
 
   if (design === "bold") {
     return (
-      <div className={`relative aspect-[1.75/1] w-full overflow-hidden rounded-[0.6rem] bg-slate-900 shadow-[0_4px_20px_rgba(0,0,0,0.2)] ${finishOverlay}`}>
-        <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-amber-500/20 to-transparent" />
-        <div className="relative flex h-full flex-col justify-between p-5">
-          <div>
-            <p className="text-[0.75rem] font-black uppercase tracking-[0.2em] text-white">
+      <div className={`relative aspect-[9/5] w-full overflow-hidden rounded-[0.5rem] ${edgeShadow}`}>
+        <div className={`relative z-10 flex h-full flex-col justify-between bg-[#111113] ${pad}`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.07] via-transparent to-amber-600/[0.04]" />
+          <div className="relative">
+            <p className={`${isLarge ? "text-[0.82rem]" : "text-[0.42rem]"} font-bold uppercase tracking-[0.22em] text-white`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
               Carlos Mendez
             </p>
-            <p className="mt-0.5 text-[0.5rem] font-medium tracking-[0.15em] text-amber-400">
+            <p className={`${isLarge ? "mt-[3%] text-[0.48rem]" : "mt-[2%] text-[0.26rem]"} font-medium tracking-[0.16em] text-amber-400/90`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
               CEO & Fundador
             </p>
           </div>
-          <div className="flex items-end justify-between">
-            <div className="space-y-0.5">
-              <p className="text-[0.45rem] text-slate-400">+58 414 888 7654</p>
-              <p className="text-[0.45rem] text-slate-400">carlos@nexus.io</p>
+          <div className="relative flex items-end justify-between">
+            <div>
+              <p className={`${isLarge ? "text-[0.42rem]" : "text-[0.22rem]"} tracking-[0.04em] text-[#555]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>+58 414 888 7654</p>
+              <p className={`${isLarge ? "mt-[1px] text-[0.42rem]" : "text-[0.22rem]"} tracking-[0.04em] text-[#555]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>carlos@nexus.io</p>
             </div>
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
-              <span className="text-[0.4rem] font-black text-slate-900">N</span>
+            <div className={`flex ${isLarge ? "h-6 w-6" : "h-3 w-3"} items-center justify-center rounded-full bg-amber-500`}>
+              <span className={`${isLarge ? "text-[0.4rem]" : "text-[0.2rem]"} font-black text-[#111]`}>N</span>
             </div>
           </div>
         </div>
+        {finishLayer}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[2px] rounded-b-[inherit] bg-gradient-to-r from-[#222] via-[#333] to-[#222]" />
       </div>
     );
   }
 
   return (
-    <div className={`relative aspect-[1.75/1] w-full overflow-hidden rounded-[0.6rem] bg-gradient-to-br from-stone-50 to-stone-100 shadow-[0_4px_20px_rgba(0,0,0,0.1)] ${finishOverlay}`}>
-      <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-rose-400 to-amber-400" />
-      <div className="flex h-full flex-col justify-between p-5 pl-6">
-        <div>
-          <p className="text-[0.6rem] font-light italic tracking-[0.08em] text-stone-400">
+    <div className={`relative aspect-[9/5] w-full overflow-hidden rounded-[0.5rem] ${edgeShadow}`}>
+      <div className={`relative z-10 flex h-full flex-col justify-between bg-gradient-to-br from-[#f8f6f3] to-[#f0ece6] ${pad}`}>
+        <div className="absolute left-0 top-0 h-full w-[2.5%] bg-gradient-to-b from-rose-400/80 to-amber-400/80" />
+        <div className="relative pl-[4%]">
+          <p className={`${isLarge ? "text-[0.52rem]" : "text-[0.28rem]"} font-light italic tracking-[0.1em] text-[#b8a898]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             Abogados & Asociados
           </p>
-          <p className="mt-2 text-[0.7rem] font-semibold text-stone-800">
+          <p className={`${isLarge ? "mt-[5%] text-[0.72rem]" : "mt-[4%] text-[0.38rem]"} font-semibold text-[#3d3530]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             Ana Lucia Fernandez
           </p>
-          <p className="mt-0.5 text-[0.45rem] tracking-[0.12em] text-stone-400">
+          <p className={`${isLarge ? "mt-[2%] text-[0.44rem]" : "mt-[1%] text-[0.24rem]"} tracking-[0.14em] text-[#b8a898]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             Socia Principal
           </p>
         </div>
-        <div className="space-y-0.5">
-          <p className="text-[0.45rem] text-stone-400">Av. Libertador, Torre Capital, Piso 12</p>
-          <p className="text-[0.45rem] text-stone-400">+58 212 555 9876 · ana@fernandez.legal</p>
+        <div className="relative pl-[4%]">
+          <p className={`${isLarge ? "text-[0.4rem]" : "text-[0.22rem]"} text-[#c4b8aa]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Av. Libertador, Torre Capital, Piso 12</p>
+          <p className={`${isLarge ? "mt-[1px] text-[0.4rem]" : "text-[0.22rem]"} text-[#c4b8aa]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>+58 212 555 9876 · ana@fernandez.legal</p>
         </div>
       </div>
+      {finishLayer}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[2px] rounded-b-[inherit] bg-gradient-to-r from-[#e8e2da] via-[#ddd5ca] to-[#e8e2da]" />
     </div>
   );
 }
@@ -562,33 +575,33 @@ function CatalogProductDetail({
             </button>
 
             {isCardProduct ? (
-              <div className="flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-50 px-6 pb-6 pt-16 sm:px-10 sm:pt-18">
-                <div className="w-full max-w-[22rem]">
-                  <CardMockup design={activeDesign} finish={currentFinish} />
+              <div className="flex flex-col items-center justify-center bg-gradient-to-b from-[#f0f0f0] via-[#e8e8e8] to-[#f0f0f0] px-6 pb-6 pt-16 sm:px-10 sm:pt-18" style={{ perspective: "900px" }}>
+                <div className="w-full max-w-[24rem] transition-all duration-500" style={{ transform: "rotateY(-2deg) rotateX(3deg)", transformStyle: "preserve-3d" }}>
+                  <CardMockup design={activeDesign} finish={currentFinish} size="large" />
                 </div>
 
-                <div className="mt-6 flex items-center gap-3">
+                <div className="mt-7 flex items-center gap-3">
                   {(["minimal", "bold", "elegant"] as const).map((d) => (
                     <button
                       key={d}
                       type="button"
                       onClick={() => setActiveDesign(d)}
-                      className={`group cursor-pointer overflow-hidden rounded-[0.5rem] border-2 transition ${
+                      className={`group cursor-pointer overflow-hidden rounded-[0.45rem] border-2 transition-all duration-200 ${
                         activeDesign === d
-                          ? "border-[#3558ff] shadow-[0_0_0_2px_rgba(53,88,255,0.15)]"
-                          : "border-slate-200 hover:border-slate-300"
+                          ? "border-[#3558ff] shadow-[0_0_0_2px_rgba(53,88,255,0.15)] scale-105"
+                          : "border-slate-200/80 opacity-70 hover:opacity-100 hover:border-slate-300"
                       }`}
                     >
-                      <div className="w-24 sm:w-28">
-                        <CardMockup design={d} finish={currentFinish} />
+                      <div className="w-[5.5rem] sm:w-[6.5rem]">
+                        <CardMockup design={d} finish={currentFinish} size="thumb" />
                       </div>
                     </button>
                   ))}
                 </div>
 
                 <p className="mt-3 text-center text-xs font-medium text-slate-400">
-                  {activeDesign === "minimal" ? "Estilo minimalista" : activeDesign === "bold" ? "Estilo corporativo" : "Estilo elegante"}
-                  {currentFinish ? ` · Acabado ${currentFinish.toLowerCase()}` : ""}
+                  {activeDesign === "minimal" ? "Minimalista" : activeDesign === "bold" ? "Corporativo" : "Elegante"}
+                  {currentFinish ? ` · ${currentFinish}` : ""}
                 </p>
               </div>
             ) : (
