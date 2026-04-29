@@ -410,10 +410,12 @@ function CardMockup({
   design,
   finish,
   size = "large",
+  artUrl,
 }: {
   design: "minimal" | "bold" | "elegant";
   finish: string;
   size?: "large" | "thumb";
+  artUrl?: string | null;
 }) {
   const isLarge = size === "large";
 
@@ -430,6 +432,19 @@ function CardMockup({
     ) : (
       <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit] bg-gradient-to-br from-white/10 via-transparent to-transparent" />
     );
+
+  if (artUrl) {
+    return (
+      <div className={`${`relative ${isLarge ? "rounded-[0.55rem]" : "rounded-[0.3rem]"} ${paperTexture}`} aspect-[9/5] w-full overflow-hidden bg-white`}>
+        <img
+          src={artUrl}
+          alt="Vista previa de tu arte"
+          className="absolute inset-0 z-10 h-full w-full object-cover"
+        />
+        {finishLayer}
+      </div>
+    );
+  }
 
   const cardBase = `relative ${isLarge ? "rounded-[0.55rem]" : "rounded-[0.3rem]"} ${paperTexture}`;
 
@@ -533,6 +548,17 @@ function CatalogProductDetail({
   const [draftFiles, setDraftFiles] = useState<File[]>([]);
   const [activeDesign, setActiveDesign] = useState<"minimal" | "bold" | "elegant">("minimal");
 
+  const artPreviewUrl = useMemo(() => {
+    const imageFile = draftFiles.find((f) => f.type.startsWith("image/"));
+    return imageFile ? URL.createObjectURL(imageFile) : null;
+  }, [draftFiles]);
+
+  useEffect(() => {
+    return () => {
+      if (artPreviewUrl) URL.revokeObjectURL(artPreviewUrl);
+    };
+  }, [artPreviewUrl]);
+
   const hasFiles = draftFiles.length > 0;
   const unitPrice = parsePrice(product.price);
   const estimatedTotal = unitPrice * draftQuantity;
@@ -588,34 +614,45 @@ function CatalogProductDetail({
                   <div className="pointer-events-none absolute -bottom-3 left-[8%] right-[8%] h-8 rounded-[50%] bg-black/20 blur-xl" />
                   <div className="pointer-events-none absolute -bottom-1 left-[12%] right-[12%] h-4 rounded-[50%] bg-black/10 blur-md" />
                   <div className="relative" style={{ filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
-                    <CardMockup design={activeDesign} finish={currentFinish} size="large" />
+                    <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={artPreviewUrl} />
                   </div>
                 </div>
 
-                <div className="relative mt-8 flex items-center gap-3 sm:gap-4">
-                  {(["minimal", "bold", "elegant"] as const).map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setActiveDesign(d)}
-                      className={`group relative cursor-pointer overflow-hidden rounded-[0.35rem] transition-all duration-300 ${
-                        activeDesign === d
-                          ? "scale-110 ring-2 ring-[#3558ff] ring-offset-2 ring-offset-[#d9d5d0]"
-                          : "opacity-60 hover:opacity-90 hover:scale-105"
-                      }`}
-                      style={{ filter: activeDesign === d ? "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" : "drop-shadow(0 2px 6px rgba(0,0,0,0.1))" }}
-                    >
-                      <div className="w-[5rem] sm:w-[6rem]">
-                        <CardMockup design={d} finish={currentFinish} size="thumb" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                {artPreviewUrl ? (
+                  <div className="mt-6 flex items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Vista previa de tu arte{currentFinish ? ` · Acabado ${currentFinish.toLowerCase()}` : ""}
+                  </div>
+                ) : (
+                  <>
+                    <div className="relative mt-8 flex items-center gap-3 sm:gap-4">
+                      {(["minimal", "bold", "elegant"] as const).map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setActiveDesign(d)}
+                          className={`group relative cursor-pointer overflow-hidden rounded-[0.35rem] transition-all duration-300 ${
+                            activeDesign === d
+                              ? "scale-110 ring-2 ring-[#3558ff] ring-offset-2 ring-offset-[#d9d5d0]"
+                              : "opacity-60 hover:opacity-90 hover:scale-105"
+                          }`}
+                          style={{ filter: activeDesign === d ? "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" : "drop-shadow(0 2px 6px rgba(0,0,0,0.1))" }}
+                        >
+                          <div className="w-[5rem] sm:w-[6rem]">
+                            <CardMockup design={d} finish={currentFinish} size="thumb" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
 
-                <p className="mt-4 text-center text-xs font-medium text-[#8a8480]">
-                  {activeDesign === "minimal" ? "Minimalista" : activeDesign === "bold" ? "Corporativo" : "Elegante"}
-                  {currentFinish ? ` · ${currentFinish}` : ""}
-                </p>
+                    <p className="mt-4 text-center text-xs font-medium text-[#8a8480]">
+                      {activeDesign === "minimal" ? "Minimalista" : activeDesign === "bold" ? "Corporativo" : "Elegante"}
+                      {currentFinish ? ` · ${currentFinish}` : ""}
+                    </p>
+                  </>
+                )}
               </div>
             ) : (
               <div className={`relative flex min-h-[16rem] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-8 pt-16 sm:min-h-[22rem] lg:min-h-[26rem]`}>
