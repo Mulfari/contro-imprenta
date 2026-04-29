@@ -414,18 +414,76 @@ interface CardFields {
   email: string;
 }
 
+type CardDesign = "minimal" | "bold" | "elegant" | "tech" | "medical" | "gastro";
+
+interface ColorScheme {
+  id: string;
+  name: string;
+  primary: string;
+  secondary: string;
+  accent: string;
+  bg: string;
+  text: string;
+}
+
+const COLOR_SCHEMES: Record<CardDesign, ColorScheme[]> = {
+  minimal: [
+    { id: "mono", name: "Monocromo", primary: "#1a1a1a", secondary: "#999", accent: "#1a1a1a", bg: "#fcfcfb", text: "#1a1a1a" },
+    { id: "navy", name: "Azul marino", primary: "#1e3a5f", secondary: "#6b8db5", accent: "#1e3a5f", bg: "#f8fafc", text: "#1e3a5f" },
+    { id: "forest", name: "Bosque", primary: "#2d4a3e", secondary: "#7a9e8e", accent: "#2d4a3e", bg: "#f7faf8", text: "#2d4a3e" },
+  ],
+  bold: [
+    { id: "gold", name: "Oro negro", primary: "#f59e0b", secondary: "#4a4a4a", accent: "#f59e0b", bg: "#0f0f11", text: "#ffffff" },
+    { id: "electric", name: "Electrico", primary: "#3b82f6", secondary: "#4a4a5a", accent: "#3b82f6", bg: "#0a0a14", text: "#ffffff" },
+    { id: "crimson", name: "Carmesi", primary: "#dc2626", secondary: "#4a4a4a", accent: "#dc2626", bg: "#110a0a", text: "#ffffff" },
+  ],
+  elegant: [
+    { id: "rose", name: "Rosa clasico", primary: "#b5a594", secondary: "#c4b5a4", accent: "from-rose-400/70 to-amber-400/70", bg: "from-[#f7f4f0] to-[#efe9e1]", text: "#3a3028" },
+    { id: "sapphire", name: "Zafiro", primary: "#7a8ba5", secondary: "#9aaabb", accent: "from-blue-400/70 to-indigo-400/70", bg: "from-[#f0f4f7] to-[#e1e9ef]", text: "#283a4a" },
+    { id: "emerald", name: "Esmeralda", primary: "#7aa58b", secondary: "#9abba5", accent: "from-emerald-400/70 to-teal-400/70", bg: "from-[#f0f7f2] to-[#e1efe5]", text: "#283a30" },
+  ],
+  tech: [
+    { id: "cyber", name: "Cyber", primary: "#00ff88", secondary: "#334455", accent: "#00ff88", bg: "#0d1117", text: "#e6edf3" },
+    { id: "purple", name: "Violeta", primary: "#a855f7", secondary: "#334455", accent: "#a855f7", bg: "#0d0d1a", text: "#e6e0f3" },
+    { id: "neon", name: "Neon", primary: "#06b6d4", secondary: "#334455", accent: "#06b6d4", bg: "#0a1014", text: "#e0f2f3" },
+  ],
+  medical: [
+    { id: "clinical", name: "Clinico", primary: "#0891b2", secondary: "#94a3b8", accent: "#0891b2", bg: "#ffffff", text: "#0f172a" },
+    { id: "mint", name: "Menta", primary: "#059669", secondary: "#94a3b8", accent: "#059669", bg: "#f8fffe", text: "#0f172a" },
+    { id: "warm", name: "Calido", primary: "#d97706", secondary: "#94a3b8", accent: "#d97706", bg: "#fffdf8", text: "#0f172a" },
+  ],
+  gastro: [
+    { id: "rustic", name: "Rustico", primary: "#92400e", secondary: "#a8856c", accent: "#92400e", bg: "#fef7ed", text: "#451a03" },
+    { id: "modern", name: "Moderno", primary: "#1f2937", secondary: "#6b7280", accent: "#ef4444", bg: "#ffffff", text: "#1f2937" },
+    { id: "tropical", name: "Tropical", primary: "#065f46", secondary: "#6b8f7a", accent: "#f97316", bg: "#f0fdf4", text: "#065f46" },
+  ],
+};
+
+const DESIGN_LABELS: Record<CardDesign, string> = {
+  minimal: "Minimalista",
+  bold: "Corporativo",
+  elegant: "Elegante",
+  tech: "Tech / Startup",
+  medical: "Salud",
+  gastro: "Gastronomia",
+};
+
 function CardMockup({
   design,
   finish,
   size = "large",
   artUrl,
   fields,
+  colorScheme,
+  side = "front",
 }: {
-  design: "minimal" | "bold" | "elegant";
+  design: CardDesign;
   finish: string;
   size?: "large" | "thumb";
   artUrl?: string | null;
   fields?: CardFields;
+  colorScheme?: ColorScheme;
+  side?: "front" | "back";
 }) {
   const isLarge = size === "large";
 
@@ -460,6 +518,31 @@ function CardMockup({
 
   const f = fields || { name: "", title: "", company: "", phone: "", email: "" };
   const hasFields = fields && (f.name || f.title || f.company || f.phone || f.email);
+
+  // Back side
+  if (side === "back") {
+    const cs = colorScheme;
+    const isDark = design === "bold" || design === "tech";
+    const bgColor = isDark ? (cs?.bg || "#0f0f11") : (cs?.bg || "#fcfcfb");
+    const textColor = isDark ? "#ffffff" : (cs?.text || "#1a1a1a");
+    const accentColor = cs?.primary || "#1a1a1a";
+
+    return (
+      <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden`} style={{ backgroundColor: bgColor.startsWith("from-") ? undefined : bgColor }}>
+        <div className={`relative z-10 flex h-full flex-col items-center justify-center ${isLarge ? "p-[9%]" : "p-[8%]"}`}>
+          <div className={`${isLarge ? "h-[2px] w-[30%]" : "h-[1px] w-[30%]"} mb-[6%]`} style={{ backgroundColor: accentColor }} />
+          <p className={`${isLarge ? "text-[0.42rem]" : "text-[0.21rem]"} text-center font-medium tracking-[0.15em]`} style={{ color: textColor, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", opacity: 0.7 }}>
+            {hasFields ? f.company || "Tu Empresa" : "Empresa"}
+          </p>
+          <p className={`${isLarge ? "mt-[4%] text-[0.34rem]" : "mt-[3%] text-[0.17rem]"} text-center tracking-[0.08em]`} style={{ color: textColor, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", opacity: 0.4 }}>
+            www.tuempresa.com
+          </p>
+          <div className={`${isLarge ? "h-[2px] w-[30%]" : "h-[1px] w-[30%]"} mt-[6%]`} style={{ backgroundColor: accentColor }} />
+        </div>
+        {finishLayer}
+      </div>
+    );
+  }
 
   if (design === "minimal") {
     return (
@@ -515,24 +598,126 @@ function CardMockup({
     );
   }
 
+  // Tech design
+  if (design === "tech") {
+    const cs = colorScheme || COLOR_SCHEMES.tech[0];
+    return (
+      <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden`} style={{ backgroundColor: cs.bg }}>
+        <div className="absolute inset-0 z-[5] opacity-[0.04]" style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 8px, currentColor 8px, currentColor 9px), repeating-linear-gradient(90deg, transparent, transparent 8px, currentColor 9px, currentColor 9px)", color: cs.primary }} />
+        <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%]" : "p-[8%]"}`}>
+          <div>
+            <div className="flex items-center gap-[4%]">
+              <div className={`${isLarge ? "h-[0.5rem] w-[0.5rem]" : "h-[0.25rem] w-[0.25rem]"} rounded-sm`} style={{ backgroundColor: cs.primary }} />
+              <p className={`${isLarge ? "text-[0.5rem]" : "text-[0.25rem]"} font-bold tracking-[0.2em]`} style={{ color: cs.primary, fontFamily: "'Courier New', monospace" }}>
+                {hasFields ? (f.company || "STARTUP").toUpperCase() : "NEXTECH"}
+              </p>
+            </div>
+            <p className={`${isLarge ? "mt-[8%] text-[0.7rem]" : "mt-[7%] text-[0.34rem]"} font-bold`} style={{ color: cs.text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+              {hasFields ? f.name || "Tu Nombre" : "Diego Ramirez"}
+            </p>
+            <p className={`${isLarge ? "mt-[3%] text-[0.4rem]" : "mt-[2%] text-[0.2rem]"} font-medium`} style={{ color: cs.primary, fontFamily: "'Courier New', monospace" }}>
+              {hasFields ? f.title || "Tu Cargo" : "Full Stack Developer"}
+            </p>
+          </div>
+          <div className="space-y-[1px]">
+            <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"}`} style={{ color: cs.secondary, fontFamily: "'Courier New', monospace" }}>{hasFields ? f.phone || "+58 000 000 0000" : "+58 424 111 2233"}</p>
+            <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"}`} style={{ color: cs.secondary, fontFamily: "'Courier New', monospace" }}>{hasFields ? f.email || "tu@email.com" : "diego@nextech.dev"}</p>
+          </div>
+        </div>
+        {finishLayer}
+      </div>
+    );
+  }
+
+  // Medical design
+  if (design === "medical") {
+    const cs = colorScheme || COLOR_SCHEMES.medical[0];
+    return (
+      <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden`} style={{ backgroundColor: cs.bg }}>
+        <div className={`absolute right-[6%] top-[8%] z-[5] ${isLarge ? "h-[1.6rem] w-[1.6rem]" : "h-[0.8rem] w-[0.8rem]"} rounded-full opacity-[0.08]`} style={{ backgroundColor: cs.primary }} />
+        <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%]" : "p-[8%]"}`}>
+          <div>
+            <div className="flex items-center gap-[3%]">
+              <svg viewBox="0 0 24 24" className={`${isLarge ? "h-[0.7rem] w-[0.7rem]" : "h-[0.35rem] w-[0.35rem]"}`} fill="none" stroke={cs.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v4m0 12v4m-6-10H2m20 0h-4m-1.5-6.5L15 7m-6 10-1.5 1.5M19.5 7.5 18 9M6 15l-1.5 1.5" />
+              </svg>
+              <p className={`${isLarge ? "text-[0.44rem]" : "text-[0.22rem]"} font-semibold tracking-[0.12em]`} style={{ color: cs.primary, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+                {hasFields ? (f.company || "CLINICA").toUpperCase() : "CENTRO MEDICO SALUD"}
+              </p>
+            </div>
+            <p className={`${isLarge ? "mt-[8%] text-[0.68rem]" : "mt-[7%] text-[0.33rem]"} font-bold`} style={{ color: cs.text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+              {hasFields ? f.name || "Tu Nombre" : "Dra. Patricia Gomez"}
+            </p>
+            <p className={`${isLarge ? "mt-[3%] text-[0.4rem]" : "mt-[2%] text-[0.2rem]"} font-medium`} style={{ color: cs.secondary, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+              {hasFields ? f.title || "Especialidad" : "Cardiologia · Medicina Interna"}
+            </p>
+          </div>
+          <div className="space-y-[1px]">
+            <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"}`} style={{ color: cs.secondary, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>{hasFields ? f.phone || "+58 000 000 0000" : "+58 212 333 4455"}</p>
+            <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"}`} style={{ color: cs.secondary, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>{hasFields ? f.email || "tu@email.com" : "dra.gomez@centromedico.com"}</p>
+          </div>
+        </div>
+        {finishLayer}
+      </div>
+    );
+  }
+
+  // Gastro design
+  if (design === "gastro") {
+    const cs = colorScheme || COLOR_SCHEMES.gastro[0];
+    return (
+      <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden`} style={{ backgroundColor: cs.bg }}>
+        <div className={`absolute bottom-0 right-0 z-[5] ${isLarge ? "h-[60%] w-[40%]" : "h-[60%] w-[40%]"} rounded-tl-full opacity-[0.04]`} style={{ backgroundColor: cs.accent }} />
+        <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%]" : "p-[8%]"}`}>
+          <div>
+            <p className={`${isLarge ? "text-[0.4rem]" : "text-[0.2rem]"} font-light uppercase tracking-[0.3em]`} style={{ color: cs.secondary, fontFamily: "Georgia, 'Times New Roman', serif" }}>
+              {hasFields ? f.company || "Restaurante" : "Restaurante & Bar"}
+            </p>
+            <p className={`${isLarge ? "mt-[6%] text-[0.72rem]" : "mt-[5%] text-[0.35rem]"} font-bold`} style={{ color: cs.text, fontFamily: "Georgia, 'Times New Roman', serif" }}>
+              {hasFields ? f.name || "Tu Nombre" : "Chef Marco Villegas"}
+            </p>
+            <p className={`${isLarge ? "mt-[3%] text-[0.4rem]" : "mt-[2%] text-[0.2rem]"}`} style={{ color: cs.accent, fontFamily: "Georgia, 'Times New Roman', serif" }}>
+              {hasFields ? f.title || "Tu Cargo" : "Chef Ejecutivo"}
+            </p>
+          </div>
+          <div className="flex items-end justify-between">
+            <div className="space-y-[1px]">
+              <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"}`} style={{ color: cs.secondary, fontFamily: "Georgia, 'Times New Roman', serif" }}>{hasFields ? f.phone || "+58 000 000 0000" : "+58 412 777 8899"}</p>
+              <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"}`} style={{ color: cs.secondary, fontFamily: "Georgia, 'Times New Roman', serif" }}>{hasFields ? f.email || "tu@email.com" : "reservas@lacocina.com"}</p>
+            </div>
+            <div className={`${isLarge ? "h-[1.2rem] w-[1.2rem]" : "h-[0.6rem] w-[0.6rem]"} rounded-full border-2 flex items-center justify-center`} style={{ borderColor: cs.accent }}>
+              <span className={`${isLarge ? "text-[0.3rem]" : "text-[0.15rem]"} font-black`} style={{ color: cs.accent }}>✦</span>
+            </div>
+          </div>
+        </div>
+        {finishLayer}
+      </div>
+    );
+  }
+
+  // Elegant (default fallback)
+  const cs = colorScheme || COLOR_SCHEMES.elegant[0];
+  const elegantAccent = cs.accent.startsWith("from-") ? cs.accent : "from-rose-400/70 to-amber-400/70";
+  const elegantBg = cs.bg.startsWith("from-") ? `bg-gradient-to-br ${cs.bg}` : "";
+
   return (
-    <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden bg-gradient-to-br from-[#f7f4f0] to-[#efe9e1]`}>
-      <div className={`absolute left-0 top-0 z-[5] h-full ${isLarge ? "w-[2.5px]" : "w-[1.5px]"} bg-gradient-to-b from-rose-400/70 to-amber-400/70`} />
+    <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden ${elegantBg || "bg-gradient-to-br from-[#f7f4f0] to-[#efe9e1]"}`}>
+      <div className={`absolute left-0 top-0 z-[5] h-full ${isLarge ? "w-[2.5px]" : "w-[1.5px]"} bg-gradient-to-b ${elegantAccent}`} />
       <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%] pl-[12%]" : "p-[8%] pl-[11%]"}`}>
         <div>
-          <p className={`${isLarge ? "text-[0.46rem]" : "text-[0.23rem]"} font-light italic tracking-[0.1em] text-[#b5a594]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          <p className={`${isLarge ? "text-[0.46rem]" : "text-[0.23rem]"} font-light italic tracking-[0.1em]`} style={{ color: cs.primary, fontFamily: "Georgia, 'Times New Roman', serif" }}>
             {hasFields ? f.company || "Tu Empresa" : "Abogados & Asociados"}
           </p>
-          <p className={`${isLarge ? "mt-[6%] text-[0.66rem]" : "mt-[5%] text-[0.32rem]"} font-semibold text-[#3a3028]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          <p className={`${isLarge ? "mt-[6%] text-[0.66rem]" : "mt-[5%] text-[0.32rem]"} font-semibold`} style={{ color: cs.text, fontFamily: "Georgia, 'Times New Roman', serif" }}>
             {hasFields ? f.name || "Tu Nombre" : "Ana Lucia Fernandez"}
           </p>
-          <p className={`${isLarge ? "mt-[2%] text-[0.4rem]" : "mt-[1%] text-[0.2rem]"} tracking-[0.16em] text-[#b5a594]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          <p className={`${isLarge ? "mt-[2%] text-[0.4rem]" : "mt-[1%] text-[0.2rem]"} tracking-[0.16em]`} style={{ color: cs.primary, fontFamily: "Georgia, 'Times New Roman', serif" }}>
             {hasFields ? f.title || "Tu Cargo" : "Socia Principal"}
           </p>
         </div>
         <div className="space-y-[1px]">
-          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"} text-[#c4b5a4]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{hasFields ? f.phone || "+58 000 000 0000" : "Av. Libertador, Torre Capital, Piso 12"}</p>
-          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"} text-[#c4b5a4]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{hasFields ? f.email || "tu@email.com" : "+58 212 555 9876 · ana@fernandez.legal"}</p>
+          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"}`} style={{ color: cs.secondary, fontFamily: "Georgia, 'Times New Roman', serif" }}>{hasFields ? f.phone || "+58 000 000 0000" : "Av. Libertador, Torre Capital, Piso 12"}</p>
+          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"}`} style={{ color: cs.secondary, fontFamily: "Georgia, 'Times New Roman', serif" }}>{hasFields ? f.email || "tu@email.com" : "+58 212 555 9876 · ana@fernandez.legal"}</p>
         </div>
       </div>
       {finishLayer}
@@ -559,7 +744,9 @@ function CatalogProductDetail({
 }) {
   const [draftQuantity, setDraftQuantity] = useState(1);
   const [draftFiles, setDraftFiles] = useState<File[]>([]);
-  const [activeDesign, setActiveDesign] = useState<"minimal" | "bold" | "elegant">("minimal");
+  const [activeDesign, setActiveDesign] = useState<CardDesign>("minimal");
+  const [activeColor, setActiveColor] = useState(0);
+  const [flipped, setFlipped] = useState(false);
   const [cardFields, setCardFields] = useState<CardFields>({ name: "", title: "", company: "", phone: "", email: "" });
   const [showEditor, setShowEditor] = useState(false);
 
@@ -619,22 +806,32 @@ function CatalogProductDetail({
             </button>
 
             {isCardProduct ? (
-              <div className="relative flex flex-col items-center justify-center overflow-hidden px-6 pb-8 pt-16 sm:px-10 sm:pt-20" style={{ perspective: "1200px", background: "linear-gradient(180deg, #e8e6e3 0%, #d9d5d0 40%, #cec9c3 100%)" }}>
+              <div className="relative flex flex-col items-center justify-center overflow-hidden px-6 pb-6 pt-16 sm:px-10 sm:pt-20" style={{ perspective: "1200px", background: "linear-gradient(180deg, #e8e6e3 0%, #d9d5d0 40%, #cec9c3 100%)" }}>
                 <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
 
                 <div
-                  className="relative w-full max-w-[26rem] transition-all duration-700 ease-out"
+                  className="relative w-full max-w-[26rem] cursor-pointer transition-all duration-700 ease-out"
                   style={{ transform: "rotateX(8deg) rotateY(-1deg)", transformStyle: "preserve-3d" }}
+                  onClick={() => setFlipped(!flipped)}
                 >
                   <div className="pointer-events-none absolute -bottom-3 left-[8%] right-[8%] h-8 rounded-[50%] bg-black/20 blur-xl" />
                   <div className="pointer-events-none absolute -bottom-1 left-[12%] right-[12%] h-4 rounded-[50%] bg-black/10 blur-md" />
-                  <div className="relative" style={{ filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
-                    <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={artPreviewUrl} fields={showEditor ? cardFields : undefined} />
+                  <div className="relative transition-transform duration-700" style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
+                    <div style={{ backfaceVisibility: "hidden", filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
+                      <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={artPreviewUrl} fields={showEditor ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="front" />
+                    </div>
+                    <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
+                      <CardMockup design={activeDesign} finish={currentFinish} size="large" fields={showEditor ? cardFields : undefined} colorScheme={COLOR_SCHEMES[activeDesign][activeColor]} side="back" />
+                    </div>
                   </div>
                 </div>
 
+                <p className="mt-4 text-center text-[0.7rem] font-medium text-[#8a8480]/70">
+                  {flipped ? "← Click para ver el frente" : "Click para ver el reverso →"}
+                </p>
+
                 {artPreviewUrl ? (
-                  <div className="mt-6 flex items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur">
+                  <div className="mt-3 flex items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur">
                     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
@@ -642,12 +839,12 @@ function CatalogProductDetail({
                   </div>
                 ) : (
                   <>
-                    <div className="relative mt-8 flex items-center gap-3 sm:gap-4">
-                      {(["minimal", "bold", "elegant"] as const).map((d) => (
+                    <div className="relative mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+                      {(["minimal", "bold", "elegant", "tech", "medical", "gastro"] as CardDesign[]).map((d) => (
                         <button
                           key={d}
                           type="button"
-                          onClick={() => setActiveDesign(d)}
+                          onClick={() => { setActiveDesign(d); setActiveColor(0); setFlipped(false); }}
                           className={`group relative cursor-pointer overflow-hidden rounded-[0.35rem] transition-all duration-300 ${
                             activeDesign === d
                               ? "scale-110 ring-2 ring-[#3558ff] ring-offset-2 ring-offset-[#d9d5d0]"
@@ -655,15 +852,33 @@ function CatalogProductDetail({
                           }`}
                           style={{ filter: activeDesign === d ? "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" : "drop-shadow(0 2px 6px rgba(0,0,0,0.1))" }}
                         >
-                          <div className="w-[5rem] sm:w-[6rem]">
-                            <CardMockup design={d} finish={currentFinish} size="thumb" fields={showEditor ? cardFields : undefined} />
+                          <div className="w-[4rem] sm:w-[5rem]">
+                            <CardMockup design={d} finish={currentFinish} size="thumb" colorScheme={COLOR_SCHEMES[d][0]} />
                           </div>
                         </button>
                       ))}
                     </div>
 
-                    <p className="mt-4 text-center text-xs font-medium text-[#8a8480]">
-                      {activeDesign === "minimal" ? "Minimalista" : activeDesign === "bold" ? "Corporativo" : "Elegante"}
+                    <div className="mt-3 flex items-center gap-2">
+                      {COLOR_SCHEMES[activeDesign].map((cs, i) => (
+                        <button
+                          key={cs.id}
+                          type="button"
+                          onClick={() => setActiveColor(i)}
+                          className={`flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.65rem] font-semibold transition ${
+                            activeColor === i
+                              ? "bg-white/90 text-slate-900 shadow-sm"
+                              : "text-[#8a8480] hover:text-slate-700"
+                          }`}
+                        >
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cs.primary }} />
+                          {cs.name}
+                        </button>
+                      ))}
+                    </div>
+
+                    <p className="mt-2 text-center text-xs font-medium text-[#8a8480]">
+                      {DESIGN_LABELS[activeDesign]}
                       {currentFinish ? ` · ${currentFinish}` : ""}
                     </p>
                   </>
