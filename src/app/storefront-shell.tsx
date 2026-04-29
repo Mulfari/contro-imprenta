@@ -416,95 +416,98 @@ function CardMockup({
   size?: "large" | "thumb";
 }) {
   const isLarge = size === "large";
-  const pad = isLarge ? "p-[8%]" : "p-[7%]";
+
+  const paperTexture = "before:pointer-events-none before:absolute before:inset-0 before:z-20 before:rounded-[inherit] before:opacity-[0.35] before:mix-blend-multiply before:bg-[url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='100'%20height='100'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='4'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='100'%20height='100'%20filter='url(%23n)'%20opacity='0.15'/%3E%3C/svg%3E\")]";
 
   const finishLayer =
     finish === "Brillante" ? (
-      <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit] bg-gradient-to-br from-white/50 via-white/5 via-60% to-white/20" />
+      <>
+        <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit] bg-gradient-to-br from-white/60 via-transparent via-40% to-transparent" />
+        <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit]" style={{ background: "linear-gradient(125deg, transparent 30%, rgba(255,255,255,0.25) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.25) 55%, transparent 70%)" }} />
+      </>
     ) : finish === "Soft touch" ? (
-      <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit] opacity-40" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='6' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='0.6' fill='%23000' opacity='0.07'/%3E%3C/svg%3E\")" }} />
-    ) : null;
+      <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit]" style={{ background: "radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08) 0%, transparent 60%)", backdropFilter: "blur(0.3px)" }} />
+    ) : (
+      <div className="pointer-events-none absolute inset-0 z-30 rounded-[inherit] bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+    );
 
-  const edgeShadow = "shadow-[0_1px_0_0_rgba(0,0,0,0.08),0_6px_24px_rgba(0,0,0,0.13),0_16px_48px_rgba(0,0,0,0.08)]";
+  const cardBase = `relative ${isLarge ? "rounded-[0.55rem]" : "rounded-[0.3rem]"} ${paperTexture}`;
 
   if (design === "minimal") {
     return (
-      <div className={`relative aspect-[9/5] w-full overflow-hidden rounded-[0.5rem] ${edgeShadow}`}>
-        <div className={`relative z-10 flex h-full flex-col justify-between bg-[#fafaf9] ${pad}`}>
+      <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden bg-[#fcfcfb]`}>
+        <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%]" : "p-[8%]"}`}>
           <div>
-            <div className={`${isLarge ? "h-[3px] w-[18%]" : "h-[2px] w-[18%]"} rounded-full bg-[#1a1a1a]`} />
-            <p className={`${isLarge ? "mt-[8%] text-[0.72rem]" : "mt-[7%] text-[0.38rem]"} font-semibold uppercase tracking-[0.28em] text-[#1a1a1a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+            <div className={`${isLarge ? "h-[2.5px] w-[16%]" : "h-[1.5px] w-[16%]"} bg-[#1a1a1a]`} />
+            <p className={`${isLarge ? "mt-[9%] text-[0.68rem]" : "mt-[8%] text-[0.32rem]"} font-semibold uppercase tracking-[0.3em] text-[#1a1a1a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", letterSpacing: isLarge ? "0.3em" : "0.2em" }}>
               Maria Rodriguez
             </p>
-            <p className={`${isLarge ? "mt-[2%] text-[0.52rem]" : "mt-[2%] text-[0.28rem]"} font-normal tracking-[0.18em] text-[#999]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+            <p className={`${isLarge ? "mt-[3%] text-[0.46rem]" : "mt-[2%] text-[0.22rem]"} font-normal tracking-[0.2em] text-[#999]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
               Directora Creativa
             </p>
           </div>
           <div className="flex items-end justify-between">
-            <div>
-              <p className={`${isLarge ? "text-[0.42rem]" : "text-[0.22rem]"} tracking-[0.04em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>+58 412 555 0123</p>
-              <p className={`${isLarge ? "mt-[1px] text-[0.42rem]" : "text-[0.22rem]"} tracking-[0.04em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>maria@estudio.com</p>
+            <div className={`space-y-[1px] ${isLarge ? "" : ""}`}>
+              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>+58 412 555 0123</p>
+              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>maria@estudio.com</p>
             </div>
-            <p className={`${isLarge ? "text-[0.5rem]" : "text-[0.26rem]"} font-medium tracking-[0.22em] text-[#d4d4d4]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>ESTUDIO</p>
+            <p className={`${isLarge ? "text-[0.44rem]" : "text-[0.22rem]"} font-medium tracking-[0.25em] text-[#ddd]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>ESTUDIO</p>
           </div>
         </div>
         {finishLayer}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[2px] rounded-b-[inherit] bg-gradient-to-r from-[#e5e5e5] via-[#d4d4d4] to-[#e5e5e5]" />
       </div>
     );
   }
 
   if (design === "bold") {
     return (
-      <div className={`relative aspect-[9/5] w-full overflow-hidden rounded-[0.5rem] ${edgeShadow}`}>
-        <div className={`relative z-10 flex h-full flex-col justify-between bg-[#111113] ${pad}`}>
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.07] via-transparent to-amber-600/[0.04]" />
-          <div className="relative">
-            <p className={`${isLarge ? "text-[0.82rem]" : "text-[0.42rem]"} font-bold uppercase tracking-[0.22em] text-white`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+      <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden bg-[#0f0f11]`}>
+        <div className="absolute inset-0 z-[5] bg-gradient-to-br from-amber-500/[0.06] via-transparent to-amber-600/[0.03]" />
+        <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%]" : "p-[8%]"}`}>
+          <div>
+            <p className={`${isLarge ? "text-[0.76rem]" : "text-[0.36rem]"} font-bold uppercase tracking-[0.24em] text-white`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
               Carlos Mendez
             </p>
-            <p className={`${isLarge ? "mt-[3%] text-[0.48rem]" : "mt-[2%] text-[0.26rem]"} font-medium tracking-[0.16em] text-amber-400/90`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+            <p className={`${isLarge ? "mt-[4%] text-[0.42rem]" : "mt-[3%] text-[0.21rem]"} font-medium tracking-[0.18em] text-amber-400/80`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
               CEO & Fundador
             </p>
           </div>
-          <div className="relative flex items-end justify-between">
-            <div>
-              <p className={`${isLarge ? "text-[0.42rem]" : "text-[0.22rem]"} tracking-[0.04em] text-[#555]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>+58 414 888 7654</p>
-              <p className={`${isLarge ? "mt-[1px] text-[0.42rem]" : "text-[0.22rem]"} tracking-[0.04em] text-[#555]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>carlos@nexus.io</p>
+          <div className="flex items-end justify-between">
+            <div className="space-y-[1px]">
+              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#4a4a4a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>+58 414 888 7654</p>
+              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#4a4a4a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>carlos@nexus.io</p>
             </div>
-            <div className={`flex ${isLarge ? "h-6 w-6" : "h-3 w-3"} items-center justify-center rounded-full bg-amber-500`}>
-              <span className={`${isLarge ? "text-[0.4rem]" : "text-[0.2rem]"} font-black text-[#111]`}>N</span>
+            <div className={`flex ${isLarge ? "h-[1.35rem] w-[1.35rem]" : "h-[0.65rem] w-[0.65rem]"} items-center justify-center rounded-full bg-amber-500`}>
+              <span className={`${isLarge ? "text-[0.38rem]" : "text-[0.18rem]"} font-black text-[#0f0f11]`}>N</span>
             </div>
           </div>
         </div>
         {finishLayer}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[2px] rounded-b-[inherit] bg-gradient-to-r from-[#222] via-[#333] to-[#222]" />
       </div>
     );
   }
 
   return (
-    <div className={`relative aspect-[9/5] w-full overflow-hidden rounded-[0.5rem] ${edgeShadow}`}>
-      <div className={`relative z-10 flex h-full flex-col justify-between bg-gradient-to-br from-[#f8f6f3] to-[#f0ece6] ${pad}`}>
-        <div className="absolute left-0 top-0 h-full w-[2.5%] bg-gradient-to-b from-rose-400/80 to-amber-400/80" />
-        <div className="relative pl-[4%]">
-          <p className={`${isLarge ? "text-[0.52rem]" : "text-[0.28rem]"} font-light italic tracking-[0.1em] text-[#b8a898]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+    <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden bg-gradient-to-br from-[#f7f4f0] to-[#efe9e1]`}>
+      <div className={`absolute left-0 top-0 z-[5] h-full ${isLarge ? "w-[2.5px]" : "w-[1.5px]"} bg-gradient-to-b from-rose-400/70 to-amber-400/70`} />
+      <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%] pl-[12%]" : "p-[8%] pl-[11%]"}`}>
+        <div>
+          <p className={`${isLarge ? "text-[0.46rem]" : "text-[0.23rem]"} font-light italic tracking-[0.1em] text-[#b5a594]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             Abogados & Asociados
           </p>
-          <p className={`${isLarge ? "mt-[5%] text-[0.72rem]" : "mt-[4%] text-[0.38rem]"} font-semibold text-[#3d3530]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          <p className={`${isLarge ? "mt-[6%] text-[0.66rem]" : "mt-[5%] text-[0.32rem]"} font-semibold text-[#3a3028]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             Ana Lucia Fernandez
           </p>
-          <p className={`${isLarge ? "mt-[2%] text-[0.44rem]" : "mt-[1%] text-[0.24rem]"} tracking-[0.14em] text-[#b8a898]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          <p className={`${isLarge ? "mt-[2%] text-[0.4rem]" : "mt-[1%] text-[0.2rem]"} tracking-[0.16em] text-[#b5a594]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             Socia Principal
           </p>
         </div>
-        <div className="relative pl-[4%]">
-          <p className={`${isLarge ? "text-[0.4rem]" : "text-[0.22rem]"} text-[#c4b8aa]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Av. Libertador, Torre Capital, Piso 12</p>
-          <p className={`${isLarge ? "mt-[1px] text-[0.4rem]" : "text-[0.22rem]"} text-[#c4b8aa]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>+58 212 555 9876 · ana@fernandez.legal</p>
+        <div className="space-y-[1px]">
+          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"} text-[#c4b5a4]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Av. Libertador, Torre Capital, Piso 12</p>
+          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"} text-[#c4b5a4]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>+58 212 555 9876 · ana@fernandez.legal</p>
         </div>
       </div>
       {finishLayer}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[2px] rounded-b-[inherit] bg-gradient-to-r from-[#e8e2da] via-[#ddd5ca] to-[#e8e2da]" />
     </div>
   );
 }
@@ -575,31 +578,41 @@ function CatalogProductDetail({
             </button>
 
             {isCardProduct ? (
-              <div className="flex flex-col items-center justify-center bg-gradient-to-b from-[#f0f0f0] via-[#e8e8e8] to-[#f0f0f0] px-6 pb-6 pt-16 sm:px-10 sm:pt-18" style={{ perspective: "900px" }}>
-                <div className="w-full max-w-[24rem] transition-all duration-500" style={{ transform: "rotateY(-2deg) rotateX(3deg)", transformStyle: "preserve-3d" }}>
-                  <CardMockup design={activeDesign} finish={currentFinish} size="large" />
+              <div className="relative flex flex-col items-center justify-center overflow-hidden px-6 pb-8 pt-16 sm:px-10 sm:pt-20" style={{ perspective: "1200px", background: "linear-gradient(180deg, #e8e6e3 0%, #d9d5d0 40%, #cec9c3 100%)" }}>
+                <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+
+                <div
+                  className="relative w-full max-w-[26rem] transition-all duration-700 ease-out"
+                  style={{ transform: "rotateX(8deg) rotateY(-1deg)", transformStyle: "preserve-3d" }}
+                >
+                  <div className="pointer-events-none absolute -bottom-3 left-[8%] right-[8%] h-8 rounded-[50%] bg-black/20 blur-xl" />
+                  <div className="pointer-events-none absolute -bottom-1 left-[12%] right-[12%] h-4 rounded-[50%] bg-black/10 blur-md" />
+                  <div className="relative" style={{ filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
+                    <CardMockup design={activeDesign} finish={currentFinish} size="large" />
+                  </div>
                 </div>
 
-                <div className="mt-7 flex items-center gap-3">
+                <div className="relative mt-8 flex items-center gap-3 sm:gap-4">
                   {(["minimal", "bold", "elegant"] as const).map((d) => (
                     <button
                       key={d}
                       type="button"
                       onClick={() => setActiveDesign(d)}
-                      className={`group cursor-pointer overflow-hidden rounded-[0.45rem] border-2 transition-all duration-200 ${
+                      className={`group relative cursor-pointer overflow-hidden rounded-[0.35rem] transition-all duration-300 ${
                         activeDesign === d
-                          ? "border-[#3558ff] shadow-[0_0_0_2px_rgba(53,88,255,0.15)] scale-105"
-                          : "border-slate-200/80 opacity-70 hover:opacity-100 hover:border-slate-300"
+                          ? "scale-110 ring-2 ring-[#3558ff] ring-offset-2 ring-offset-[#d9d5d0]"
+                          : "opacity-60 hover:opacity-90 hover:scale-105"
                       }`}
+                      style={{ filter: activeDesign === d ? "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" : "drop-shadow(0 2px 6px rgba(0,0,0,0.1))" }}
                     >
-                      <div className="w-[5.5rem] sm:w-[6.5rem]">
+                      <div className="w-[5rem] sm:w-[6rem]">
                         <CardMockup design={d} finish={currentFinish} size="thumb" />
                       </div>
                     </button>
                   ))}
                 </div>
 
-                <p className="mt-3 text-center text-xs font-medium text-slate-400">
+                <p className="mt-4 text-center text-xs font-medium text-[#8a8480]">
                   {activeDesign === "minimal" ? "Minimalista" : activeDesign === "bold" ? "Corporativo" : "Elegante"}
                   {currentFinish ? ` · ${currentFinish}` : ""}
                 </p>
