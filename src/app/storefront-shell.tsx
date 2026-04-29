@@ -406,6 +406,96 @@ function CatalogArtPreview({ file }: { file: File }) {
   );
 }
 
+function CardMockup({
+  design,
+  finish,
+}: {
+  design: "minimal" | "bold" | "elegant";
+  finish: string;
+}) {
+  const finishOverlay =
+    finish === "Brillante"
+      ? "after:absolute after:inset-0 after:rounded-[0.6rem] after:bg-gradient-to-br after:from-white/40 after:via-transparent after:to-white/10 after:pointer-events-none"
+      : finish === "Soft touch"
+        ? "after:absolute after:inset-0 after:rounded-[0.6rem] after:bg-[url('data:image/svg+xml,%3Csvg%20width%3D%224%22%20height%3D%224%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%224%22%20height%3D%224%22%20fill%3D%22%23000%22%20opacity%3D%220.03%22/%3E%3C/svg%3E')] after:pointer-events-none"
+        : "";
+
+  if (design === "minimal") {
+    return (
+      <div className={`relative aspect-[1.75/1] w-full overflow-hidden rounded-[0.6rem] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.12)] ${finishOverlay}`}>
+        <div className="flex h-full flex-col justify-between p-5">
+          <div>
+            <div className="h-1 w-8 rounded-full bg-slate-900" />
+            <p className="mt-3 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-slate-900">
+              Maria Rodriguez
+            </p>
+            <p className="mt-0.5 text-[0.5rem] tracking-[0.15em] text-slate-400">
+              Directora Creativa
+            </p>
+          </div>
+          <div className="flex items-end justify-between">
+            <div className="space-y-0.5">
+              <p className="text-[0.45rem] text-slate-400">+58 412 555 0123</p>
+              <p className="text-[0.45rem] text-slate-400">maria@estudio.com</p>
+            </div>
+            <p className="text-[0.55rem] font-semibold tracking-[0.1em] text-slate-300">ESTUDIO</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (design === "bold") {
+    return (
+      <div className={`relative aspect-[1.75/1] w-full overflow-hidden rounded-[0.6rem] bg-slate-900 shadow-[0_4px_20px_rgba(0,0,0,0.2)] ${finishOverlay}`}>
+        <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-amber-500/20 to-transparent" />
+        <div className="relative flex h-full flex-col justify-between p-5">
+          <div>
+            <p className="text-[0.75rem] font-black uppercase tracking-[0.2em] text-white">
+              Carlos Mendez
+            </p>
+            <p className="mt-0.5 text-[0.5rem] font-medium tracking-[0.15em] text-amber-400">
+              CEO & Fundador
+            </p>
+          </div>
+          <div className="flex items-end justify-between">
+            <div className="space-y-0.5">
+              <p className="text-[0.45rem] text-slate-400">+58 414 888 7654</p>
+              <p className="text-[0.45rem] text-slate-400">carlos@nexus.io</p>
+            </div>
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
+              <span className="text-[0.4rem] font-black text-slate-900">N</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative aspect-[1.75/1] w-full overflow-hidden rounded-[0.6rem] bg-gradient-to-br from-stone-50 to-stone-100 shadow-[0_4px_20px_rgba(0,0,0,0.1)] ${finishOverlay}`}>
+      <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-rose-400 to-amber-400" />
+      <div className="flex h-full flex-col justify-between p-5 pl-6">
+        <div>
+          <p className="text-[0.6rem] font-light italic tracking-[0.08em] text-stone-400">
+            Abogados & Asociados
+          </p>
+          <p className="mt-2 text-[0.7rem] font-semibold text-stone-800">
+            Ana Lucia Fernandez
+          </p>
+          <p className="mt-0.5 text-[0.45rem] tracking-[0.12em] text-stone-400">
+            Socia Principal
+          </p>
+        </div>
+        <div className="space-y-0.5">
+          <p className="text-[0.45rem] text-stone-400">Av. Libertador, Torre Capital, Piso 12</p>
+          <p className="text-[0.45rem] text-stone-400">+58 212 555 9876 · ana@fernandez.legal</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CatalogProductDetail({
   product,
   selectedOptions,
@@ -425,91 +515,128 @@ function CatalogProductDetail({
 }) {
   const [draftQuantity, setDraftQuantity] = useState(1);
   const [draftFiles, setDraftFiles] = useState<File[]>([]);
+  const [activeDesign, setActiveDesign] = useState<"minimal" | "bold" | "elegant">("minimal");
 
   const hasFiles = draftFiles.length > 0;
   const unitPrice = parsePrice(product.price);
   const estimatedTotal = unitPrice * draftQuantity;
-  const selectedSummary = product.options
-    .map((group) => selectedOptions[group.name])
-    .filter(Boolean)
-    .join(" · ");
+  const currentFinish = selectedOptions["Acabado"] ?? "";
+  const isCardProduct = product.id === "tarjetas-premium" || product.id === "tarjetas-corporativas";
+
+  const quantityOption = product.options.find(
+    (g) => g.name === "Cantidad",
+  );
+  const otherOptions = product.options.filter(
+    (g) => g.name !== "Cantidad",
+  );
 
   return (
     <article className="mt-5">
       <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.07)]">
-        <div className={`relative flex min-h-[16rem] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-8 sm:min-h-[22rem] lg:min-h-[26rem]`}>
-          <button
-            type="button"
-            onClick={onBack}
-            className="absolute left-4 top-4 z-20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3.5 py-2 text-xs font-black text-slate-700 shadow-sm backdrop-blur transition hover:bg-white hover:text-slate-950"
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-            Catalogo
-          </button>
+        <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="relative border-b border-slate-100 lg:border-b-0 lg:border-r">
+            <button
+              type="button"
+              onClick={onBack}
+              className="absolute left-4 top-4 z-20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/90 px-3.5 py-2 text-xs font-black text-slate-600 shadow-sm backdrop-blur transition hover:bg-white hover:text-slate-950"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+              Catalogo
+            </button>
 
-          <button
-            type="button"
-            onClick={onToggleWishlist}
-            aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
-            className={`absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm backdrop-blur transition ${
-              wished
-                ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white"
-                : "border-white/60 bg-white/80 text-slate-500 hover:bg-white hover:text-[#ff5b4d]"
-            }`}
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill={wished ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
-            </svg>
-          </button>
+            <button
+              type="button"
+              onClick={onToggleWishlist}
+              aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
+              className={`absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm backdrop-blur transition ${
+                wished
+                  ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white"
+                  : "border-slate-200/80 bg-white/90 text-slate-500 hover:bg-white hover:text-[#ff5b4d]"
+              }`}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill={wished ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
+              </svg>
+            </button>
 
-          <div className="absolute inset-x-12 bottom-10 h-12 rounded-full bg-slate-900/10 blur-2xl" />
-          <Image
-            src={product.image}
-            alt={product.imageAlt}
-            width={1200}
-            height={900}
-            sizes="(min-width: 1024px) 60vw, 92vw"
-            className="relative z-10 h-auto max-h-[80%] w-auto max-w-[70%] object-contain drop-shadow-[0_28px_48px_rgba(15,23,42,0.2)] sm:max-w-[60%]"
-          />
-        </div>
+            {isCardProduct ? (
+              <div className="flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-50 px-6 pb-6 pt-16 sm:px-10 sm:pt-18">
+                <div className="w-full max-w-[22rem]">
+                  <CardMockup design={activeDesign} finish={currentFinish} />
+                </div>
 
-        <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="border-b border-slate-100 p-5 sm:p-7 lg:border-b-0 lg:border-r">
+                <div className="mt-6 flex items-center gap-3">
+                  {(["minimal", "bold", "elegant"] as const).map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setActiveDesign(d)}
+                      className={`group cursor-pointer overflow-hidden rounded-[0.5rem] border-2 transition ${
+                        activeDesign === d
+                          ? "border-[#3558ff] shadow-[0_0_0_2px_rgba(53,88,255,0.15)]"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="w-24 sm:w-28">
+                        <CardMockup design={d} finish={currentFinish} />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <p className="mt-3 text-center text-xs font-medium text-slate-400">
+                  {activeDesign === "minimal" ? "Estilo minimalista" : activeDesign === "bold" ? "Estilo corporativo" : "Estilo elegante"}
+                  {currentFinish ? ` · Acabado ${currentFinish.toLowerCase()}` : ""}
+                </p>
+              </div>
+            ) : (
+              <div className={`relative flex min-h-[16rem] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-8 pt-16 sm:min-h-[22rem] lg:min-h-[26rem]`}>
+                <div className="absolute inset-x-12 bottom-10 h-12 rounded-full bg-slate-900/10 blur-2xl" />
+                <Image
+                  src={product.image}
+                  alt={product.imageAlt}
+                  width={1200}
+                  height={900}
+                  sizes="(min-width: 1024px) 60vw, 92vw"
+                  className="relative z-10 h-auto max-h-[80%] w-auto max-w-[70%] object-contain drop-shadow-[0_28px_48px_rgba(15,23,42,0.2)] sm:max-w-[60%]"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col p-5 sm:p-7">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-[#3558ff]/8 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#3558ff]">
                 {product.category}
               </span>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-                Entrega: {product.turnaround}
+                {product.turnaround}
               </span>
             </div>
 
-            <h2 className="mt-4 text-[1.85rem] font-black leading-[1.15] tracking-tight text-slate-950 sm:text-[2.2rem]">
+            <h2 className="mt-3 text-[1.65rem] font-black leading-[1.15] tracking-tight text-slate-950 sm:text-[1.9rem]">
               {product.title}
             </h2>
 
-            <p className="mt-3 text-[0.95rem] leading-7 text-slate-500">
+            <p className="mt-2 text-[0.9rem] leading-7 text-slate-500">
               {product.description}
             </p>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <ul className="mt-4 space-y-1.5">
               {product.highlights.map((item) => (
-                <span
-                  key={item}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.8rem] font-semibold text-slate-600"
-                >
-                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   {item}
-                </span>
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <div className="mt-7 space-y-5">
-              {product.options.map((group) => (
+            <div className="mt-6 space-y-5">
+              {otherOptions.map((group) => (
                 <div key={group.name}>
                   <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">{group.name}</p>
                   <div className="mt-2.5 flex flex-wrap gap-2">
@@ -535,50 +662,65 @@ function CatalogProductDetail({
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="flex flex-col p-5 sm:p-7">
-            <div className="flex items-baseline gap-3">
-              <p className="text-[2.4rem] font-black leading-none tracking-tight text-slate-950">
-                ${estimatedTotal}
-              </p>
-              {draftQuantity > 1 && (
-                <p className="text-sm font-semibold text-slate-400">
-                  {product.price}/und
-                </p>
-              )}
-            </div>
-            {selectedSummary && (
-              <p className="mt-2 text-sm font-medium text-slate-400">{selectedSummary}</p>
-            )}
+            {quantityOption ? (
+              <div className="mt-6">
+                <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">Cantidad</p>
+                <div className="mt-2.5 grid grid-cols-3 gap-2">
+                  {quantityOption.values.map((value) => {
+                    const selected = selectedOptions["Cantidad"] === value;
+                    const num = parseInt(value) || 0;
 
-            <div className="mt-6 flex items-center gap-3">
-              <p className="text-sm font-black text-slate-700">Cantidad</p>
-              <div className="flex h-12 items-center overflow-hidden rounded-[0.85rem] border-2 border-slate-200 bg-white">
-                <button
-                  type="button"
-                  onClick={() => setDraftQuantity((c) => Math.max(1, c - 1))}
-                  className="flex h-full w-12 cursor-pointer items-center justify-center text-lg font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
-                >
-                  {"−"}
-                </button>
-                <input
-                  type="number"
-                  min={1}
-                  value={draftQuantity}
-                  onChange={(e) => setDraftQuantity(Math.max(1, Number(e.target.value) || 1))}
-                  className="h-full w-14 bg-transparent text-center text-[0.95rem] font-black text-slate-950 outline-none"
-                  aria-label="Cantidad del producto"
-                />
-                <button
-                  type="button"
-                  onClick={() => setDraftQuantity((c) => c + 1)}
-                  className="flex h-full w-12 cursor-pointer items-center justify-center text-lg font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
-                >
-                  +
-                </button>
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => {
+                          onOptionChange("Cantidad", value);
+                          if (num > 0) setDraftQuantity(num);
+                        }}
+                        className={`cursor-pointer rounded-[0.85rem] border-2 px-3 py-3 text-center transition ${
+                          selected
+                            ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff] shadow-[0_0_0_1px_rgba(53,88,255,0.15)]"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        <span className="block text-lg font-black">{num || value}</span>
+                        {num > 0 && <span className="block text-[0.7rem] font-medium text-slate-400">unidades</span>}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="mt-6 flex items-center gap-3">
+                <p className="text-sm font-black text-slate-700">Cantidad</p>
+                <div className="flex h-12 items-center overflow-hidden rounded-[0.85rem] border-2 border-slate-200 bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setDraftQuantity((c) => Math.max(1, c - 1))}
+                    className="flex h-full w-12 cursor-pointer items-center justify-center text-lg font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
+                  >
+                    {"−"}
+                  </button>
+                  <input
+                    type="number"
+                    min={1}
+                    value={draftQuantity}
+                    onChange={(e) => setDraftQuantity(Math.max(1, Number(e.target.value) || 1))}
+                    className="h-full w-14 bg-transparent text-center text-[0.95rem] font-black text-slate-950 outline-none"
+                    aria-label="Cantidad del producto"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setDraftQuantity((c) => c + 1)}
+                    className="flex h-full w-12 cursor-pointer items-center justify-center text-lg font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="mt-6">
               {hasFiles ? (
@@ -607,17 +749,17 @@ function CatalogProductDetail({
                   </div>
                 </div>
               ) : (
-                <label className="flex cursor-pointer items-center gap-3 rounded-[0.85rem] border-2 border-dashed border-slate-200 bg-slate-50/60 px-4 py-4 transition hover:border-slate-300 hover:bg-white">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <label className="flex cursor-pointer items-center gap-3 rounded-[0.85rem] border-2 border-dashed border-slate-200 bg-slate-50/60 px-4 py-3.5 transition hover:border-slate-300 hover:bg-white">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400 shadow-sm">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                       <polyline points="17 8 12 3 7 8" />
                       <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
                   </span>
                   <div>
-                    <p className="text-sm font-black text-slate-700">Subir arte</p>
-                    <p className="text-xs text-slate-400">PDF, PNG, JPG — opcional, puedes enviarlo despues</p>
+                    <p className="text-sm font-bold text-slate-600">Subir arte</p>
+                    <p className="text-xs text-slate-400">Opcional — puedes enviarlo despues</p>
                   </div>
                   <input type="file" multiple className="sr-only" onChange={(e) => { setDraftFiles(Array.from(e.target.files ?? [])); e.currentTarget.value = ""; }} />
                 </label>
@@ -625,10 +767,22 @@ function CatalogProductDetail({
             </div>
 
             <div className="mt-auto pt-6">
+              <div className="flex items-baseline justify-between gap-3">
+                <div className="flex items-baseline gap-2">
+                  <p className="text-[2.2rem] font-black leading-none tracking-tight text-slate-950">
+                    ${estimatedTotal}
+                  </p>
+                  {draftQuantity > 1 && (
+                    <p className="text-sm font-semibold text-slate-400">
+                      {product.price}/und
+                    </p>
+                  )}
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => onAddToCart(draftQuantity, draftFiles)}
-                className="w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-6 py-[1.15rem] text-[0.95rem] font-black text-slate-950 shadow-[0_14px_32px_rgba(255,212,95,0.4)] transition hover:bg-[#ffcd41] hover:shadow-[0_18px_40px_rgba(255,212,95,0.5)] active:scale-[0.98]"
+                className="mt-4 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-6 py-[1.15rem] text-[0.95rem] font-black text-slate-950 shadow-[0_14px_32px_rgba(255,212,95,0.4)] transition hover:bg-[#ffcd41] hover:shadow-[0_18px_40px_rgba(255,212,95,0.5)] active:scale-[0.98]"
               >
                 Anadir al carrito
               </button>
