@@ -406,16 +406,26 @@ function CatalogArtPreview({ file }: { file: File }) {
   );
 }
 
+interface CardFields {
+  name: string;
+  title: string;
+  company: string;
+  phone: string;
+  email: string;
+}
+
 function CardMockup({
   design,
   finish,
   size = "large",
   artUrl,
+  fields,
 }: {
   design: "minimal" | "bold" | "elegant";
   finish: string;
   size?: "large" | "thumb";
   artUrl?: string | null;
+  fields?: CardFields;
 }) {
   const isLarge = size === "large";
 
@@ -448,6 +458,9 @@ function CardMockup({
 
   const cardBase = `relative ${isLarge ? "rounded-[0.55rem]" : "rounded-[0.3rem]"} ${paperTexture}`;
 
+  const f = fields || { name: "", title: "", company: "", phone: "", email: "" };
+  const hasFields = fields && (f.name || f.title || f.company || f.phone || f.email);
+
   if (design === "minimal") {
     return (
       <div className={`${cardBase} aspect-[9/5] w-full overflow-hidden bg-[#fcfcfb]`}>
@@ -455,18 +468,18 @@ function CardMockup({
           <div>
             <div className={`${isLarge ? "h-[2.5px] w-[16%]" : "h-[1.5px] w-[16%]"} bg-[#1a1a1a]`} />
             <p className={`${isLarge ? "mt-[9%] text-[0.68rem]" : "mt-[8%] text-[0.32rem]"} font-semibold uppercase tracking-[0.3em] text-[#1a1a1a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", letterSpacing: isLarge ? "0.3em" : "0.2em" }}>
-              Maria Rodriguez
+              {hasFields ? f.name || "Tu Nombre" : "Maria Rodriguez"}
             </p>
             <p className={`${isLarge ? "mt-[3%] text-[0.46rem]" : "mt-[2%] text-[0.22rem]"} font-normal tracking-[0.2em] text-[#999]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
-              Directora Creativa
+              {hasFields ? f.title || "Tu Cargo" : "Directora Creativa"}
             </p>
           </div>
           <div className="flex items-end justify-between">
-            <div className={`space-y-[1px] ${isLarge ? "" : ""}`}>
-              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>+58 412 555 0123</p>
-              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>maria@estudio.com</p>
+            <div className={`space-y-[1px]`}>
+              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>{hasFields ? f.phone || "+58 000 000 0000" : "+58 412 555 0123"}</p>
+              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#aaa]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>{hasFields ? f.email || "tu@email.com" : "maria@estudio.com"}</p>
             </div>
-            <p className={`${isLarge ? "text-[0.44rem]" : "text-[0.22rem]"} font-medium tracking-[0.25em] text-[#ddd]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>ESTUDIO</p>
+            <p className={`${isLarge ? "text-[0.44rem]" : "text-[0.22rem]"} font-medium tracking-[0.25em] text-[#ddd]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>{hasFields ? (f.company || "EMPRESA").toUpperCase() : "ESTUDIO"}</p>
           </div>
         </div>
         {finishLayer}
@@ -481,19 +494,19 @@ function CardMockup({
         <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%]" : "p-[8%]"}`}>
           <div>
             <p className={`${isLarge ? "text-[0.76rem]" : "text-[0.36rem]"} font-bold uppercase tracking-[0.24em] text-white`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
-              Carlos Mendez
+              {hasFields ? f.name || "Tu Nombre" : "Carlos Mendez"}
             </p>
             <p className={`${isLarge ? "mt-[4%] text-[0.42rem]" : "mt-[3%] text-[0.21rem]"} font-medium tracking-[0.18em] text-amber-400/80`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
-              CEO & Fundador
+              {hasFields ? f.title || "Tu Cargo" : "CEO & Fundador"}
             </p>
           </div>
           <div className="flex items-end justify-between">
             <div className="space-y-[1px]">
-              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#4a4a4a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>+58 414 888 7654</p>
-              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#4a4a4a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>carlos@nexus.io</p>
+              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#4a4a4a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>{hasFields ? f.phone || "+58 000 000 0000" : "+58 414 888 7654"}</p>
+              <p className={`${isLarge ? "text-[0.38rem]" : "text-[0.19rem]"} tracking-[0.06em] text-[#4a4a4a]`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>{hasFields ? f.email || "tu@email.com" : "carlos@nexus.io"}</p>
             </div>
             <div className={`flex ${isLarge ? "h-[1.35rem] w-[1.35rem]" : "h-[0.65rem] w-[0.65rem]"} items-center justify-center rounded-full bg-amber-500`}>
-              <span className={`${isLarge ? "text-[0.38rem]" : "text-[0.18rem]"} font-black text-[#0f0f11]`}>N</span>
+              <span className={`${isLarge ? "text-[0.38rem]" : "text-[0.18rem]"} font-black text-[#0f0f11]`}>{hasFields ? (f.company || "E")[0].toUpperCase() : "N"}</span>
             </div>
           </div>
         </div>
@@ -508,18 +521,18 @@ function CardMockup({
       <div className={`relative z-10 flex h-full flex-col justify-between ${isLarge ? "p-[9%] pl-[12%]" : "p-[8%] pl-[11%]"}`}>
         <div>
           <p className={`${isLarge ? "text-[0.46rem]" : "text-[0.23rem]"} font-light italic tracking-[0.1em] text-[#b5a594]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-            Abogados & Asociados
+            {hasFields ? f.company || "Tu Empresa" : "Abogados & Asociados"}
           </p>
           <p className={`${isLarge ? "mt-[6%] text-[0.66rem]" : "mt-[5%] text-[0.32rem]"} font-semibold text-[#3a3028]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-            Ana Lucia Fernandez
+            {hasFields ? f.name || "Tu Nombre" : "Ana Lucia Fernandez"}
           </p>
           <p className={`${isLarge ? "mt-[2%] text-[0.4rem]" : "mt-[1%] text-[0.2rem]"} tracking-[0.16em] text-[#b5a594]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-            Socia Principal
+            {hasFields ? f.title || "Tu Cargo" : "Socia Principal"}
           </p>
         </div>
         <div className="space-y-[1px]">
-          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"} text-[#c4b5a4]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Av. Libertador, Torre Capital, Piso 12</p>
-          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"} text-[#c4b5a4]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>+58 212 555 9876 · ana@fernandez.legal</p>
+          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"} text-[#c4b5a4]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{hasFields ? f.phone || "+58 000 000 0000" : "Av. Libertador, Torre Capital, Piso 12"}</p>
+          <p className={`${isLarge ? "text-[0.36rem]" : "text-[0.18rem]"} text-[#c4b5a4]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{hasFields ? f.email || "tu@email.com" : "+58 212 555 9876 · ana@fernandez.legal"}</p>
         </div>
       </div>
       {finishLayer}
@@ -547,6 +560,8 @@ function CatalogProductDetail({
   const [draftQuantity, setDraftQuantity] = useState(1);
   const [draftFiles, setDraftFiles] = useState<File[]>([]);
   const [activeDesign, setActiveDesign] = useState<"minimal" | "bold" | "elegant">("minimal");
+  const [cardFields, setCardFields] = useState<CardFields>({ name: "", title: "", company: "", phone: "", email: "" });
+  const [showEditor, setShowEditor] = useState(false);
 
   const artPreviewUrl = useMemo(() => {
     const imageFile = draftFiles.find((f) => f.type.startsWith("image/"));
@@ -614,7 +629,7 @@ function CatalogProductDetail({
                   <div className="pointer-events-none absolute -bottom-3 left-[8%] right-[8%] h-8 rounded-[50%] bg-black/20 blur-xl" />
                   <div className="pointer-events-none absolute -bottom-1 left-[12%] right-[12%] h-4 rounded-[50%] bg-black/10 blur-md" />
                   <div className="relative" style={{ filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))" }}>
-                    <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={artPreviewUrl} />
+                    <CardMockup design={activeDesign} finish={currentFinish} size="large" artUrl={artPreviewUrl} fields={showEditor ? cardFields : undefined} />
                   </div>
                 </div>
 
@@ -641,7 +656,7 @@ function CatalogProductDetail({
                           style={{ filter: activeDesign === d ? "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" : "drop-shadow(0 2px 6px rgba(0,0,0,0.1))" }}
                         >
                           <div className="w-[5rem] sm:w-[6rem]">
-                            <CardMockup design={d} finish={currentFinish} size="thumb" />
+                            <CardMockup design={d} finish={currentFinish} size="thumb" fields={showEditor ? cardFields : undefined} />
                           </div>
                         </button>
                       ))}
@@ -782,6 +797,90 @@ function CatalogProductDetail({
                     +
                   </button>
                 </div>
+              </div>
+            )}
+
+            {isCardProduct && (
+              <div className="mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowEditor(!showEditor)}
+                  className={`flex w-full cursor-pointer items-center gap-3 rounded-[0.85rem] border-2 px-4 py-3.5 transition ${
+                    showEditor
+                      ? "border-[#3558ff] bg-[#3558ff]/5"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-sm ${showEditor ? "bg-[#3558ff] text-white" : "bg-slate-100 text-slate-500"}`}>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                  </span>
+                  <div className="text-left">
+                    <p className={`text-sm font-bold ${showEditor ? "text-[#3558ff]" : "text-slate-700"}`}>Personalizar tarjeta</p>
+                    <p className="text-xs text-slate-400">Edita los campos y ve el resultado en vivo</p>
+                  </div>
+                </button>
+
+                {showEditor && (
+                  <div className="mt-3 space-y-2.5 rounded-[0.85rem] border border-slate-200 bg-slate-50/60 p-4">
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Nombre</label>
+                        <input
+                          type="text"
+                          placeholder="Maria Rodriguez"
+                          value={cardFields.name}
+                          onChange={(e) => setCardFields((prev) => ({ ...prev, name: e.target.value }))}
+                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Cargo</label>
+                        <input
+                          type="text"
+                          placeholder="Directora Creativa"
+                          value={cardFields.title}
+                          onChange={(e) => setCardFields((prev) => ({ ...prev, title: e.target.value }))}
+                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Empresa</label>
+                      <input
+                        type="text"
+                        placeholder="Mi Empresa"
+                        value={cardFields.company}
+                        onChange={(e) => setCardFields((prev) => ({ ...prev, company: e.target.value }))}
+                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Telefono</label>
+                        <input
+                          type="text"
+                          placeholder="+58 412 555 0123"
+                          value={cardFields.phone}
+                          onChange={(e) => setCardFields((prev) => ({ ...prev, phone: e.target.value }))}
+                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Email</label>
+                        <input
+                          type="text"
+                          placeholder="tu@email.com"
+                          value={cardFields.email}
+                          onChange={(e) => setCardFields((prev) => ({ ...prev, email: e.target.value }))}
+                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
