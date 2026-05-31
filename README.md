@@ -1,4 +1,4 @@
-# Control de Imprenta
+# Express Printer
 
 Base inicial para una tienda de imprenta construida con Next.js 16, Supabase y despliegue pensado para Vercel.
 

@@ -1,7 +1,7 @@
 # Codex Handoff
 
 ## Proyecto
-- Nombre local del proyecto: `control-imprenta`
+- Nombre local del proyecto: `expressprinter`
 - Ruta de trabajo: `C:\Users\joses\OneDrive\Documentos\control-imprenta`
 - Tipo de app: Next.js App Router
 - Producto: panel administrativo + storefront ecommerce para Express Printer
