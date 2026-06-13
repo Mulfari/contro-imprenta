@@ -135,14 +135,22 @@ export function StorefrontHeader({
           </p>
 
           <div className="min-w-0 flex-1 overflow-hidden rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
-            <div className="storefront-marquee flex min-w-max items-center gap-8">
-              {[...promoTickerItems, ...promoTickerItems].map((item, index) => (
+            <div className="storefront-marquee flex min-w-max items-center">
+              {[0, 1].map((copy) => (
                 <div
-                  key={`${item}-${index}`}
-                  className="flex items-center gap-8 text-xs font-semibold tracking-[0.04em] text-slate-300"
+                  key={copy}
+                  aria-hidden={copy === 1}
+                  className="flex shrink-0 items-center gap-8 pr-8"
                 >
-                  <span className="whitespace-nowrap">{item}</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#ffd45f]" />
+                  {promoTickerItems.map((item, index) => (
+                    <div
+                      key={`${item}-${index}`}
+                      className="flex items-center gap-8 text-xs font-semibold tracking-[0.04em] text-slate-300"
+                    >
+                      <span className="whitespace-nowrap">{item}</span>
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#ffd45f]" />
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
