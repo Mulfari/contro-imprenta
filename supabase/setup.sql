@@ -943,3 +943,198 @@ begin
       foreign key (user_id) references public.app_users(id) on delete cascade;
   end if;
 end $$;
+
+-- =====================================================================
+-- Catalogo administrable (storefront)
+-- Tablas product_categories y products, bucket de imagenes y semilla de
+-- los 8 productos iniciales. Idempotente: se puede re-ejecutar sin romper.
+-- =====================================================================
+
+create table if not exists public.product_categories (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug text not null,
+  sort_order integer not null default 0,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+alter table public.product_categories enable row level security;
+
+create unique index if not exists product_categories_slug_idx
+  on public.product_categories (slug);
+
+create table if not exists public.products (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null,
+  title text not null,
+  description text null,
+  category text null,
+  image_path text null,
+  image_alt text null,
+  tint text null,
+  turnaround text null,
+  highlights jsonb not null default '[]'::jsonb,
+  pricing_mode text not null default 'package' check (pricing_mode in ('package', 'unit')),
+  base_price numeric(12,2) not null default 0,
+  options jsonb not null default '[]'::jsonb,
+  is_active boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.products enable row level security;
+
+-- Columnas idempotentes (por si la tabla ya existia con otra forma).
+alter table public.products add column if not exists slug text;
+alter table public.products add column if not exists title text;
+alter table public.products add column if not exists description text null;
+alter table public.products add column if not exists category text null;
+alter table public.products add column if not exists image_path text null;
+alter table public.products add column if not exists image_alt text null;
+alter table public.products add column if not exists tint text null;
+alter table public.products add column if not exists turnaround text null;
+alter table public.products add column if not exists highlights jsonb not null default '[]'::jsonb;
+alter table public.products add column if not exists pricing_mode text not null default 'package';
+alter table public.products add column if not exists base_price numeric(12,2) not null default 0;
+alter table public.products add column if not exists options jsonb not null default '[]'::jsonb;
+alter table public.products add column if not exists is_active boolean not null default true;
+alter table public.products add column if not exists sort_order integer not null default 0;
+alter table public.products add column if not exists created_at timestamptz not null default now();
+alter table public.products add column if not exists updated_at timestamptz not null default now();
+
+create unique index if not exists products_slug_idx on public.products (slug);
+create index if not exists products_is_active_idx on public.products (is_active);
+create index if not exists products_sort_order_idx on public.products (sort_order);
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'products_pricing_mode_check'
+  ) then
+    alter table public.products
+      add constraint products_pricing_mode_check
+      check (pricing_mode in ('package', 'unit'));
+  end if;
+end $$;
+
+create or replace function public.handle_products_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists products_set_updated_at on public.products;
+
+create trigger products_set_updated_at
+before update on public.products
+for each row
+execute function public.handle_products_updated_at();
+
+-- Bucket publico para fotos de productos subidas desde el panel.
+insert into storage.buckets (id, name, public, file_size_limit)
+select 'product-images', 'product-images', true, 5242880
+where not exists (
+  select 1 from storage.buckets where id = 'product-images'
+);
+
+-- Semilla de categorias.
+insert into public.product_categories (name, slug, sort_order)
+values
+  ('Tarjetas de presentacion', 'tarjetas-de-presentacion', 1),
+  ('Stickers y etiquetas', 'stickers-y-etiquetas', 2),
+  ('Pendones y gran formato', 'pendones-y-gran-formato', 3),
+  ('Facturas y talonarios', 'facturas-y-talonarios', 4),
+  ('Invitaciones y papeleria', 'invitaciones-y-papeleria', 5)
+on conflict (slug) do nothing;
+
+-- Semilla de los 8 productos iniciales (no pisa cambios si ya existen).
+insert into public.products
+  (slug, title, description, category, image_path, image_alt, tint, turnaround, highlights, pricing_mode, base_price, options, is_active, sort_order)
+values
+  (
+    'tarjetas-premium', 'Tarjetas premium',
+    'Tarjetas de presentacion con acabado profesional para marcas, vendedores y equipos comerciales.',
+    'Tarjetas de presentacion', '/storefront-promo-cards-premium.webp', 'Tarjetas premium impresas',
+    'from-amber-100 via-white to-orange-50', '24 a 48 horas',
+    '["Papel grueso","Acabado mate o brillante","Diseno listo para imprimir"]'::jsonb,
+    'package', 18,
+    '[{"name":"Cantidad","role":"package","values":[{"label":"100 unidades","amount":18},{"label":"250 unidades","amount":32},{"label":"500 unidades","amount":55}]},{"name":"Acabado","role":"surcharge","values":[{"label":"Mate","amount":0},{"label":"Brillante","amount":0},{"label":"Soft touch","amount":8}]}]'::jsonb,
+    true, 1
+  ),
+  (
+    'stickers-troquelados', 'Stickers troquelados',
+    'Stickers con corte personalizado para empaques, promociones, frascos, bolsas y regalos.',
+    'Stickers y etiquetas', '/storefront-promo-stickers-labels-trimmed.webp', 'Stickers troquelados personalizados',
+    'from-sky-100 via-white to-cyan-50', '2 a 3 dias',
+    '["Corte a la forma","Vinil adhesivo","Ideal para packaging"]'::jsonb,
+    'package', 12,
+    '[{"name":"Material","role":"package","values":[{"label":"Papel adhesivo","amount":12},{"label":"Vinil blanco","amount":18},{"label":"Vinil transparente","amount":22}]},{"name":"Corte","role":"surcharge","values":[{"label":"Circular","amount":0},{"label":"Cuadrado","amount":0},{"label":"Troquelado","amount":6}]}]'::jsonb,
+    true, 2
+  ),
+  (
+    'pendon-publicitario', 'Pendon publicitario',
+    'Piezas de gran formato para promociones, vitrinas, ferias, eventos y puntos de venta.',
+    'Pendones y gran formato', '/storefront-promo-banners-posters-transparent.webp', 'Pendones y afiches publicitarios',
+    'from-violet-100 via-white to-fuchsia-50', '24 a 72 horas',
+    '["Alta visibilidad","Listo para evento","Formatos personalizados"]'::jsonb,
+    'package', 25,
+    '[{"name":"Tamano","role":"package","values":[{"label":"60 x 160 cm","amount":25},{"label":"90 x 190 cm","amount":38},{"label":"Personalizado","amount":55}]},{"name":"Formato","role":"surcharge","values":[{"label":"Pendon","amount":0},{"label":"Afiche","amount":0},{"label":"Roll up","amount":20}]}]'::jsonb,
+    true, 3
+  ),
+  (
+    'talonarios-fiscales', 'Talonarios fiscales',
+    'Talonarios, recibos y formatos comerciales para ventas, entregas y control administrativo.',
+    'Facturas y talonarios', '/storefront-promo-invoices-receipts-transparent.webp', 'Talonarios y recibos impresos',
+    'from-emerald-100 via-white to-lime-50', '2 a 4 dias',
+    '["Numeracion disponible","Copias autocopiativas","Formato a medida"]'::jsonb,
+    'package', 14,
+    '[{"name":"Copias","role":"package","values":[{"label":"Original","amount":14},{"label":"Original + copia","amount":22},{"label":"Triplicado","amount":30}]},{"name":"Tipo","role":"surcharge","values":[{"label":"Recibo","amount":0},{"label":"Factura","amount":0},{"label":"Nota de entrega","amount":0}]}]'::jsonb,
+    true, 4
+  ),
+  (
+    'invitaciones-save-the-date', 'Invitaciones "Save the date"',
+    'Invitaciones y papeleria social con una presentacion cuidada para eventos especiales.',
+    'Invitaciones y papeleria', '/storefront-invitations.webp', 'Invitaciones impresas para eventos',
+    'from-rose-100 via-white to-pink-50', '2 a 5 dias',
+    '["Papeles finos","Corte limpio","Acabado premium"]'::jsonb,
+    'package', 22,
+    '[{"name":"Cantidad","role":"package","values":[{"label":"25 unidades","amount":22},{"label":"50 unidades","amount":38},{"label":"100 unidades","amount":65}]},{"name":"Papel","role":"surcharge","values":[{"label":"Opalina","amount":0},{"label":"Lino","amount":6},{"label":"Texturizado","amount":10}]}]'::jsonb,
+    true, 5
+  ),
+  (
+    'etiquetas-packaging', 'Etiquetas para packaging',
+    'Etiquetas para productos, cajas, bolsas y empaques con opciones resistentes y llamativas.',
+    'Stickers y etiquetas', '/storefront-labels.webp', 'Etiquetas para packaging',
+    'from-cyan-100 via-white to-sky-50', '2 a 3 dias',
+    '["Para productos","Por pliego o rollo","Colores vivos"]'::jsonb,
+    'package', 11,
+    '[{"name":"Entrega","role":"package","values":[{"label":"Pliego","amount":11},{"label":"Corte individual","amount":18},{"label":"Rollo","amount":24}]},{"name":"Acabado","role":"surcharge","values":[{"label":"Mate","amount":0},{"label":"Brillante","amount":0},{"label":"Laminado","amount":5}]}]'::jsonb,
+    true, 6
+  ),
+  (
+    'tarjetas-corporativas', 'Tarjetas corporativas',
+    'Tarjetas para equipos comerciales con identidad consistente, buena lectura y presencia sobria.',
+    'Tarjetas de presentacion', '/storefront-cards.webp', 'Tarjetas corporativas',
+    'from-zinc-100 via-white to-slate-50', '24 a 48 horas',
+    '["Paquetes por equipo","Marca corporativa","Revision de arte"]'::jsonb,
+    'package', 20,
+    '[{"name":"Cantidad","role":"package","values":[{"label":"250 unidades","amount":20},{"label":"500 unidades","amount":34},{"label":"1000 unidades","amount":60}]},{"name":"Acabado","role":"surcharge","values":[{"label":"Mate","amount":0},{"label":"Brillante","amount":0},{"label":"Laminado","amount":8}]}]'::jsonb,
+    true, 7
+  ),
+  (
+    'pendones-roll-up', 'Pendones roll up',
+    'Pendones roll up con estructura para stands, ferias, vitrinas y presentaciones de marca.',
+    'Pendones y gran formato', '/storefront-banners.webp', 'Pendones roll up',
+    'from-yellow-100 via-white to-amber-50', '2 a 4 dias',
+    '["Estructura incluida","Transportable","Alta presencia visual"]'::jsonb,
+    'package', 39,
+    '[{"name":"Medida","role":"package","values":[{"label":"80 x 200 cm","amount":39},{"label":"85 x 200 cm","amount":45},{"label":"Personalizada","amount":60}]},{"name":"Material","role":"surcharge","values":[{"label":"Lona","amount":0},{"label":"Banner premium","amount":10},{"label":"Vinil","amount":6}]}]'::jsonb,
+    true, 8
+  )
+on conflict (slug) do nothing;

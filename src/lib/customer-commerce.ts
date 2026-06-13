@@ -3,7 +3,9 @@ import {
   createOrderNumber,
   type Order,
 } from "@/lib/business";
+import { getStorefrontProductBySlug } from "@/lib/catalog";
 import { listOrderFiles, uploadOrderFile, type OrderFile } from "@/lib/order-files";
+import { computeUnitPrice } from "@/lib/pricing";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export type StorefrontCheckoutItem = {
@@ -323,17 +325,24 @@ export async function createStorefrontCheckout(input: {
   const client = await ensureCustomerClient(input);
   const supabase = createSupabaseAdminClient();
   const orderNumber = await createOrderNumber();
-  const normalizedItems = input.items.map((item) => {
-    const quantity = Math.max(1, Number(item.quantity) || 1);
-    const unitPrice = Math.max(0, Number(item.unitPrice) || 0);
+  // El precio NO se confía al cliente: se recalcula desde el producto en BD
+  // (cae al precio recibido solo si el producto ya no existe).
+  const normalizedItems = await Promise.all(
+    input.items.map(async (item) => {
+      const quantity = Math.max(1, Number(item.quantity) || 1);
+      const product = await getStorefrontProductBySlug(item.productId);
+      const unitPrice = product
+        ? computeUnitPrice(product, item.options ?? {})
+        : Math.max(0, Number(item.unitPrice) || 0);
 
-    return {
-      ...item,
-      quantity,
-      unitPrice,
-      lineTotal: unitPrice * quantity,
-    };
-  });
+      return {
+        ...item,
+        quantity,
+        unitPrice,
+        lineTotal: unitPrice * quantity,
+      };
+    }),
+  );
   const totalQuantity = normalizedItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = normalizedItems.reduce((sum, item) => sum + item.lineTotal, 0);
   const paymentMethod = input.paymentMethod ?? "pago_movil";

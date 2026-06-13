@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 
 import { StorefrontAuthShell } from "@/app/storefront-auth-shell";
+import { listStorefrontProducts } from "@/lib/catalog";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
   title: "Mi cuenta | Express Printer",
   description: "Acceso de clientes para Express Printer.",
 };
+
+export const dynamic = "force-dynamic";
 
 type CustomerAccountPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -29,10 +32,13 @@ export default async function CustomerAccountPage({
       }
     : null;
 
+  const products = await listStorefrontProducts();
+
   return (
     <StorefrontAuthShell
       hasPublicAuth={hasSupabasePublicConfig()}
       initialMode="login"
+      products={products}
       initialNotice={initialNotice}
     />
   );

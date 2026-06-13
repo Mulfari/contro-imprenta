@@ -17,6 +17,7 @@ import {
   type DashboardNotificationItem,
 } from "@/app/dashboard/notification-center-button";
 import { InventoryPanel } from "@/app/dashboard/inventory-panel";
+import { ProductsPanel } from "@/app/dashboard/products-panel";
 import { OrdersPanel } from "@/app/dashboard/orders-panel";
 import { PaymentsPanel } from "@/app/dashboard/payments-panel";
 import { TeamUserModal } from "@/app/dashboard/team-user-modal";
@@ -48,6 +49,17 @@ import {
   reviewOrderPayment,
   type AdminPayment,
 } from "@/lib/customer-commerce";
+import {
+  type CatalogProductInput,
+  type CatalogProductRecord,
+  createCatalogProduct,
+  deleteCatalogProduct,
+  listCatalogCategories,
+  listCatalogProductsForAdmin,
+  setCatalogProductActive,
+  updateCatalogProduct,
+} from "@/lib/catalog";
+import type { ProductOptionGroup } from "@/app/storefront-data";
 import {
   deleteClientFile,
   listClientFiles,
@@ -96,6 +108,7 @@ const dashboardViews = [
   "pedidos",
   "pagos",
   "inventario",
+  "productos",
   "proveedores",
   "equipo",
 ] as const;
@@ -107,6 +120,7 @@ const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Pagos", view: "pagos" },
   { label: "Clientes", view: "clientes" },
   { label: "Inventario", view: "inventario" },
+  { label: "Productos", view: "productos" },
   { label: "Proveedores", view: "proveedores" },
   { label: "Equipo", view: "equipo" },
 ];
@@ -114,6 +128,7 @@ const sideNavItems: { label: string; view: DashboardView }[] = [
 const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "pagos", "clientes"];
 const adminSideNavViews: DashboardView[] = [
   "inventario",
+  "productos",
   "proveedores",
   "equipo",
 ];
@@ -382,6 +397,141 @@ async function deleteUserAction(formData: FormData) {
   redirect(buildTeamUrl("lista", "Usuario eliminado"));
 }
 
+function parseProductPayload(formData: FormData): CatalogProductInput {
+  const raw = String(formData.get("payload") ?? "");
+
+  if (!raw) {
+    throw new Error("Faltan los datos del producto.");
+  }
+
+  let data: Record<string, unknown>;
+
+  try {
+    data = JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    throw new Error("Los datos del producto no son validos.");
+  }
+
+  const highlights = Array.isArray(data.highlights)
+    ? (data.highlights as unknown[]).map((item) => String(item))
+    : [];
+  const options = Array.isArray(data.options)
+    ? (data.options as ProductOptionGroup[])
+    : [];
+
+  return {
+    title: String(data.title ?? ""),
+    slug: data.slug ? String(data.slug) : undefined,
+    description: String(data.description ?? ""),
+    category: String(data.category ?? ""),
+    imagePath: String(data.imagePath ?? ""),
+    imageAlt: String(data.imageAlt ?? ""),
+    tint: String(data.tint ?? ""),
+    turnaround: String(data.turnaround ?? ""),
+    highlights,
+    pricingMode: data.pricingMode === "unit" ? "unit" : "package",
+    basePrice: Number(data.basePrice) || 0,
+    options,
+    isActive: data.isActive !== false,
+    sortOrder: Number(data.sortOrder) || 0,
+  };
+}
+
+async function createProductAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  try {
+    await createCatalogProduct(parseProductPayload(formData));
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo crear el producto.";
+    redirect(buildDashboardUrl("productos", message));
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+  redirect(buildDashboardUrl("productos", "Producto creado"));
+}
+
+async function updateProductAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const productId = String(formData.get("productId") ?? "");
+
+  try {
+    await updateCatalogProduct(productId, parseProductPayload(formData));
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo actualizar el producto.";
+    redirect(buildDashboardUrl("productos", message));
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+  redirect(buildDashboardUrl("productos", "Producto actualizado"));
+}
+
+async function deleteProductAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const productId = String(formData.get("productId") ?? "");
+
+  try {
+    await deleteCatalogProduct(productId);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo eliminar el producto.";
+    redirect(buildDashboardUrl("productos", message));
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+  redirect(buildDashboardUrl("productos", "Producto eliminado"));
+}
+
+async function toggleProductActiveAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const productId = String(formData.get("productId") ?? "");
+  const isActive = String(formData.get("isActive") ?? "") === "true";
+
+  try {
+    await setCatalogProductActive(productId, isActive);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo actualizar el producto.";
+    redirect(buildDashboardUrl("productos", message));
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+  redirect(buildDashboardUrl("productos", isActive ? "Producto visible" : "Producto oculto"));
+}
+
 async function createOrderAction(formData: FormData) {
   "use server";
 
@@ -646,7 +796,7 @@ function buildTeamEditUrl(userId: string, message?: string) {
 
 function resolveView(value: string, isAdmin: boolean): DashboardView {
   if (
-    ["inventario", "proveedores", "equipo"].includes(value) &&
+    ["inventario", "productos", "proveedores", "equipo"].includes(value) &&
     !isAdmin
   ) {
     return "resumen";
@@ -809,6 +959,8 @@ function getViewLabel(view: DashboardView) {
       return "Pagos";
     case "inventario":
       return "Inventario";
+    case "productos":
+      return "Productos";
     case "proveedores":
       return "Proveedores";
     case "equipo":
@@ -899,6 +1051,8 @@ export default async function DashboardPage({
   let payments: AdminPayment[] = [];
   let activeStaffCount = 0;
   let activeSessions: Awaited<ReturnType<typeof listActivePanelSessions>> = [];
+  let catalogProducts: CatalogProductRecord[] = [];
+  let catalogCategories: string[] = [];
   let schemaMessage = "";
 
   try {
@@ -909,6 +1063,10 @@ export default async function DashboardPage({
     clients = await listClients();
     orders = await listOrders();
     payments = await listAdminPayments();
+    catalogProducts =
+      session.role === "admin" ? await listCatalogProductsForAdmin() : [];
+    catalogCategories =
+      session.role === "admin" ? await listCatalogCategories() : [];
     clientFiles = selectedClientId ? await listClientFiles(selectedClientId) : [];
     orderFiles = await listOrderFiles(orders.map((order) => order.id));
     orderHistory = await listOrderHistory(orders.map((order) => order.id));
@@ -2051,6 +2209,17 @@ export default async function DashboardPage({
 
           {activeView === "inventario" && session.role === "admin" ? (
             <InventoryPanel orders={orders} />
+          ) : null}
+
+          {activeView === "productos" && session.role === "admin" ? (
+            <ProductsPanel
+              products={catalogProducts}
+              categories={catalogCategories}
+              createAction={createProductAction}
+              updateAction={updateProductAction}
+              deleteAction={deleteProductAction}
+              toggleAction={toggleProductActiveAction}
+            />
           ) : null}
 
           {activeView === "proveedores" && session.role === "admin" ? (

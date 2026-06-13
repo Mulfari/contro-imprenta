@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { StorefrontProduct } from "../../storefront-data";
-import { parsePrice } from "../../storefront-cart";
+import { computeUnitPrice, formatPrice } from "@/lib/pricing";
 
 type CommercePanel = "wishlist" | "cart" | null;
 
@@ -44,7 +44,7 @@ export function CommerceDrawer({
   }
 
   const cartSubtotal = cartItems.reduce(
-    (sum, item) => sum + parsePrice(item.product.price) * item.quantity,
+    (sum, item) => sum + computeUnitPrice(item.product, item.options) * item.quantity,
     0,
   );
 
@@ -141,7 +141,7 @@ export function CommerceDrawer({
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <h3 className="font-semibold leading-tight text-slate-950">{item.product.title}</h3>
-                          <p className="mt-1 text-sm font-semibold text-[#3558ff]">{item.product.price}</p>
+                          <p className="mt-1 text-sm font-semibold text-[#3558ff]">{formatPrice(computeUnitPrice(item.product, item.options))}</p>
                         </div>
                         <button
                           type="button"
@@ -201,7 +201,7 @@ export function CommerceDrawer({
             ) : null}
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-slate-500">Subtotal estimado</span>
-              <span className="text-2xl font-black text-slate-950">${cartSubtotal}</span>
+              <span className="text-2xl font-black text-slate-950">{formatPrice(cartSubtotal)}</span>
             </div>
             <button
               type="button"

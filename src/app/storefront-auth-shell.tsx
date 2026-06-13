@@ -8,14 +8,14 @@ import { CustomerAccountClient } from "@/app/mi-cuenta/account-client";
 import {
   cartStorageKey,
   catalogQueryStorageKey,
-  parsePrice,
   restoreStoredCart,
   restoreStoredWishlist,
   serializeCartItems,
   wishlistStorageKey,
   type CartItem,
 } from "@/app/storefront-cart";
-import { storefrontProducts, type StorefrontProduct } from "@/app/storefront-data";
+import { type StorefrontProduct } from "@/app/storefront-data";
+import { computeUnitPrice } from "@/lib/pricing";
 import { StorefrontFooter } from "@/app/storefront-footer";
 import { StorefrontHeader } from "@/app/storefront-header";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -23,6 +23,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 type StorefrontAuthShellProps = {
   hasPublicAuth: boolean;
   initialMode: "login" | "register";
+  products: StorefrontProduct[];
   initialNotice?: {
     message: string;
     tone: "error" | "success";
@@ -76,7 +77,7 @@ function AuthCommerceDrawer({
   }
 
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + parsePrice(item.product.price) * item.quantity,
+    (sum, item) => sum + computeUnitPrice(item.product, item.options) * item.quantity,
     0,
   );
 
@@ -165,7 +166,7 @@ function AuthCommerceDrawer({
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="truncate font-semibold text-slate-950">{item.product.title}</p>
-                          <p className="mt-1 text-sm font-semibold text-[#3558ff]">{item.product.price}</p>
+                          <p className="mt-1 text-sm font-semibold text-[#3558ff]">{formatCurrency(computeUnitPrice(item.product, item.options))}</p>
                         </div>
                         <button
                           type="button"
@@ -236,6 +237,7 @@ function AuthCommerceDrawer({
 export function StorefrontAuthShell({
   hasPublicAuth,
   initialMode,
+  products,
   initialNotice = null,
 }: StorefrontAuthShellProps) {
   const router = useRouter();
@@ -250,8 +252,8 @@ export function StorefrontAuthShell({
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      setWishlistIds(restoreStoredWishlist(window.localStorage.getItem(wishlistStorageKey)));
-      setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey)));
+      setWishlistIds(restoreStoredWishlist(window.localStorage.getItem(wishlistStorageKey), products));
+      setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey), products));
       setStorageReady(true);
     }, 0);
 
@@ -384,8 +386,8 @@ export function StorefrontAuthShell({
   }, [accountOpen]);
 
   const wishlistProducts = useMemo(
-    () => storefrontProducts.filter((product) => wishlistIds.has(product.id)),
-    [wishlistIds],
+    () => products.filter((product) => wishlistIds.has(product.id)),
+    [wishlistIds, products],
   );
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 

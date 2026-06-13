@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/lib/auth/session";
+import { listStorefrontProducts } from "@/lib/catalog";
 import { StorefrontShell } from "@/app/storefront-shell";
 
 export default async function Home() {
@@ -10,5 +11,7 @@ export default async function Home() {
     redirect("/dashboard");
   }
 
-  return <StorefrontShell />;
+  const products = await listStorefrontProducts();
+
+  return <StorefrontShell products={products} />;
 }

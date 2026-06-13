@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { StorefrontAuthShell } from "@/app/storefront-auth-shell";
+import { listStorefrontProducts } from "@/lib/catalog";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -8,11 +9,16 @@ export const metadata: Metadata = {
   description: "Registro de clientes para Express Printer.",
 };
 
-export default function CustomerRegisterPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CustomerRegisterPage() {
+  const products = await listStorefrontProducts();
+
   return (
     <StorefrontAuthShell
       hasPublicAuth={hasSupabasePublicConfig()}
       initialMode="register"
+      products={products}
     />
   );
 }

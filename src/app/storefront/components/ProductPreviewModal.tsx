@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { StorefrontProduct } from "../../storefront-data";
+import { computeUnitPrice, formatPrice } from "@/lib/pricing";
 
 interface ProductPreviewModalProps {
   product: StorefrontProduct;
@@ -78,17 +79,24 @@ export function ProductPreviewModal({
                   <p className="text-sm font-semibold text-slate-950">{group.name}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {group.values.map((value) => {
-                      const selected = selectedOptions[group.name] === value;
+                      const selected = selectedOptions[group.name] === value.label;
+                      const hint =
+                        group.role === "package"
+                          ? ` · $${value.amount}`
+                          : value.amount > 0
+                            ? ` +$${value.amount}`
+                            : "";
                       return (
                         <button
-                          key={value}
+                          key={value.label}
                           type="button"
-                          onClick={() => onOptionChange(group.name, value)}
+                          onClick={() => onOptionChange(group.name, value.label)}
                           className={`cursor-pointer rounded-xl border px-3.5 py-2 text-sm font-semibold transition ${
                             selected ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                         >
-                          {value}
+                          {value.label}
+                          {hint ? <span className={selected ? "text-white/70" : "text-slate-400"}>{hint}</span> : null}
                         </button>
                       );
                     })}
@@ -100,8 +108,8 @@ export function ProductPreviewModal({
             <div className="mt-7 rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Precio base</p>
-                  <p className="text-3xl font-black text-slate-950">{product.price}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Precio</p>
+                  <p className="text-3xl font-black text-slate-950">{formatPrice(computeUnitPrice(product, selectedOptions))}</p>
                 </div>
                 <p className="text-right text-sm font-medium text-slate-500">
                   Entrega estimada<br />

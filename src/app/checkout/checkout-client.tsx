@@ -12,15 +12,17 @@ import {
   clearCartArtFiles,
   deleteCartArtFiles,
   loadCartArtFiles,
-  parsePrice,
   restoreStoredCart,
   serializeCartItems,
   type CartItem,
 } from "@/app/storefront-cart";
+import { type StorefrontProduct } from "@/app/storefront-data";
+import { computeUnitPrice } from "@/lib/pricing";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 type CheckoutClientProps = {
   hasPublicAuth: boolean;
+  products: StorefrontProduct[];
 };
 
 type CheckoutPrep = {
@@ -65,7 +67,7 @@ function formatCurrency(value: number) {
 }
 
 function getItemTotal(item: CartItem) {
-  return parsePrice(item.product.price) * item.quantity;
+  return computeUnitPrice(item.product, item.options) * item.quantity;
 }
 
 function getPrep(prepByKey: Record<string, CheckoutPrep>, key: string) {
@@ -652,7 +654,7 @@ function ActiveProductPreparation({
   );
 }
 
-export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
+export function CheckoutClient({ hasPublicAuth, products }: CheckoutClientProps) {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [storageReady, setStorageReady] = useState(false);
@@ -683,7 +685,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey)));
+      setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey), products));
       setStorageReady(true);
     }, 0);
 
@@ -1063,7 +1065,7 @@ export function CheckoutClient({ hasPublicAuth }: CheckoutClientProps) {
           title: item.product.title,
           productType: item.product.category,
           quantity: item.quantity,
-          unitPrice: parsePrice(item.product.price),
+          unitPrice: computeUnitPrice(item.product, item.options),
           options: item.options,
         })),
       ),

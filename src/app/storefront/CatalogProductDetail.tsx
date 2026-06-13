@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { StorefrontProduct } from "../storefront-data";
-import { parsePrice } from "../storefront-cart";
+import { computeUnitPrice, formatPrice } from "@/lib/pricing";
 import { CardMockup } from "./card-editor/CardMockup";
 import { COLOR_SCHEMES, DESIGN_LABELS } from "./card-editor/colorSchemes";
 import type { CardDesign, CardFields } from "./card-editor/types";
@@ -66,13 +66,13 @@ export function CatalogProductDetail({
   }, [backPreviewUrl]);
 
   const hasFiles = draftFiles.length > 0;
-  const unitPrice = parsePrice(product.price);
+  const unitPrice = computeUnitPrice(product, selectedOptions);
   const estimatedTotal = unitPrice * draftQuantity;
   const currentFinish = selectedOptions["Acabado"] ?? "";
   const isCardProduct = product.id === "tarjetas-premium" || product.id === "tarjetas-corporativas";
 
-  const quantityOption = product.options.find((g) => g.name === "Cantidad");
-  const otherOptions = product.options.filter((g) => g.name !== "Cantidad");
+  const packageGroup = product.options.find((g) => g.role === "package");
+  const otherOptions = product.options.filter((g) => g !== packageGroup);
 
   return (
     <article className="mt-5">
@@ -320,19 +320,21 @@ export function CatalogProductDetail({
                     <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">{group.name}</p>
                     <div className="mt-2.5 flex flex-wrap gap-2">
                       {group.values.map((value) => {
-                        const selected = selectedOptions[group.name] === value;
+                        const selected = selectedOptions[group.name] === value.label;
+                        const hint = value.amount > 0 ? ` +$${value.amount}` : "";
                         return (
                           <button
-                            key={value}
+                            key={value.label}
                             type="button"
-                            onClick={() => onOptionChange(group.name, value)}
+                            onClick={() => onOptionChange(group.name, value.label)}
                             className={`cursor-pointer rounded-[0.85rem] border-2 px-4 py-2.5 text-sm font-semibold transition ${
                               selected
                                 ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff] shadow-[0_0_0_1px_rgba(53,88,255,0.15)]"
                                 : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
                             }`}
                           >
-                            {value}
+                            {value.label}
+                            {hint ? <span className={selected ? "text-[#3558ff]/70" : "text-slate-400"}>{hint}</span> : null}
                           </button>
                         );
                       })}
@@ -345,29 +347,25 @@ export function CatalogProductDetail({
               })}
             </div>
 
-            {quantityOption ? (
+            {packageGroup ? (
               <div className="mt-6">
-                <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">Cantidad</p>
+                <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">{packageGroup.name}</p>
                 <div className="mt-2.5 grid grid-cols-3 gap-2">
-                  {quantityOption.values.map((value) => {
-                    const selected = selectedOptions["Cantidad"] === value;
-                    const num = parseInt(value) || 0;
+                  {packageGroup.values.map((value) => {
+                    const selected = selectedOptions[packageGroup.name] === value.label;
                     return (
                       <button
-                        key={value}
+                        key={value.label}
                         type="button"
-                        onClick={() => {
-                          onOptionChange("Cantidad", value);
-                          if (num > 0) setDraftQuantity(num);
-                        }}
+                        onClick={() => onOptionChange(packageGroup.name, value.label)}
                         className={`cursor-pointer rounded-[0.85rem] border-2 px-3 py-3 text-center transition ${
                           selected
                             ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff] shadow-[0_0_0_1px_rgba(53,88,255,0.15)]"
                             : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                         }`}
                       >
-                        <span className="block text-lg font-black">{num || value}</span>
-                        {num > 0 && <span className="block text-[0.7rem] font-medium text-slate-400">unidades</span>}
+                        <span className="block text-sm font-black leading-tight">{value.label}</span>
+                        <span className="block text-[0.78rem] font-bold text-slate-500">${value.amount}</span>
                       </button>
                     );
                   })}
@@ -780,8 +778,8 @@ export function CatalogProductDetail({
 
               <div className="flex items-baseline justify-between gap-3">
                 <div className="flex items-baseline gap-2">
-                  <p className="text-[2.2rem] font-black leading-none tracking-tight text-slate-950">${estimatedTotal}</p>
-                  {draftQuantity > 1 && <p className="text-sm font-semibold text-slate-400">{product.price}/und</p>}
+                  <p className="text-[2.2rem] font-black leading-none tracking-tight text-slate-950">{formatPrice(estimatedTotal)}</p>
+                  {draftQuantity > 1 && <p className="text-sm font-semibold text-slate-400">{formatPrice(unitPrice)} c/u</p>}
                 </div>
               </div>
               <button

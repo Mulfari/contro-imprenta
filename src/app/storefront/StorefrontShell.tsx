@@ -20,7 +20,7 @@ import {
   type CartItem,
   type StoredCartItem,
 } from "@/app/storefront-cart";
-import { storefrontProducts, type StorefrontProduct } from "@/app/storefront-data";
+import { type StorefrontProduct } from "@/app/storefront-data";
 import { StorefrontBusinessSection } from "@/app/storefront-business-section";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
 import { StorefrontDealsSection } from "@/app/storefront-deals-section";
@@ -69,7 +69,7 @@ const categoryGroups = [
   { title: "Acabados y usos", items: ["Premium", "Corporativas", "Autocopiativos", "Personalizados"] },
 ];
 
-export function StorefrontShell() {
+export function StorefrontShell({ products }: { products: StorefrontProduct[] }) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -162,8 +162,8 @@ export function StorefrontShell() {
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      setWishlistIds(restoreStoredWishlist(window.localStorage.getItem(wishlistStorageKey)));
-      setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey)));
+      setWishlistIds(restoreStoredWishlist(window.localStorage.getItem(wishlistStorageKey), products));
+      setCartItems(restoreStoredCart(window.localStorage.getItem(cartStorageKey), products));
       setStorageReady(true);
     }, 0);
 
@@ -223,17 +223,17 @@ export function StorefrontShell() {
     }
     const normalized = debouncedQuery.toLowerCase();
     if (!normalized) {
-      return storefrontProducts;
+      return products;
     }
-    return storefrontProducts.filter((item) =>
-      [item.title, item.note, item.category, item.description, item.highlights.join(" "), item.options.map((g) => g.values.join(" ")).join(" ")]
+    return products.filter((item) =>
+      [item.title, item.note, item.category, item.description, item.highlights.join(" "), item.options.map((g) => g.values.map((v) => v.label).join(" ")).join(" ")]
         .join(" ")
         .toLowerCase()
         .includes(normalized),
     );
-  }, [debouncedQuery, isCatalogVisible]);
+  }, [debouncedQuery, isCatalogVisible, products]);
 
-  const wishlistProducts = useMemo(() => storefrontProducts.filter((product) => wishlistIds.has(product.id)), [wishlistIds]);
+  const wishlistProducts = useMemo(() => products.filter((product) => wishlistIds.has(product.id)), [wishlistIds, products]);
 
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
   const publicAuthEnabled = hasSupabasePublicConfig();
@@ -332,7 +332,7 @@ export function StorefrontShell() {
   };
 
   const openPreviewById = (productId: string) => {
-    const product = getProductById(productId);
+    const product = getProductById(products, productId);
     if (!product) {
       showToast("No se encontro ese producto.", "error");
       return;
@@ -387,7 +387,7 @@ export function StorefrontShell() {
   };
 
   const addProductById = (productId: string) => {
-    const product = getProductById(productId);
+    const product = getProductById(products, productId);
     if (!product) {
       showToast("No se encontro ese producto.", "error");
       return;

@@ -1,6 +1,30 @@
+// Tipos del catálogo del storefront.
+//
+// El catálogo real vive en la base de datos (tablas `product_categories` y
+// `products`) y se gestiona desde el panel admin. `fallbackProducts` es la
+// semilla/red de seguridad: si la BD aún no tiene productos (o falla la
+// lectura), el storefront sigue funcionando con estos 8 productos. La semilla
+// SQL en `supabase/setup.sql` crea exactamente estos mismos productos.
+
+export type ProductOptionValue = {
+  label: string;
+  // En grupos `package` es el precio total del paquete; en `surcharge` es el
+  // monto que se suma al precio.
+  amount: number;
+};
+
+export type ProductOptionRole = "package" | "surcharge";
+
+export type ProductOptionGroup = {
+  name: string;
+  role: ProductOptionRole;
+  values: ProductOptionValue[];
+};
+
 export type StorefrontProduct = {
   id: string;
   title: string;
+  // Texto "Desde $X" que se muestra en tarjetas; derivado del precio mínimo.
   price: string;
   note: string;
   category: string;
@@ -10,10 +34,11 @@ export type StorefrontProduct = {
   description: string;
   turnaround: string;
   highlights: string[];
-  options: {
-    name: string;
-    values: string[];
-  }[];
+  // 'package': un grupo de opciones (role 'package') fija el precio.
+  // 'unit': el precio = basePrice por unidad.
+  pricingMode: "package" | "unit";
+  basePrice: number;
+  options: ProductOptionGroup[];
 };
 
 export const storefrontCategories = [
@@ -24,7 +49,7 @@ export const storefrontCategories = [
   "Invitaciones y papeleria",
 ];
 
-export const storefrontProducts: StorefrontProduct[] = [
+export const fallbackProducts: StorefrontProduct[] = [
   {
     id: "tarjetas-premium",
     title: "Tarjetas premium",
@@ -37,9 +62,27 @@ export const storefrontProducts: StorefrontProduct[] = [
     description: "Tarjetas de presentacion con acabado profesional para marcas, vendedores y equipos comerciales.",
     turnaround: "24 a 48 horas",
     highlights: ["Papel grueso", "Acabado mate o brillante", "Diseno listo para imprimir"],
+    pricingMode: "package",
+    basePrice: 18,
     options: [
-      { name: "Cantidad", values: ["100 unidades", "250 unidades", "500 unidades"] },
-      { name: "Acabado", values: ["Mate", "Brillante", "Soft touch"] },
+      {
+        name: "Cantidad",
+        role: "package",
+        values: [
+          { label: "100 unidades", amount: 18 },
+          { label: "250 unidades", amount: 32 },
+          { label: "500 unidades", amount: 55 },
+        ],
+      },
+      {
+        name: "Acabado",
+        role: "surcharge",
+        values: [
+          { label: "Mate", amount: 0 },
+          { label: "Brillante", amount: 0 },
+          { label: "Soft touch", amount: 8 },
+        ],
+      },
     ],
   },
   {
@@ -54,9 +97,27 @@ export const storefrontProducts: StorefrontProduct[] = [
     description: "Stickers con corte personalizado para empaques, promociones, frascos, bolsas y regalos.",
     turnaround: "2 a 3 dias",
     highlights: ["Corte a la forma", "Vinil adhesivo", "Ideal para packaging"],
+    pricingMode: "package",
+    basePrice: 12,
     options: [
-      { name: "Material", values: ["Papel adhesivo", "Vinil blanco", "Vinil transparente"] },
-      { name: "Corte", values: ["Circular", "Cuadrado", "Troquelado"] },
+      {
+        name: "Material",
+        role: "package",
+        values: [
+          { label: "Papel adhesivo", amount: 12 },
+          { label: "Vinil blanco", amount: 18 },
+          { label: "Vinil transparente", amount: 22 },
+        ],
+      },
+      {
+        name: "Corte",
+        role: "surcharge",
+        values: [
+          { label: "Circular", amount: 0 },
+          { label: "Cuadrado", amount: 0 },
+          { label: "Troquelado", amount: 6 },
+        ],
+      },
     ],
   },
   {
@@ -71,9 +132,27 @@ export const storefrontProducts: StorefrontProduct[] = [
     description: "Piezas de gran formato para promociones, vitrinas, ferias, eventos y puntos de venta.",
     turnaround: "24 a 72 horas",
     highlights: ["Alta visibilidad", "Listo para evento", "Formatos personalizados"],
+    pricingMode: "package",
+    basePrice: 25,
     options: [
-      { name: "Formato", values: ["Pendon", "Afiche", "Roll up"] },
-      { name: "Tamano", values: ["60 x 160 cm", "90 x 190 cm", "Personalizado"] },
+      {
+        name: "Tamano",
+        role: "package",
+        values: [
+          { label: "60 x 160 cm", amount: 25 },
+          { label: "90 x 190 cm", amount: 38 },
+          { label: "Personalizado", amount: 55 },
+        ],
+      },
+      {
+        name: "Formato",
+        role: "surcharge",
+        values: [
+          { label: "Pendon", amount: 0 },
+          { label: "Afiche", amount: 0 },
+          { label: "Roll up", amount: 20 },
+        ],
+      },
     ],
   },
   {
@@ -88,9 +167,27 @@ export const storefrontProducts: StorefrontProduct[] = [
     description: "Talonarios, recibos y formatos comerciales para ventas, entregas y control administrativo.",
     turnaround: "2 a 4 dias",
     highlights: ["Numeracion disponible", "Copias autocopiativas", "Formato a medida"],
+    pricingMode: "package",
+    basePrice: 14,
     options: [
-      { name: "Tipo", values: ["Recibo", "Factura", "Nota de entrega"] },
-      { name: "Copias", values: ["Original", "Original + copia", "Triplicado"] },
+      {
+        name: "Copias",
+        role: "package",
+        values: [
+          { label: "Original", amount: 14 },
+          { label: "Original + copia", amount: 22 },
+          { label: "Triplicado", amount: 30 },
+        ],
+      },
+      {
+        name: "Tipo",
+        role: "surcharge",
+        values: [
+          { label: "Recibo", amount: 0 },
+          { label: "Factura", amount: 0 },
+          { label: "Nota de entrega", amount: 0 },
+        ],
+      },
     ],
   },
   {
@@ -105,9 +202,27 @@ export const storefrontProducts: StorefrontProduct[] = [
     description: "Invitaciones y papeleria social con una presentacion cuidada para eventos especiales.",
     turnaround: "2 a 5 dias",
     highlights: ["Papeles finos", "Corte limpio", "Acabado premium"],
+    pricingMode: "package",
+    basePrice: 22,
     options: [
-      { name: "Papel", values: ["Opalina", "Lino", "Texturizado"] },
-      { name: "Cantidad", values: ["25 unidades", "50 unidades", "100 unidades"] },
+      {
+        name: "Cantidad",
+        role: "package",
+        values: [
+          { label: "25 unidades", amount: 22 },
+          { label: "50 unidades", amount: 38 },
+          { label: "100 unidades", amount: 65 },
+        ],
+      },
+      {
+        name: "Papel",
+        role: "surcharge",
+        values: [
+          { label: "Opalina", amount: 0 },
+          { label: "Lino", amount: 6 },
+          { label: "Texturizado", amount: 10 },
+        ],
+      },
     ],
   },
   {
@@ -122,9 +237,27 @@ export const storefrontProducts: StorefrontProduct[] = [
     description: "Etiquetas para productos, cajas, bolsas y empaques con opciones resistentes y llamativas.",
     turnaround: "2 a 3 dias",
     highlights: ["Para productos", "Por pliego o rollo", "Colores vivos"],
+    pricingMode: "package",
+    basePrice: 11,
     options: [
-      { name: "Entrega", values: ["Pliego", "Corte individual", "Rollo"] },
-      { name: "Acabado", values: ["Mate", "Brillante", "Laminado"] },
+      {
+        name: "Entrega",
+        role: "package",
+        values: [
+          { label: "Pliego", amount: 11 },
+          { label: "Corte individual", amount: 18 },
+          { label: "Rollo", amount: 24 },
+        ],
+      },
+      {
+        name: "Acabado",
+        role: "surcharge",
+        values: [
+          { label: "Mate", amount: 0 },
+          { label: "Brillante", amount: 0 },
+          { label: "Laminado", amount: 5 },
+        ],
+      },
     ],
   },
   {
@@ -139,9 +272,27 @@ export const storefrontProducts: StorefrontProduct[] = [
     description: "Tarjetas para equipos comerciales con identidad consistente, buena lectura y presencia sobria.",
     turnaround: "24 a 48 horas",
     highlights: ["Paquetes por equipo", "Marca corporativa", "Revision de arte"],
+    pricingMode: "package",
+    basePrice: 20,
     options: [
-      { name: "Cantidad", values: ["250 unidades", "500 unidades", "1000 unidades"] },
-      { name: "Acabado", values: ["Mate", "Brillante", "Laminado"] },
+      {
+        name: "Cantidad",
+        role: "package",
+        values: [
+          { label: "250 unidades", amount: 20 },
+          { label: "500 unidades", amount: 34 },
+          { label: "1000 unidades", amount: 60 },
+        ],
+      },
+      {
+        name: "Acabado",
+        role: "surcharge",
+        values: [
+          { label: "Mate", amount: 0 },
+          { label: "Brillante", amount: 0 },
+          { label: "Laminado", amount: 8 },
+        ],
+      },
     ],
   },
   {
@@ -156,9 +307,31 @@ export const storefrontProducts: StorefrontProduct[] = [
     description: "Pendones roll up con estructura para stands, ferias, vitrinas y presentaciones de marca.",
     turnaround: "2 a 4 dias",
     highlights: ["Estructura incluida", "Transportable", "Alta presencia visual"],
+    pricingMode: "package",
+    basePrice: 39,
     options: [
-      { name: "Medida", values: ["80 x 200 cm", "85 x 200 cm", "Personalizada"] },
-      { name: "Material", values: ["Lona", "Banner premium", "Vinil"] },
+      {
+        name: "Medida",
+        role: "package",
+        values: [
+          { label: "80 x 200 cm", amount: 39 },
+          { label: "85 x 200 cm", amount: 45 },
+          { label: "Personalizada", amount: 60 },
+        ],
+      },
+      {
+        name: "Material",
+        role: "surcharge",
+        values: [
+          { label: "Lona", amount: 0 },
+          { label: "Banner premium", amount: 10 },
+          { label: "Vinil", amount: 6 },
+        ],
+      },
     ],
   },
 ];
+
+// Alias de compatibilidad. El storefront debe preferir los productos cargados
+// desde la BD (vía props); este export es solo la red de seguridad.
+export const storefrontProducts = fallbackProducts;

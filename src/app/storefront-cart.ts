@@ -1,4 +1,4 @@
-import { storefrontProducts, type StorefrontProduct } from "@/app/storefront-data";
+import { type StorefrontProduct } from "@/app/storefront-data";
 
 export type CartItem = {
   key: string;
@@ -21,7 +21,7 @@ export const catalogQueryStorageKey = "express-printer-catalog-query";
 
 export function getDefaultOptions(product: StorefrontProduct) {
   return Object.fromEntries(
-    product.options.map((group) => [group.name, group.values[0] ?? ""]),
+    product.options.map((group) => [group.name, group.values[0]?.label ?? ""]),
   );
 }
 
@@ -36,11 +36,11 @@ export function parsePrice(price: string) {
   return Number(price.replace(/[^\d.]/g, "")) || 0;
 }
 
-export function getProductById(productId: string) {
-  return storefrontProducts.find((product) => product.id === productId) ?? null;
+export function getProductById(products: StorefrontProduct[], productId: string) {
+  return products.find((product) => product.id === productId) ?? null;
 }
 
-export function restoreStoredCart(value: string | null) {
+export function restoreStoredCart(value: string | null, products: StorefrontProduct[]) {
   if (!value) {
     return [] as CartItem[];
   }
@@ -53,7 +53,7 @@ export function restoreStoredCart(value: string | null) {
     }
 
     return parsed.flatMap((item) => {
-      const product = getProductById(item.productId);
+      const product = getProductById(products, item.productId);
 
       if (!product) {
         return [];
@@ -78,7 +78,7 @@ export function restoreStoredCart(value: string | null) {
   }
 }
 
-export function restoreStoredWishlist(value: string | null) {
+export function restoreStoredWishlist(value: string | null, products: StorefrontProduct[]) {
   if (!value) {
     return new Set<string>();
   }
@@ -90,7 +90,7 @@ export function restoreStoredWishlist(value: string | null) {
       return new Set<string>();
     }
 
-    const validIds = new Set(storefrontProducts.map((product) => product.id));
+    const validIds = new Set(products.map((product) => product.id));
     return new Set(parsed.filter((productId) => validIds.has(productId)));
   } catch {
     return new Set<string>();
