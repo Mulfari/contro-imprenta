@@ -300,7 +300,7 @@ export function StorefrontHeader({
                 type="button"
                 aria-label="Carrito"
                 onClick={onCartClick}
-                className="relative inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-slate-950 text-white transition hover:bg-slate-800"
+                className="relative inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-[#ffd45f] text-slate-950 transition hover:bg-[#ffcd41]"
               >
                 <svg
                   aria-hidden="true"
@@ -317,7 +317,7 @@ export function StorefrontHeader({
                   <path d="M3 4h2l2.3 10.2a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 7H7.2" />
                 </svg>
                 {cartCount > 0 ? (
-                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ffd45f] px-1 text-[0.68rem] font-bold text-slate-950">
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-950 px-1 text-[0.68rem] font-bold text-[#ffd45f]">
                     {cartCount}
                   </span>
                 ) : null}
@@ -550,52 +550,57 @@ export function StorefrontHeader({
               </div>
             </div>
 
-              <div className="hidden flex-wrap items-center gap-3 lg:flex">
+              <div className="hidden items-center gap-2 lg:flex">
               <button
                 type="button"
                 onClick={onAccountClick}
                 data-account-trigger="true"
-                className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                className={`group inline-flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold transition ${
                   isAccountActive
-                    ? "border-slate-950 bg-slate-950 text-white"
-                    : accountActivity?.needsAttention
-                      ? "border-amber-300 bg-amber-50 text-slate-950 shadow-[0_0_0_4px_rgba(253,224,71,0.14)]"
-                      : hasAccountActivity
-                        ? "border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-300 hover:bg-blue-100"
-                    : "border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                    ? "bg-slate-100 text-slate-950"
+                    : "text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <span
+                  className={`relative inline-flex h-8 w-8 items-center justify-center rounded-full transition ${
+                    accountActivity?.needsAttention
+                      ? "bg-amber-100 text-amber-900"
+                      : hasAccountActivity
+                        ? "bg-blue-50 text-blue-700"
+                        : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
+                  }`}
                 >
-                  <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
-                  <path d="M5 20a7 7 0 0 1 14 0" />
-                </svg>
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+                    <path d="M5 20a7 7 0 0 1 14 0" />
+                  </svg>
+                  {hasAccountActivity ? (
+                    <span className={`absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[0.62rem] font-black ${accountIndicatorClass} ${accountActivity?.needsAttention ? "animate-pulse" : ""}`}>
+                      {accountActivity?.activeCount}
+                    </span>
+                  ) : null}
+                </span>
                 Mi cuenta
-                {hasAccountActivity ? (
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-black ${accountIndicatorClass} ${accountActivity?.needsAttention ? "animate-pulse" : ""}`}>
-                    {accountActivity?.needsAttention
-                      ? "Revisar"
-                      : `${accountActivity?.activeCount} en proceso`}
-                  </span>
-                ) : null}
               </button>
               <button
                 type="button"
                 onClick={onWishlistClick}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                aria-label="Deseados"
+                className="relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-50"
               >
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 24 24"
-                  className="h-4 w-4"
+                  className="h-5 w-5"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.8"
@@ -604,9 +609,8 @@ export function StorefrontHeader({
                 >
                   <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
                 </svg>
-                Deseados
                 {wishlistCount > 0 ? (
-                  <span className="rounded-full bg-[#ff5b4d] px-2 py-0.5 text-xs font-bold text-white">
+                  <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ff5b4d] px-1 text-[0.66rem] font-bold text-white">
                     {wishlistCount}
                   </span>
                 ) : null}
@@ -614,7 +618,7 @@ export function StorefrontHeader({
               <button
                 type="button"
                 onClick={onCartClick}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="ml-1 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#ffd45f] px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-[#ffcd41]"
               >
                 <svg
                   aria-hidden="true"
@@ -632,7 +636,7 @@ export function StorefrontHeader({
                 </svg>
                 Carrito
                 {cartCount > 0 ? (
-                  <span className="rounded-full bg-[#ffd45f] px-2 py-0.5 text-xs font-bold text-slate-950">
+                  <span className="rounded-full bg-slate-950 px-2 py-0.5 text-xs font-bold text-[#ffd45f]">
                     {cartCount}
                   </span>
                 ) : null}
