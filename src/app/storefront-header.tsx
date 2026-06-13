@@ -1,7 +1,13 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 const promoTickerItems = [
   "Horario: lunes a sabado",
@@ -9,6 +15,80 @@ const promoTickerItems = [
   "Cotizaciones por WhatsApp",
   "Impresion comercial y publicitaria",
 ];
+
+// Ticker superior con loop continuo y sin huecos: mide el ancho real de la
+// barra y repite el contenido las veces necesarias para llenarla en cualquier
+// pantalla, desplazando exactamente el ancho de una copia (loop perfecto).
+function PromoTicker({ items }: { items: string[] }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const setRef = useRef<HTMLDivElement | null>(null);
+  const [copies, setCopies] = useState(2);
+  const [setWidth, setSetWidth] = useState(0);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const set = setRef.current;
+
+    if (!container || !set) {
+      return;
+    }
+
+    const measure = () => {
+      const containerWidth = container.offsetWidth;
+      const singleWidth = set.scrollWidth;
+
+      if (singleWidth <= 0) {
+        return;
+      }
+
+      setSetWidth(singleWidth);
+      // Suficientes copias para cubrir la barra + margen, minimo 2 para el loop.
+      setCopies(Math.max(2, Math.ceil(containerWidth / singleWidth) + 2));
+    };
+
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    observer.observe(set);
+
+    return () => observer.disconnect();
+  }, [items]);
+
+  const pixelsPerSecond = 22;
+  const style = {
+    "--marquee-shift": setWidth > 0 ? `${setWidth}px` : "50%",
+    "--marquee-duration": `${setWidth > 0 ? Math.max(12, setWidth / pixelsPerSecond) : 34}s`,
+  } as CSSProperties;
+
+  return (
+    <div
+      ref={containerRef}
+      className="min-w-0 flex-1 overflow-hidden rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]"
+    >
+      <div className="storefront-marquee flex w-max items-center" style={style}>
+        {Array.from({ length: copies }).map((_, copyIndex) => (
+          <div
+            key={copyIndex}
+            ref={copyIndex === 0 ? setRef : undefined}
+            aria-hidden={copyIndex > 0}
+            className="flex shrink-0 items-center gap-8 pr-8"
+          >
+            {items.map((item, index) => (
+              <div
+                key={`${item}-${index}`}
+                className="flex items-center gap-8 text-xs font-semibold tracking-[0.04em] text-slate-300"
+              >
+                <span className="whitespace-nowrap">{item}</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ffd45f]" />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 const categoryMenu = [
   {
     title: "Papeleria comercial",
@@ -134,27 +214,7 @@ export function StorefrontHeader({
             Bienvenido a Express Printer
           </p>
 
-          <div className="min-w-0 flex-1 overflow-hidden rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
-            <div className="storefront-marquee flex min-w-max items-center">
-              {[0, 1].map((copy) => (
-                <div
-                  key={copy}
-                  aria-hidden={copy === 1}
-                  className="flex shrink-0 items-center gap-8 pr-8"
-                >
-                  {promoTickerItems.map((item, index) => (
-                    <div
-                      key={`${item}-${index}`}
-                      className="flex items-center gap-8 text-xs font-semibold tracking-[0.04em] text-slate-300"
-                    >
-                      <span className="whitespace-nowrap">{item}</span>
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#ffd45f]" />
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <PromoTicker items={promoTickerItems} />
         </div>
       </div>
 
