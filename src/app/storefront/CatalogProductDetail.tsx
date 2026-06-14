@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { StorefrontProduct } from "../storefront-data";
 import { computeUnitPrice, formatPrice } from "@/lib/pricing";
+import { buildWhatsappLink, whatsappProductMessage } from "@/lib/whatsapp";
 import { CardMockup } from "./card-editor/CardMockup";
 import { COLOR_SCHEMES, DESIGN_LABELS } from "./card-editor/colorSchemes";
 import type { CardDesign, CardFields } from "./card-editor/types";
@@ -859,6 +860,18 @@ export function CatalogProductDetail({
                   </button>
                 </>
               )}
+
+              <a
+                href={buildWhatsappLink(whatsappProductMessage(product, selectedOptions, draftQuantity))}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-6 py-[0.95rem] text-sm font-black text-white transition hover:bg-[#1ebe5d] active:scale-[0.98]"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+                  <path d="M19.05 4.91A9.82 9.82 0 0 0 12.03 2c-5.45 0-9.88 4.43-9.88 9.88 0 1.74.45 3.43 1.31 4.92L2 22l5.35-1.4a9.82 9.82 0 0 0 4.68 1.19h.01c5.45 0 9.88-4.43 9.88-9.88a9.8 9.8 0 0 0-2.87-7Zm-7.01 15.19h-.01a8.13 8.13 0 0 1-4.14-1.13l-.3-.18-3.17.83.85-3.09-.2-.32a8.11 8.11 0 0 1 1.24-10.03 8.1 8.1 0 0 1 5.77-2.38c4.49 0 8.15 3.65 8.15 8.14 0 4.49-3.66 8.15-8.19 8.15Z" />
+                </svg>
+                Pedir por WhatsApp
+              </a>
             </div>
           </div>
         </div>
