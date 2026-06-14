@@ -36,6 +36,7 @@ type FormState = {
   basePrice: string;
   designFee: string;
   requiresQuote: boolean;
+  stock: string;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: string;
@@ -68,6 +69,7 @@ function emptyForm(sortOrder: number): FormState {
     basePrice: "0",
     designFee: "0",
     requiresQuote: false,
+    stock: "",
     options: [
       { name: "Cantidad", role: "package", values: [{ label: "", amount: 0 }] },
     ],
@@ -92,6 +94,7 @@ function recordToForm(record: CatalogProductRecord): FormState {
     basePrice: String(record.basePrice),
     designFee: String(record.designFee),
     requiresQuote: record.requiresQuote,
+    stock: record.stock == null ? "" : String(record.stock),
     options: record.options.length > 0 ? record.options : [],
     isActive: record.isActive,
     sortOrder: String(record.sortOrder),
@@ -116,6 +119,7 @@ function buildPayload(form: FormState) {
     basePrice: Number(form.basePrice) || 0,
     designFee: Number(form.designFee) || 0,
     requiresQuote: form.requiresQuote,
+    stock: form.stock.trim() === "" ? null : Math.max(0, Math.trunc(Number(form.stock) || 0)),
     options: form.options,
     isActive: form.isActive,
     sortOrder: Number(form.sortOrder) || 0,
@@ -386,6 +390,21 @@ export function ProductsPanel({
                 />
               </label>
             </div>
+
+            <label className="block">
+              <span className={labelClass}>Existencias (stock)</span>
+              <input
+                className={inputClass}
+                type="number"
+                min="0"
+                value={form.stock}
+                onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                placeholder="Déjalo vacío = bajo pedido (sin límite)"
+              />
+              <span className="mt-1 block text-xs text-slate-400">
+                Vacío = se produce bajo pedido. Si pones un número, al llegar a 0 sale &quot;Agotado&quot; y se bloquea el pedido.
+              </span>
+            </label>
 
             <label className="block">
               <span className={labelClass}>Destacados (uno por linea)</span>

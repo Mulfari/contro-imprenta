@@ -24,6 +24,7 @@ export type CatalogProductRecord = {
   basePrice: number;
   designFee: number;
   requiresQuote: boolean;
+  stock: number | null;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: number;
@@ -44,6 +45,7 @@ type ProductRow = {
   base_price: number | string | null;
   design_fee: number | string | null;
   requires_quote: boolean | null;
+  stock: number | null;
   options: unknown;
   is_active: boolean;
   sort_order: number | null;
@@ -118,6 +120,7 @@ function rowToRecord(row: ProductRow): CatalogProductRecord {
     basePrice: Number(row.base_price ?? 0) || 0,
     designFee: Number(row.design_fee ?? 0) || 0,
     requiresQuote: Boolean(row.requires_quote),
+    stock: row.stock === null || row.stock === undefined ? null : Number(row.stock),
     options: toOptionGroups(row.options),
     isActive: Boolean(row.is_active),
     sortOrder: Number(row.sort_order ?? 0) || 0,
@@ -162,6 +165,7 @@ export function recordToStorefrontProduct(
     basePrice: record.basePrice,
     designFee: record.designFee,
     requiresQuote: record.requiresQuote,
+    stock: record.stock,
     options,
   };
 
@@ -170,7 +174,7 @@ export function recordToStorefrontProduct(
 }
 
 const productColumns =
-  "id, slug, title, description, category, image_path, image_alt, tint, turnaround, highlights, pricing_mode, base_price, design_fee, requires_quote, options, is_active, sort_order";
+  "id, slug, title, description, category, image_path, image_alt, tint, turnaround, highlights, pricing_mode, base_price, design_fee, requires_quote, stock, options, is_active, sort_order";
 
 // Catálogo público para el storefront. Si la BD no tiene productos o falla la
 // lectura (p. ej. tabla aún no creada), cae a los productos de respaldo.
@@ -274,6 +278,7 @@ export type CatalogProductInput = {
   basePrice: number;
   designFee: number;
   requiresQuote: boolean;
+  stock: number | null;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: number;
@@ -315,6 +320,7 @@ function toRowPayload(input: CatalogProductInput) {
     base_price: Number.isFinite(input.basePrice) ? Math.max(0, input.basePrice) : 0,
     design_fee: Number.isFinite(input.designFee) ? Math.max(0, input.designFee) : 0,
     requires_quote: Boolean(input.requiresQuote),
+    stock: input.stock == null ? null : Math.max(0, Math.trunc(Number(input.stock))),
     options: sanitizeOptions(input.options),
     is_active: input.isActive,
     sort_order: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,

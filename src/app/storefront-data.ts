@@ -42,6 +42,8 @@ export type StorefrontProduct = {
   designFee: number;
   // Si true: no se vende con precio cerrado; el cliente "solicita cotización".
   requiresQuote: boolean;
+  // null = bajo pedido (sin límite). Número = existencias; 0 = agotado.
+  stock: number | null;
   options: ProductOptionGroup[];
 };
 
@@ -69,6 +71,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     pricingMode: "package",
     designFee: 8,
     requiresQuote: false,
+    stock: null,
     basePrice: 18,
     options: [
       {
@@ -106,6 +109,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     pricingMode: "package",
     designFee: 8,
     requiresQuote: false,
+    stock: null,
     basePrice: 12,
     options: [
       {
@@ -143,6 +147,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     pricingMode: "package",
     designFee: 8,
     requiresQuote: false,
+    stock: null,
     basePrice: 25,
     options: [
       {
@@ -180,6 +185,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     pricingMode: "package",
     designFee: 8,
     requiresQuote: false,
+    stock: null,
     basePrice: 14,
     options: [
       {
@@ -217,6 +223,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     pricingMode: "package",
     designFee: 8,
     requiresQuote: false,
+    stock: null,
     basePrice: 22,
     options: [
       {
@@ -254,6 +261,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     pricingMode: "package",
     designFee: 8,
     requiresQuote: false,
+    stock: null,
     basePrice: 11,
     options: [
       {
@@ -291,6 +299,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     pricingMode: "package",
     designFee: 8,
     requiresQuote: false,
+    stock: null,
     basePrice: 20,
     options: [
       {
@@ -328,6 +337,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     pricingMode: "package",
     designFee: 8,
     requiresQuote: false,
+    stock: null,
     basePrice: 39,
     options: [
       {

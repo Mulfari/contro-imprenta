@@ -65,7 +65,9 @@ export function CatalogProductCard({ product, wished, onPreview, onToggleWishlis
           </p>
           <div className="mt-auto flex items-end justify-between gap-3 pt-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Producto</p>
-            {product.requiresQuote ? (
+            {product.stock !== null && product.stock <= 0 ? (
+              <p className="text-right text-lg font-black tracking-tight text-rose-600">Agotado</p>
+            ) : product.requiresQuote ? (
               <p className="text-right text-lg font-black tracking-tight text-slate-950">A cotización</p>
             ) : (
               <p className="text-right text-sm font-semibold text-slate-400">

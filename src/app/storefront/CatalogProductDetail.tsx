@@ -79,6 +79,7 @@ export function CatalogProductDetail({
   const otherOptions = product.options.filter((g) => g !== packageGroup && g !== designGroup);
   const designChoice = selectedOptions["Diseño"] ?? designGroup?.values[0]?.label ?? "";
   const designServiceValue = designGroup?.values.find((v) => v.label === "Lo diseña la imprenta");
+  const agotado = product.stock !== null && product.stock <= 0;
 
   return (
     <article className="mt-5">
@@ -795,6 +796,15 @@ export function CatalogProductDetail({
             )}
 
             <div className="mt-auto pt-6">
+              {agotado ? (
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-5 text-center">
+                  <p className="text-2xl font-black text-rose-700">Agotado</p>
+                  <p className="mt-2 text-sm leading-6 text-rose-600">
+                    Este producto no tiene existencias por ahora. Escríbenos por WhatsApp y te avisamos cuando vuelva.
+                  </p>
+                </div>
+              ) : (
+                <>
               {isCardProduct && designMode !== "choose" && (
                 <div className="mb-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
                   <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Resumen</p>
@@ -872,6 +882,8 @@ export function CatalogProductDetail({
                 </svg>
                 Pedir por WhatsApp
               </a>
+                </>
+              )}
             </div>
           </div>
         </div>

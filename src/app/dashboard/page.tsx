@@ -434,6 +434,7 @@ function parseProductPayload(formData: FormData): CatalogProductInput {
     basePrice: Number(data.basePrice) || 0,
     designFee: Number(data.designFee) || 0,
     requiresQuote: Boolean(data.requiresQuote),
+    stock: data.stock === null || data.stock === undefined ? null : Number(data.stock),
     options,
     isActive: data.isActive !== false,
     sortOrder: Number(data.sortOrder) || 0,

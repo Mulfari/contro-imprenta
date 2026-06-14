@@ -25,6 +25,7 @@ export function ProductPreviewModal({
   wished,
   onToggleWishlist,
 }: ProductPreviewModalProps) {
+  const agotado = product.stock !== null && product.stock <= 0;
   return (
     <div className="fixed inset-0 z-[90] bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:px-6">
       <div className="mx-auto flex h-full w-full max-w-[76rem] items-center">
@@ -111,7 +112,9 @@ export function ProductPreviewModal({
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Precio</p>
-                  {product.requiresQuote ? (
+                  {agotado ? (
+                    <p className="text-xl font-black text-rose-600">Agotado</p>
+                  ) : product.requiresQuote ? (
                     <p className="text-xl font-black text-slate-950">A cotizacion</p>
                   ) : (
                     <p className="text-3xl font-black text-slate-950">{formatPrice(computeUnitPrice(product, selectedOptions))}</p>
@@ -125,14 +128,17 @@ export function ProductPreviewModal({
               <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <button
                   type="button"
-                  onClick={product.requiresQuote ? onRequestQuote : onAddToCart}
+                  disabled={agotado}
+                  onClick={agotado ? undefined : product.requiresQuote ? onRequestQuote : onAddToCart}
                   className={
-                    product.requiresQuote
-                      ? "cursor-pointer rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-black text-white transition hover:bg-slate-800"
-                      : "cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+                    agotado
+                      ? "cursor-not-allowed rounded-xl bg-slate-200 px-5 py-3.5 text-sm font-black text-slate-500"
+                      : product.requiresQuote
+                        ? "cursor-pointer rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-black text-white transition hover:bg-slate-800"
+                        : "cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
                   }
                 >
-                  {product.requiresQuote ? "Solicitar cotizacion" : "Anadir al carrito"}
+                  {agotado ? "Agotado" : product.requiresQuote ? "Solicitar cotizacion" : "Anadir al carrito"}
                 </button>
                 <button
                   type="button"
