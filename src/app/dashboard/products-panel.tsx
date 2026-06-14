@@ -35,6 +35,7 @@ type FormState = {
   pricingMode: "package" | "unit";
   basePrice: string;
   designFee: string;
+  requiresQuote: boolean;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: string;
@@ -66,6 +67,7 @@ function emptyForm(sortOrder: number): FormState {
     pricingMode: "package",
     basePrice: "0",
     designFee: "0",
+    requiresQuote: false,
     options: [
       { name: "Cantidad", role: "package", values: [{ label: "", amount: 0 }] },
     ],
@@ -89,6 +91,7 @@ function recordToForm(record: CatalogProductRecord): FormState {
     pricingMode: record.pricingMode,
     basePrice: String(record.basePrice),
     designFee: String(record.designFee),
+    requiresQuote: record.requiresQuote,
     options: record.options.length > 0 ? record.options : [],
     isActive: record.isActive,
     sortOrder: String(record.sortOrder),
@@ -112,6 +115,7 @@ function buildPayload(form: FormState) {
     pricingMode: form.pricingMode,
     basePrice: Number(form.basePrice) || 0,
     designFee: Number(form.designFee) || 0,
+    requiresQuote: form.requiresQuote,
     options: form.options,
     isActive: form.isActive,
     sortOrder: Number(form.sortOrder) || 0,
@@ -631,6 +635,21 @@ export function ProductsPanel({
                 </div>
               </div>
             </div>
+
+            <label className="flex items-start gap-2 text-sm font-semibold text-slate-700">
+              <input
+                type="checkbox"
+                checked={form.requiresQuote}
+                onChange={(e) => setForm({ ...form, requiresQuote: e.target.checked })}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300"
+              />
+              <span>
+                A cotización
+                <span className="mt-0.5 block text-xs font-normal text-slate-400">
+                  No muestra precio cerrado: el cliente envía "Solicitar cotización" y tú le pones el precio en el pedido.
+                </span>
+              </span>
+            </label>
 
             <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
               <input

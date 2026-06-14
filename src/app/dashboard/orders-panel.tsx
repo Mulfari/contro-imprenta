@@ -29,6 +29,7 @@ type OrdersPanelProps = {
   createAction: (formData: FormData) => void | Promise<void>;
   updateStatusAction: (formData: FormData) => void | Promise<void>;
   rejectAction: (formData: FormData) => void | Promise<void>;
+  quoteAction: (formData: FormData) => void | Promise<void>;
   deleteOrderFileAction: (formData: FormData) => void | Promise<void>;
   isAdmin: boolean;
 };
@@ -333,6 +334,7 @@ export function OrdersPanel(props: OrdersPanelProps) {
     createAction,
     updateStatusAction,
     rejectAction,
+    quoteAction,
     deleteOrderFileAction,
     isAdmin,
   } = props;
@@ -987,6 +989,37 @@ export function OrdersPanel(props: OrdersPanelProps) {
                     </div>
 
                     <div className="flex w-full flex-col gap-3 xl:sticky xl:top-5 xl:min-w-[250px]">
+                      {order.total_amount === null && order.status !== "rechazado" ? (
+                        <form
+                          action={quoteAction}
+                          className="flex flex-col gap-3 rounded-[1.3rem] border border-blue-200 bg-blue-50 p-4 sm:rounded-[1.5rem]"
+                        >
+                          <input type="hidden" name="orderId" value={order.id} />
+                          <input type="hidden" name="activeStatus" value={activeStatus} />
+                          <label className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-600">
+                            Poner precio (cotizacion)
+                          </label>
+                          <p className="text-xs leading-5 text-blue-700">
+                            Este pedido entro como solicitud de cotizacion. Define el total y el cliente podra pagarlo desde su cuenta.
+                          </p>
+                          <input
+                            name="totalAmount"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            placeholder="Total a cobrar"
+                            className="rounded-2xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          />
+                          <button
+                            type="submit"
+                            className="rounded-full bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                          >
+                            Enviar precio al cliente
+                          </button>
+                        </form>
+                      ) : null}
+
                       {order.status === "rechazado" ? (
                         <div className="rounded-[1.3rem] border border-rose-200 bg-rose-50 p-4 text-sm font-semibold leading-6 text-rose-800 sm:rounded-[1.5rem]">
                           Este pedido quedo cerrado como rechazado.

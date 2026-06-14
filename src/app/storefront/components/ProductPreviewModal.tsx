@@ -10,6 +10,7 @@ interface ProductPreviewModalProps {
   onClose: () => void;
   onOptionChange: (group: string, value: string) => void;
   onAddToCart: () => void;
+  onRequestQuote: () => void;
   wished: boolean;
   onToggleWishlist: () => void;
 }
@@ -20,6 +21,7 @@ export function ProductPreviewModal({
   onClose,
   onOptionChange,
   onAddToCart,
+  onRequestQuote,
   wished,
   onToggleWishlist,
 }: ProductPreviewModalProps) {
@@ -109,7 +111,11 @@ export function ProductPreviewModal({
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Precio</p>
-                  <p className="text-3xl font-black text-slate-950">{formatPrice(computeUnitPrice(product, selectedOptions))}</p>
+                  {product.requiresQuote ? (
+                    <p className="text-xl font-black text-slate-950">A cotizacion</p>
+                  ) : (
+                    <p className="text-3xl font-black text-slate-950">{formatPrice(computeUnitPrice(product, selectedOptions))}</p>
+                  )}
                 </div>
                 <p className="text-right text-sm font-medium text-slate-500">
                   Entrega estimada<br />
@@ -119,10 +125,14 @@ export function ProductPreviewModal({
               <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <button
                   type="button"
-                  onClick={onAddToCart}
-                  className="cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+                  onClick={product.requiresQuote ? onRequestQuote : onAddToCart}
+                  className={
+                    product.requiresQuote
+                      ? "cursor-pointer rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-black text-white transition hover:bg-slate-800"
+                      : "cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
+                  }
                 >
-                  Anadir al carrito
+                  {product.requiresQuote ? "Solicitar cotizacion" : "Anadir al carrito"}
                 </button>
                 <button
                   type="button"

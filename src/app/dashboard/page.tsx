@@ -41,6 +41,7 @@ import {
   type OrderUrgency,
   type PaymentStatus,
   rejectOrder,
+  setOrderQuotedTotal,
   updateClient,
   updateOrderStatus,
 } from "@/lib/business";
@@ -432,6 +433,7 @@ function parseProductPayload(formData: FormData): CatalogProductInput {
     pricingMode: data.pricingMode === "unit" ? "unit" : "package",
     basePrice: Number(data.basePrice) || 0,
     designFee: Number(data.designFee) || 0,
+    requiresQuote: Boolean(data.requiresQuote),
     options,
     isActive: data.isActive !== false,
     sortOrder: Number(data.sortOrder) || 0,
@@ -531,6 +533,33 @@ async function toggleProductActiveAction(formData: FormData) {
   revalidatePath("/dashboard");
   revalidatePath("/");
   redirect(buildDashboardUrl("productos", isActive ? "Producto visible" : "Producto oculto"));
+}
+
+async function quoteOrderAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  const orderId = String(formData.get("orderId") ?? "");
+
+  try {
+    await setOrderQuotedTotal({
+      orderId,
+      totalAmount: String(formData.get("totalAmount") ?? ""),
+      changedBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo enviar la cotizacion.";
+    redirect(buildDashboardUrl("pedidos", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("pedidos", "Cotizacion enviada al cliente"));
 }
 
 async function createOrderAction(formData: FormData) {
@@ -2120,6 +2149,7 @@ export default async function DashboardPage({
               createAction={createOrderAction}
               updateStatusAction={updateOrderStatusAction}
               rejectAction={rejectOrderAction}
+              quoteAction={quoteOrderAction}
               deleteOrderFileAction={deleteOrderFileAction}
               isAdmin={session.role === "admin"}
             />

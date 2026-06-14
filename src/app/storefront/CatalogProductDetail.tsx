@@ -15,6 +15,7 @@ interface CatalogProductDetailProps {
   onBack: () => void;
   onOptionChange: (group: string, value: string) => void;
   onAddToCart: (quantity: number, files: File[]) => void;
+  onRequestQuote: () => void;
   wished: boolean;
   onToggleWishlist: () => void;
 }
@@ -32,6 +33,7 @@ export function CatalogProductDetail({
   onBack,
   onOptionChange,
   onAddToCart,
+  onRequestQuote,
   wished,
   onToggleWishlist,
 }: CatalogProductDetailProps) {
@@ -824,19 +826,39 @@ export function CatalogProductDetail({
                 </div>
               )}
 
-              <div className="flex items-baseline justify-between gap-3">
-                <div className="flex items-baseline gap-2">
-                  <p className="text-[2.2rem] font-black leading-none tracking-tight text-slate-950">{formatPrice(estimatedTotal)}</p>
-                  {draftQuantity > 1 && <p className="text-sm font-semibold text-slate-400">{formatPrice(unitPrice)} c/u</p>}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => onAddToCart(draftQuantity, frontFile ? [frontFile, ...(backFile ? [backFile] : [])] : draftFiles)}
-                className="mt-4 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-6 py-[1.15rem] text-[0.95rem] font-black text-slate-950 shadow-[0_14px_32px_rgba(255,212,95,0.4)] transition hover:bg-[#ffcd41] hover:shadow-[0_18px_40px_rgba(255,212,95,0.5)] active:scale-[0.98]"
-              >
-                Anadir al carrito
-              </button>
+              {product.requiresQuote ? (
+                <>
+                  <div>
+                    <p className="text-2xl font-black leading-none tracking-tight text-slate-950">Precio a confirmar</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      Este producto se cotiza segun lo que elijas. Envia la solicitud y te haremos llegar el precio para que lo pagues desde tu cuenta.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onRequestQuote}
+                    className="mt-4 w-full cursor-pointer rounded-2xl bg-slate-950 px-6 py-[1.15rem] text-[0.95rem] font-black text-white transition hover:bg-slate-800 active:scale-[0.98]"
+                  >
+                    Solicitar cotizacion
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-[2.2rem] font-black leading-none tracking-tight text-slate-950">{formatPrice(estimatedTotal)}</p>
+                      {draftQuantity > 1 && <p className="text-sm font-semibold text-slate-400">{formatPrice(unitPrice)} c/u</p>}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onAddToCart(draftQuantity, frontFile ? [frontFile, ...(backFile ? [backFile] : [])] : draftFiles)}
+                    className="mt-4 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-6 py-[1.15rem] text-[0.95rem] font-black text-slate-950 shadow-[0_14px_32px_rgba(255,212,95,0.4)] transition hover:bg-[#ffcd41] hover:shadow-[0_18px_40px_rgba(255,212,95,0.5)] active:scale-[0.98]"
+                  >
+                    Anadir al carrito
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

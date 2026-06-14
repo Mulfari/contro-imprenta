@@ -40,6 +40,8 @@ export type StorefrontProduct = {
   basePrice: number;
   // Costo del servicio "lo diseña la imprenta" (se suma si el cliente lo elige).
   designFee: number;
+  // Si true: no se vende con precio cerrado; el cliente "solicita cotización".
+  requiresQuote: boolean;
   options: ProductOptionGroup[];
 };
 
@@ -66,6 +68,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     highlights: ["Papel grueso", "Acabado mate o brillante", "Diseno listo para imprimir"],
     pricingMode: "package",
     designFee: 8,
+    requiresQuote: false,
     basePrice: 18,
     options: [
       {
@@ -102,6 +105,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     highlights: ["Corte a la forma", "Vinil adhesivo", "Ideal para packaging"],
     pricingMode: "package",
     designFee: 8,
+    requiresQuote: false,
     basePrice: 12,
     options: [
       {
@@ -138,6 +142,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     highlights: ["Alta visibilidad", "Listo para evento", "Formatos personalizados"],
     pricingMode: "package",
     designFee: 8,
+    requiresQuote: false,
     basePrice: 25,
     options: [
       {
@@ -174,6 +179,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     highlights: ["Numeracion disponible", "Copias autocopiativas", "Formato a medida"],
     pricingMode: "package",
     designFee: 8,
+    requiresQuote: false,
     basePrice: 14,
     options: [
       {
@@ -210,6 +216,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     highlights: ["Papeles finos", "Corte limpio", "Acabado premium"],
     pricingMode: "package",
     designFee: 8,
+    requiresQuote: false,
     basePrice: 22,
     options: [
       {
@@ -246,6 +253,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     highlights: ["Para productos", "Por pliego o rollo", "Colores vivos"],
     pricingMode: "package",
     designFee: 8,
+    requiresQuote: false,
     basePrice: 11,
     options: [
       {
@@ -282,6 +290,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     highlights: ["Paquetes por equipo", "Marca corporativa", "Revision de arte"],
     pricingMode: "package",
     designFee: 8,
+    requiresQuote: false,
     basePrice: 20,
     options: [
       {
@@ -318,6 +327,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     highlights: ["Estructura incluida", "Transportable", "Alta presencia visual"],
     pricingMode: "package",
     designFee: 8,
+    requiresQuote: false,
     basePrice: 39,
     options: [
       {

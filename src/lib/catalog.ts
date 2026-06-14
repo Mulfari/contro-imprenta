@@ -23,6 +23,7 @@ export type CatalogProductRecord = {
   pricingMode: "package" | "unit";
   basePrice: number;
   designFee: number;
+  requiresQuote: boolean;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: number;
@@ -42,6 +43,7 @@ type ProductRow = {
   pricing_mode: string | null;
   base_price: number | string | null;
   design_fee: number | string | null;
+  requires_quote: boolean | null;
   options: unknown;
   is_active: boolean;
   sort_order: number | null;
@@ -115,6 +117,7 @@ function rowToRecord(row: ProductRow): CatalogProductRecord {
     pricingMode: row.pricing_mode === "unit" ? "unit" : "package",
     basePrice: Number(row.base_price ?? 0) || 0,
     designFee: Number(row.design_fee ?? 0) || 0,
+    requiresQuote: Boolean(row.requires_quote),
     options: toOptionGroups(row.options),
     isActive: Boolean(row.is_active),
     sortOrder: Number(row.sort_order ?? 0) || 0,
@@ -158,6 +161,7 @@ export function recordToStorefrontProduct(
     pricingMode: record.pricingMode,
     basePrice: record.basePrice,
     designFee: record.designFee,
+    requiresQuote: record.requiresQuote,
     options,
   };
 
@@ -166,7 +170,7 @@ export function recordToStorefrontProduct(
 }
 
 const productColumns =
-  "id, slug, title, description, category, image_path, image_alt, tint, turnaround, highlights, pricing_mode, base_price, design_fee, options, is_active, sort_order";
+  "id, slug, title, description, category, image_path, image_alt, tint, turnaround, highlights, pricing_mode, base_price, design_fee, requires_quote, options, is_active, sort_order";
 
 // Catálogo público para el storefront. Si la BD no tiene productos o falla la
 // lectura (p. ej. tabla aún no creada), cae a los productos de respaldo.
@@ -269,6 +273,7 @@ export type CatalogProductInput = {
   pricingMode: "package" | "unit";
   basePrice: number;
   designFee: number;
+  requiresQuote: boolean;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: number;
@@ -309,6 +314,7 @@ function toRowPayload(input: CatalogProductInput) {
     pricing_mode: input.pricingMode === "unit" ? "unit" : "package",
     base_price: Number.isFinite(input.basePrice) ? Math.max(0, input.basePrice) : 0,
     design_fee: Number.isFinite(input.designFee) ? Math.max(0, input.designFee) : 0,
+    requires_quote: Boolean(input.requiresQuote),
     options: sanitizeOptions(input.options),
     is_active: input.isActive,
     sort_order: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,

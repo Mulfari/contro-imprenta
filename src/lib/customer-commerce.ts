@@ -454,6 +454,115 @@ export async function createStorefrontCheckout(input: {
   return [data];
 }
 
+// Solicitud de cotización: crea el pedido SIN precio ni pago. El admin define el
+// total despues (setOrderQuotedTotal) y el cliente paga desde Mi cuenta.
+export async function createStorefrontQuote(input: {
+  userId: string;
+  email: string;
+  fullName: string;
+  phone: string;
+  notes: string;
+  items: StorefrontCheckoutItem[];
+}) {
+  if (input.items.length === 0) {
+    throw new Error("Agrega al menos un producto para cotizar.");
+  }
+
+  const client = await ensureCustomerClient(input);
+  const supabase = createSupabaseAdminClient();
+  const orderNumber = await createOrderNumber();
+  const normalizedItems = input.items.map((item) => ({
+    ...item,
+    quantity: Math.max(1, Number(item.quantity) || 1),
+  }));
+  const totalQuantity = normalizedItems.reduce((sum, item) => sum + item.quantity, 0);
+  const categories = [...new Set(normalizedItems.map((item) => item.productType).filter(Boolean))];
+  const firstItem = normalizedItems[0];
+  const title =
+    normalizedItems.length === 1
+      ? firstItem.title
+      : `Cotizacion web (${normalizedItems.length} productos)`;
+  const productType =
+    normalizedItems.length === 1
+      ? firstItem.productType || firstItem.title
+      : categories.length === 1
+        ? categories[0]
+        : "Pedido mixto";
+  const includesDesign = normalizedItems.some(
+    (item) => (item.options?.["Diseño"] ?? "") === "Lo diseña la imprenta",
+  );
+  const description = [
+    "Solicitud de cotizacion creada desde la tienda.",
+    `Productos:\n${normalizedItems
+      .map((item, index) => {
+        const optionLines = Object.entries(item.options || {})
+          .filter(([, value]) => value)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join("\n");
+        return [
+          `${index + 1}. ${item.title}`,
+          `Cantidad: ${item.quantity}`,
+          optionLines ? `Opciones:\n${optionLines}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n");
+      })
+      .join("\n\n")}`,
+    normalizeText(input.notes) ? `Notas del cliente: ${normalizeText(input.notes)}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+  const singleOptions = normalizedItems.length === 1 ? firstItem.options : {};
+
+  const { data, error } = await supabase
+    .from("orders")
+    .insert({
+      client_id: client.id,
+      customer_user_id: input.userId,
+      order_number: orderNumber,
+      title,
+      product_type: productType,
+      description,
+      quantity: totalQuantity,
+      material: singleOptions.Material ?? null,
+      size: singleOptions.Tamano ?? singleOptions.Medida ?? null,
+      lamination_finish: singleOptions.Acabado ?? null,
+      includes_design: includesDesign,
+      includes_installation: false,
+      urgency: "normal",
+      branch: null,
+      quoted_price: null,
+      total_amount: null,
+      deposit_amount: 0,
+      pending_amount: 0,
+      payment_method: null,
+      payment_status: "pendiente",
+      payment_review_status: "sin_pago",
+      confirmation_status: "pendiente",
+      promised_delivery_at: addBusinessDays(5),
+      priority: "media",
+      current_area: "Cotizacion",
+      status: "recibido",
+      source: "storefront",
+      internal_notes: "Solicitud de cotizacion web. Definir precio y enviarlo al cliente.",
+    })
+    .select("*")
+    .single<Order>();
+
+  if (error) {
+    throw error;
+  }
+
+  await createOrderHistoryEntry({
+    orderId: data.id,
+    detail: `Solicitud de cotizacion ${orderNumber} creada desde la tienda (${normalizedItems.length} producto${normalizedItems.length === 1 ? "" : "s"}).`,
+    eventType: "cotizacion",
+    changedBy: null,
+  });
+
+  return data;
+}
+
 export async function getCustomerDashboard(userId: string) {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase

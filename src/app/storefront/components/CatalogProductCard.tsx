@@ -65,9 +65,13 @@ export function CatalogProductCard({ product, wished, onPreview, onToggleWishlis
           </p>
           <div className="mt-auto flex items-end justify-between gap-3 pt-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Producto</p>
-            <p className="text-right text-sm font-semibold text-slate-400">
-              Desde <span className="text-2xl font-black tracking-tight text-slate-950">{product.price}</span>
-            </p>
+            {product.requiresQuote ? (
+              <p className="text-right text-lg font-black tracking-tight text-slate-950">A cotización</p>
+            ) : (
+              <p className="text-right text-sm font-semibold text-slate-400">
+                Desde <span className="text-2xl font-black tracking-tight text-slate-950">{product.price}</span>
+              </p>
+            )}
           </div>
         </div>
       </button>

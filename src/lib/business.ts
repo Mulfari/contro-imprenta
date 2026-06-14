@@ -569,3 +569,59 @@ export async function rejectOrder(input: {
 
   return data;
 }
+
+export async function setOrderQuotedTotal(input: {
+  orderId: string;
+  totalAmount: string;
+  changedBy?: string | null;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const total = parseCurrency(input.totalAmount);
+
+  if (!input.orderId) {
+    throw new Error("No se encontro el pedido.");
+  }
+
+  if (total === null || total <= 0) {
+    throw new Error("Escribe un total valido para la cotizacion.");
+  }
+
+  const { data: previousOrder, error: previousError } = await supabase
+    .from("orders")
+    .select("id, order_number, deposit_amount")
+    .eq("id", input.orderId)
+    .single<{ id: string; order_number: string; deposit_amount: number | null }>();
+
+  if (previousError) {
+    throw previousError;
+  }
+
+  const deposit = Number(previousOrder.deposit_amount ?? 0);
+  const pending = Math.max(0, Number((total - deposit).toFixed(2)));
+
+  const { data, error } = await supabase
+    .from("orders")
+    .update({
+      quoted_price: total,
+      total_amount: total,
+      pending_amount: pending,
+      payment_status: pending <= 0 ? "pagado" : deposit > 0 ? "anticipo" : "pendiente",
+      current_area: "Caja",
+    })
+    .eq("id", input.orderId)
+    .select("*")
+    .single<Order>();
+
+  if (error) {
+    throw error;
+  }
+
+  await createOrderHistoryEntry({
+    orderId: input.orderId,
+    detail: `Cotizacion enviada al cliente: total $${total.toFixed(2)}.`,
+    eventType: "cotizacion",
+    changedBy: input.changedBy ?? null,
+  });
+
+  return data;
+}

@@ -430,6 +430,57 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
     router.push("/checkout");
   };
 
+  const requestQuote = async (
+    product: StorefrontProduct,
+    options: Record<string, string>,
+  ) => {
+    if (!customerSession) {
+      const message = "Inicia sesion o registrate para solicitar una cotizacion.";
+      setCheckoutNotice({ message, tone: "error" });
+      showToast(message, "error");
+      setAccountOpen(true);
+      setActivePanel(null);
+      setSelectedProduct(null);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/storefront/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: [
+            {
+              productId: product.id,
+              title: product.title,
+              productType: product.category,
+              quantity: 1,
+              options,
+            },
+          ],
+        }),
+      });
+      const payload = (await response.json()) as { error?: string; message?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error || "No se pudo enviar la solicitud.");
+      }
+
+      setSelectedProduct(null);
+      router.push(
+        `/mi-cuenta?tone=success&message=${encodeURIComponent(
+          payload.message || "Solicitud de cotizacion enviada.",
+        )}`,
+      );
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : "No se pudo enviar la solicitud.",
+        "error",
+      );
+    }
+  };
+
   const clearCatalogFilters = () => {
     setSearchQuery("");
     setDebouncedQuery("");
@@ -606,6 +657,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
                       void addToCart(selectedProduct, selectedOptions, quantity, files);
                       setSelectedProduct(null);
                     }}
+                    onRequestQuote={() => void requestQuote(selectedProduct, selectedOptions)}
                     wished={wishlistIds.has(selectedProduct.id)}
                     onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
                   />
@@ -659,6 +711,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
             void addToCart(selectedProduct, selectedOptions);
             setSelectedProduct(null);
           }}
+          onRequestQuote={() => void requestQuote(selectedProduct, selectedOptions)}
           wished={wishlistIds.has(selectedProduct.id)}
           onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
         />
