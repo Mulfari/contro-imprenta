@@ -22,6 +22,7 @@ export type CatalogProductRecord = {
   highlights: string[];
   pricingMode: "package" | "unit";
   basePrice: number;
+  designFee: number;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: number;
@@ -40,6 +41,7 @@ type ProductRow = {
   highlights: unknown;
   pricing_mode: string | null;
   base_price: number | string | null;
+  design_fee: number | string | null;
   options: unknown;
   is_active: boolean;
   sort_order: number | null;
@@ -112,15 +114,35 @@ function rowToRecord(row: ProductRow): CatalogProductRecord {
     highlights: toStringArray(row.highlights),
     pricingMode: row.pricing_mode === "unit" ? "unit" : "package",
     basePrice: Number(row.base_price ?? 0) || 0,
+    designFee: Number(row.design_fee ?? 0) || 0,
     options: toOptionGroups(row.options),
     isActive: Boolean(row.is_active),
     sortOrder: Number(row.sort_order ?? 0) || 0,
   };
 }
 
+// Productos con editor de tarjetas propio (conservan su flujo de diseño actual).
+const CARD_EDITOR_SLUGS = new Set(["tarjetas-premium", "tarjetas-corporativas"]);
+
 export function recordToStorefrontProduct(
   record: CatalogProductRecord,
 ): StorefrontProduct {
+  const options = [...record.options];
+
+  // El "diseño" se modela como una opción mas: el cliente sube su arte (+0) o
+  // pide que la imprenta lo diseñe (+designFee). Las tarjetas conservan su
+  // editor propio, asi que no se les sintetiza este grupo.
+  if (!CARD_EDITOR_SLUGS.has(record.slug)) {
+    options.push({
+      name: "Diseño",
+      role: "surcharge",
+      values: [
+        { label: "Subo mi arte", amount: 0 },
+        { label: "Lo diseña la imprenta", amount: Math.max(0, record.designFee) },
+      ],
+    });
+  }
+
   const base: StorefrontProduct = {
     id: record.slug,
     title: record.title,
@@ -135,7 +157,8 @@ export function recordToStorefrontProduct(
     highlights: record.highlights,
     pricingMode: record.pricingMode,
     basePrice: record.basePrice,
-    options: record.options,
+    designFee: record.designFee,
+    options,
   };
 
   base.price = formatFromPrice(productFromPrice(base));
@@ -143,7 +166,7 @@ export function recordToStorefrontProduct(
 }
 
 const productColumns =
-  "id, slug, title, description, category, image_path, image_alt, tint, turnaround, highlights, pricing_mode, base_price, options, is_active, sort_order";
+  "id, slug, title, description, category, image_path, image_alt, tint, turnaround, highlights, pricing_mode, base_price, design_fee, options, is_active, sort_order";
 
 // Catálogo público para el storefront. Si la BD no tiene productos o falla la
 // lectura (p. ej. tabla aún no creada), cae a los productos de respaldo.
@@ -245,6 +268,7 @@ export type CatalogProductInput = {
   highlights: string[];
   pricingMode: "package" | "unit";
   basePrice: number;
+  designFee: number;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: number;
@@ -284,6 +308,7 @@ function toRowPayload(input: CatalogProductInput) {
     highlights: input.highlights.map((item) => item.trim()).filter(Boolean),
     pricing_mode: input.pricingMode === "unit" ? "unit" : "package",
     base_price: Number.isFinite(input.basePrice) ? Math.max(0, input.basePrice) : 0,
+    design_fee: Number.isFinite(input.designFee) ? Math.max(0, input.designFee) : 0,
     options: sanitizeOptions(input.options),
     is_active: input.isActive,
     sort_order: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,

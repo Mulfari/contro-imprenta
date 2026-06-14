@@ -72,7 +72,10 @@ export function CatalogProductDetail({
   const isCardProduct = product.id === "tarjetas-premium" || product.id === "tarjetas-corporativas";
 
   const packageGroup = product.options.find((g) => g.role === "package");
-  const otherOptions = product.options.filter((g) => g !== packageGroup);
+  const designGroup = product.options.find((g) => g.name === "Diseño");
+  const otherOptions = product.options.filter((g) => g !== packageGroup && g !== designGroup);
+  const designChoice = selectedOptions["Diseño"] ?? designGroup?.values[0]?.label ?? "";
+  const designServiceValue = designGroup?.values.find((v) => v.label === "Lo diseña la imprenta");
 
   return (
     <article className="mt-5">
@@ -673,8 +676,53 @@ export function CatalogProductDetail({
 
             {!isCardProduct && (
               <div className="mt-6">
-                {hasFiles ? (
-                  <div className="space-y-2">
+                {designGroup ? (
+                  <>
+                    <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">¿Cómo quieres tu diseño?</p>
+                    <div className="mt-2.5 grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onOptionChange("Diseño", "Subo mi arte")}
+                        className={`cursor-pointer rounded-[0.85rem] border-2 px-3 py-3 text-center transition ${
+                          designChoice === "Subo mi arte"
+                            ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff]"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        <span className="block text-sm font-black leading-tight">Ya tengo mi arte</span>
+                        <span className="mt-0.5 block text-[0.7rem] font-medium text-slate-400">Sube tu archivo</span>
+                      </button>
+                      <div
+                        aria-disabled="true"
+                        className="rounded-[0.85rem] border-2 border-dashed border-slate-200 bg-slate-50/60 px-3 py-3 text-center text-slate-400"
+                      >
+                        <span className="block text-sm font-black leading-tight">Créalo aquí</span>
+                        <span className="mt-0.5 block text-[0.7rem] font-medium">Próximamente</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onOptionChange("Diseño", "Lo diseña la imprenta")}
+                        className={`cursor-pointer rounded-[0.85rem] border-2 px-3 py-3 text-center transition ${
+                          designChoice === "Lo diseña la imprenta"
+                            ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff]"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        <span className="block text-sm font-black leading-tight">Lo diseña la imprenta</span>
+                        <span className="mt-0.5 block text-[0.7rem] font-medium text-slate-400">
+                          {designServiceValue && designServiceValue.amount > 0 ? `+ $${designServiceValue.amount} diseño` : "Servicio de diseño"}
+                        </span>
+                      </button>
+                    </div>
+                  </>
+                ) : null}
+
+                {designGroup && designChoice === "Lo diseña la imprenta" ? (
+                  <div className="mt-3 rounded-[0.85rem] border border-[#3558ff]/20 bg-[#3558ff]/5 px-4 py-3 text-xs leading-5 text-slate-600">
+                    Nuestro equipo crea tu diseño. En el paso de pago podrás contarnos tu idea (y subir una referencia si quieres).
+                  </div>
+                ) : hasFiles ? (
+                  <div className={`space-y-2 ${designGroup ? "mt-3" : ""}`}>
                     <p className="text-sm font-black text-slate-700">Arte cargado</p>
                     {draftFiles.map((file) => (
                       <div key={`${file.name}-${file.lastModified}`} className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5">

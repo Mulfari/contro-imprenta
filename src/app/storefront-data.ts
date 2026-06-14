@@ -38,6 +38,8 @@ export type StorefrontProduct = {
   // 'unit': el precio = basePrice por unidad.
   pricingMode: "package" | "unit";
   basePrice: number;
+  // Costo del servicio "lo diseña la imprenta" (se suma si el cliente lo elige).
+  designFee: number;
   options: ProductOptionGroup[];
 };
 
@@ -63,6 +65,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     turnaround: "24 a 48 horas",
     highlights: ["Papel grueso", "Acabado mate o brillante", "Diseno listo para imprimir"],
     pricingMode: "package",
+    designFee: 8,
     basePrice: 18,
     options: [
       {
@@ -98,6 +101,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     turnaround: "2 a 3 dias",
     highlights: ["Corte a la forma", "Vinil adhesivo", "Ideal para packaging"],
     pricingMode: "package",
+    designFee: 8,
     basePrice: 12,
     options: [
       {
@@ -133,6 +137,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     turnaround: "24 a 72 horas",
     highlights: ["Alta visibilidad", "Listo para evento", "Formatos personalizados"],
     pricingMode: "package",
+    designFee: 8,
     basePrice: 25,
     options: [
       {
@@ -168,6 +173,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     turnaround: "2 a 4 dias",
     highlights: ["Numeracion disponible", "Copias autocopiativas", "Formato a medida"],
     pricingMode: "package",
+    designFee: 8,
     basePrice: 14,
     options: [
       {
@@ -203,6 +209,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     turnaround: "2 a 5 dias",
     highlights: ["Papeles finos", "Corte limpio", "Acabado premium"],
     pricingMode: "package",
+    designFee: 8,
     basePrice: 22,
     options: [
       {
@@ -238,6 +245,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     turnaround: "2 a 3 dias",
     highlights: ["Para productos", "Por pliego o rollo", "Colores vivos"],
     pricingMode: "package",
+    designFee: 8,
     basePrice: 11,
     options: [
       {
@@ -273,6 +281,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     turnaround: "24 a 48 horas",
     highlights: ["Paquetes por equipo", "Marca corporativa", "Revision de arte"],
     pricingMode: "package",
+    designFee: 8,
     basePrice: 20,
     options: [
       {
@@ -308,6 +317,7 @@ export const fallbackProducts: StorefrontProduct[] = [
     turnaround: "2 a 4 dias",
     highlights: ["Estructura incluida", "Transportable", "Alta presencia visual"],
     pricingMode: "package",
+    designFee: 8,
     basePrice: 39,
     options: [
       {

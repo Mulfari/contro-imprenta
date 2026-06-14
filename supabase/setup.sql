@@ -977,6 +977,7 @@ create table if not exists public.products (
   highlights jsonb not null default '[]'::jsonb,
   pricing_mode text not null default 'package' check (pricing_mode in ('package', 'unit')),
   base_price numeric(12,2) not null default 0,
+  design_fee numeric(12,2) not null default 0,
   options jsonb not null default '[]'::jsonb,
   is_active boolean not null default true,
   sort_order integer not null default 0,
@@ -998,6 +999,7 @@ alter table public.products add column if not exists turnaround text null;
 alter table public.products add column if not exists highlights jsonb not null default '[]'::jsonb;
 alter table public.products add column if not exists pricing_mode text not null default 'package';
 alter table public.products add column if not exists base_price numeric(12,2) not null default 0;
+alter table public.products add column if not exists design_fee numeric(12,2) not null default 0;
 alter table public.products add column if not exists options jsonb not null default '[]'::jsonb;
 alter table public.products add column if not exists is_active boolean not null default true;
 alter table public.products add column if not exists sort_order integer not null default 0;

@@ -34,6 +34,7 @@ type FormState = {
   highlights: string;
   pricingMode: "package" | "unit";
   basePrice: string;
+  designFee: string;
   options: ProductOptionGroup[];
   isActive: boolean;
   sortOrder: string;
@@ -64,6 +65,7 @@ function emptyForm(sortOrder: number): FormState {
     highlights: "",
     pricingMode: "package",
     basePrice: "0",
+    designFee: "0",
     options: [
       { name: "Cantidad", role: "package", values: [{ label: "", amount: 0 }] },
     ],
@@ -86,6 +88,7 @@ function recordToForm(record: CatalogProductRecord): FormState {
     highlights: record.highlights.join("\n"),
     pricingMode: record.pricingMode,
     basePrice: String(record.basePrice),
+    designFee: String(record.designFee),
     options: record.options.length > 0 ? record.options : [],
     isActive: record.isActive,
     sortOrder: String(record.sortOrder),
@@ -108,6 +111,7 @@ function buildPayload(form: FormState) {
       .filter(Boolean),
     pricingMode: form.pricingMode,
     basePrice: Number(form.basePrice) || 0,
+    designFee: Number(form.designFee) || 0,
     options: form.options,
     isActive: form.isActive,
     sortOrder: Number(form.sortOrder) || 0,
@@ -491,6 +495,20 @@ export function ProductsPanel({
                   En modo paquete, el grupo marcado como <strong>Paquete</strong> fija el precio (ej. Cantidad). Los grupos <strong>Recargo</strong> suman su monto.
                 </p>
               )}
+
+              <label className="mt-3 block">
+                <span className={labelClass}>Costo de diseño ($) — si el cliente pide que la imprenta lo diseñe</span>
+                <input
+                  className={inputClass}
+                  type="number"
+                  step="0.01"
+                  value={form.designFee}
+                  onChange={(e) => setForm({ ...form, designFee: e.target.value })}
+                />
+                <span className="mt-1 block text-xs text-slate-400">
+                  No aplica a Tarjetas de presentacion (tienen su propio editor).
+                </span>
+              </label>
 
               <div className="mt-4 space-y-3">
                 {form.options.map((group, groupIndex) => (

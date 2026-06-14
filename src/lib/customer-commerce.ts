@@ -385,6 +385,9 @@ export async function createStorefrontCheckout(input: {
     .join("\n\n");
 
   const singleOptions = normalizedItems.length === 1 ? firstItem.options : {};
+  const includesDesign = input.items.some(
+    (item) => (item.options?.["Diseño"] ?? "") === "Lo diseña la imprenta",
+  );
 
   const { data, error } = await supabase
     .from("orders")
@@ -399,7 +402,7 @@ export async function createStorefrontCheckout(input: {
       material: singleOptions.Material ?? null,
       size: singleOptions.Tamano ?? singleOptions.Medida ?? null,
       lamination_finish: singleOptions.Acabado ?? null,
-      includes_design: false,
+      includes_design: includesDesign,
       includes_installation: false,
       urgency: "normal",
       branch: null,

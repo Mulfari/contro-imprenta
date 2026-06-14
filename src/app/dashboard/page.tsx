@@ -431,6 +431,7 @@ function parseProductPayload(formData: FormData): CatalogProductInput {
     highlights,
     pricingMode: data.pricingMode === "unit" ? "unit" : "package",
     basePrice: Number(data.basePrice) || 0,
+    designFee: Number(data.designFee) || 0,
     options,
     isActive: data.isActive !== false,
     sortOrder: Number(data.sortOrder) || 0,
