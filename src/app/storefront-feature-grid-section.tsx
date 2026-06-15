@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
+// Muestrario de productos de la home. Antes traia precios, descuentos y
+// calificaciones inventadas + botones sin funcion; se dejo como un muestrario
+// honesto (imagen + nombre + categoria), sin precios falsos. El precio real
+// vive en el detalle del producto / catalogo.
 const products = [
   {
     title: "Tarjetas soft touch",
     category: "Tarjetas",
-    price: "$29",
-    previousPrice: "$34",
-    discount: "-$5",
     tint: "from-[#fff7d6] via-white to-[#fff1bf]",
     image: {
       src: "/storefront-promo-cards-premium.webp",
@@ -22,9 +23,6 @@ const products = [
   {
     title: "Stickers troquelados",
     category: "Etiquetas",
-    price: "$19",
-    previousPrice: "$23",
-    discount: "-$4",
     tint: "from-[#dff3ff] via-white to-[#cae8ff]",
     image: {
       src: "/storefront-promo-stickers-labels-trimmed.webp",
@@ -37,9 +35,6 @@ const products = [
   {
     title: "Pendon express",
     category: "Gran formato",
-    price: "$32",
-    previousPrice: "$39",
-    discount: "-$7",
     tint: "from-[#efe4ff] via-white to-[#e2d7ff]",
     image: {
       src: "/storefront-promo-banners-posters-transparent.webp",
@@ -52,9 +47,6 @@ const products = [
   {
     title: "Invitaciones deluxe",
     category: "Invitaciones",
-    price: "$27",
-    previousPrice: "$33",
-    discount: "-$6",
     tint: "from-[#ffe0ea] via-white to-[#ffd2df]",
     image: {
       src: "/storefront-invitations.webp",
@@ -67,9 +59,6 @@ const products = [
   {
     title: "Sobres membretados",
     category: "Sobres",
-    price: "$18",
-    previousPrice: "$22",
-    discount: "-$4",
     tint: "from-[#f3f4f6] via-white to-[#e5e7eb]",
     image: {
       src: "/storefront-invoices.webp",
@@ -82,9 +71,6 @@ const products = [
   {
     title: "Etiquetas metalizadas",
     category: "Etiquetas",
-    price: "$18",
-    previousPrice: "$22",
-    discount: "-$4",
     tint: "from-[#eef2ff] via-white to-[#e4e9ff]",
     image: {
       src: "/storefront-labels.webp",
@@ -97,9 +83,6 @@ const products = [
   {
     title: "Talonarios autocopiativos",
     category: "Talonarios",
-    price: "$24",
-    previousPrice: "$31",
-    discount: "-$7",
     tint: "from-[#e8ffe7] via-white to-[#d8ffd5]",
     image: {
       src: "/storefront-promo-invoices-receipts-transparent.webp",
@@ -112,9 +95,6 @@ const products = [
   {
     title: "Vinil adhesivo",
     category: "Vinil",
-    price: "$28",
-    previousPrice: "$35",
-    discount: "-$7",
     tint: "from-[#fff3cf] via-white to-[#ffe7af]",
     image: {
       src: "/storefront-packaging.webp",
@@ -149,35 +129,6 @@ function ArrowIcon({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-function HeartIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 20 20"
-      className="h-4 w-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M10 16.2 3.7 9.9a3.8 3.8 0 0 1 5.4-5.4L10 5.4l.9-.9a3.8 3.8 0 1 1 5.4 5.4Z" />
-    </svg>
-  );
-}
-
-function StarRow() {
-  return (
-    <div className="mt-4 flex gap-1 text-slate-300">
-      {Array.from({ length: 5 }).map((_, index) => (
-        <svg key={index} aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 fill-current">
-          <path d="m10 2.4 2.3 4.7 5.2.8-3.7 3.6.9 5.1L10 14.2 5.3 16.6l.9-5.1L2.5 7.9l5.2-.8Z" />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
 function SideFeature() {
   return (
     <article className="relative overflow-hidden bg-[#0d0d0d] p-6 text-white sm:p-10">
@@ -199,13 +150,6 @@ function SideFeature() {
             </li>
           ))}
         </ul>
-        <button
-          type="button"
-          className="mt-8 inline-flex cursor-pointer items-center gap-2 text-base font-semibold text-white"
-        >
-          Ver todo
-          <ArrowIcon direction="right" />
-        </button>
       </div>
 
       <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[78%] w-[58%] sm:block">
@@ -227,17 +171,11 @@ function SideFeature() {
 function ProductCard({
   title,
   category,
-  price,
-  previousPrice,
-  discount,
   tint,
   image,
 }: {
   title: string;
   category: string;
-  price: string;
-  previousPrice: string;
-  discount: string;
   tint: string;
   image: {
     src: string;
@@ -249,17 +187,6 @@ function ProductCard({
 }) {
   return (
     <article className="group relative border-b border-slate-200 px-4 py-4 last:border-b-0 sm:px-5 sm:py-5 md:border-b-0 md:border-r md:last:border-r-0">
-      <span className="absolute left-5 top-5 rounded-md bg-[#ff5b4d] px-2.5 py-1 text-xs font-bold text-white">
-        {discount}
-      </span>
-      <button
-        type="button"
-        aria-label="Guardar"
-        className="absolute right-5 top-5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
-      >
-        <HeartIcon />
-      </button>
-
       <div className={`relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br ${tint} sm:h-52`}>
         <div className="absolute inset-x-9 bottom-4 h-8 rounded-full bg-slate-900/12 blur-2xl" />
         <Image
@@ -272,17 +199,12 @@ function ProductCard({
         />
       </div>
 
-      <div className="mt-4 flex items-center gap-2 text-lg font-semibold">
-        <span className="text-slate-300 line-through">{previousPrice}</span>
-        <span className="text-[#3558ff]">{price}</span>
-      </div>
-      <h4 className="mt-3 text-[1.08rem] font-semibold leading-7 tracking-tight text-slate-950">
+      <h4 className="mt-4 text-[1.08rem] font-semibold leading-7 tracking-tight text-slate-950">
         {title}
       </h4>
-      <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-slate-400">
+      <p className="mt-1 text-sm font-medium uppercase tracking-[0.16em] text-slate-400">
         {category}
       </p>
-      <StarRow />
     </article>
   );
 }
@@ -316,38 +238,40 @@ export function StorefrontFeatureGridSection() {
         <SideFeature />
 
         <div className="relative">
-          <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-4 py-3 sm:justify-end sm:px-5 sm:py-4">
-            <p className="text-sm font-semibold text-slate-500 sm:hidden">
-              Productos destacados
+          <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-4 py-3 sm:px-5 sm:py-4">
+            <p className="text-sm font-semibold text-slate-500">
+              Lo que imprimimos
             </p>
-            <button
-              type="button"
-              onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
-              disabled={!canGoPrev}
-              className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
-                canGoPrev
-                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-                  : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
-              }`}
-              aria-label="Anterior"
-            >
-              <ArrowIcon direction="left" />
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setStartIndex((current) => Math.min(current + 1, Math.max(products.length - visibleCount, 0)))
-              }
-              disabled={!canGoNext}
-              className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
-                canGoNext
-                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-                  : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
-              }`}
-              aria-label="Siguiente"
-            >
-              <ArrowIcon direction="right" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
+                disabled={!canGoPrev}
+                className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
+                  canGoPrev
+                    ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                    : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
+                }`}
+                aria-label="Anterior"
+              >
+                <ArrowIcon direction="left" />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setStartIndex((current) => Math.min(current + 1, Math.max(products.length - visibleCount, 0)))
+                }
+                disabled={!canGoNext}
+                className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
+                  canGoNext
+                    ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                    : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
+                }`}
+                aria-label="Siguiente"
+              >
+                <ArrowIcon direction="right" />
+              </button>
+            </div>
           </div>
 
           <div

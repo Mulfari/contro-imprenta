@@ -1,273 +1,164 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { buildWhatsappLink } from "@/lib/whatsapp";
 
-const testimonials = [
-  {
-    name: "Mariela Gomez",
-    time: "Hace 2 meses",
-    quote:
-      "Excelente calidad de impresion, tiempos de entrega cumplidos y una atencion muy cercana durante todo el pedido.",
-  },
-  {
-    name: "Carlos Rojas",
-    time: "Hace 1 mes",
-    quote:
-      "Pedimos talonarios y etiquetas para el negocio. Todo llego bien terminado, con muy buena presentacion y rapido.",
-  },
-  {
-    name: "Fabiana Rivas",
-    time: "Hace 3 semanas",
-    quote:
-      "Quede muy satisfecha con mis invitaciones. El acabado se ve premium y el equipo resolvio cada detalle del diseno.",
-  },
-  {
-    name: "Josue Perez",
-    time: "Hace 6 semanas",
-    quote:
-      "Los pendones y stickers quedaron impecables. La asesoria fue clara y el proceso de aprobacion super sencillo.",
-  },
-  {
-    name: "Andrea Salazar",
-    time: "Hace 4 meses",
-    quote:
-      "Nos ayudaron con material corporativo para un evento y todo se entrego a tiempo, con muy buena presentacion.",
-  },
-];
+// Seccion de valor/confianza de la home. Antes mostraba testimonios de ejemplo
+// con nombres y calificaciones inventadas; se reemplazo por afirmaciones
+// honestas de como trabaja la imprenta (sin reseñas falsas).
 
 const benefits = [
   {
-    title: "Entregas a nivel nacional",
-    description: "Enviamos pedidos a diferentes ciudades y coordinamos retiros en tienda.",
-  },
-  {
-    title: "Satisfaccion garantizada",
-    description: "Revisamos acabados y calidad para que cada trabajo salga como se espera.",
-  },
-  {
-    title: "Precios competitivos",
-    description: "Opciones para emprendedores, negocios y pedidos corporativos frecuentes.",
-  },
-  {
     title: "Atencion personalizada",
-    description: "Te orientamos en materiales, formatos y tiempos segun el tipo de trabajo.",
+    description:
+      "Te orientamos en materiales, formatos y tiempos segun el tipo de trabajo.",
   },
   {
-    title: "Pagos seguros",
-    description: "Procesamos tus pedidos con confirmacion clara y seguimiento de cada pago.",
+    title: "Revisamos tu arte",
+    description:
+      "Confirmamos medidas, colores y acabados antes de imprimir para evitar sorpresas.",
+  },
+  {
+    title: "Tu arte o lo diseñamos",
+    description:
+      "Subes tu diseño listo para imprimir o nuestro equipo lo arma por ti.",
+  },
+  {
+    title: "Coordina por WhatsApp",
+    description:
+      "Cotiza y confirma tu pedido por el canal que ya usas todos los dias.",
+  },
+  {
+    title: "Calidad cuidada",
+    description:
+      "Revisamos cada trabajo para que salga tal como lo necesitas.",
+  },
+  {
+    title: "Para personas y empresas",
+    description:
+      "Desde un pedido puntual hasta produccion recurrente para tu negocio.",
   },
 ];
 
-function ArrowIcon({ direction }: { direction: "left" | "right" }) {
+function BenefitIcon({ index }: { index: number }) {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 20 20"
-      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      className="h-6 w-6"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {direction === "left" ? <path d="M12.5 4.5 7 10l5.5 5.5" /> : <path d="M7.5 4.5 13 10l-5.5 5.5" />}
+      {index === 0 && (
+        <>
+          <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+          <path d="M5 20a7 7 0 0 1 14 0" />
+        </>
+      )}
+      {index === 1 && (
+        <>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+          <path d="m9 11 1.5 1.5L14 9" />
+        </>
+      )}
+      {index === 2 && (
+        <>
+          <path d="M4 7h16v10H4z" />
+          <path d="M8 7V4h8v3" />
+          <path d="M8 12h6" />
+        </>
+      )}
+      {index === 3 && (
+        <>
+          <path d="M19.5 12.5a7 7 0 1 1-3-5.7" />
+          <path d="m4 20 1.4-3.2" />
+          <path d="m9 11 2 2 4-4" />
+        </>
+      )}
+      {index === 4 && (
+        <>
+          <path d="M12 3 5 6v6c0 4.2 2.9 7.9 7 9 4.1-1.1 7-4.8 7-9V6Z" />
+          <path d="m9 12 2 2 4-4" />
+        </>
+      )}
+      {index === 5 && (
+        <>
+          <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+          <path d="M17 11a3 3 0 1 0 0-6" />
+          <path d="M3 20a6 6 0 0 1 12 0" />
+          <path d="M16 14a6 6 0 0 1 5 6" />
+        </>
+      )}
     </svg>
   );
 }
 
-function RatingStars() {
-  return (
-    <div className="mt-1 flex gap-0.5 text-[#ffb61d]">
-      {Array.from({ length: 5 }).map((_, index) => (
-        <svg key={index} aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 fill-current">
-          <path d="m10 2.4 2.3 4.7 5.2.8-3.7 3.6.9 5.1L10 14.2 5.3 16.6l.9-5.1L2.5 7.9l5.2-.8Z" />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
 export function StorefrontTestimonialsSection() {
-  const [startIndex, setStartIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(1);
-
-  useEffect(() => {
-    const updateVisibleCount = () => {
-      const nextVisibleCount = window.innerWidth >= 1024 ? 3 : 1;
-      setVisibleCount(nextVisibleCount);
-      setStartIndex((current) =>
-        Math.min(current, Math.max(testimonials.length - nextVisibleCount, 0)),
-      );
-    };
-
-    updateVisibleCount();
-    window.addEventListener("resize", updateVisibleCount);
-
-    return () => window.removeEventListener("resize", updateVisibleCount);
-  }, []);
-
-  const visibleTestimonials = useMemo(
-    () => testimonials.slice(startIndex, startIndex + visibleCount),
-    [startIndex, visibleCount],
-  );
-
-  const canGoPrev = startIndex > 0;
-  const canGoNext = startIndex + visibleCount < testimonials.length;
-
   return (
-    <section className="w-full">
-      <div className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-[104rem] items-center justify-between gap-4 px-3 py-7 sm:px-5 lg:px-6">
-          <div className="h-px flex-1 bg-slate-200" />
-          <h2 className="text-center text-[1.35rem] font-semibold tracking-tight text-slate-950 sm:text-[1.95rem]">
-            Lo que nuestros clientes estan diciendo
+    <section className="w-full border-b border-slate-200 bg-white">
+      <div className="mx-auto w-full max-w-[104rem] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-[#3558ff]">
+            Por que elegirnos
+          </p>
+          <h2 className="mt-3 text-[1.7rem] font-black leading-tight tracking-tight text-slate-950 sm:text-[2.3rem]">
+            Tu imprenta de confianza, de principio a fin
           </h2>
-          <div className="h-px flex-1 bg-slate-200" />
+          <p className="mt-4 text-base leading-7 text-slate-600">
+            Desde la cotizacion hasta la entrega cuidamos cada detalle para que
+            tu material salga impecable.
+          </p>
         </div>
 
-        <div className="relative mx-auto w-full max-w-[104rem] px-7 pb-10 sm:px-9 lg:px-12 2xl:px-14">
-          <button
-            type="button"
-            onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
-            disabled={!canGoPrev}
-            className={`absolute left-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border transition lg:flex xl:left-5 2xl:left-6 ${
-              canGoPrev
-                ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
-                : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
-            }`}
-            aria-label="Anterior"
-          >
-            <ArrowIcon direction="left" />
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              setStartIndex((current) =>
-                Math.min(current + 1, testimonials.length - visibleCount),
-              )
-            }
-            disabled={!canGoNext}
-            className={`absolute right-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border transition lg:flex xl:right-5 2xl:right-6 ${
-              canGoNext
-                ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
-                : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
-            }`}
-            aria-label="Siguiente"
-          >
-            <ArrowIcon direction="right" />
-          </button>
-
-          <div className="grid gap-6 lg:grid-cols-3 lg:gap-0">
-            {visibleTestimonials.map((item, index) => (
-              <article
-                key={`${item.name}-${item.time}`}
-                className={`px-4 py-6 text-center sm:px-5 sm:py-8 lg:px-10 2xl:px-12 ${
-                  index < visibleTestimonials.length - 1 ? "lg:border-r lg:border-slate-200" : ""
-                }`}
-              >
-                <div className="flex items-start justify-center gap-5">
-                  <p className="text-[3.6rem] font-black leading-none tracking-tight text-[#ffb61d] sm:text-[4.6rem]">
-                    5.0
-                  </p>
-                  <div className="pt-2 text-left">
-                    <h3 className="text-[1.1rem] font-semibold tracking-tight text-slate-950">
-                      {item.name}
-                    </h3>
-                    <p className="text-sm text-slate-400">{item.time}</p>
-                    <RatingStars />
-                  </div>
-                </div>
-                <p className="mx-auto mt-6 max-w-[30rem] text-base leading-8 tracking-tight text-slate-800 sm:mt-8 sm:text-[1.15rem] sm:leading-10">
-                  &quot;{item.quote}&quot;
-                </p>
-              </article>
-            ))}
-          </div>
-
-          <div className="mt-6 flex items-center justify-center gap-2 lg:hidden">
-            <button
-              type="button"
-              onClick={() => setStartIndex((current) => Math.max(current - 1, 0))}
-              disabled={!canGoPrev}
-              className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
-                canGoPrev
-                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
-                  : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
-              }`}
-              aria-label="Anterior"
-            >
-              <ArrowIcon direction="left" />
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setStartIndex((current) =>
-                  Math.min(current + 1, testimonials.length - visibleCount),
-                )
-              }
-              disabled={!canGoNext}
-              className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
-                canGoNext
-                  ? "cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
-                  : "cursor-default border-slate-100 bg-slate-50 text-slate-300"
-              }`}
-              aria-label="Siguiente"
-            >
-              <ArrowIcon direction="right" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mx-auto grid w-full max-w-[104rem] gap-5 border-t border-slate-200 px-3 py-10 sm:px-5 md:grid-cols-2 lg:grid-cols-5 lg:px-6 2xl:px-10">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {benefits.map((item, index) => (
-            <article key={item.title} className="flex items-start gap-4">
-              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-slate-200 text-[#3558ff]">
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  {index === 0 && (
-                    <>
-                      <path d="M4 7h16v10H4z" />
-                      <path d="M8 7V4h8v3" />
-                      <path d="M8 12h8" />
-                    </>
-                  )}
-                  {index === 1 && (
-                    <>
-                      <path d="M12 3v18" />
-                      <path d="M16 7.5c0-1.7-1.8-3-4-3s-4 1.3-4 3 1.5 2.6 4 3 4 1.3 4 3-1.8 3-4 3-4-1.3-4-3" />
-                    </>
-                  )}
-                  {index === 2 && (
-                    <>
-                      <path d="M7 7h10" />
-                      <path d="M7 12h7" />
-                      <path d="M7 17h5" />
-                      <path d="m18 15 2 2-2 2" />
-                    </>
-                  )}
-                  {index === 3 && (
-                    <>
-                      <path d="M6 18 18 6" />
-                      <path d="M8 6h10v10" />
-                      <path d="M4 10v8h8" />
-                    </>
-                  )}
-                  {index === 4 && (
-                    <>
-                      <path d="M12 3 5 6v6c0 4.2 2.9 7.9 7 9 4.1-1.1 7-4.8 7-9V6Z" />
-                      <path d="M12 8v8" />
-                      <path d="M9.5 11.5h5" />
-                    </>
-                  )}
-                </svg>
+            <article
+              key={item.title}
+              className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-[0_14px_30px_rgba(15,23,42,0.05)]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#eef2ff] text-[#3558ff]">
+                <BenefitIcon index={index} />
               </div>
               <div>
-                <h3 className="text-[1.08rem] font-semibold tracking-tight text-slate-950">
+                <h3 className="text-[1.05rem] font-semibold tracking-tight text-slate-950">
                   {item.title}
                 </h3>
-                <p className="mt-1.5 text-sm leading-7 text-slate-500">{item.description}</p>
+                <p className="mt-1.5 text-sm leading-6 text-slate-500">
+                  {item.description}
+                </p>
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <a
+            href={buildWhatsappLink(
+              "Hola Express Printer, quiero hacer un pedido.",
+            )}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#1fbd5a] sm:w-fit"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="currentColor"
+            >
+              <path d="M19.05 4.91A9.82 9.82 0 0 0 12.03 2c-5.45 0-9.88 4.43-9.88 9.88 0 1.74.45 3.43 1.31 4.92L2 22l5.35-1.4a9.82 9.82 0 0 0 4.68 1.19h.01c5.45 0 9.88-4.43 9.88-9.88a9.8 9.8 0 0 0-2.87-7ZM12.04 20.1h-.01a8.13 8.13 0 0 1-4.14-1.13l-.3-.18-3.17.83.85-3.09-.2-.32a8.11 8.11 0 0 1 1.24-10.03 8.1 8.1 0 0 1 5.77-2.38c4.49 0 8.15 3.65 8.15 8.14 0 4.49-3.66 8.15-8.19 8.15Z" />
+            </svg>
+            Escribenos por WhatsApp
+          </a>
+          <a
+            href="#destacados"
+            className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 sm:w-fit"
+          >
+            Ver productos
+          </a>
         </div>
       </div>
     </section>

@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import { buildWhatsappLink } from "@/lib/whatsapp";
+
 const businessBenefits = [
   "Precios preferenciales para compras recurrentes",
   "Produccion por volumen para sedes, marcas y eventos",
@@ -96,8 +98,12 @@ export function StorefrontBusinessSection() {
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
-            <button
-              type="button"
+            <a
+              href={buildWhatsappLink(
+                "Hola Express Printer, quiero informacion de impresion para mi empresa.",
+              )}
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#fbbf24] px-5 py-3.5 text-sm font-semibold text-slate-950 transition hover:bg-[#f5b116] sm:w-fit sm:px-6"
             >
               Solicitar atencion empresarial
@@ -113,7 +119,7 @@ export function StorefrontBusinessSection() {
               >
                 <path d="m9 6 6 6-6 6" />
               </svg>
-            </button>
+            </a>
             <p className="text-sm font-medium text-slate-500">
               Respuesta para cuentas empresariales
             </p>
