@@ -144,3 +144,70 @@ a:hover {
 .hero-indicator-progress {
   animation: hero-indicator-progress 5000ms linear forwards;
 }
+
+/* ── Seccion "Por que elegirnos": banda oscura con stack 3D ── */
+@keyframes vp-float-a {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes vp-float-b {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(12px); }
+}
+
+@keyframes vp-spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+.vp-stack {
+  perspective: 1200px;
+}
+
+.vp-stack-inner {
+  transform: rotateX(var(--vp-rx, 0deg)) rotateY(var(--vp-ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vp-float-a { animation: vp-float-a 6s ease-in-out infinite; }
+.vp-float-b { animation: vp-float-b 7.5s ease-in-out infinite; }
+.vp-spin-slow { animation: vp-spin-slow 46s linear infinite; }
+
+/* Entrada escalonada: visible por defecto (SSR / sin JS); solo se oculta
+   cuando el cliente arma la animacion (.vp-js) y se revela con .vp-in */
+.vp-item {
+  transition:
+    opacity 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vp-js .vp-item {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.vp-js.vp-in .vp-item {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-float-a,
+  .vp-float-b,
+  .vp-spin-slow {
+    animation: none;
+  }
+
+  .vp-stack-inner {
+    transition: none;
+    transform: none;
+  }
+
+  .vp-js .vp-item,
+  .vp-item {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
