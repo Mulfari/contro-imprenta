@@ -37,7 +37,6 @@ import { CatalogProductCard } from "./components/CatalogProductCard";
 import { CatalogProductSkeleton } from "./components/CatalogProductSkeleton";
 import { ProductPreviewModal } from "./components/ProductPreviewModal";
 import { MobileCatalogFilterSheet } from "./components/MobileCatalogFilterSheet";
-import { MobileStorefrontBar } from "./components/MobileStorefrontBar";
 import { CommerceDrawer } from "./components/CommerceDrawer";
 import { CatalogProductDetail } from "./CatalogProductDetail";
 
@@ -511,21 +510,8 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
     }, 0);
   };
 
-  const openMobileFilters = () => {
-    setCatalogOpen(true);
-    setCatalogLoading(true);
-    setActivePanel(null);
-    setAccountOpen(false);
-    setSelectedProduct(null);
-    setMobileFilterOpen(true);
-    window.history.pushState(null, "", "#catalogo");
-    window.setTimeout(() => {
-      document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
-  };
-
   return (
-    <main className="relative min-h-screen bg-[#f3f5f8] pb-24 text-slate-950 xl:pb-0">
+    <main className="relative min-h-screen bg-[#f3f5f8] text-slate-950">
       <StorefrontToast key={toast?.id ?? "empty-toast"} toast={toast} onDone={() => setToast(null)} />
 
       <StorefrontHeader
@@ -739,23 +725,6 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
         onSelect={selectCatalogFilter}
       />
 
-      <MobileStorefrontBar
-        isCatalogVisible={isCatalogVisible}
-        cartCount={cartCount}
-        wishlistCount={wishlistIds.size}
-        onCatalogClick={openCatalog}
-        onFilterClick={openMobileFilters}
-        onWishlistClick={() => {
-          setActivePanel("wishlist");
-          setAccountOpen(false);
-          setMobileFilterOpen(false);
-        }}
-        onCartClick={() => {
-          setActivePanel("cart");
-          setAccountOpen(false);
-          setMobileFilterOpen(false);
-        }}
-      />
     </main>
   );
 }

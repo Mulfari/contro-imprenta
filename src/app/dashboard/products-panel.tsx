@@ -665,7 +665,7 @@ export function ProductsPanel({
               <span>
                 A cotización
                 <span className="mt-0.5 block text-xs font-normal text-slate-400">
-                  No muestra precio cerrado: el cliente envía "Solicitar cotización" y tú le pones el precio en el pedido.
+                  No muestra precio cerrado: el cliente envía &quot;Solicitar cotización&quot; y tú le pones el precio en el pedido.
                 </span>
               </span>
             </label>
