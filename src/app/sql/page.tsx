@@ -3,7 +3,9 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
+import { getCurrentSession } from "@/lib/auth/session";
 import { SqlCopyButton } from "./sql-copy-button";
 
 export const dynamic = "force-dynamic";
@@ -99,7 +101,13 @@ function readPatchEntries(supabasePath: string) {
   }
 }
 
-export default function SqlPage() {
+export default async function SqlPage() {
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Acceso%20solo%20para%20administradores");
+  }
+
   const rootPath = process.cwd();
   const supabasePath = path.join(rootPath, "supabase");
   const setupPath = path.join(supabasePath, "setup.sql");

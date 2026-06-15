@@ -110,7 +110,6 @@ const dashboardViews = [
   "pagos",
   "inventario",
   "productos",
-  "proveedores",
   "equipo",
 ] as const;
 type DashboardView = (typeof dashboardViews)[number];
@@ -122,7 +121,6 @@ const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Clientes", view: "clientes" },
   { label: "Inventario", view: "inventario" },
   { label: "Productos", view: "productos" },
-  { label: "Proveedores", view: "proveedores" },
   { label: "Equipo", view: "equipo" },
 ];
 
@@ -130,7 +128,6 @@ const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "pagos", "clien
 const adminSideNavViews: DashboardView[] = [
   "inventario",
   "productos",
-  "proveedores",
   "equipo",
 ];
 const dashboardTimeZone = "America/Caracas";
@@ -827,7 +824,7 @@ function buildTeamEditUrl(userId: string, message?: string) {
 
 function resolveView(value: string, isAdmin: boolean): DashboardView {
   if (
-    ["inventario", "productos", "proveedores", "equipo"].includes(value) &&
+    ["inventario", "productos", "equipo"].includes(value) &&
     !isAdmin
   ) {
     return "resumen";
@@ -992,8 +989,6 @@ function getViewLabel(view: DashboardView) {
       return "Inventario";
     case "productos":
       return "Productos";
-    case "proveedores":
-      return "Proveedores";
     case "equipo":
       return "Equipo";
     default:
@@ -2254,53 +2249,6 @@ export default async function DashboardPage({
             />
           ) : null}
 
-          {activeView === "proveedores" && session.role === "admin" ? (
-            <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold">Proveedores</h2>
-                    <p className="mt-2 text-sm text-slate-500">
-                      Centraliza los datos de talleres, distribuidores y aliados del negocio.
-                    </p>
-                  </div>
-                  <span className="rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-                    Proximo modulo
-                  </span>
-                </div>
-
-                <div className="mt-6 rounded-[1.75rem] border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center">
-                  <p className="text-base font-semibold text-slate-900">
-                    Este modulo ya tiene espacio reservado en el panel.
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    En el siguiente paso podemos construir sus formularios, listados
-                    y controles reales sin mover la navegacion administrativa.
-                  </p>
-                </div>
-              </article>
-
-              <article className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-                <h3 className="text-lg font-semibold text-slate-900">
-                  Lo siguiente aqui
-                </h3>
-                <div className="mt-5 space-y-3">
-                  {[
-                    "Guardar datos de contacto y categoria del proveedor",
-                    "Registrar servicios, materiales y observaciones",
-                    "Consultar rapidamente proveedores frecuentes",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600"
-                    >
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </article>
-            </section>
-          ) : null}
         </div>
       </div>
     </main>
