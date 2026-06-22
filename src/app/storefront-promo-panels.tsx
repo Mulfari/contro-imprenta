@@ -6,17 +6,15 @@ import {
   Cards,
   FlagBanner,
   type Icon,
-  Plus,
   Receipt,
   Sticker,
 } from "@phosphor-icons/react";
 
 // Paneles destacados (export "paneles expansibles" de Claude Design): tipo
 // triptico que se ensancha al pasar el cursor (desktop) y acordeon nativo en
-// movil. Foto de referencia del export reemplazada por el producto real sobre
-// un gradiente de marca (cuando Javier de fotos ambientales se cambian a cover).
-// Cada panel abre el detalle (onPreviewProduct) o anade al carrito
-// (onAddProduct); "Ver todo el catalogo" abre el catalogo (onViewAll).
+// movil. Usa las fotos del export, descargadas a /public para no depender de
+// Unsplash en produccion. Cada panel abre el detalle (onPreviewProduct);
+// "Ver todo el catalogo" abre el catalogo (onViewAll).
 
 const grotesk = { fontFamily: "var(--font-space-grotesk), sans-serif" };
 
@@ -26,7 +24,6 @@ type Panel = {
   hook: string;
   Glyph: Icon;
   image: string;
-  gradient: string;
 };
 
 const panels: Panel[] = [
@@ -35,49 +32,41 @@ const panels: Panel[] = [
     name: "Tarjetas premium",
     hook: "Acabado mate o brillante.",
     Glyph: Cards,
-    image: "/storefront-promo-cards-premium.webp",
-    gradient: "linear-gradient(135deg, #243154 0%, #0f1830 100%)",
+    image: "/promo-panel-tarjetas.jpg",
   },
   {
     productId: "stickers-troquelados",
     name: "Stickers y etiquetas",
     hook: "Troquelados para tu marca.",
     Glyph: Sticker,
-    image: "/storefront-promo-stickers-labels-trimmed.webp",
-    gradient: "linear-gradient(135deg, #7a4a12 0%, #3a2206 100%)",
+    image: "/promo-panel-stickers.jpg",
   },
   {
     productId: "pendon-publicitario",
     name: "Pendones y afiches",
     hook: "Gran formato que se ve.",
     Glyph: FlagBanner,
-    image: "/storefront-promo-banners-posters-transparent.webp",
-    gradient: "linear-gradient(135deg, #6b2420 0%, #2c0f0d 100%)",
+    image: "/promo-panel-pendones.jpg",
   },
   {
     productId: "talonarios-fiscales",
     name: "Talonarios y recibos",
     hook: "Para el día a día del negocio.",
     Glyph: Receipt,
-    image: "/storefront-promo-invoices-receipts-transparent.webp",
-    gradient: "linear-gradient(135deg, #3b4a66 0%, #1a2433 100%)",
+    image: "/promo-panel-talonarios.jpg",
   },
 ];
 
 const verBtn =
-  "inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/40 bg-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/30";
-const addBtn =
-  "inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#3558ff] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(53,88,255,0.34)] transition hover:bg-[#2c49db] active:scale-[0.97]";
+  "inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/40 bg-white/15 px-[18px] py-3 text-[14.5px] font-semibold text-white backdrop-blur-sm transition hover:bg-white/30";
 
 type StorefrontPromoPanelsProps = {
   onPreviewProduct: (productId: string) => void;
-  onAddProduct: (productId: string) => void;
   onViewAll?: () => void;
 };
 
 export function StorefrontPromoPanels({
   onPreviewProduct,
-  onAddProduct,
   onViewAll,
 }: StorefrontPromoPanelsProps) {
   return (
@@ -106,7 +95,7 @@ export function StorefrontPromoPanels({
 
       {/* Desktop: paneles que se expanden al pasar el cursor */}
       <div className="pp-row hidden h-[460px] gap-3.5 lg:flex">
-        {panels.map(({ productId, name, hook, Glyph, image, gradient }) => (
+        {panels.map(({ productId, name, hook, Glyph, image }) => (
           <div
             key={productId}
             role="button"
@@ -119,14 +108,13 @@ export function StorefrontPromoPanels({
               }
             }}
             aria-label={name}
-            className="pp-panel group cursor-pointer rounded-[18px] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-[#3558ff]/55"
-            style={{ backgroundImage: gradient }}
+            className="pp-panel group cursor-pointer rounded-[18px] bg-[#1b1714] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-[#3558ff]/55"
           >
             <div
-              className="pp-img absolute inset-x-5 inset-y-6 bg-center bg-no-repeat drop-shadow-[0_24px_40px_rgba(0,0,0,0.45)]"
-              style={{ backgroundImage: `url('${image}')`, backgroundSize: "contain" }}
+              className="pp-img absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url('${image}')` }}
             />
-            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(15,13,10,0.85)_0%,rgba(15,13,10,0.32)_46%,rgba(15,13,10,0.05)_80%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(15,13,10,0.82)_0%,rgba(15,13,10,0.3)_46%,rgba(15,13,10,0.05)_80%)]" />
 
             <span className="absolute left-5 top-[18px] flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm">
               <Glyph size={20} weight="bold" />
@@ -135,7 +123,7 @@ export function StorefrontPromoPanels({
             <div className="pp-label pointer-events-none absolute inset-x-0 bottom-6 flex flex-col items-center">
               <span
                 style={{ ...grotesk, writingMode: "vertical-rl" }}
-                className="rotate-180 text-[17px] font-semibold whitespace-nowrap text-white"
+                className="rotate-180 whitespace-nowrap text-[17px] font-semibold text-white"
               >
                 {name}
               </span>
@@ -144,22 +132,12 @@ export function StorefrontPromoPanels({
             <div className="pp-exp absolute inset-x-[26px] bottom-[26px] flex flex-col gap-4">
               <div>
                 <span className="mb-3 block h-[3px] w-[30px] rounded-full bg-[#fbbf24]" />
-                <div style={grotesk} className="text-[1.5rem] font-semibold leading-[1.08] tracking-[-0.02em] text-white">
+                <div style={grotesk} className="whitespace-nowrap text-[27px] font-semibold leading-[1.08] tracking-[-0.02em] text-white">
                   {name}
                 </div>
-                <div className="mt-1.5 text-sm text-white/85">{hook}</div>
+                <div className="mt-1.5 whitespace-nowrap text-sm text-white/88">{hook}</div>
               </div>
-              <div className="flex flex-wrap gap-2.5">
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onAddProduct(productId);
-                  }}
-                  className={addBtn}
-                >
-                  <Plus size={15} weight="bold" /> Añadir
-                </button>
+              <div className="flex">
                 <button
                   type="button"
                   onClick={(event) => {
@@ -178,12 +156,12 @@ export function StorefrontPromoPanels({
 
       {/* Móvil / tablet: acordeón nativo */}
       <div className="flex flex-col gap-2.5 lg:hidden">
-        {panels.map(({ productId, name, hook, Glyph, image, gradient }, index) => (
+        {panels.map(({ productId, name, hook, Glyph, image }, index) => (
           <details key={productId} className="pp-mp overflow-hidden rounded-2xl shadow-[0_5px_14px_rgba(20,20,35,0.06)]" open={index === 0}>
-            <summary className="relative flex h-[150px] cursor-pointer items-end p-4" style={{ backgroundImage: gradient }}>
+            <summary className="relative flex h-[150px] cursor-pointer items-end bg-[#1b1714] p-4">
               <div
-                className="absolute inset-x-4 inset-y-3 bg-center bg-no-repeat"
-                style={{ backgroundImage: `url('${image}')`, backgroundSize: "contain" }}
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url('${image}')` }}
               />
               <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(15,13,10,0.82),rgba(15,13,10,0.05)_78%)]" />
               <div className="relative z-[2] flex w-full items-center justify-between">
@@ -198,10 +176,7 @@ export function StorefrontPromoPanels({
             </summary>
             <div className="bg-[#1b1714] px-4 pb-4">
               <p className="pt-3 text-[12.5px] text-white/80">{hook}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" onClick={() => onAddProduct(productId)} className={addBtn}>
-                  <Plus size={14} weight="bold" /> Añadir
-                </button>
+              <div className="mt-3 flex">
                 <button type="button" onClick={() => onPreviewProduct(productId)} className={verBtn}>
                   Ver producto
                 </button>

@@ -678,7 +678,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
         <>
           <StorefrontHero />
           <StorefrontCategoryStrip onCategorySelect={openCatalogWithQuery} />
-          <StorefrontPromoPanels onPreviewProduct={openPreviewById} onAddProduct={addProductById} onViewAll={openCatalog} />
+          <StorefrontPromoPanels onPreviewProduct={openPreviewById} onViewAll={openCatalog} />
           <StorefrontDealsSection onPreviewProduct={openPreviewById} onAddProduct={addProductById} />
           <StorefrontFeatureGridSection />
           <StorefrontBusinessSection />
