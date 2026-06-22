@@ -1,498 +1,148 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import {
+  ArrowRight,
+  BookOpen,
+  Cards,
+  CaretLeft,
+  CaretRight,
+  Envelope,
+  FlagBanner,
+  FrameCorners,
+  type Icon,
+  Notebook,
+  Package,
+  Receipt,
+  Stamp,
+  Sticker,
+  Tag,
+} from "@phosphor-icons/react";
 
-const items = [
-  { title: "Tarjetas", count: "18 productos", art: "cards", query: "Tarjetas" },
-  { title: "Stickers", count: "16 productos", art: "stickers", query: "Stickers" },
-  { title: "Folletos", count: "12 productos", art: "brochure", query: "Afiches" },
-  { title: "Pendones", count: "9 productos", art: "rollup", query: "Pendones" },
-  { title: "Talonarios", count: "7 productos", art: "notepad", query: "Talonarios" },
-  { title: "Etiquetas", count: "21 productos", art: "sticker-labels", query: "Etiquetas" },
-  { title: "Invitaciones", count: "14 productos", art: "invitations-card", query: "Invitaciones" },
-  { title: "Packaging", count: "11 productos", art: "packaging-real", query: "Packaging" },
-  { title: "Cuadernos", count: "10 productos", art: "booklet", query: "Papeleria" },
-  { title: "Acrilicos", count: "6 productos", art: "banner", query: "Gran formato" },
-  { title: "Sellos", count: "8 productos", art: "invoice", query: "Facturas" },
+// Tira de categorias ("opción marca de agua", de Claude Design): cada categoria
+// es una tarjeta con un icono duotono grande como textura de fondo y el nombre
+// nitido al frente. En hover la tarjeta se eleva, el icono crece/intensifica y
+// aparece "Ver →". Riel horizontal con flechas (desktop) y swipe (movil). Cada
+// tarjeta abre el catalogo filtrado por su categoria (onCategorySelect).
+
+const grotesk = { fontFamily: "var(--font-space-grotesk), sans-serif" };
+
+type Category = {
+  name: string;
+  desc: string;
+  query: string;
+  Glyph: Icon;
+  color: string;
+  tint: string;
+};
+
+const categories: Category[] = [
+  { name: "Tarjetas", desc: "Mate o brillante", query: "Tarjetas", Glyph: Cards, color: "#3558ff", tint: "#fbfaf7" },
+  { name: "Stickers", desc: "Troquelados", query: "Stickers", Glyph: Sticker, color: "#e0941a", tint: "#fdf9f0" },
+  { name: "Folletos", desc: "Tríptico o díptico", query: "Afiches", Glyph: BookOpen, color: "#cf6342", tint: "#fcf6f3" },
+  { name: "Pendones", desc: "Roll-up y banner", query: "Pendones", Glyph: FlagBanner, color: "#c0392b", tint: "#fcf5f4" },
+  { name: "Talonarios", desc: "Numerados", query: "Talonarios", Glyph: Receipt, color: "#51607a", tint: "#f8f9fb" },
+  { name: "Etiquetas", desc: "Adhesivas", query: "Etiquetas", Glyph: Tag, color: "#1f8a5b", tint: "#f4faf7" },
+  { name: "Invitaciones", desc: "Con sobre", query: "Invitaciones", Glyph: Envelope, color: "#9d5577", tint: "#fbf6f9" },
+  { name: "Packaging", desc: "Cajas y bolsas", query: "Packaging", Glyph: Package, color: "#a9743f", tint: "#fbf8f3" },
+  { name: "Cuadernos", desc: "Personalizados", query: "Papeleria", Glyph: Notebook, color: "#2e8aa6", tint: "#f4fafc" },
+  { name: "Acrílicos", desc: "Corte láser", query: "Gran formato", Glyph: FrameCorners, color: "#2a86c4", tint: "#f4f9fc" },
+  { name: "Sellos", desc: "Automáticos", query: "Facturas", Glyph: Stamp, color: "#3a3a42", tint: "#f8f8f9" },
 ];
-
-const DESKTOP_ITEM_STRIDE = 206;
-
-function getTrackItemStride(track: HTMLDivElement) {
-  const firstItem = track.firstElementChild as HTMLElement | null;
-
-  if (!firstItem) {
-    return DESKTOP_ITEM_STRIDE;
-  }
-
-  const trackStyles = window.getComputedStyle(track);
-  const gap = Number.parseFloat(trackStyles.columnGap || trackStyles.gap || "0");
-
-  return firstItem.getBoundingClientRect().width + (Number.isFinite(gap) ? gap : 0);
-}
-
-function CategoryArt({ art }: { art: string }) {
-  if (art === "cards") {
-    return (
-      <div
-        className="relative flex h-40 w-44 items-center justify-center"
-        style={{ width: "11rem", height: "10rem" }}
-      >
-        <div className="absolute inset-x-3 bottom-1 h-9 rounded-full bg-slate-300/65 blur-xl" />
-        <div
-          aria-label="Tarjetas"
-          role="img"
-          className="h-[139px] w-[11.625rem] translate-x-1 drop-shadow-[0_20px_30px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_72%_66%_at_52%_52%,black_58%,transparent_84%)]"
-          style={{
-            backgroundImage: "url('/storefront-cards.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (art === "stickers") {
-    return (
-      <div
-        className="relative flex h-32 w-36 items-center justify-center"
-        style={{ width: "9rem", height: "8rem" }}
-      >
-        <div className="absolute inset-x-4 bottom-2 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <div
-          aria-label="Stickers"
-          role="img"
-          className="h-[119px] w-[9.875rem] drop-shadow-[0_20px_30px_rgba(15,23,42,0.18)]"
-          style={{
-            backgroundImage: "url('/storefront-stickers.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (art === "booklet") {
-    return (
-      <div className="relative h-24 w-24">
-        <div className="absolute left-4 top-5 h-13 w-10 rounded-[1rem] border border-slate-300 bg-white shadow-sm" />
-        <div className="absolute left-9 top-2 h-13 w-10 rounded-[1rem] border border-slate-300 bg-white/92 shadow-sm" />
-      </div>
-    );
-  }
-
-  if (art === "brochure") {
-    return (
-      <div
-        className="relative flex h-36 w-40 items-center justify-center"
-        style={{ width: "10rem", height: "9rem" }}
-      >
-        <div className="absolute inset-x-4 bottom-1 h-8 rounded-full bg-slate-300/65 blur-xl" />
-        <div
-          aria-label="Folletos"
-          role="img"
-          className="h-[133px] w-[10.875rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_52%,black_58%,transparent_84%)]"
-          style={{
-            backgroundImage: "url('/storefront-brochures.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (art === "banner") {
-    return (
-      <div className="relative h-24 w-24">
-        <div className="absolute left-8 top-1 h-20 w-2 rounded-full bg-slate-400" />
-        <div className="absolute left-10 top-7 h-12 w-9 rounded-r-[1rem] rounded-tl-[0.3rem] rounded-bl-[0.3rem] bg-violet-300 shadow-sm" />
-      </div>
-    );
-  }
-
-  if (art === "rollup") {
-    return (
-      <div
-        className="relative flex h-36 w-28 items-center justify-center"
-        style={{ width: "7rem", height: "9rem" }}
-      >
-        <div className="absolute inset-x-2 bottom-1 h-6 rounded-full bg-slate-300/65 blur-xl" />
-        <div
-          aria-label="Pendones"
-          role="img"
-          className="h-[161px] w-[7.0625rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_70%_76%_at_50%_52%,black_60%,transparent_86%)]"
-          style={{
-            backgroundImage: "url('/storefront-banners.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (art === "invoice") {
-    return (
-      <div className="relative h-24 w-24">
-        <div className="absolute left-6 top-4 h-14 w-11 rounded-[1rem] border border-slate-300 bg-white shadow-sm" />
-        <div className="absolute left-9 top-10 h-1.5 w-7 rounded-full bg-slate-200" />
-        <div className="absolute left-9 top-14 h-1.5 w-8 rounded-full bg-slate-200" />
-        <div className="absolute left-9 top-18 h-1.5 w-5 rounded-full bg-slate-200" />
-      </div>
-    );
-  }
-
-  if (art === "notepad") {
-    return (
-      <div
-        className="relative flex h-34 w-36 items-center justify-center"
-        style={{ width: "9rem", height: "8.5rem" }}
-      >
-        <div className="absolute inset-x-3 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <div
-          aria-label="Talonarios"
-          role="img"
-          className="h-[125px] w-[9.75rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_68%_at_50%_54%,black_58%,transparent_84%)]"
-          style={{
-            backgroundImage: "url('/storefront-invoices.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (art === "labels") {
-    return (
-      <div className="grid h-24 w-24 grid-cols-2 gap-2">
-        <div className="rounded-xl bg-emerald-300" />
-        <div className="rounded-xl bg-cyan-300" />
-        <div className="rounded-xl bg-amber-300" />
-        <div className="rounded-xl bg-pink-300" />
-      </div>
-    );
-  }
-
-  if (art === "sticker-labels") {
-    return (
-      <div
-        className="relative flex h-34 w-40 items-center justify-center"
-        style={{ width: "10rem", height: "8.5rem" }}
-      >
-        <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <div
-          aria-label="Etiquetas"
-          role="img"
-          className="h-[127px] w-[10.5625rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
-          style={{
-            backgroundImage: "url('/storefront-labels.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (art === "invite") {
-    return (
-      <div className="relative h-24 w-24">
-        <div className="absolute left-5 top-6 h-11 w-12 rotate-[-8deg] rounded-[1rem] border border-slate-300 bg-white shadow-sm" />
-        <div className="absolute left-10 top-3 h-11 w-12 rotate-[8deg] rounded-[1rem] border border-slate-300 bg-white/92 shadow-sm" />
-        <div className="absolute left-12 top-11 h-3 w-6 rounded-full bg-rose-300" />
-      </div>
-    );
-  }
-
-  if (art === "invitations-card") {
-    return (
-      <div
-        className="relative flex h-34 w-40 items-center justify-center"
-        style={{ width: "10rem", height: "8.5rem" }}
-      >
-        <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <div
-          aria-label="Invitaciones"
-          role="img"
-          className="h-[127px] w-[10.5625rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
-          style={{
-            backgroundImage: "url('/storefront-invitations.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (art === "packaging") {
-    return (
-      <div className="relative h-24 w-24">
-        <div className="absolute left-5 top-6 h-10 w-12 rounded-[0.9rem] border border-slate-300 bg-white shadow-sm" />
-        <div className="absolute left-9 top-2 h-8 w-4 rounded-md bg-slate-300" />
-        <div className="absolute left-9 bottom-3 h-2 w-4 rounded-full bg-amber-300" />
-      </div>
-    );
-  }
-
-  if (art === "packaging-real") {
-    return (
-      <div
-        className="relative flex h-34 w-40 items-center justify-center"
-        style={{ width: "10rem", height: "8.5rem" }}
-      >
-        <div className="absolute inset-x-4 bottom-1 h-7 rounded-full bg-slate-300/65 blur-xl" />
-        <div
-          aria-label="Packaging"
-          role="img"
-          className="h-[127px] w-[10.5625rem] drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] [mask-image:radial-gradient(ellipse_74%_70%_at_50%_54%,black_58%,transparent_84%)]"
-          style={{
-            backgroundImage: "url('/storefront-packaging.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-          }}
-        />
-      </div>
-    );
-  }
-  return null;
-}
 
 type StorefrontCategoryStripProps = {
   onCategorySelect: (query: string) => void;
 };
 
 export function StorefrontCategoryStrip({ onCategorySelect }: StorefrontCategoryStripProps) {
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const dragState = useRef<{
-    pointerId: number | null;
-    startX: number;
-    startScrollLeft: number;
-    hasMoved: boolean;
-    frame: number | null;
-    pendingScrollLeft: number | null;
-  }>({
-    pointerId: null,
-    startX: 0,
-    startScrollLeft: 0,
-    hasMoved: false,
-    frame: null,
-    pendingScrollLeft: null,
-  });
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) {
-      return;
-    }
+  const railRef = useRef<HTMLDivElement | null>(null);
 
-    const updateControls = () => {
-      const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
-      setCanScrollLeft(track.scrollLeft > 4);
-      setCanScrollRight(track.scrollLeft < maxScrollLeft - 4);
-    };
-
-    updateControls();
-    track.addEventListener("scroll", updateControls, { passive: true });
-
-    return () => {
-      track.removeEventListener("scroll", updateControls);
-    };
-  }, []);
-
-  useEffect(() => {
-    const dragRef = dragState.current;
-
-    return () => {
-      if (dragRef.frame !== null) {
-        cancelAnimationFrame(dragRef.frame);
-      }
-    };
-  }, []);
-
-  const snapToNearestItem = () => {
-    const track = trackRef.current;
-    if (!track) {
-      return;
-    }
-
-    const stride = getTrackItemStride(track);
-    const target = Math.round(track.scrollLeft / stride) * stride;
-    track.scrollTo({
-      left: target,
-      behavior: "smooth",
-    });
-  };
-
-  const slideBy = (direction: "prev" | "next") => {
-    const track = trackRef.current;
-    if (!track) {
-      return;
-    }
-
-    track.scrollBy({
-      left: direction === "next" ? getTrackItemStride(track) : -getTrackItemStride(track),
-      behavior: "smooth",
-    });
+  const scrollByAmount = (amount: number) => {
+    railRef.current?.scrollBy({ left: amount, behavior: "smooth" });
   };
 
   return (
     <section id="catalogo" className="mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 pb-6 sm:px-6 lg:px-8 2xl:px-10">
-      <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[2.9rem_minmax(0,1fr)_2.9rem]">
-        <button
-          type="button"
-          onClick={() => slideBy("prev")}
-          className={`hidden h-12 w-12 items-center justify-center rounded-full border bg-white shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition md:flex ${
-            canScrollLeft
-              ? "cursor-pointer border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
-              : "cursor-default border-slate-100 text-slate-300"
-          }`}
-          aria-label="Anterior"
-          disabled={!canScrollLeft}
-        >
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-
-        <div className="relative overflow-hidden">
-          <div
-            ref={trackRef}
-            className={`storefront-strip-scrollbar storefront-strip-track flex gap-3 overflow-x-auto px-0.5 md:gap-[18px] md:px-1 ${
-              isDragging ? "cursor-grabbing" : "cursor-grab scroll-smooth"
-            }`}
-            onPointerDown={(event) => {
-              if (event.pointerType !== "mouse") {
-                return;
-              }
-
-              const track = trackRef.current;
-              if (!track) {
-                return;
-              }
-
-              dragState.current.pointerId = event.pointerId;
-              dragState.current.startX = event.clientX;
-              dragState.current.startScrollLeft = track.scrollLeft;
-              dragState.current.hasMoved = false;
-              dragState.current.pendingScrollLeft = null;
-              setIsDragging(true);
-              track.setPointerCapture(event.pointerId);
-            }}
-            onPointerMove={(event) => {
-              if (event.pointerType !== "mouse") {
-                return;
-              }
-
-              const track = trackRef.current;
-              if (!track || dragState.current.pointerId !== event.pointerId) {
-                return;
-              }
-
-              const deltaX = (event.clientX - dragState.current.startX) * 1.08;
-              const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
-              dragState.current.pendingScrollLeft = Math.min(
-                Math.max(dragState.current.startScrollLeft - deltaX, 0),
-                maxScrollLeft,
-              );
-              dragState.current.hasMoved ||= Math.abs(deltaX) > 6;
-
-              if (dragState.current.frame !== null) {
-                return;
-              }
-
-              dragState.current.frame = requestAnimationFrame(() => {
-                if (trackRef.current && dragState.current.pendingScrollLeft !== null) {
-                  trackRef.current.scrollLeft = dragState.current.pendingScrollLeft;
-                }
-
-                dragState.current.frame = null;
-              });
-            }}
-            onPointerUp={(event) => {
-              if (event.pointerType !== "mouse") {
-                return;
-              }
-
-              const track = trackRef.current;
-              if (!track || dragState.current.pointerId !== event.pointerId) {
-                return;
-              }
-
-              track.releasePointerCapture(event.pointerId);
-              dragState.current.pointerId = null;
-              setIsDragging(false);
-              snapToNearestItem();
-            }}
-            onPointerCancel={() => {
-              if (dragState.current.pointerId === null) {
-                return;
-              }
-
-              dragState.current.pointerId = null;
-              setIsDragging(false);
-              snapToNearestItem();
-            }}
-          >
-            {items.map((item) => (
-              <button
-                key={item.title}
-                type="button"
-                draggable={false}
-                className="min-w-0 basis-[42%] snap-start shrink-0 cursor-pointer px-1 py-4 text-center transition hover:opacity-85 md:w-[188px] md:min-w-[188px] md:basis-auto md:px-2"
-                onClick={(event) => {
-                  if (dragState.current.hasMoved) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    dragState.current.hasMoved = false;
-                    return;
-                  }
-
-                  onCategorySelect(item.query);
-                }}
-              >
-                <div className="mx-auto flex h-28 w-full items-center justify-center md:h-32">
-                  <CategoryArt art={item.art} />
-                </div>
-                <p className="mt-4 text-[0.98rem] font-semibold leading-5 tracking-tight text-slate-950 md:mt-5 md:text-[1.02rem] md:leading-6">
-                  {item.title}
-                </p>
-                <p className="mt-1 text-[0.86rem] text-slate-400 md:text-[0.95rem]">{item.count}</p>
-              </button>
-            ))}
-          </div>
+      <div className="mb-6 flex items-end justify-between gap-6 sm:mb-7">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#a8841f]">
+            Qué imprimimos
+          </p>
+          <h2 style={grotesk} className="mt-2 text-[1.4rem] font-semibold tracking-[-0.025em] text-[#1b1b20] sm:text-[1.65rem]">
+            Explora por categoría
+          </h2>
         </div>
 
-        <button
-          type="button"
-          onClick={() => slideBy("next")}
-          className={`hidden h-12 w-12 items-center justify-center rounded-full border bg-white shadow-[0_16px_32px_rgba(15,23,42,0.07)] transition md:flex ${
-            canScrollRight
-              ? "cursor-pointer border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.97]"
-              : "cursor-default border-slate-100 text-slate-300"
-          }`}
-          aria-label="Siguiente"
-          disabled={!canScrollRight}
-        >
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m9 6 6 6-6 6" />
-          </svg>
-        </button>
+        <div className="hidden gap-2.5 pb-1 sm:flex">
+          <button
+            type="button"
+            onClick={() => scrollByAmount(-432)}
+            aria-label="Anterior"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#e6e3da] bg-white text-[#3a3a42] transition hover:border-[#3558ff]/40 hover:bg-[#fffdf6] hover:text-[#3558ff]"
+          >
+            <CaretLeft size={18} weight="bold" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByAmount(432)}
+            aria-label="Siguiente"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#e6e3da] bg-white text-[#3a3a42] transition hover:border-[#3558ff]/40 hover:bg-[#fffdf6] hover:text-[#3558ff]"
+          >
+            <CaretRight size={18} weight="bold" />
+          </button>
+        </div>
       </div>
+
+      <div className="relative">
+        <div
+          ref={railRef}
+          className="storefront-strip-scrollbar flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-0.5 pb-3.5 pt-2 sm:gap-[22px]"
+        >
+          {categories.map(({ name, desc, query, Glyph, color, tint }) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => onCategorySelect(query)}
+              className="group relative flex h-[8.5rem] w-[9.875rem] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-2xl border border-[#eceae2] p-[15px] text-left shadow-[0_6px_18px_rgba(20,20,35,0.05)] transition duration-[260ms] ease-out hover:-translate-y-1.5 hover:border-[#e2ded4] hover:shadow-[0_20px_38px_rgba(25,30,60,0.14)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:h-[9.875rem] sm:w-[12.125rem] sm:p-[18px]"
+              style={{ backgroundColor: tint }}
+            >
+              <Glyph
+                aria-hidden="true"
+                weight="duotone"
+                size={108}
+                color={color}
+                className="pointer-events-none absolute -bottom-[22px] -right-[18px] opacity-[0.13] transition duration-300 ease-out group-hover:-rotate-3 group-hover:scale-110 group-hover:opacity-90 motion-reduce:transition-none motion-reduce:group-hover:rotate-0 motion-reduce:group-hover:scale-100"
+              />
+
+              <span
+                className="relative flex h-9 w-9 items-center justify-center rounded-[11px] bg-white shadow-[0_2px_6px_rgba(20,20,35,0.07)] sm:h-[38px] sm:w-[38px]"
+                style={{ color }}
+              >
+                <Glyph weight="fill" size={20} />
+              </span>
+
+              <span className="relative flex flex-col gap-1">
+                <span style={grotesk} className="text-[16.5px] font-semibold leading-[1.1] tracking-[-0.015em] text-[#1b1b20] sm:text-[19px] sm:tracking-[-0.02em]">
+                  {name}
+                </span>
+                <span className="text-[12px] text-[#7e7b73] sm:text-[12.5px]">{desc}</span>
+                <span
+                  className="mt-[3px] flex translate-x-[-4px] items-center gap-1.5 text-[12.5px] font-semibold opacity-0 transition duration-200 ease-out group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none"
+                  style={{ color }}
+                >
+                  Ver <ArrowRight size={12} weight="bold" />
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#f3f5f8] to-transparent sm:w-[72px]" />
+      </div>
+
+      <p className="mt-2 flex items-center gap-1.5 text-[11.5px] text-[#a7a49b] sm:hidden">
+        Desliza para ver más <ArrowRight size={12} weight="bold" />
+      </p>
     </section>
   );
 }
