@@ -212,37 +212,19 @@ a:hover {
   }
 }
 
-/* ── Paneles destacados (expansibles tipo tríptico) ── */
+/* ── Paneles destacados (expansibles tipo tríptico, panel activo por JS) ── */
 .pp-panel {
   position: relative;
   flex: 1 1 0;
   min-width: 0;
   overflow: hidden;
-  box-shadow: 0 6px 18px rgba(20, 20, 35, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
   transition: flex-grow 0.45s cubic-bezier(0.3, 0.7, 0.2, 1), box-shadow 0.3s ease;
 }
-.pp-panel:nth-child(1) { flex-grow: 2.6; }
-.pp-row:hover .pp-panel { flex-grow: 1; }
-.pp-row .pp-panel:hover {
-  flex-grow: 2.8;
-  box-shadow: 0 18px 38px rgba(25, 30, 60, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
-}
-
 .pp-img { transition: transform 0.6s ease; }
-.pp-panel:hover .pp-img { transform: scale(1.05); }
-
-.pp-label { opacity: 0; transition: opacity 0.3s ease; }
-.pp-exp {
-  opacity: 1;
-  transform: translateY(0);
+.pp-exp,
+.pp-label {
   transition: opacity 0.35s ease, transform 0.42s cubic-bezier(0.3, 0.7, 0.2, 1);
 }
-.pp-panel:nth-child(n + 2) .pp-exp { opacity: 0; transform: translateY(12px); }
-.pp-panel:nth-child(n + 2) .pp-label { opacity: 1; }
-.pp-row:hover .pp-panel .pp-exp { opacity: 0; transform: translateY(12px); }
-.pp-row:hover .pp-panel .pp-label { opacity: 1; }
-.pp-row:hover .pp-panel:hover .pp-exp { opacity: 1; transform: translateY(0); }
-.pp-row:hover .pp-panel:hover .pp-label { opacity: 0; }
 
 .pp-mp summary { list-style: none; }
 .pp-mp summary::-webkit-details-marker { display: none; }
