@@ -206,8 +206,8 @@ export function StorefrontHero({ onViewCatalog }: StorefrontHeroProps) {
                   </div>
                 </div>
 
-                {/* Media con Ken Burns */}
-                <div className="relative z-[2] overflow-hidden">
+                {/* Media con Ken Burns (arriba en móvil, derecha en desktop) */}
+                <div className="relative z-[2] order-first overflow-hidden lg:order-none">
                   <div
                     className="hero-kenburns absolute inset-0 bg-cover bg-center"
                     style={{ backgroundImage: `url('${slide.image}')`, transformOrigin: "center" }}
