@@ -672,7 +672,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
               </section>
             </div>
           </section>
-          <StorefrontFooter />
+          <StorefrontFooter onCategorySelect={openCatalogWithQuery} />
         </>
       ) : (
         <>
@@ -683,7 +683,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
           <StorefrontFeatureGridSection />
           <StorefrontBusinessSection />
           <StorefrontTestimonialsSection />
-          <StorefrontFooter />
+          <StorefrontFooter onCategorySelect={openCatalogWithQuery} />
         </>
       )}
 

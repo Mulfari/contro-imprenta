@@ -1,86 +1,168 @@
 "use client";
 
 import Link from "next/link";
+import {
+  Clock,
+  EnvelopeSimple,
+  LockSimple,
+  MapPin,
+  WhatsappLogo,
+} from "@phosphor-icons/react";
 
-function FooterLogo() {
+// Footer (export de Claude Design): superficie oscura premium con filo CMYK,
+// 4 columnas (marca / navegar / categorías / contacto) que colapsan en móvil.
+// Datos de contacto reales. El wordmark va TODO en blanco (sin "Printer" azul,
+// por pedido de Jose). Las categorías abren el catálogo filtrado si se pasa
+// onCategorySelect.
+
+const grotesk = { fontFamily: "var(--font-space-grotesk), sans-serif" };
+
+const WHATSAPP_LINK =
+  "https://wa.me/584243390487?text=" +
+  encodeURIComponent("Hola Express Printer, quiero hacer un pedido.");
+
+const navLinks = [
+  { label: "Catálogo", href: "#catalogo" },
+  { label: "Destacados", href: "#destacados" },
+  { label: "Empresas", href: "#empresas" },
+];
+
+const categoryLinks = [
+  { name: "Tarjetas", query: "Tarjetas" },
+  { name: "Stickers", query: "Stickers" },
+  { name: "Pendones", query: "Pendones" },
+  { name: "Talonarios", query: "Talonarios" },
+  { name: "Etiquetas", query: "Etiquetas" },
+];
+
+function Wordmark({ size = "text-[22px]" }: { size?: string }) {
   return (
-    <Link
-      href="/"
-      className="group inline-flex w-fit cursor-pointer items-center rounded-xl border border-white/20 bg-white px-4 py-3 shadow-[0_18px_42px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_56px_rgba(0,0,0,0.3)]"
-      aria-label="Express Printer"
-    >
-      <span className="relative block h-[2.9rem] w-[10.4rem]" aria-hidden="true">
-        <span
-          className="block h-full w-full"
-          style={{
-            backgroundImage: "url('/express-printer-logo.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "left center",
-            backgroundSize: "contain",
-          }}
-        />
-        <span
-          className="pointer-events-none absolute text-[12px] font-black uppercase tracking-[0.08em] text-slate-500"
-          style={{ left: "5.45rem", top: "1.9rem" }}
-        >
-          Printer
-        </span>
+    <div className="flex items-center gap-2.5">
+      <span style={grotesk} className={`${size} font-bold tracking-[-0.02em] text-white`}>
+        ExpressPrinter
       </span>
-    </Link>
+      <span className="h-2 w-2 rounded-full bg-[#fbbf24]" />
+    </div>
   );
 }
 
-export function StorefrontFooter() {
+function Heading({ children }: { children: React.ReactNode }) {
   return (
-    <footer className="bg-[#08111f] text-slate-200">
-      <div className="mx-auto grid w-full max-w-[118rem] gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center lg:px-8 2xl:px-10">
-        <div className="space-y-5">
-          <FooterLogo />
-          <p className="max-w-md text-sm leading-6 text-slate-400">
-            Impresion comercial, publicitaria y corporativa con pedidos online
-            conectados al panel administrativo.
-          </p>
-        </div>
+    <div className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.15em] text-[#fbbf24]">
+      {children}
+    </div>
+  );
+}
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-5 text-sm text-slate-300 shadow-[0_18px_44px_rgba(0,0,0,0.18)] lg:min-w-[24rem] lg:text-right">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Contacto
-          </p>
-          <div className="space-y-2">
-            <p>
-              WhatsApp:{" "}
+type StorefrontFooterProps = {
+  onCategorySelect?: (query: string) => void;
+};
+
+export function StorefrontFooter({ onCategorySelect }: StorefrontFooterProps) {
+  return (
+    <footer className="relative bg-[#08111f] text-white">
+      {/* Filo CMYK */}
+      <div className="flex h-[3px]">
+        <div className="flex-1 bg-[#23c4d6]" />
+        <div className="flex-1 bg-[#e6398a]" />
+        <div className="flex-1 bg-[#fbbf24]" />
+        <div className="flex-1 bg-[#3558ff]" />
+      </div>
+
+      <div className="mx-auto w-full max-w-[112rem] px-6 pb-7 pt-12 sm:px-8 lg:px-12 lg:pt-14">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-[1.5fr_1fr_1fr_1.4fr] lg:gap-12">
+          {/* Marca */}
+          <div className="col-span-2 lg:col-span-1">
+            <Wordmark />
+            <p className="mt-[18px] max-w-[280px] text-sm leading-relaxed text-white/60">
+              Impresión comercial, publicitaria y corporativa.
+            </p>
+          </div>
+
+          {/* Navegar */}
+          <div>
+            <Heading>Navegar</Heading>
+            <ul className="flex flex-col gap-[13px]">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    className="text-sm text-white/60 transition hover:text-white"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Categorías */}
+          <div>
+            <Heading>Categorías</Heading>
+            <ul className="flex flex-col gap-[13px]">
+              {categoryLinks.map((category) => (
+                <li key={category.name}>
+                  <button
+                    type="button"
+                    onClick={() => onCategorySelect?.(category.query)}
+                    className="group inline-flex cursor-pointer items-center gap-2 text-sm text-white/60 transition hover:text-[#fbbf24]"
+                  >
+                    <span className="h-[5px] w-[5px] shrink-0 -translate-x-1 rounded-full bg-[#fbbf24] opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" />
+                    {category.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contacto */}
+          <div className="col-span-2 lg:col-span-1">
+            <Heading>Contacto</Heading>
+            <div className="flex flex-col gap-[15px] text-sm">
               <a
-                href="https://wa.me/584243390487?text=Hola%2C%20necesito%20ayuda%20con%20mi%20pedido%20en%20Express%20Printer."
+                href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noreferrer"
-                className="font-medium text-white transition hover:text-slate-100"
+                className="inline-flex items-start gap-2.5 text-white/65 transition hover:text-white"
               >
+                <WhatsappLogo size={18} className="mt-px shrink-0 text-[#5b7bff]" />
                 +58 424-339-0487
               </a>
-            </p>
-            <p>
-              Correo:{" "}
               <a
                 href="mailto:expressprinterpedidos@gmail.com"
-                className="font-medium text-white transition hover:text-slate-100"
+                className="inline-flex items-start gap-2.5 break-all text-white/65 transition hover:text-white"
               >
+                <EnvelopeSimple size={18} className="mt-px shrink-0 text-[#5b7bff]" />
                 expressprinterpedidos@gmail.com
               </a>
-            </p>
-            <p>Lunes a viernes, 8:00 AM - 6:00 PM</p>
-            <p>Sabados, 9:00 AM - 2:00 PM</p>
+              <div className="inline-flex items-start gap-2.5 text-white/65">
+                <MapPin size={18} className="mt-px shrink-0 text-[#5b7bff]" />
+                Las Américas, PB, local 15
+              </div>
+              <div className="inline-flex items-start gap-2.5 text-white/65">
+                <Clock size={18} className="mt-px shrink-0 text-[#5b7bff]" />
+                <span className="leading-[1.55]">
+                  Lun a Vie 8:00–18:00
+                  <br />
+                  Sáb 9:00–14:00
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Barra inferior */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex w-full max-w-[118rem] flex-col gap-3 px-4 py-5 text-sm text-slate-400 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 2xl:px-10">
-          <div className="flex flex-wrap gap-4">
-            <Link href="/login" className="transition hover:text-white">
-              Panel administrativo
-            </Link>
-          </div>
-          <p>&copy; 2026 Express Printer. Todos los derechos reservados.</p>
+        <div className="mx-auto flex w-full max-w-[112rem] flex-col items-start gap-2.5 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <span className="text-[13px] text-white/40">© 2026 Express Printer</span>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-[12.5px] text-white/30 transition hover:text-white/60"
+          >
+            <LockSimple size={13} />
+            Panel administrativo
+          </Link>
         </div>
       </div>
     </footer>
