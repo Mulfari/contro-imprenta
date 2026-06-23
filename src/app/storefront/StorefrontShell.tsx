@@ -29,7 +29,6 @@ import { StorefrontFeatureGridSection } from "@/app/storefront-feature-grid-sect
 import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
 import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
-import { StorefrontTestimonialsSection } from "@/app/storefront-testimonials-section";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { StorefrontToast } from "./components/StorefrontToast";
@@ -682,7 +681,6 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
           <StorefrontDealsSection onPreviewProduct={openPreviewById} onAddProduct={addProductById} />
           <StorefrontFeatureGridSection />
           <StorefrontBusinessSection />
-          <StorefrontTestimonialsSection />
           <StorefrontFooter onCategorySelect={openCatalogWithQuery} />
         </>
       )}
