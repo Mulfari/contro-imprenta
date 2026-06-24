@@ -23,9 +23,7 @@ import {
 import { type StorefrontProduct } from "@/app/storefront-data";
 import { StorefrontBusinessSection } from "@/app/storefront-business-section";
 import { StorefrontCategoryStrip } from "@/app/storefront-category-strip";
-import { StorefrontDealsSection } from "@/app/storefront-deals-section";
 import { StorefrontFooter } from "@/app/storefront-footer";
-import { StorefrontFeatureGridSection } from "@/app/storefront-feature-grid-section";
 import { StorefrontHeader } from "@/app/storefront-header";
 import { StorefrontHero } from "@/app/storefront-hero";
 import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
@@ -384,15 +382,6 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
     showToast(artFiles.length > 0 ? `${product.title} agregado con arte preparado.` : `${product.title} agregado al carrito.`, "success");
   };
 
-  const addProductById = (productId: string) => {
-    const product = getProductById(products, productId);
-    if (!product) {
-      showToast("No se encontro ese producto.", "error");
-      return;
-    }
-    void addToCart(product);
-  };
-
   const removeCartItem = (key: string) => {
     setCartItems((current) => current.filter((item) => item.key !== key));
     void deleteCartArtFiles(key);
@@ -678,8 +667,6 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
           <StorefrontHero onViewCatalog={openCatalog} />
           <StorefrontCategoryStrip onCategorySelect={openCatalogWithQuery} onViewAll={openCatalog} />
           <StorefrontPromoPanels onPreviewProduct={openPreviewById} onViewAll={openCatalog} />
-          <StorefrontDealsSection onPreviewProduct={openPreviewById} onAddProduct={addProductById} />
-          <StorefrontFeatureGridSection />
           <StorefrontBusinessSection />
           <StorefrontFooter onCategorySelect={openCatalogWithQuery} />
         </>
