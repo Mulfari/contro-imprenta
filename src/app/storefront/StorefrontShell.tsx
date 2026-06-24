@@ -757,7 +757,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
                     ) : null}
 
                     {showCatalogSkeleton ? (
-                      <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
+                      <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
                         {[0, 1, 2, 3, 4, 5].map((item) => <CatalogProductSkeleton key={item} />)}
                       </div>
                     ) : catalogResults.length === 0 ? (
@@ -784,7 +784,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
                         </button>
                       </div>
                     ) : catalogView === "grid" ? (
-                      <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
+                      <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
                         {catalogResults.map((product) => (
                           <CatalogProductCard key={product.id} product={product} view="grid" onPreview={() => openPreview(product)} />
                         ))}
