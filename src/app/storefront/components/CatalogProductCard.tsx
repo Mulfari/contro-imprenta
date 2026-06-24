@@ -100,14 +100,14 @@ export function CatalogProductCard({ product, view = "grid", onPreview }: Catalo
       onKeyDown={handleKeyDown}
       className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#ececec] bg-white shadow-[0_1px_2px_rgba(20,20,35,0.04)] transition duration-200 hover:-translate-y-[5px] hover:border-[#e4dfd2] hover:shadow-[0_18px_34px_rgba(25,30,60,0.12)]"
     >
-      <div className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-4`}>
+      <div className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-3`}>
         <Image
           src={product.image}
           alt={product.imageAlt}
           width={1000}
           height={760}
-          sizes="(min-width: 1280px) 22vw, (min-width: 640px) 40vw, 88vw"
-          className={`h-auto max-h-[86%] w-auto max-w-[84%] object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.16)] transition duration-500 group-hover:scale-105 ${agotado ? "opacity-70 grayscale" : ""}`}
+          sizes="(min-width: 1024px) 20vw, 45vw"
+          className={`h-auto max-h-[66%] w-auto max-w-[74%] object-contain drop-shadow-[0_14px_22px_rgba(15,23,42,0.14)] transition duration-500 group-hover:scale-105 ${agotado ? "opacity-70 grayscale" : ""}`}
         />
         {agotado ? <div className="absolute left-3 top-3">{agotadoBadge}</div> : null}
       </div>
