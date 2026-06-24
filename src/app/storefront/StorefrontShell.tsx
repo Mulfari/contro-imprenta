@@ -30,6 +30,7 @@ import { StorefrontPromoPanels } from "@/app/storefront-promo-panels";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { StorefrontToast } from "./components/StorefrontToast";
+import { CaretDown, MagnifyingGlass, Rows, SquaresFour, X } from "@phosphor-icons/react";
 import { CatalogProductCard } from "./components/CatalogProductCard";
 import { CatalogProductSkeleton } from "./components/CatalogProductSkeleton";
 import { ProductPreviewModal } from "./components/ProductPreviewModal";
@@ -58,17 +59,14 @@ type AccountActivityOrder = {
   }>;
 };
 
-const categoryGroups = [
-  { title: "Papeleria comercial", items: ["Tarjetas", "Talonarios", "Facturas", "Invitaciones"] },
-  { title: "Gran formato", items: ["Pendones", "Gran formato", "Roll up", "Publicitario"] },
-  { title: "Etiquetas y stickers", items: ["Stickers", "Etiquetas", "Packaging", "Troquelados"] },
-  { title: "Acabados y usos", items: ["Premium", "Corporativas", "Autocopiativos", "Personalizados"] },
-];
+const grotesk = { fontFamily: "var(--font-space-grotesk), sans-serif" };
 
 export function StorefrontShell({ products }: { products: StorefrontProduct[] }) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [catalogView, setCatalogView] = useState<"grid" | "list">("grid");
+  const [catalogSort, setCatalogSort] = useState<"rel" | "az" | "cat">("rel");
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => new Set());
@@ -228,6 +226,26 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
         .includes(normalized),
     );
   }, [debouncedQuery, isCatalogVisible, products]);
+
+  const catalogCategories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const product of products) {
+      counts.set(product.category, (counts.get(product.category) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([label, count]) => ({ label, count }));
+  }, [products]);
+
+  const catalogResults = useMemo(() => {
+    if (catalogSort === "az") {
+      return [...filteredProducts].sort((a, b) => a.title.localeCompare(b.title));
+    }
+    if (catalogSort === "cat") {
+      return [...filteredProducts].sort(
+        (a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title),
+      );
+    }
+    return filteredProducts;
+  }, [filteredProducts, catalogSort]);
 
   const wishlistProducts = useMemo(() => products.filter((product) => wishlistIds.has(product.id)), [wishlistIds, products]);
 
@@ -546,80 +564,58 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
         <>
           <section
             id="catalogo"
-            className="catalog-enter mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 2xl:px-10"
+            className="catalog-enter mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 py-6 sm:px-6 lg:px-8 2xl:px-10"
           >
-            <div className="grid gap-4 xl:grid-cols-[300px_1fr] xl:gap-6">
-              <aside className="catalog-enter-panel hidden rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)] xl:block xl:rounded-[1.8rem]">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Catalogo</p>
-                <h2 className="mt-2 text-xl font-black tracking-tight text-slate-950">Categorias</h2>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setDebouncedQuery("");
-                    setCatalogOpen(true);
-                    setCatalogLoading(true);
-                    setSelectedProduct(null);
-                  }}
-                  className={`mt-5 w-full cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                    debouncedQuery ? "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50" : "bg-slate-950 text-white hover:bg-slate-800"
-                  }`}
-                >
-                  Catalogo completo
-                </button>
-                <div className="mt-5 space-y-5">
-                  {categoryGroups.map((group) => (
-                    <div key={group.title} className="border-b border-slate-100 pb-5 last:border-b-0 last:pb-0">
-                      <h3 className="text-sm font-semibold text-slate-500">{group.title}</h3>
-                      <div className="mt-3 space-y-1.5">
-                        {group.items.map((item) => (
-                          <button
-                            key={item}
-                            type="button"
-                            onClick={() => {
-                              setSearchQuery(item);
-                              setDebouncedQuery(item);
-                              setCatalogOpen(true);
-                              setCatalogLoading(true);
-                              setSelectedProduct(null);
-                            }}
-                            className={`block w-full cursor-pointer rounded-lg px-2 py-2.5 text-left text-sm transition ${
-                              debouncedQuery.toLowerCase() === item.toLowerCase()
-                                ? "bg-slate-950 text-white"
-                                : "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
-                            }`}
-                          >
-                            {item}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+            <div className="grid gap-8 xl:grid-cols-[236px_1fr]">
+              {/* Sidebar de categorías (real, con conteo) */}
+              <aside className="catalog-enter-panel hidden xl:sticky xl:top-6 xl:block xl:self-start">
+                <p className="mb-3 pl-3 text-[11px] font-semibold uppercase tracking-[0.13em] text-[#a7a49b]">
+                  Categorías
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setDebouncedQuery("");
+                      setCatalogOpen(true);
+                      setCatalogLoading(true);
+                      setSelectedProduct(null);
+                    }}
+                    className={`flex cursor-pointer items-center justify-between gap-2 rounded-[10px] px-3 py-2.5 text-left text-sm font-medium transition ${
+                      debouncedQuery ? "text-[#5d5a52] hover:bg-[#1b1b20]/[0.04] hover:text-[#1b1b20]" : "bg-[#1b1b20] text-white"
+                    }`}
+                  >
+                    <span>Todas</span>
+                    <span className={`text-[12px] ${debouncedQuery ? "text-[#a7a49b]" : "text-white/60"}`}>{products.length}</span>
+                  </button>
+                  {catalogCategories.map((category) => {
+                    const on = debouncedQuery.toLowerCase() === category.label.toLowerCase();
+                    return (
+                      <button
+                        key={category.label}
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery(category.label);
+                          setDebouncedQuery(category.label);
+                          setCatalogOpen(true);
+                          setCatalogLoading(true);
+                          setSelectedProduct(null);
+                        }}
+                        className={`flex cursor-pointer items-center justify-between gap-2 rounded-[10px] px-3 py-2.5 text-left text-sm font-medium transition ${
+                          on ? "bg-[#1b1b20] text-white" : "text-[#5d5a52] hover:bg-[#1b1b20]/[0.04] hover:text-[#1b1b20]"
+                        }`}
+                      >
+                        <span>{category.label}</span>
+                        <span className={`text-[12px] ${on ? "text-white/60" : "text-[#a7a49b]"}`}>{category.count}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </aside>
 
-              <section className="catalog-enter-panel rounded-[1.2rem] border border-slate-200 bg-white p-4 shadow-[0_18px 40px_rgba(15,23,42,0.04)] sm:p-6 xl:rounded-[1.9rem]">
-                <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 sm:tracking-[0.32em]">
-                      {showCatalogSkeleton
-                        ? "Preparando catalogo"
-                        : debouncedQuery
-                          ? "Resultados de busqueda"
-                          : "Catalogo completo"}
-                    </p>
-                    <h2 className="mt-2 text-[1.55rem] font-black leading-tight tracking-tight text-slate-950 sm:text-4xl">
-                      {showCatalogSkeleton ? searchQuery.trim() || "Productos de impresion" : debouncedQuery || "Productos de impresion"}
-                    </h2>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 sm:text-sm">
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                      {showCatalogSkeleton ? "Cargando..." : `${filteredProducts.length} producto${filteredProducts.length === 1 ? "" : "s"}`}
-                    </span>
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">{cartCount} en carrito</span>
-                  </div>
-                </div>
-
+              {/* Main */}
+              <div className="catalog-enter-panel">
                 {selectedProduct ? (
                   <CatalogProductDetail
                     key={selectedProduct.id}
@@ -635,29 +631,139 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
                     wished={wishlistIds.has(selectedProduct.id)}
                     onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
                   />
-                ) : showCatalogSkeleton ? (
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-                    {[0, 1, 2, 3, 4, 5].map((item) => <CatalogProductSkeleton key={item} />)}
-                  </div>
-                ) : filteredProducts.length > 0 ? (
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-                    {filteredProducts.map((product) => (
-                      <CatalogProductCard
-                        key={product.id}
-                        product={product}
-                        wished={wishlistIds.has(product.id)}
-                        onPreview={() => openPreview(product)}
-                        onToggleWishlist={() => toggleWishlist(product.id)}
-                      />
-                    ))}
-                  </div>
                 ) : (
-                  <div className="mt-6 rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
-                    <p className="text-lg font-semibold text-slate-900">No encontramos productos para esa busqueda</p>
-                    <p className="mt-2 text-sm text-slate-500">Prueba con otra palabra o selecciona una categoria del catalogo.</p>
-                  </div>
+                  <>
+                    {/* Toolbar */}
+                    <div className="mb-5 flex flex-wrap items-center gap-3">
+                      <div className="flex h-[46px] flex-1 items-center gap-2.5 rounded-xl border border-[#e6e3da] bg-white px-3.5 transition focus-within:border-[#3558ff] focus-within:shadow-[0_0_0_3px_rgba(53,88,255,0.13)] sm:max-w-[360px]">
+                        <MagnifyingGlass size={18} className="shrink-0 text-[#8a857a]" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(event) => setSearchQuery(event.target.value)}
+                          placeholder="Buscar productos…"
+                          className="w-full bg-transparent text-sm text-[#1b1b20] outline-none placeholder:text-[#a7a49b]"
+                        />
+                        {searchQuery ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery("");
+                              setDebouncedQuery("");
+                            }}
+                            aria-label="Limpiar búsqueda"
+                            className="flex cursor-pointer text-[#a7a49b] transition hover:text-[#1b1b20]"
+                          >
+                            <X size={15} weight="bold" />
+                          </button>
+                        ) : null}
+                      </div>
+                      <span className="text-sm font-semibold text-[#1b1b20]">
+                        {showCatalogSkeleton
+                          ? "Cargando…"
+                          : `${catalogResults.length} ${catalogResults.length === 1 ? "producto" : "productos"}`}
+                      </span>
+                      <div className="relative ml-auto">
+                        <select
+                          value={catalogSort}
+                          onChange={(event) => setCatalogSort(event.target.value as "rel" | "az" | "cat")}
+                          className="h-[46px] cursor-pointer appearance-none rounded-xl border border-[#e6e3da] bg-white pl-3.5 pr-9 text-sm font-medium text-[#1b1b20] outline-none transition focus:border-[#3558ff]"
+                        >
+                          <option value="rel">Relevancia</option>
+                          <option value="az">Nombre · A-Z</option>
+                          <option value="cat">Categoría</option>
+                        </select>
+                        <CaretDown size={14} weight="bold" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8a857a]" />
+                      </div>
+                      <div className="flex h-[46px] gap-0.5 rounded-xl border border-[#e6e3da] bg-[#f1eee7] p-[3px]">
+                        <button
+                          type="button"
+                          onClick={() => setCatalogView("grid")}
+                          aria-label="Cuadrícula"
+                          className={`flex w-[42px] cursor-pointer items-center justify-center rounded-[9px] transition ${
+                            catalogView === "grid" ? "bg-white text-[#1b1b20] shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "text-[#8a857a]"
+                          }`}
+                        >
+                          <SquaresFour size={18} weight="bold" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCatalogView("list")}
+                          aria-label="Lista"
+                          className={`flex w-[42px] cursor-pointer items-center justify-center rounded-[9px] transition ${
+                            catalogView === "list" ? "bg-white text-[#1b1b20] shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "text-[#8a857a]"
+                          }`}
+                        >
+                          <Rows size={18} weight="bold" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Filtro activo */}
+                    {debouncedQuery ? (
+                      <div className="mb-5">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-[#e6e3da] bg-white px-3.5 py-1.5 text-[13px] text-[#1b1b20]">
+                          {catalogCategories.some((c) => c.label.toLowerCase() === debouncedQuery.toLowerCase())
+                            ? debouncedQuery
+                            : `“${debouncedQuery}”`}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery("");
+                              setDebouncedQuery("");
+                            }}
+                            aria-label="Quitar filtro"
+                            className="flex cursor-pointer text-[#8a857a] transition hover:text-[#1b1b20]"
+                          >
+                            <X size={12} weight="bold" />
+                          </button>
+                        </span>
+                      </div>
+                    ) : null}
+
+                    {showCatalogSkeleton ? (
+                      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                        {[0, 1, 2, 3, 4, 5].map((item) => <CatalogProductSkeleton key={item} />)}
+                      </div>
+                    ) : catalogResults.length === 0 ? (
+                      <div className="flex flex-col items-center px-5 py-14 text-center">
+                        <div className="flex h-[60px] w-[60px] items-center justify-center rounded-full border border-[#e6e3da] bg-white text-[#b8b3a7]">
+                          <MagnifyingGlass size={26} />
+                        </div>
+                        <div style={grotesk} className="mt-4 text-[19px] font-semibold text-[#1b1b20]">
+                          Sin resultados
+                        </div>
+                        <p className="mt-1.5 max-w-[340px] text-sm leading-relaxed text-[#75726a]">
+                          No encontramos productos para esa búsqueda o filtro. Prueba con otra palabra o mira todo el catálogo.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery("");
+                            setDebouncedQuery("");
+                            setCatalogOpen(true);
+                          }}
+                          className="mt-5 cursor-pointer rounded-xl bg-[#3558ff] px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(53,88,255,0.26)] transition hover:bg-[#2c49db]"
+                        >
+                          Ver todo el catálogo
+                        </button>
+                      </div>
+                    ) : catalogView === "grid" ? (
+                      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                        {catalogResults.map((product) => (
+                          <CatalogProductCard key={product.id} product={product} view="grid" onPreview={() => openPreview(product)} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-2.5">
+                        {catalogResults.map((product) => (
+                          <CatalogProductCard key={product.id} product={product} view="list" onPreview={() => openPreview(product)} />
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
-              </section>
+              </div>
             </div>
           </section>
           <StorefrontFooter onCategorySelect={openCatalogWithQuery} />
