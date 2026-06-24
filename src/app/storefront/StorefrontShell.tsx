@@ -601,6 +601,22 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
             id="catalogo"
             className="catalog-enter mx-auto w-full max-w-[112rem] scroll-mt-6 px-4 py-6 sm:px-6 lg:px-8 2xl:px-10"
           >
+            {selectedProduct ? (
+              <CatalogProductDetail
+                key={selectedProduct.id}
+                product={selectedProduct}
+                selectedOptions={selectedOptions}
+                onBack={() => setSelectedProduct(null)}
+                onOptionChange={(group, value) => setSelectedOptions((current) => ({ ...current, [group]: value }))}
+                onAddToCart={(quantity, files) => {
+                  void addToCart(selectedProduct, selectedOptions, quantity, files);
+                  setSelectedProduct(null);
+                }}
+                onRequestQuote={() => void requestQuote(selectedProduct, selectedOptions)}
+                wished={wishlistIds.has(selectedProduct.id)}
+                onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
+              />
+            ) : (
             <div className="grid gap-8 xl:grid-cols-[236px_1fr]">
               {/* Sidebar de categorías (real, con conteo) */}
               <aside className="catalog-enter-panel hidden xl:sticky xl:top-6 xl:block xl:self-start">
@@ -651,22 +667,6 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
 
               {/* Main */}
               <div className="catalog-enter-panel">
-                {selectedProduct ? (
-                  <CatalogProductDetail
-                    key={selectedProduct.id}
-                    product={selectedProduct}
-                    selectedOptions={selectedOptions}
-                    onBack={() => setSelectedProduct(null)}
-                    onOptionChange={(group, value) => setSelectedOptions((current) => ({ ...current, [group]: value }))}
-                    onAddToCart={(quantity, files) => {
-                      void addToCart(selectedProduct, selectedOptions, quantity, files);
-                      setSelectedProduct(null);
-                    }}
-                    onRequestQuote={() => void requestQuote(selectedProduct, selectedOptions)}
-                    wished={wishlistIds.has(selectedProduct.id)}
-                    onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
-                  />
-                ) : (
                   <>
                     {/* Toolbar */}
                     <div className="mb-5 flex flex-wrap items-center gap-3">
@@ -797,9 +797,9 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
                       </div>
                     )}
                   </>
-                )}
               </div>
             </div>
+            )}
           </section>
           <StorefrontFooter onCategorySelect={openCatalogWithQuery} />
         </>

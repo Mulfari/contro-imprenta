@@ -1,14 +1,26 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
+import {
+  ArrowLeft,
+  CaretRight,
+  CheckCircle,
+  Clock,
+  Heart,
+  Package,
+  PenNib,
+  Plus,
+  Trash,
+  UploadSimple,
+  WhatsappLogo,
+} from "@phosphor-icons/react";
+
 import type { StorefrontProduct } from "../storefront-data";
 import { computeUnitPrice, formatPrice } from "@/lib/pricing";
 import { buildWhatsappLink, whatsappProductMessage } from "@/lib/whatsapp";
-import { CardMockup } from "./card-editor/CardMockup";
-import { COLOR_SCHEMES, DESIGN_LABELS } from "./card-editor/colorSchemes";
-import type { CardDesign, CardFields } from "./card-editor/types";
-import { CatalogArtPreview } from "./components/CatalogArtPreview";
+
+const grotesk = { fontFamily: "var(--font-space-grotesk), sans-serif" };
 
 interface CatalogProductDetailProps {
   product: StorefrontProduct;
@@ -21,13 +33,10 @@ interface CatalogProductDetailProps {
   onToggleWishlist: () => void;
 }
 
-function formatCatalogFileSize(value: number) {
-  if (value < 1024 * 1024) {
-    return `${Math.max(1, Math.round(value / 1024))} KB`;
-  }
-  return `${(value / 1024 / 1024).toFixed(1)} MB`;
-}
-
+// Ficha de producto (export "Producto detalle"): galería + opciones (estilo
+// botón) + "Tu diseño" (subo mi arte / lo diseñan + subir arte) + CTA. Sin
+// editor de tarjetas (decisión de Jose). Conserva el contrato con
+// StorefrontShell (opciones, cantidad, archivos, añadir/cotizar, deseados).
 export function CatalogProductDetail({
   product,
   selectedOptions,
@@ -40,854 +49,261 @@ export function CatalogProductDetail({
 }: CatalogProductDetailProps) {
   const [draftQuantity, setDraftQuantity] = useState(1);
   const [draftFiles, setDraftFiles] = useState<File[]>([]);
-  const [activeDesign, setActiveDesign] = useState<CardDesign>("minimal");
-  const [activeColor, setActiveColor] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [cardFields, setCardFields] = useState<CardFields>({ name: "", title: "", company: "", phone: "", email: "" });
-  const [designMode, setDesignMode] = useState<"choose" | "upload" | "create">("choose");
-  const [frontFile, setFrontFile] = useState<File | null>(null);
-  const [backFile, setBackFile] = useState<File | null>(null);
 
-  const frontPreviewUrl = useMemo(() => {
-    return frontFile && frontFile.type.startsWith("image/") ? URL.createObjectURL(frontFile) : null;
-  }, [frontFile]);
-
-  const backPreviewUrl = useMemo(() => {
-    return backFile && backFile.type.startsWith("image/") ? URL.createObjectURL(backFile) : null;
-  }, [backFile]);
-
-  useEffect(() => {
-    return () => {
-      if (frontPreviewUrl) URL.revokeObjectURL(frontPreviewUrl);
-    };
-  }, [frontPreviewUrl]);
-
-  useEffect(() => {
-    return () => {
-      if (backPreviewUrl) URL.revokeObjectURL(backPreviewUrl);
-    };
-  }, [backPreviewUrl]);
-
-  const hasFiles = draftFiles.length > 0;
   const unitPrice = computeUnitPrice(product, selectedOptions);
   const estimatedTotal = unitPrice * draftQuantity;
-  const currentFinish = selectedOptions["Acabado"] ?? "";
-  const isCardProduct = product.id === "tarjetas-premium" || product.id === "tarjetas-corporativas";
+  const agotado = product.stock !== null && product.stock <= 0;
 
   const packageGroup = product.options.find((g) => g.role === "package");
   const designGroup = product.options.find((g) => g.name === "Diseño");
   const otherOptions = product.options.filter((g) => g !== packageGroup && g !== designGroup);
-  const designChoice = selectedOptions["Diseño"] ?? designGroup?.values[0]?.label ?? "";
-  const designServiceValue = designGroup?.values.find((v) => v.label === "Lo diseña la imprenta");
-  const agotado = product.stock !== null && product.stock <= 0;
+  const designChoice = designGroup ? selectedOptions["Diseño"] ?? designGroup.values[0]?.label ?? "" : "";
+  const wantsUpload = !designGroup || /arte|subo|propio|mi dise/i.test(designChoice);
+
+  const optButton = (active: boolean) =>
+    `cursor-pointer rounded-[10px] border px-[15px] py-2.5 text-[13.5px] font-medium transition ${
+      active
+        ? "border-[#1b1b20] bg-[#fbfaf7] text-[#1b1b20] shadow-[inset_0_0_0_1px_#1b1b20]"
+        : "border-[#e0dbcf] bg-white text-[#5d5a52] hover:border-[#c9c3b6] hover:text-[#1b1b20]"
+    }`;
+
+  const selectionParts = [
+    ...otherOptions.map((g) => selectedOptions[g.name]).filter(Boolean),
+    packageGroup ? selectedOptions[packageGroup.name] : null,
+  ].filter(Boolean);
 
   return (
-    <article className="mt-5">
-      <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.07)]">
-        <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="relative border-b border-slate-100 lg:border-b-0 lg:border-r">
-            <button
-              type="button"
-              onClick={onBack}
-              className="absolute left-4 top-4 z-20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/90 px-3.5 py-2 text-xs font-black text-slate-600 shadow-sm backdrop-blur transition hover:bg-white hover:text-slate-950"
-            >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="h-3.5 w-3.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-              Catalogo
-            </button>
+    <div className="catalog-enter-panel">
+      {/* Breadcrumb */}
+      <div className="mb-6 flex items-center gap-2 text-[13px] text-[#9a968c]">
+        <button type="button" onClick={onBack} className="inline-flex cursor-pointer items-center gap-1.5 transition hover:text-[#1b1b20]">
+          <ArrowLeft size={14} weight="bold" /> Catálogo
+        </button>
+        <CaretRight size={11} weight="bold" />
+        <span className="text-[#a8841f]">{product.category}</span>
+        <CaretRight size={11} weight="bold" />
+        <span className="font-medium text-[#1b1b20]">{product.title}</span>
+      </div>
 
+      <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-start">
+        {/* Galería */}
+        <div className="lg:sticky lg:top-6">
+          <div className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[18px] border border-[#ececec] bg-gradient-to-br ${product.tint} p-8`}>
+            <Image
+              src={product.image}
+              alt={product.imageAlt}
+              width={1200}
+              height={900}
+              sizes="(min-width: 1024px) 45vw, 92vw"
+              className={`h-auto max-h-[78%] w-auto max-w-[78%] object-contain drop-shadow-[0_24px_40px_rgba(15,23,42,0.18)] ${agotado ? "opacity-70 grayscale" : ""}`}
+            />
             <button
               type="button"
               onClick={onToggleWishlist}
-              aria-label={wished ? "Quitar de deseados" : "Agregar a deseados"}
-              className={`absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm backdrop-blur transition ${
-                wished ? "border-[#ff5b4d]/20 bg-[#ff5b4d] text-white" : "border-slate-200/80 bg-white/90 text-slate-500 hover:bg-white hover:text-[#ff5b4d]"
+              aria-label={wished ? "Quitar de deseados" : "Guardar en deseados"}
+              className={`absolute right-4 top-4 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full backdrop-blur transition ${
+                wished ? "bg-[#ff5b4d] text-white" : "bg-white/90 text-[#8a857a] hover:text-[#ff5b4d]"
               }`}
             >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="h-[1.1rem] w-[1.1rem]"
-                fill={wished ? "currentColor" : "none"}
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m12 20-1.2-1.1C5.8 14.4 3 11.8 3 8.5A4.5 4.5 0 0 1 7.5 4C9.3 4 11 4.9 12 6.3 13 4.9 14.7 4 16.5 4A4.5 4.5 0 0 1 21 8.5c0 3.3-2.8 5.9-7.8 10.4L12 20Z" />
-              </svg>
+              <Heart size={18} weight={wished ? "fill" : "regular"} />
             </button>
+            {agotado ? (
+              <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-[#1b1b20]/85 px-3 py-1 text-[11.5px] font-semibold text-white">
+                Agotado
+              </span>
+            ) : null}
+          </div>
+        </div>
 
-            {isCardProduct ? (
-              <div
-                className="relative flex flex-col items-center justify-center overflow-hidden px-6 pb-6 pt-16 sm:px-10 sm:pt-20"
-                style={{ perspective: "1200px", background: "linear-gradient(180deg, #e8e6e3 0%, #d9d5d0 40%, #cec9c3 100%)" }}
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-[0.03]"
-                  style={{
-                    backgroundImage:
-                      "url(\"data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E\")",
-                  }}
-                />
+        {/* Info */}
+        <div className="flex flex-col">
+          <div className="text-[11.5px] font-semibold uppercase tracking-[0.04em] text-[#a8841f]">{product.category}</div>
+          <h1 style={grotesk} className="mt-1.5 text-[1.9rem] font-semibold leading-[1.1] tracking-[-0.025em] text-[#1b1b20]">
+            {product.title}
+          </h1>
+          <p className="mt-3.5 max-w-[460px] text-[15px] leading-[1.6] text-[#6e6b62]">{product.description}</p>
 
-                <div
-                  className="relative w-full max-w-[26rem] cursor-pointer transition-all duration-700 ease-out"
-                  style={{ transform: "rotateX(8deg) rotateY(-1deg)", transformStyle: "preserve-3d" }}
-                  onClick={() => setFlipped(!flipped)}
-                >
-                  <div className="pointer-events-none absolute -bottom-3 left-[8%] right-[8%] h-8 rounded-[50%] bg-black/20 blur-xl" />
-                  <div className="pointer-events-none absolute -bottom-1 left-[12%] right-[12%] h-4 rounded-[50%] bg-black/10 blur-md" />
-                  <div
-                    className="relative transition-transform duration-700"
-                    style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
-                  >
-                    <div
-                      style={{
-                        backfaceVisibility: "hidden",
-                        filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))",
-                      }}
-                    >
-                      <CardMockup
-                        design={activeDesign}
-                        finish={currentFinish}
-                        size="large"
-                        artUrl={designMode === "upload" ? frontPreviewUrl : undefined}
-                        fields={designMode === "create" ? cardFields : undefined}
-                        colorScheme={COLOR_SCHEMES[activeDesign][activeColor]}
-                        side="front"
-                      />
-                    </div>
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        backfaceVisibility: "hidden",
-                        transform: "rotateY(180deg)",
-                        filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.1)) drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 20px 40px rgba(0,0,0,0.08))",
-                      }}
-                    >
-                      <CardMockup
-                        design={activeDesign}
-                        finish={currentFinish}
-                        size="large"
-                        artUrl={designMode === "upload" ? backPreviewUrl : undefined}
-                        fields={designMode === "create" ? cardFields : undefined}
-                        colorScheme={COLOR_SCHEMES[activeDesign][activeColor]}
-                        side="back"
-                      />
-                    </div>
-                  </div>
-                </div>
+          <div className="mt-5 flex items-baseline gap-2.5">
+            <span style={grotesk} className="text-[22px] font-semibold text-[#1b1b20]">
+              {product.requiresQuote ? "A cotización" : formatPrice(estimatedTotal)}
+            </span>
+            <span className="text-[13px] text-[#9a968c]">
+              {product.requiresQuote ? "según cantidad y acabado" : draftQuantity > 1 ? `${formatPrice(unitPrice)} c/u` : "precio estimado"}
+            </span>
+          </div>
 
-                {(designMode === "upload" && (frontPreviewUrl || backPreviewUrl)) || designMode === "create" ? (
-                  <p className="mt-4 text-center text-[0.7rem] font-medium text-[#8a8480]/70">
-                    {flipped ? "← Click para ver el frente" : "Click para ver el reverso →"}
-                  </p>
-                ) : null}
-
-                {designMode === "create" && (
-                  <>
-                    <div className="relative mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
-                      {(["minimal", "bold", "elegant", "tech", "medical", "gastro"] as CardDesign[]).map((d) => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => {
-                            setActiveDesign(d);
-                            setActiveColor(0);
-                            setFlipped(false);
-                          }}
-                          className={`group relative cursor-pointer overflow-hidden rounded-[0.35rem] transition-all duration-300 ${
-                            activeDesign === d
-                              ? "scale-110 ring-2 ring-[#3558ff] ring-offset-2 ring-offset-[#d9d5d0]"
-                              : "opacity-60 hover:opacity-90 hover:scale-105"
-                          }`}
-                          style={{ filter: activeDesign === d ? "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" : "drop-shadow(0 2px 6px rgba(0,0,0,0.1))" }}
-                        >
-                          <div className="w-[4rem] sm:w-[5rem]">
-                            <CardMockup design={d} finish={currentFinish} size="thumb" colorScheme={COLOR_SCHEMES[d][0]} />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                      {COLOR_SCHEMES[activeDesign].map((cs, i) => (
-                        <button
-                          key={cs.id}
-                          type="button"
-                          onClick={() => setActiveColor(i)}
-                          className={`flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.65rem] font-semibold transition ${
-                            activeColor === i ? "bg-white/90 text-slate-900 shadow-sm" : "text-[#8a8480] hover:text-slate-700"
-                          }`}
-                        >
-                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cs.primary }} />
-                          {cs.name}
-                        </button>
-                      ))}
-                    </div>
-
-                    <p className="mt-2 text-center text-xs font-medium text-[#8a8480]">
-                      {DESIGN_LABELS[activeDesign]}
-                      {currentFinish ? ` · ${currentFinish}` : ""}
-                    </p>
-                  </>
-                )}
-
-                {designMode === "choose" && (
-                  <p className="mt-6 text-center text-xs font-medium text-[#8a8480]">
-                    Tarjeta de presentacion premium{currentFinish ? ` · ${currentFinish}` : ""}
-                  </p>
-                )}
-
-                {designMode === "upload" && (frontPreviewUrl || backPreviewUrl) && (
-                  <div className="mt-3 flex items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur">
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    Vista previa de tu arte{currentFinish ? ` · Acabado ${currentFinish.toLowerCase()}` : ""}
-                  </div>
-                )}
+          {/* Opciones */}
+          {otherOptions.map((group) => (
+            <div key={group.name} className="mt-6">
+              <div className="mb-2.5 text-[12.5px] font-semibold text-[#1b1b20]">{group.name}</div>
+              <div className="flex flex-wrap gap-2">
+                {group.values.map((value) => {
+                  const active = selectedOptions[group.name] === value.label;
+                  return (
+                    <button key={value.label} type="button" onClick={() => onOptionChange(group.name, value.label)} className={optButton(active)}>
+                      {value.label}
+                      {value.amount > 0 ? <span className="text-[#9a968c]"> +${value.amount}</span> : null}
+                    </button>
+                  );
+                })}
               </div>
-            ) : (
-              <div className={`relative flex min-h-[16rem] items-center justify-center overflow-hidden bg-gradient-to-br ${product.tint} p-8 pt-16 sm:min-h-[22rem] lg:min-h-[26rem]`}>
-                <div className="absolute inset-x-12 bottom-10 h-12 rounded-full bg-slate-900/10 blur-2xl" />
-                <Image
-                  src={product.image}
-                  alt={product.imageAlt}
-                  width={1200}
-                  height={900}
-                  sizes="(min-width: 1024px) 60vw, 92vw"
-                  className="relative z-10 h-auto max-h-[80%] w-auto max-w-[70%] object-contain drop-shadow-[0_28px_48px_rgba(15,23,42,0.2)] sm:max-w-[60%]"
+            </div>
+          ))}
+
+          {/* Cantidad / paquete */}
+          {packageGroup ? (
+            <div className="mt-6">
+              <div className="mb-2.5 text-[12.5px] font-semibold text-[#1b1b20]">{packageGroup.name}</div>
+              <div className="flex flex-wrap gap-2">
+                {packageGroup.values.map((value) => {
+                  const active = selectedOptions[packageGroup.name] === value.label;
+                  return (
+                    <button key={value.label} type="button" onClick={() => onOptionChange(packageGroup.name, value.label)} className={optButton(active)}>
+                      {value.label} <span className="text-[#9a968c]">· ${value.amount}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-6">
+              <div className="mb-2.5 text-[12.5px] font-semibold text-[#1b1b20]">Cantidad</div>
+              <div className="inline-flex items-center overflow-hidden rounded-[10px] border border-[#e0dbcf]">
+                <button type="button" onClick={() => setDraftQuantity((c) => Math.max(1, c - 1))} aria-label="Menos" className="flex h-10 w-10 cursor-pointer items-center justify-center text-[#3a3a42] transition hover:bg-[#f4f1ea]">
+                  −
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  value={draftQuantity}
+                  onChange={(e) => setDraftQuantity(Math.max(1, Number(e.target.value) || 1))}
+                  className="h-10 w-14 bg-transparent text-center text-[14px] font-semibold text-[#1b1b20] outline-none"
+                  aria-label="Cantidad"
                 />
+                <button type="button" onClick={() => setDraftQuantity((c) => c + 1)} aria-label="Más" className="flex h-10 w-10 cursor-pointer items-center justify-center text-[#3a3a42] transition hover:bg-[#f4f1ea]">
+                  +
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Tu diseño */}
+          <div className="mt-7 border-t border-[#ece8df] pt-5">
+            <div className="mb-2.5 flex items-center gap-2">
+              <span className="text-[12.5px] font-semibold text-[#1b1b20]">Tu diseño</span>
+              <span className="text-[12px] text-[#9a968c]">¿cómo lo hacemos?</span>
+            </div>
+            {designGroup ? (
+              <div className="flex flex-wrap gap-2">
+                {designGroup.values.map((value) => {
+                  const active = selectedOptions[designGroup.name] === value.label || (!selectedOptions[designGroup.name] && value.label === designChoice);
+                  const icon = /dise[ñn]a/i.test(value.label) ? <PenNib size={15} weight="bold" /> : <UploadSimple size={15} weight="bold" />;
+                  return (
+                    <button key={value.label} type="button" onClick={() => onOptionChange(designGroup.name, value.label)} className={`${optButton(active)} inline-flex items-center gap-1.5`}>
+                      {icon}
+                      {value.label}
+                      {value.amount > 0 ? <span className="text-[#9a968c]"> +${value.amount}</span> : null}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+
+            {wantsUpload ? (
+              draftFiles.length > 0 ? (
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-[13px] border border-[#1f8a5b]/25 bg-[#1f8a5b]/[0.07] px-4 py-3">
+                  <div className="flex items-center gap-2.5 text-[13px] text-[#1b1b20]">
+                    <CheckCircle size={18} weight="fill" className="text-[#1f8a5b]" />
+                    <span className="truncate">{draftFiles.map((f) => f.name).join(", ")}</span>
+                  </div>
+                  <button type="button" onClick={() => setDraftFiles([])} aria-label="Quitar arte" className="flex shrink-0 cursor-pointer text-[#a7a49b] transition hover:text-[#c0392b]">
+                    <Trash size={15} weight="bold" />
+                  </button>
+                </div>
+              ) : (
+                <label className="mt-3 flex cursor-pointer flex-col items-center gap-1.5 rounded-[13px] border-[1.5px] border-dashed border-[#cfc8ba] bg-white px-4 py-5 text-center transition hover:border-[#3558ff]">
+                  <UploadSimple size={26} className="text-[#3558ff]" />
+                  <span className="text-[13.5px] font-semibold text-[#1b1b20]">Arrastra tu archivo o haz clic para subir</span>
+                  <span className="text-[12px] text-[#9a968c]">PDF, JPG, PNG o AI · opcional, puedes enviarlo después</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,.pdf,.ai,.psd"
+                    className="sr-only"
+                    onChange={(e) => {
+                      setDraftFiles(Array.from(e.target.files ?? []));
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </label>
+              )
+            ) : (
+              <div className="mt-3 flex items-start gap-2.5 rounded-[13px] border border-[#3558ff]/20 bg-[#3558ff]/[0.06] px-4 py-3.5 text-[13px] leading-relaxed text-[#3d3a34]">
+                <PenNib size={18} weight="bold" className="mt-px shrink-0 text-[#3558ff]" />
+                Nuestro equipo lo diseña por ti. Cuéntanos tu idea al cotizar y te pasamos una propuesta.
               </div>
             )}
           </div>
 
-          <div className="flex flex-col p-5 sm:p-7">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-[#3558ff]/8 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#3558ff]">{product.category}</span>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">{product.turnaround}</span>
+          {/* Selección actual */}
+          {selectionParts.length ? (
+            <div className="mt-5 flex items-center gap-2 text-[13.5px] text-[#5d5a52]">
+              <CheckCircle size={16} weight="fill" className="text-[#1f8a5b]" />
+              <span>{product.title} · {selectionParts.join(" · ")}</span>
             </div>
+          ) : null}
 
-            <h2 className="mt-3 text-[1.65rem] font-black leading-[1.15] tracking-tight text-slate-950 sm:text-[1.9rem]">{product.title}</h2>
-
-            <p className="mt-2 text-[0.9rem] leading-7 text-slate-500">{product.description}</p>
-
-            <ul className="mt-4 space-y-1.5">
-              {product.highlights.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4 shrink-0 text-emerald-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  {item}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-6 space-y-5">
-              {otherOptions.map((group) => {
-                const finishDescriptions: Record<string, string> = {
-                  Mate: "Textura suave sin reflejos, elegante y sobria",
-                  Brillante: "Acabado espejo con brillo intenso, colores vibrantes",
-                  "Soft touch": "Tacto aterciopelado premium, sensacion de lujo",
-                };
-                const isFinishGroup = group.name === "Acabado";
-
-                return (
-                  <div key={group.name}>
-                    <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">{group.name}</p>
-                    <div className="mt-2.5 flex flex-wrap gap-2">
-                      {group.values.map((value) => {
-                        const selected = selectedOptions[group.name] === value.label;
-                        const hint = value.amount > 0 ? ` +$${value.amount}` : "";
-                        return (
-                          <button
-                            key={value.label}
-                            type="button"
-                            onClick={() => onOptionChange(group.name, value.label)}
-                            className={`cursor-pointer rounded-[0.85rem] border-2 px-4 py-2.5 text-sm font-semibold transition ${
-                              selected
-                                ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff] shadow-[0_0_0_1px_rgba(53,88,255,0.15)]"
-                                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-                            }`}
-                          >
-                            {value.label}
-                            {hint ? <span className={selected ? "text-[#3558ff]/70" : "text-slate-400"}>{hint}</span> : null}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {isFinishGroup && selectedOptions[group.name] && finishDescriptions[selectedOptions[group.name]] && (
-                      <p className="mt-2 text-xs text-slate-400 italic">{finishDescriptions[selectedOptions[group.name]]}</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {packageGroup ? (
-              <div className="mt-6">
-                <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">{packageGroup.name}</p>
-                <div className="mt-2.5 grid grid-cols-3 gap-2">
-                  {packageGroup.values.map((value) => {
-                    const selected = selectedOptions[packageGroup.name] === value.label;
-                    return (
-                      <button
-                        key={value.label}
-                        type="button"
-                        onClick={() => onOptionChange(packageGroup.name, value.label)}
-                        className={`cursor-pointer rounded-[0.85rem] border-2 px-3 py-3 text-center transition ${
-                          selected
-                            ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff] shadow-[0_0_0_1px_rgba(53,88,255,0.15)]"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
-                      >
-                        <span className="block text-sm font-black leading-tight">{value.label}</span>
-                        <span className="block text-[0.78rem] font-bold text-slate-500">${value.amount}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+          {/* CTA */}
+          <div className="mt-6">
+            {agotado ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-5 text-center">
+                <p style={grotesk} className="text-[20px] font-semibold text-rose-700">Agotado</p>
+                <p className="mt-1.5 text-[13.5px] leading-6 text-rose-600">Escríbenos por WhatsApp y te avisamos cuando vuelva.</p>
               </div>
             ) : (
-              <div className="mt-6 flex items-center gap-3">
-                <p className="text-sm font-black text-slate-700">Cantidad</p>
-                <div className="flex h-12 items-center overflow-hidden rounded-[0.85rem] border-2 border-slate-200 bg-white">
-                  <button
-                    type="button"
-                    onClick={() => setDraftQuantity((c) => Math.max(1, c - 1))}
-                    className="flex h-full w-12 cursor-pointer items-center justify-center text-lg font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
-                  >
-                    {"−"}
-                  </button>
-                  <input
-                    type="number"
-                    min={1}
-                    value={draftQuantity}
-                    onChange={(e) => setDraftQuantity(Math.max(1, Number(e.target.value) || 1))}
-                    className="h-full w-14 bg-transparent text-center text-[0.95rem] font-black text-slate-950 outline-none"
-                    aria-label="Cantidad del producto"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setDraftQuantity((c) => c + 1)}
-                    className="flex h-full w-12 cursor-pointer items-center justify-center text-lg font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isCardProduct && (
-              <div className="mt-6">
-                <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">Tu diseño</p>
-
-                {designMode === "choose" ? (
-                  <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setDesignMode("upload")}
-                      className="flex cursor-pointer flex-col items-center gap-2 rounded-[0.85rem] border-2 border-slate-200 bg-white p-4 text-center transition hover:border-[#3558ff] hover:bg-[#3558ff]/5"
-                    >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
-                        <svg
-                          aria-hidden="true"
-                          viewBox="0 0 24 24"
-                          className="h-5 w-5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="17 8 12 3 7 8" />
-                          <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                      </span>
-                      <span className="text-sm font-bold text-slate-700">Ya tengo mi diseño</span>
-                      <span className="text-[0.7rem] text-slate-400">Sube tu archivo listo</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDesignMode("create")}
-                      className="flex cursor-pointer flex-col items-center gap-2 rounded-[0.85rem] border-2 border-slate-200 bg-white p-4 text-center transition hover:border-[#3558ff] hover:bg-[#3558ff]/5"
-                    >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
-                        <svg
-                          aria-hidden="true"
-                          viewBox="0 0 24 24"
-                          className="h-5 w-5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                      </span>
-                      <span className="text-sm font-bold text-slate-700">Crear mi diseño</span>
-                      <span className="text-[0.7rem] text-slate-400">Usa nuestras plantillas</span>
-                    </button>
-                  </div>
-                ) : designMode === "upload" ? (
-                  <div className="mt-2.5 space-y-3">
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div>
-                        <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Frente</p>
-                        {frontFile ? (
-                          <div className="flex flex-col items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5">
-                            <CatalogArtPreview file={frontFile} />
-                            <p className="max-w-full truncate text-[0.65rem] font-medium text-slate-600">{frontFile.name}</p>
-                            <div className="flex gap-1.5">
-                              <label className="cursor-pointer rounded-lg bg-white px-2 py-1 text-[0.65rem] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50">
-                                Cambiar
-                                <input
-                                  type="file"
-                                  accept="image/*,.pdf,.ai,.psd"
-                                  className="sr-only"
-                                  onChange={(e) => {
-                                    const f = e.target.files?.[0];
-                                    if (f) setFrontFile(f);
-                                    e.currentTarget.value = "";
-                                  }}
-                                />
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() => setFrontFile(null)}
-                                className="cursor-pointer rounded-lg px-2 py-1 text-[0.65rem] font-bold text-slate-400 transition hover:text-slate-600"
-                              >
-                                Quitar
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <label className="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 text-center transition hover:border-[#3558ff] hover:bg-white">
-                            <svg
-                              aria-hidden="true"
-                              viewBox="0 0 24 24"
-                              className="h-5 w-5 text-slate-300"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                              <polyline points="17 8 12 3 7 8" />
-                              <line x1="12" y1="3" x2="12" y2="15" />
-                            </svg>
-                            <span className="text-[0.7rem] font-semibold text-slate-500">Subir frente</span>
-                            <input
-                              type="file"
-                              accept="image/*,.pdf,.ai,.psd"
-                              className="sr-only"
-                              onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (f) {
-                                  setFrontFile(f);
-                                  setDraftFiles([f]);
-                                }
-                                e.currentTarget.value = "";
-                              }}
-                            />
-                          </label>
-                        )}
-                      </div>
-                      <div>
-                        <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Reverso</p>
-                        {backFile ? (
-                          <div className="flex flex-col items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5">
-                            <CatalogArtPreview file={backFile} />
-                            <p className="max-w-full truncate text-[0.65rem] font-medium text-slate-600">{backFile.name}</p>
-                            <div className="flex gap-1.5">
-                              <label className="cursor-pointer rounded-lg bg-white px-2 py-1 text-[0.65rem] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50">
-                                Cambiar
-                                <input
-                                  type="file"
-                                  accept="image/*,.pdf,.ai,.psd"
-                                  className="sr-only"
-                                  onChange={(e) => {
-                                    const f = e.target.files?.[0];
-                                    if (f) {
-                                      setBackFile(f);
-                                      setFlipped(true);
-                                    }
-                                    e.currentTarget.value = "";
-                                  }}
-                                />
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() => setBackFile(null)}
-                                className="cursor-pointer rounded-lg px-2 py-1 text-[0.65rem] font-bold text-slate-400 transition hover:text-slate-600"
-                              >
-                                Quitar
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <label className="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 text-center transition hover:border-[#3558ff] hover:bg-white">
-                            <svg
-                              aria-hidden="true"
-                              viewBox="0 0 24 24"
-                              className="h-5 w-5 text-slate-300"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                              <polyline points="17 8 12 3 7 8" />
-                              <line x1="12" y1="3" x2="12" y2="15" />
-                            </svg>
-                            <span className="text-[0.7rem] font-semibold text-slate-500">Subir reverso</span>
-                            <span className="text-[0.6rem] text-slate-400">Opcional</span>
-                            <input
-                              type="file"
-                              accept="image/*,.pdf,.ai,.psd"
-                              className="sr-only"
-                              onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (f) {
-                                  setBackFile(f);
-                                  setFlipped(true);
-                                }
-                                e.currentTarget.value = "";
-                              }}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDesignMode("choose");
-                        setFrontFile(null);
-                        setBackFile(null);
-                        setDraftFiles([]);
-                        setFlipped(false);
-                      }}
-                      className="cursor-pointer text-xs font-semibold text-slate-400 transition hover:text-slate-600"
-                    >
-                      ← Volver a opciones
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-2.5 space-y-3">
-                    <div className="space-y-2.5 rounded-[0.85rem] border border-slate-200 bg-slate-50/60 p-4">
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div>
-                          <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Nombre</label>
-                          <input
-                            type="text"
-                            placeholder="Maria Rodriguez"
-                            value={cardFields.name}
-                            onChange={(e) => setCardFields((prev) => ({ ...prev, name: e.target.value }))}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Cargo</label>
-                          <input
-                            type="text"
-                            placeholder="Directora Creativa"
-                            value={cardFields.title}
-                            onChange={(e) => setCardFields((prev) => ({ ...prev, title: e.target.value }))}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Empresa</label>
-                        <input
-                          type="text"
-                          placeholder="Mi Empresa"
-                          value={cardFields.company}
-                          onChange={(e) => setCardFields((prev) => ({ ...prev, company: e.target.value }))}
-                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div>
-                          <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Telefono</label>
-                          <input
-                            type="text"
-                            placeholder="+58 412 555 0123"
-                            value={cardFields.phone}
-                            onChange={(e) => setCardFields((prev) => ({ ...prev, phone: e.target.value }))}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Email</label>
-                          <input
-                            type="text"
-                            placeholder="tu@email.com"
-                            value={cardFields.email}
-                            onChange={(e) => setCardFields((prev) => ({ ...prev, email: e.target.value }))}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-[#3558ff] focus:outline-none focus:ring-1 focus:ring-[#3558ff]/30"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setDesignMode("choose")}
-                      className="cursor-pointer text-xs font-semibold text-slate-400 transition hover:text-slate-600"
-                    >
-                      ← Volver a opciones
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {!isCardProduct && (
-              <div className="mt-6">
-                {designGroup ? (
-                  <>
-                    <p className="text-[0.82rem] font-black uppercase tracking-[0.12em] text-slate-950">¿Cómo quieres tu diseño?</p>
-                    <div className="mt-2.5 grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => onOptionChange("Diseño", "Subo mi arte")}
-                        className={`cursor-pointer rounded-[0.85rem] border-2 px-3 py-3 text-center transition ${
-                          designChoice === "Subo mi arte"
-                            ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff]"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
-                      >
-                        <span className="block text-sm font-black leading-tight">Ya tengo mi arte</span>
-                        <span className="mt-0.5 block text-[0.7rem] font-medium text-slate-400">Sube tu archivo</span>
-                      </button>
-                      <div
-                        aria-disabled="true"
-                        className="rounded-[0.85rem] border-2 border-dashed border-slate-200 bg-slate-50/60 px-3 py-3 text-center text-slate-400"
-                      >
-                        <span className="block text-sm font-black leading-tight">Créalo aquí</span>
-                        <span className="mt-0.5 block text-[0.7rem] font-medium">Próximamente</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => onOptionChange("Diseño", "Lo diseña la imprenta")}
-                        className={`cursor-pointer rounded-[0.85rem] border-2 px-3 py-3 text-center transition ${
-                          designChoice === "Lo diseña la imprenta"
-                            ? "border-[#3558ff] bg-[#3558ff]/5 text-[#3558ff]"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
-                      >
-                        <span className="block text-sm font-black leading-tight">Lo diseña la imprenta</span>
-                        <span className="mt-0.5 block text-[0.7rem] font-medium text-slate-400">
-                          {designServiceValue && designServiceValue.amount > 0 ? `+ $${designServiceValue.amount} diseño` : "Servicio de diseño"}
-                        </span>
-                      </button>
-                    </div>
-                  </>
-                ) : null}
-
-                {designGroup && designChoice === "Lo diseña la imprenta" ? (
-                  <div className="mt-3 rounded-[0.85rem] border border-[#3558ff]/20 bg-[#3558ff]/5 px-4 py-3 text-xs leading-5 text-slate-600">
-                    Nuestro equipo crea tu diseño. En el paso de pago podrás contarnos tu idea (y subir una referencia si quieres).
-                  </div>
-                ) : hasFiles ? (
-                  <div className={`space-y-2 ${designGroup ? "mt-3" : ""}`}>
-                    <p className="text-sm font-black text-slate-700">Arte cargado</p>
-                    {draftFiles.map((file) => (
-                      <div key={`${file.name}-${file.lastModified}`} className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5">
-                        <CatalogArtPreview file={file} />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-bold text-slate-950">{file.name}</p>
-                          <p className="text-xs text-slate-400">{formatCatalogFileSize(file.size)}</p>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="flex gap-2 pt-1">
-                      <label className="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-xs font-black text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-                        Cambiar
-                        <input
-                          type="file"
-                          multiple
-                          className="sr-only"
-                          onChange={(e) => {
-                            setDraftFiles(Array.from(e.target.files ?? []));
-                            e.currentTarget.value = "";
-                          }}
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setDraftFiles([])}
-                        className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-black text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
-                      >
-                        Quitar
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <label className="flex cursor-pointer items-center gap-3 rounded-[0.85rem] border-2 border-dashed border-slate-200 bg-slate-50/60 px-4 py-3.5 transition hover:border-slate-300 hover:bg-white">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400 shadow-sm">
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        className="h-4.5 w-4.5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                      </svg>
-                    </span>
-                    <div>
-                      <p className="text-sm font-bold text-slate-600">Subir arte</p>
-                      <p className="text-xs text-slate-400">Opcional — puedes enviarlo despues</p>
-                    </div>
-                    <input
-                      type="file"
-                      multiple
-                      className="sr-only"
-                      onChange={(e) => {
-                        setDraftFiles(Array.from(e.target.files ?? []));
-                        e.currentTarget.value = "";
-                      }}
-                    />
-                  </label>
-                )}
-              </div>
-            )}
-
-            <div className="mt-auto pt-6">
-              {agotado ? (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-5 text-center">
-                  <p className="text-2xl font-black text-rose-700">Agotado</p>
-                  <p className="mt-2 text-sm leading-6 text-rose-600">
-                    Este producto no tiene existencias por ahora. Escríbenos por WhatsApp y te avisamos cuando vuelva.
-                  </p>
-                </div>
-              ) : (
-                <>
-              {isCardProduct && designMode !== "choose" && (
-                <div className="mb-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                  <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-wider text-slate-400">Resumen</p>
-                  <div className="space-y-1 text-xs text-slate-600">
-                    <div className="flex justify-between">
-                      <span>Diseño</span>
-                      <span className="font-semibold text-slate-900">{designMode === "upload" ? "Arte propio" : DESIGN_LABELS[activeDesign]}</span>
-                    </div>
-                    {currentFinish && (
-                      <div className="flex justify-between">
-                        <span>Acabado</span>
-                        <span className="font-semibold text-slate-900">{currentFinish}</span>
-                      </div>
-                    )}
-                    {selectedOptions["Cantidad"] && (
-                      <div className="flex justify-between">
-                        <span>Cantidad</span>
-                        <span className="font-semibold text-slate-900">{selectedOptions["Cantidad"]}</span>
-                      </div>
-                    )}
-                    {designMode === "upload" && (
-                      <div className="flex justify-between">
-                        <span>Archivos</span>
-                        <span className="font-semibold text-slate-900">
-                          {frontFile ? "Frente ✓" : "Frente ✗"} · {backFile ? "Reverso ✓" : "Reverso ✗"}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {product.requiresQuote ? (
-                <>
-                  <div>
-                    <p className="text-2xl font-black leading-none tracking-tight text-slate-950">Precio a confirmar</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      Este producto se cotiza segun lo que elijas. Envia la solicitud y te haremos llegar el precio para que lo pagues desde tu cuenta.
-                    </p>
-                  </div>
+              <div className="flex flex-col gap-2.5 sm:flex-row">
+                {product.requiresQuote ? (
                   <button
                     type="button"
                     onClick={onRequestQuote}
-                    className="mt-4 w-full cursor-pointer rounded-2xl bg-slate-950 px-6 py-[1.15rem] text-[0.95rem] font-black text-white transition hover:bg-slate-800 active:scale-[0.98]"
+                    className="inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#25d366] text-[15px] font-semibold text-[#06310f] shadow-[0_8px_22px_rgba(37,211,102,0.26)] transition hover:opacity-90"
                   >
-                    Solicitar cotizacion
+                    <WhatsappLogo size={20} weight="fill" /> Solicitar cotización
                   </button>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-[2.2rem] font-black leading-none tracking-tight text-slate-950">{formatPrice(estimatedTotal)}</p>
-                      {draftQuantity > 1 && <p className="text-sm font-semibold text-slate-400">{formatPrice(unitPrice)} c/u</p>}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onAddToCart(draftQuantity, frontFile ? [frontFile, ...(backFile ? [backFile] : [])] : draftFiles)}
-                    className="mt-4 w-full cursor-pointer rounded-2xl bg-[#ffd45f] px-6 py-[1.15rem] text-[0.95rem] font-black text-slate-950 shadow-[0_14px_32px_rgba(255,212,95,0.4)] transition hover:bg-[#ffcd41] hover:shadow-[0_18px_40px_rgba(255,212,95,0.5)] active:scale-[0.98]"
+                ) : (
+                  <a
+                    href={buildWhatsappLink(whatsappProductMessage(product, selectedOptions, draftQuantity))}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#25d366] text-[15px] font-semibold text-[#06310f] shadow-[0_8px_22px_rgba(37,211,102,0.26)] transition hover:opacity-90"
                   >
-                    Anadir al carrito
-                  </button>
-                </>
-              )}
+                    <WhatsappLogo size={20} weight="fill" /> Pedir por WhatsApp
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onAddToCart(draftQuantity, draftFiles)}
+                  className="inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#e0dbcf] bg-white text-[15px] font-semibold text-[#1b1b20] transition hover:border-[#c9c3b6] hover:bg-[#fbfaf7]"
+                >
+                  <Plus size={16} weight="bold" /> Añadir a mi pedido
+                </button>
+              </div>
+            )}
+          </div>
 
-              <a
-                href={buildWhatsappLink(whatsappProductMessage(product, selectedOptions, draftQuantity))}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-6 py-[0.95rem] text-sm font-black text-white transition hover:bg-[#1ebe5d] active:scale-[0.98]"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-                  <path d="M19.05 4.91A9.82 9.82 0 0 0 12.03 2c-5.45 0-9.88 4.43-9.88 9.88 0 1.74.45 3.43 1.31 4.92L2 22l5.35-1.4a9.82 9.82 0 0 0 4.68 1.19h.01c5.45 0 9.88-4.43 9.88-9.88a9.8 9.8 0 0 0-2.87-7Zm-7.01 15.19h-.01a8.13 8.13 0 0 1-4.14-1.13l-.3-.18-3.17.83.85-3.09-.2-.32a8.11 8.11 0 0 1 1.24-10.03 8.1 8.1 0 0 1 5.77-2.38c4.49 0 8.15 3.65 8.15 8.14 0 4.49-3.66 8.15-8.19 8.15Z" />
-                </svg>
-                Pedir por WhatsApp
-              </a>
-                </>
-              )}
+          {/* Detalles */}
+          <div className="mt-7 flex flex-col gap-3 border-t border-[#ece8df] pt-5">
+            {product.highlights.slice(0, 3).map((item) => (
+              <div key={item} className="flex items-center gap-2.5 text-[13.5px] text-[#5d5a52]">
+                <Package size={18} className="shrink-0 text-[#8a857a]" /> {item}
+              </div>
+            ))}
+            <div className="flex items-center gap-2.5 text-[13.5px] text-[#5d5a52]">
+              <Clock size={18} className="shrink-0 text-[#8a857a]" /> Entrega estimada: {product.turnaround}
             </div>
           </div>
         </div>
       </div>
-    </article>
+    </div>
   );
 }
