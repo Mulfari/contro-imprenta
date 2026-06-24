@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -60,7 +61,26 @@ export function CommerceDrawer({
   onBrowseCatalog,
   checkoutMessage,
 }: CommerceDrawerProps) {
-  if (!panel) {
+  // Montaje con transición: render mantiene el DOM durante el cierre; show
+  // dispara las transiciones (entra/sale); view conserva el contenido del
+  // último panel abierto mientras se anima el cierre.
+  const [render, setRender] = useState(false);
+  const [show, setShow] = useState(false);
+  const [view, setView] = useState<Exclude<CommercePanel, null>>("cart");
+
+  useEffect(() => {
+    if (panel) {
+      setView(panel);
+      setRender(true);
+      const id = window.setTimeout(() => setShow(true), 20);
+      return () => window.clearTimeout(id);
+    }
+    setShow(false);
+    const id = window.setTimeout(() => setRender(false), 300);
+    return () => window.clearTimeout(id);
+  }, [panel]);
+
+  if (!render) {
     return null;
   }
 
@@ -75,16 +95,27 @@ export function CommerceDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-[85] bg-[#0c0b08]/[0.42]">
-      <button type="button" aria-label="Cerrar panel" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col bg-[#fbfaf7] shadow-[-18px_0_50px_rgba(20,20,35,0.22)]">
+    <div className="fixed inset-0 z-[85]">
+      <button
+        type="button"
+        aria-label="Cerrar panel"
+        onClick={onClose}
+        className={`absolute inset-0 cursor-default bg-[#0c0b08]/[0.42] transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+          show ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <aside
+        className={`absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col bg-[#fbfaf7] shadow-[-18px_0_50px_rgba(20,20,35,0.22)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform motion-reduce:transition-none ${
+          show ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         {/* Encabezado */}
         <div className="flex flex-none items-center justify-between border-b border-[#ece8df] px-5 py-[18px]">
           <div className="flex items-center gap-2.5">
             <span style={grotesk} className="text-[18px] font-semibold tracking-[-0.015em] text-[#1b1b20]">
-              {panel === "cart" ? "Tu carrito" : "Deseados"}
+              {view === "cart" ? "Tu carrito" : "Deseados"}
             </span>
-            {panel === "cart"
+            {view === "cart"
               ? cartItems.length > 0 && (
                   <span className="rounded-full bg-[#3558ff] px-2 py-0.5 text-[12.5px] font-semibold text-white">
                     {cartItems.length}
@@ -108,7 +139,7 @@ export function CommerceDrawer({
 
         {/* Cuerpo */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {panel === "wishlist" ? (
+          {view === "wishlist" ? (
             wishlistProducts.length > 0 ? (
               <div className="flex flex-col gap-3.5">
                 {wishlistProducts.map((product) => (
@@ -261,7 +292,7 @@ export function CommerceDrawer({
         </div>
 
         {/* Pie (solo carrito con ítems) */}
-        {panel === "cart" && cartItems.length > 0 ? (
+        {view === "cart" && cartItems.length > 0 ? (
           <div className="flex-none border-t border-[#ece8df] bg-white p-5">
             <div className="flex items-center justify-between">
               <span className="text-sm text-[#5d5a52]">Total estimado</span>
