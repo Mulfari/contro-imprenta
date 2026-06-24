@@ -15,7 +15,6 @@ import {
 
 import type { StorefrontProduct } from "../../storefront-data";
 import { computeUnitPrice, formatPrice } from "@/lib/pricing";
-import { buildWhatsappLink, whatsappCartMessage } from "@/lib/whatsapp";
 
 const grotesk = { fontFamily: "var(--font-space-grotesk), sans-serif" };
 
@@ -38,6 +37,7 @@ interface CommerceDrawerProps {
   onRemoveCartItem: (key: string) => void;
   onQuantityChange: (key: string, quantity: number) => void;
   onCheckout: () => void;
+  onRequestQuote: () => void;
   onBrowseCatalog?: () => void;
   checkoutMessage: string;
 }
@@ -56,6 +56,7 @@ export function CommerceDrawer({
   onRemoveCartItem,
   onQuantityChange,
   onCheckout,
+  onRequestQuote,
   onBrowseCatalog,
   checkoutMessage,
 }: CommerceDrawerProps) {
@@ -282,14 +283,13 @@ export function CommerceDrawer({
               >
                 Ir a pagar <ArrowRight size={16} weight="bold" />
               </button>
-              <a
-                href={buildWhatsappLink(whatsappCartMessage(cartItems))}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={onRequestQuote}
                 className="inline-flex h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl bg-[#25d366] text-[15px] font-semibold text-[#06310f] transition hover:opacity-90"
               >
                 <WhatsappLogo size={19} weight="fill" /> Pedir por WhatsApp
-              </a>
+              </button>
             </div>
             {checkoutMessage ? (
               <p className="mt-3 text-center text-[11.5px] leading-5 text-[#9a968c]">{checkoutMessage}</p>

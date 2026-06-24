@@ -36,6 +36,7 @@ import { CatalogProductSkeleton } from "./components/CatalogProductSkeleton";
 import { ProductPreviewModal } from "./components/ProductPreviewModal";
 import { MobileCatalogFilterSheet } from "./components/MobileCatalogFilterSheet";
 import { CommerceDrawer } from "./components/CommerceDrawer";
+import { QuoteReview } from "./components/QuoteReview";
 import { CatalogProductDetail } from "./CatalogProductDetail";
 
 type CommercePanel = "wishlist" | "cart" | null;
@@ -67,6 +68,10 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [catalogView, setCatalogView] = useState<"grid" | "list">("grid");
   const [catalogSort, setCatalogSort] = useState<"rel" | "az" | "cat">("rel");
+  const [showQuote, setShowQuote] = useState(false);
+  const [quoteName, setQuoteName] = useState("");
+  const [quotePhone, setQuotePhone] = useState("");
+  const [quoteNote, setQuoteNote] = useState("");
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => new Set());
@@ -265,11 +270,20 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
     setAccountOpen(false);
     setActivePanel(null);
     setSelectedProduct(null);
+    setShowQuote(false);
     setMobileFilterOpen(false);
     window.history.pushState(null, "", "#catalogo");
     window.setTimeout(() => {
       document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 0);
+  };
+
+  const openQuoteReview = () => {
+    setActivePanel(null);
+    setAccountOpen(false);
+    setSelectedProduct(null);
+    setShowQuote(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const goToHome = () => {
@@ -280,6 +294,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
     setAccountOpen(false);
     setActivePanel(null);
     setSelectedProduct(null);
+    setShowQuote(false);
     setMobileFilterOpen(false);
     window.history.pushState(null, "", "/");
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
@@ -293,6 +308,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
     setAccountOpen(false);
     setActivePanel(null);
     setSelectedProduct(null);
+    setShowQuote(false);
     setMobileFilterOpen(false);
     window.history.pushState(null, "", "#catalogo");
     window.setTimeout(() => {
@@ -327,6 +343,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
     setSearchQuery(value);
     setSelectedProduct(null);
     if (value.trim()) {
+      setShowQuote(false);
       setCatalogOpen(true);
       setCatalogLoading(true);
       setAccountOpen(false);
@@ -337,6 +354,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
     setSelectedProduct(product);
     setSelectedOptions(getDefaultOptions(product));
     setActivePanel(null);
+    setShowQuote(false);
     setMobileFilterOpen(false);
     if (isCatalogVisible) {
       window.setTimeout(() => {
@@ -560,7 +578,24 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
         </div>
       ) : null}
 
-      {isCatalogVisible ? (
+      {showQuote ? (
+        <>
+          <QuoteReview
+            items={cartItems}
+            name={quoteName}
+            phone={quotePhone}
+            note={quoteNote}
+            onName={setQuoteName}
+            onPhone={setQuotePhone}
+            onNote={setQuoteNote}
+            onQuantityChange={changeCartQuantity}
+            onRemoveItem={removeCartItem}
+            onBack={() => setShowQuote(false)}
+            onBrowseCatalog={openCatalog}
+          />
+          <StorefrontFooter onCategorySelect={openCatalogWithQuery} />
+        </>
+      ) : isCatalogVisible ? (
         <>
           <section
             id="catalogo"
@@ -805,6 +840,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
         onRemoveCartItem={removeCartItem}
         onQuantityChange={changeCartQuantity}
         onCheckout={handleCheckout}
+        onRequestQuote={openQuoteReview}
         onBrowseCatalog={openCatalog}
         checkoutMessage={checkoutMessage}
       />
