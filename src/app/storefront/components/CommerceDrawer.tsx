@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -61,28 +60,10 @@ export function CommerceDrawer({
   onBrowseCatalog,
   checkoutMessage,
 }: CommerceDrawerProps) {
-  // Montaje con transición: render mantiene el DOM durante el cierre; show
-  // dispara las transiciones (entra/sale); view conserva el contenido del
-  // último panel abierto mientras se anima el cierre.
-  const [render, setRender] = useState(false);
-  const [show, setShow] = useState(false);
-  const [view, setView] = useState<Exclude<CommercePanel, null>>("cart");
-
-  useEffect(() => {
-    if (panel) {
-      setView(panel);
-      setRender(true);
-      const id = window.setTimeout(() => setShow(true), 20);
-      return () => window.clearTimeout(id);
-    }
-    setShow(false);
-    const id = window.setTimeout(() => setRender(false), 300);
-    return () => window.clearTimeout(id);
-  }, [panel]);
-
-  if (!render) {
+  if (!panel) {
     return null;
   }
+  const view = panel;
 
   const fixedSubtotal = cartItems
     .filter((item) => !item.product.requiresQuote)
@@ -100,15 +81,9 @@ export function CommerceDrawer({
         type="button"
         aria-label="Cerrar panel"
         onClick={onClose}
-        className={`absolute inset-0 cursor-default bg-[#0c0b08]/[0.42] transition-opacity duration-300 ease-out motion-reduce:transition-none ${
-          show ? "opacity-100" : "opacity-0"
-        }`}
+        className="drawer-backdrop-in absolute inset-0 cursor-default bg-[#0c0b08]/[0.42]"
       />
-      <aside
-        className={`absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col bg-[#fbfaf7] shadow-[-18px_0_50px_rgba(20,20,35,0.22)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform motion-reduce:transition-none ${
-          show ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
+      <aside className="drawer-panel-in absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col bg-[#fbfaf7] shadow-[-18px_0_50px_rgba(20,20,35,0.22)] will-change-transform">
         {/* Encabezado */}
         <div className="flex flex-none items-center justify-between border-b border-[#ece8df] px-5 py-[18px]">
           <div className="flex items-center gap-2.5">
