@@ -1,9 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import {
+  ArrowRight,
+  Heart,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Tag,
+  Trash,
+  WhatsappLogo,
+  X,
+} from "@phosphor-icons/react";
+
 import type { StorefrontProduct } from "../../storefront-data";
 import { computeUnitPrice, formatPrice } from "@/lib/pricing";
 import { buildWhatsappLink, whatsappCartMessage } from "@/lib/whatsapp";
+
+const grotesk = { fontFamily: "var(--font-space-grotesk), sans-serif" };
 
 type CommercePanel = "wishlist" | "cart" | null;
 
@@ -24,9 +38,13 @@ interface CommerceDrawerProps {
   onRemoveCartItem: (key: string) => void;
   onQuantityChange: (key: string, quantity: number) => void;
   onCheckout: () => void;
+  onBrowseCatalog?: () => void;
   checkoutMessage: string;
 }
 
+// Drawer (export "Carrito y Deseados"): panel que entra desde la derecha sobre
+// un backdrop. Carrito maneja precio fijo + "a cotizar" (suma lo fijo e indica
+// los ítems por cotizar). Deseados con añadir/quitar. Estados vacíos.
 export function CommerceDrawer({
   panel,
   cartItems,
@@ -38,196 +56,280 @@ export function CommerceDrawer({
   onRemoveCartItem,
   onQuantityChange,
   onCheckout,
+  onBrowseCatalog,
   checkoutMessage,
 }: CommerceDrawerProps) {
   if (!panel) {
     return null;
   }
 
-  const cartSubtotal = cartItems.reduce(
-    (sum, item) => sum + computeUnitPrice(item.product, item.options) * item.quantity,
-    0,
-  );
+  const fixedSubtotal = cartItems
+    .filter((item) => !item.product.requiresQuote)
+    .reduce((sum, item) => sum + computeUnitPrice(item.product, item.options) * item.quantity, 0);
+  const quoteCount = cartItems.filter((item) => item.product.requiresQuote).length;
+
+  const browse = () => {
+    onClose();
+    onBrowseCatalog?.();
+  };
 
   return (
-    <div className="fixed inset-0 z-[85] bg-slate-950/35 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[85] bg-[#0c0b08]/[0.42]">
       <button type="button" aria-label="Cerrar panel" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[28rem] flex-col bg-white shadow-[0_28px_80px_rgba(15,23,42,0.28)]">
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Express Printer</p>
-            <h2 className="text-xl font-black tracking-tight text-slate-950">
-              {panel === "cart" ? "Carrito de compras" : "Lista de deseados"}
-            </h2>
+      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col bg-[#fbfaf7] shadow-[-18px_0_50px_rgba(20,20,35,0.22)]">
+        {/* Encabezado */}
+        <div className="flex flex-none items-center justify-between border-b border-[#ece8df] px-5 py-[18px]">
+          <div className="flex items-center gap-2.5">
+            <span style={grotesk} className="text-[18px] font-semibold tracking-[-0.015em] text-[#1b1b20]">
+              {panel === "cart" ? "Tu carrito" : "Deseados"}
+            </span>
+            {panel === "cart"
+              ? cartItems.length > 0 && (
+                  <span className="rounded-full bg-[#3558ff] px-2 py-0.5 text-[12.5px] font-semibold text-white">
+                    {cartItems.length}
+                  </span>
+                )
+              : wishlistProducts.length > 0 && (
+                  <span className="rounded-full bg-[#fbbf24]/30 px-2 py-0.5 text-[12.5px] font-semibold text-[#1b1b20]">
+                    {wishlistProducts.length}
+                  </span>
+                )}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
             aria-label="Cerrar"
+            className="flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-full text-[#3a3a42] transition hover:bg-[#1b1b20]/[0.05]"
           >
-            x
+            <X size={18} weight="bold" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5">
+        {/* Cuerpo */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
           {panel === "wishlist" ? (
             wishlistProducts.length > 0 ? (
-              <div className="space-y-4">
+              <div className="flex flex-col gap-3.5">
                 {wishlistProducts.map((product) => (
-                  <div key={product.id} className="grid grid-cols-[5.5rem_1fr] gap-3 rounded-2xl border border-slate-200 p-3">
+                  <div key={product.id} className="flex gap-3">
                     <button
                       type="button"
                       onClick={() => onPreview(product)}
-                      className={`flex h-22 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${product.tint}`}
+                      className={`relative flex h-[74px] w-[74px] flex-none cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${product.tint}`}
                     >
                       <Image
                         src={product.image}
                         alt={product.imageAlt}
                         width={260}
                         height={220}
-                        sizes="6rem"
+                        sizes="74px"
                         className="h-auto max-h-[84%] w-auto max-w-[84%] object-contain"
                       />
                     </button>
-                    <div>
-                      <h3 className="font-semibold leading-tight text-slate-950">{product.title}</h3>
-                      <p className="mt-1 text-sm text-slate-500">{product.price}</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => onAddProduct(product)}
-                          className="cursor-pointer rounded-lg bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                        >
-                          Anadir
-                        </button>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => onPreview(product)}
+                            style={grotesk}
+                            className="block cursor-pointer text-left text-[15px] font-semibold tracking-[-0.01em] text-[#1b1b20]"
+                          >
+                            {product.title}
+                          </button>
+                          <div className="mt-0.5 text-[13px] font-semibold text-[#1b1b20]">
+                            {product.requiresQuote ? "A cotización" : `Desde ${product.price}`}
+                          </div>
+                        </div>
                         <button
                           type="button"
                           onClick={() => onRemoveWishlist(product.id)}
-                          className="cursor-pointer rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                          aria-label="Quitar"
+                          className="flex cursor-pointer rounded-md p-[3px] text-[#a7a49b] transition hover:bg-[#faf0ee] hover:text-[#c0392b]"
                         >
-                          Quitar
+                          <X size={15} weight="bold" />
                         </button>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => onAddProduct(product)}
+                        className="mt-2.5 inline-flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[#e0dbcf] bg-white text-[12.5px] font-semibold text-[#1b1b20] transition hover:border-[#c9c3b6] hover:bg-[#fbfaf7]"
+                      >
+                        <Plus size={13} weight="bold" /> Añadir al carrito
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="rounded-[1.4rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
-                <p className="font-semibold text-slate-950">No tienes productos guardados.</p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">Guarda productos del catalogo para revisarlos despues.</p>
-              </div>
+              <EmptyState
+                icon={<Heart size={27} />}
+                title="Aún no tienes guardados"
+                text="Guarda productos con el corazón para encontrarlos rápido."
+                cta="Explorar catálogo"
+                onCta={browse}
+              />
             )
           ) : cartItems.length > 0 ? (
-            <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div key={item.key} className="rounded-2xl border border-slate-200 p-3">
-                  <div className="grid grid-cols-[5.5rem_1fr] gap-3">
+            <div className="flex flex-col gap-4">
+              {cartItems.map((item) => {
+                const lineQuote = item.product.requiresQuote;
+                const lineTotal = computeUnitPrice(item.product, item.options) * item.quantity;
+                const opts = Object.entries(item.options)
+                  .map(([key, value]) => `${key}: ${value}`)
+                  .join(" · ");
+                return (
+                  <div key={item.key} className="flex gap-3">
                     <button
                       type="button"
                       onClick={() => onPreview(item.product)}
-                      className={`flex h-22 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${item.product.tint}`}
+                      className={`relative flex h-[74px] w-[74px] flex-none cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${item.product.tint}`}
                     >
                       <Image
                         src={item.product.image}
                         alt={item.product.imageAlt}
                         width={260}
                         height={220}
-                        sizes="6rem"
+                        sizes="74px"
                         className="h-auto max-h-[84%] w-auto max-w-[84%] object-contain"
                       />
                     </button>
-                    <div>
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h3 className="font-semibold leading-tight text-slate-950">{item.product.title}</h3>
-                          <p className="mt-1 text-sm font-semibold text-[#3558ff]">{formatPrice(computeUnitPrice(item.product, item.options))}</p>
-                        </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onPreview(item.product)}
+                          style={grotesk}
+                          className="block min-w-0 cursor-pointer text-left text-[15px] font-semibold tracking-[-0.01em] text-[#1b1b20]"
+                        >
+                          {item.product.title}
+                        </button>
                         <button
                           type="button"
                           onClick={() => onRemoveCartItem(item.key)}
-                          className="cursor-pointer text-sm font-semibold text-slate-400 transition hover:text-slate-950"
+                          aria-label="Quitar"
+                          className="flex cursor-pointer rounded-md p-[3px] text-[#a7a49b] transition hover:bg-[#faf0ee] hover:text-[#c0392b]"
                         >
-                          Quitar
+                          <Trash size={15} weight="bold" />
                         </button>
                       </div>
-                      <p className="mt-2 text-xs leading-5 text-slate-500">
-                        {Object.entries(item.options).map(([key, value]) => `${key}: ${value}`).join(" / ")}
-                      </p>
+                      {opts ? <div className="mt-0.5 truncate text-[12.5px] text-[#8a857a]">{opts}</div> : null}
                       {item.artFileNames?.length ? (
-                        <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
-                          Arte cargado: {item.artFileNames.join(", ")}
-                        </p>
+                        <div className="mt-1.5 text-[11.5px] font-medium text-[#1f8a5b]">
+                          Arte: {item.artFileNames.join(", ")}
+                        </div>
                       ) : null}
+                      <div className="mt-2.5 flex items-center justify-between gap-2">
+                        <div className="inline-flex items-center overflow-hidden rounded-[9px] border border-[#e0dbcf]">
+                          <button
+                            type="button"
+                            onClick={() => onQuantityChange(item.key, item.quantity - 1)}
+                            aria-label="Menos"
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center bg-white text-[#3a3a42] transition hover:bg-[#f4f1ea]"
+                          >
+                            <Minus size={12} weight="bold" />
+                          </button>
+                          <span className="min-w-[34px] text-center text-[13px] font-semibold text-[#1b1b20]">{item.quantity}</span>
+                          <button
+                            type="button"
+                            onClick={() => onQuantityChange(item.key, item.quantity + 1)}
+                            aria-label="Más"
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center bg-white text-[#3a3a42] transition hover:bg-[#f4f1ea]"
+                          >
+                            <Plus size={12} weight="bold" />
+                          </button>
+                        </div>
+                        <span className={`text-[14px] font-semibold ${lineQuote ? "text-[#a8841f]" : "text-[#1b1b20]"}`}>
+                          {lineQuote ? "A cotizar" : formatPrice(lineTotal)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                    <p className="text-sm font-medium text-slate-500">Cantidad</p>
-                    <div className="flex items-center rounded-full border border-slate-200">
-                      <button
-                        type="button"
-                        onClick={() => onQuantityChange(item.key, item.quantity - 1)}
-                        className="h-9 w-9 cursor-pointer text-slate-500 transition hover:text-slate-950"
-                      >
-                        -
-                      </button>
-                      <span className="min-w-8 text-center text-sm font-semibold">{item.quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => onQuantityChange(item.key, item.quantity + 1)}
-                        className="h-9 w-9 cursor-pointer text-slate-500 transition hover:text-slate-950"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
-            <div className="rounded-[1.4rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
-              <p className="font-semibold text-slate-950">Tu carrito esta vacio.</p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Agrega productos del catalogo para preparar tu pedido.</p>
-            </div>
+            <EmptyState
+              icon={<ShoppingBag size={27} />}
+              title="Tu carrito está vacío"
+              text="Explora el catálogo y agrega lo que quieras imprimir."
+              cta="Ver catálogo"
+              onCta={browse}
+            />
           )}
         </div>
 
-        {panel === "cart" ? (
-          <div className="border-t border-slate-200 p-5">
-            {checkoutMessage ? (
-              <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-900">
-                {checkoutMessage}
+        {/* Pie (solo carrito con ítems) */}
+        {panel === "cart" && cartItems.length > 0 ? (
+          <div className="flex-none border-t border-[#ece8df] bg-white p-5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-[#5d5a52]">Total estimado</span>
+              <span style={grotesk} className="text-[20px] font-semibold text-[#1b1b20]">{formatPrice(fixedSubtotal)}</span>
+            </div>
+            {quoteCount > 0 ? (
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fbbf24]/[0.16] px-2.5 py-1 text-[11px] font-semibold text-[#a8841f]">
+                  <Tag size={12} weight="bold" /> + {quoteCount} {quoteCount === 1 ? "ítem a cotizar" : "ítems a cotizar"}
+                </span>
+                <span className="text-[11.5px] text-[#9a968c]">se confirma por WhatsApp</span>
               </div>
             ) : null}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-500">Subtotal estimado</span>
-              <span className="text-2xl font-black text-slate-950">{formatPrice(cartSubtotal)}</span>
+            <div className="mt-3.5 flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={onCheckout}
+                className="inline-flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#3558ff] text-[15px] font-semibold text-white shadow-[0_4px_14px_rgba(53,88,255,0.26)] transition hover:bg-[#2647e8]"
+              >
+                Ir a pagar <ArrowRight size={16} weight="bold" />
+              </button>
+              <a
+                href={buildWhatsappLink(whatsappCartMessage(cartItems))}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl bg-[#25d366] text-[15px] font-semibold text-[#06310f] transition hover:opacity-90"
+              >
+                <WhatsappLogo size={19} weight="fill" /> Pedir por WhatsApp
+              </a>
             </div>
-            <a
-              href={buildWhatsappLink(whatsappCartMessage(cartItems))}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3.5 text-sm font-black text-white transition hover:bg-[#1ebe5d]"
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-                <path d="M19.05 4.91A9.82 9.82 0 0 0 12.03 2c-5.45 0-9.88 4.43-9.88 9.88 0 1.74.45 3.43 1.31 4.92L2 22l5.35-1.4a9.82 9.82 0 0 0 4.68 1.19h.01c5.45 0 9.88-4.43 9.88-9.88a9.8 9.8 0 0 0-2.87-7Zm-7.01 15.19h-.01a8.13 8.13 0 0 1-4.14-1.13l-.3-.18-3.17.83.85-3.09-.2-.32a8.11 8.11 0 0 1 1.24-10.03 8.1 8.1 0 0 1 5.77-2.38c4.49 0 8.15 3.65 8.15 8.14 0 4.49-3.66 8.15-8.19 8.15Z" />
-              </svg>
-              Pedir por WhatsApp
-            </a>
-            <button
-              type="button"
-              onClick={onCheckout}
-              className="mt-2 w-full cursor-pointer rounded-xl bg-[#ffd45f] px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-[#ffcd41]"
-            >
-              Prepararlo en la web
-            </button>
-            <p className="mt-3 text-center text-xs leading-5 text-slate-400">
-              Por WhatsApp cierras al instante. En la web subes arte y pago tu mismo.
-            </p>
+            {checkoutMessage ? (
+              <p className="mt-3 text-center text-[11.5px] leading-5 text-[#9a968c]">{checkoutMessage}</p>
+            ) : null}
           </div>
         ) : null}
       </aside>
+    </div>
+  );
+}
+
+function EmptyState({
+  icon,
+  title,
+  text,
+  cta,
+  onCta,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+  cta: string;
+  onCta: () => void;
+}) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+      <div className="flex h-[62px] w-[62px] items-center justify-center rounded-full border border-[#e6e3da] bg-white text-[#b8b3a7]">
+        {icon}
+      </div>
+      <div style={grotesk} className="mt-4 text-[18px] font-semibold text-[#1b1b20]">
+        {title}
+      </div>
+      <p className="mt-1.5 max-w-[240px] text-[13.5px] leading-relaxed text-[#75726a]">{text}</p>
+      <button
+        type="button"
+        onClick={onCta}
+        className="mt-5 cursor-pointer rounded-xl bg-[#3558ff] px-[22px] py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(53,88,255,0.26)] transition hover:bg-[#2647e8]"
+      >
+        {cta}
+      </button>
     </div>
   );
 }

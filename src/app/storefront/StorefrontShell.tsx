@@ -805,6 +805,7 @@ export function StorefrontShell({ products }: { products: StorefrontProduct[] })
         onRemoveCartItem={removeCartItem}
         onQuantityChange={changeCartQuantity}
         onCheckout={handleCheckout}
+        onBrowseCatalog={openCatalog}
         checkoutMessage={checkoutMessage}
       />
 
