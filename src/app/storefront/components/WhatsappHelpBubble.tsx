@@ -1,31 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PaperPlaneRight, X } from "@phosphor-icons/react";
 
 const PHONE = "584243390487";
 const FALLBACK = "Hola, necesito ayuda con mi pedido en Express Printer.";
 
-// Burbuja flotante de WhatsApp con un mini-chat: el usuario escribe su mensaje
-// en el input y al enviar se abre WhatsApp con ese texto prellenado (o un
-// mensaje por defecto si lo deja vacío). El FAB conserva el look anterior.
+// Respuestas rápidas: un toque abre WhatsApp con el mensaje ya redactado.
+const QUICK_REPLIES: Array<{ label: string; message: string }> = [
+  { label: "Cotización", message: "Hola, quiero una cotización para un trabajo de impresión." },
+  { label: "Tiempo de entrega", message: "Hola, ¿cuánto tarda en estar listo un pedido?" },
+  { label: "Horarios y dirección", message: "Hola, ¿cuáles son sus horarios y dónde están ubicados?" },
+];
+
+// Burbuja flotante de WhatsApp con un mini-chat: respuestas rápidas + input
+// libre. Al enviar se abre WhatsApp con el texto prellenado. Cierra con la X,
+// con Escape o al hacer clic fuera. Responsive (ancho fluido con tope).
 export function WhatsappHelpBubble() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  const send = () => {
-    const text = message.trim() || FALLBACK;
+  // Cerrar al hacer clic fuera o con Escape (solo mientras está abierto).
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const sendText = (raw: string) => {
+    const text = raw.trim() || FALLBACK;
     window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
     setMessage("");
     setOpen(false);
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div ref={rootRef} className="fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {open ? (
-        <div className="wa-pop-in w-[300px] overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.22)] sm:w-[330px]">
+        <div
+          role="dialog"
+          aria-label="Chat de ayuda por WhatsApp"
+          className="wa-pop-in flex max-h-[min(70vh,32rem)] w-[calc(100vw-2.5rem)] max-w-[21rem] flex-col overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.22)]"
+        >
           {/* Encabezado */}
-          <div className="flex items-center gap-3 bg-[#075E54] px-4 py-3">
+          <div className="flex flex-none items-center gap-3 bg-[#075E54] px-4 py-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-[13px] font-bold text-white">
               EP
             </span>
@@ -45,30 +76,42 @@ export function WhatsappHelpBubble() {
             </button>
           </div>
 
-          {/* Saludo */}
-          <div className="bg-[#ECE5DD] px-3 py-4">
+          {/* Saludo + respuestas rápidas */}
+          <div className="flex-1 overflow-y-auto bg-[#ECE5DD] px-3 py-4">
             <div className="max-w-[88%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-[13px] leading-snug text-slate-700 shadow-sm">
               ¡Hola! 👋 Cuéntanos qué necesitas imprimir y seguimos por WhatsApp.
             </div>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {QUICK_REPLIES.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => sendText(item.message)}
+                  className="cursor-pointer rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-[12px] font-medium text-emerald-800 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Input */}
-          <div className="flex items-center gap-2 border-t border-emerald-50 bg-white px-3 py-2.5">
+          {/* Input libre */}
+          <div className="flex flex-none items-center gap-2 border-t border-emerald-50 bg-white px-3 py-2.5">
             <input
               type="text"
               value={message}
               onChange={(event) => setMessage(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === "Enter") send();
+                if (event.key === "Enter") sendText(message);
               }}
               placeholder="Escribe tu mensaje…"
               aria-label="Mensaje para WhatsApp"
               autoFocus
-              className="h-10 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-[13.5px] text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-300 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,211,102,0.14)]"
+              className="h-10 min-w-0 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-[13.5px] text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-300 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,211,102,0.14)]"
             />
             <button
               type="button"
-              onClick={send}
+              onClick={() => sendText(message)}
               aria-label="Enviar por WhatsApp"
               className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_8px_18px_rgba(37,211,102,0.34)] transition hover:bg-[#20bd5a]"
             >
