@@ -1144,3 +1144,79 @@ values
     true, 8
   )
 on conflict (slug) do nothing;
+
+-- ============================================================
+-- 12) Finanzas (fase 1a): tasa del día, cierres y movimientos
+-- ============================================================
+
+create table if not exists public.exchange_rates (
+  id uuid primary key default gen_random_uuid(),
+  rate_date date not null unique,
+  bs_per_usd numeric(14,4) not null check (bs_per_usd > 0),
+  set_by uuid null references public.app_users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.exchange_rates enable row level security;
+
+create index if not exists exchange_rates_rate_date_idx
+  on public.exchange_rates (rate_date desc);
+
+create table if not exists public.cash_sessions (
+  id uuid primary key default gen_random_uuid(),
+  branch text not null,
+  status text not null default 'abierta' check (status in ('abierta', 'cerrada')),
+  opened_by uuid null references public.app_users(id) on delete set null,
+  opened_at timestamptz not null default now(),
+  opening_cash_usd numeric(12,2) not null default 0,
+  opening_cash_ves numeric(14,2) not null default 0,
+  closed_by uuid null references public.app_users(id) on delete set null,
+  closed_at timestamptz null,
+  counted_cash_usd numeric(12,2) null,
+  counted_cash_ves numeric(14,2) null,
+  expected_cash_usd numeric(12,2) null,
+  expected_cash_ves numeric(14,2) null,
+  notes text null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.cash_sessions enable row level security;
+
+create index if not exists cash_sessions_branch_status_idx
+  on public.cash_sessions (branch, status);
+
+create index if not exists cash_sessions_opened_at_idx
+  on public.cash_sessions (opened_at desc);
+
+create table if not exists public.cash_movements (
+  id uuid primary key default gen_random_uuid(),
+  type text not null check (type in ('ingreso', 'egreso')),
+  amount_usd numeric(12,2) not null check (amount_usd > 0),
+  currency_in text not null default 'USD' check (currency_in in ('USD', 'VES')),
+  amount_in numeric(14,2) not null,
+  exchange_rate numeric(14,4) null,
+  method text not null,
+  category text not null default 'venta',
+  description text null,
+  order_id uuid null references public.orders(id) on delete set null,
+  client_id uuid null references public.clients(id) on delete set null,
+  payment_id uuid null references public.order_payments(id) on delete set null,
+  branch text null,
+  cash_session_id uuid null references public.cash_sessions(id) on delete set null,
+  created_by uuid null references public.app_users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.cash_movements enable row level security;
+
+create index if not exists cash_movements_created_at_idx
+  on public.cash_movements (created_at desc);
+
+create index if not exists cash_movements_type_idx
+  on public.cash_movements (type);
+
+create index if not exists cash_movements_session_idx
+  on public.cash_movements (cash_session_id);
+
+create index if not exists cash_movements_order_idx
+  on public.cash_movements (order_id);

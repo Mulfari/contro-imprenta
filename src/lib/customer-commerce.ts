@@ -4,6 +4,7 @@ import {
   type Order,
 } from "@/lib/business";
 import { getStorefrontProductBySlug } from "@/lib/catalog";
+import { createCashMovement } from "@/lib/finance";
 import { listOrderFiles, uploadOrderFile, type OrderFile } from "@/lib/order-files";
 import { computeUnitPrice } from "@/lib/pricing";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -998,5 +999,26 @@ export async function reviewOrderPayment(input: {
       changedBy: input.reviewedBy,
       description: `Pago movil aprobado para pedido ${order.order_number ?? payment.order_id}.`,
     });
+  }
+
+  if (input.status === "aprobado") {
+    // Registro automático en caja (best-effort: si las tablas de finanzas aún
+    // no existen, no rompe la revisión del pago).
+    try {
+      await createCashMovement({
+        type: "ingreso",
+        method: "pago_movil",
+        currencyIn: "USD",
+        amountIn: Number(payment.amount),
+        exchangeRate: null,
+        category: "venta",
+        description: `Pago móvil aprobado — pedido ${order.order_number ?? payment.order_id}`,
+        orderId: payment.order_id,
+        paymentId: payment.id,
+        createdBy: input.reviewedBy,
+      });
+    } catch (error) {
+      console.error("No se pudo registrar el movimiento de caja:", error);
+    }
   }
 }
