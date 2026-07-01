@@ -66,6 +66,25 @@ import {
   listClientFiles,
   type ClientFile,
 } from "@/lib/client-files";
+import { FinancePanel } from "@/app/dashboard/finance-panel";
+import { CASH_METHODS, type CashMethod } from "@/lib/finance-math";
+import {
+  closeCashSession,
+  createCashMovement,
+  getOpenCashSession,
+  getTodayRate,
+  listCashMovements,
+  listRecentRates,
+  listRecentSessions,
+  listReceivables,
+  openCashSession,
+  registerReceivablePayment,
+  setTodayRate,
+  type CashMovement,
+  type CashSession,
+  type ExchangeRate,
+  type ReceivableRow,
+} from "@/lib/finance";
 import {
   deleteOrderFile,
   listOrderFiles,
@@ -108,6 +127,7 @@ const dashboardViews = [
   "clientes",
   "pedidos",
   "pagos",
+  "finanzas",
   "inventario",
   "productos",
   "equipo",
@@ -118,13 +138,14 @@ const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Resumen", view: "resumen" },
   { label: "Pedidos", view: "pedidos" },
   { label: "Pagos", view: "pagos" },
+  { label: "Finanzas", view: "finanzas" },
   { label: "Clientes", view: "clientes" },
   { label: "Inventario", view: "inventario" },
   { label: "Productos", view: "productos" },
   { label: "Equipo", view: "equipo" },
 ];
 
-const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "pagos", "clientes"];
+const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "pagos", "finanzas", "clientes"];
 const adminSideNavViews: DashboardView[] = [
   "inventario",
   "productos",
@@ -748,6 +769,166 @@ async function reviewPaymentAction(formData: FormData) {
   redirect(buildDashboardUrl("pagos", "Pago revisado"));
 }
 
+async function setRateAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    await setTodayRate({
+      bsPerUsd: Number(String(formData.get("bsPerUsd") ?? "").replace(",", ".")),
+      setBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo guardar la tasa.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Tasa del día guardada"));
+}
+
+async function createMovementAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  const type =
+    String(formData.get("type") ?? "ingreso") === "egreso" ? "egreso" : "ingreso";
+
+  try {
+    const method = String(formData.get("method") ?? "efectivo_usd") as CashMethod;
+    const methodInfo = CASH_METHODS.find((item) => item.value === method);
+    const currencyIn = methodInfo?.currency ?? "USD";
+    const rate = currencyIn === "VES" ? (await getTodayRate())?.bs_per_usd ?? null : null;
+
+    if (currencyIn === "VES" && !rate) {
+      throw new Error("Fija la tasa del día antes de registrar montos en Bs.");
+    }
+
+    await createCashMovement({
+      type,
+      method,
+      currencyIn,
+      amountIn: Number(String(formData.get("amount") ?? "").replace(",", ".")),
+      exchangeRate: rate,
+      category: String(formData.get("category") ?? (type === "ingreso" ? "venta" : "otros")),
+      description: String(formData.get("description") ?? ""),
+      branch: String(formData.get("branch") ?? "") || null,
+      createdBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo registrar el movimiento.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(
+    buildDashboardUrl("finanzas", type === "ingreso" ? "Ingreso registrado" : "Gasto registrado"),
+  );
+}
+
+async function openSessionAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    await openCashSession({
+      branch: String(formData.get("branch") ?? ""),
+      openingUsd: Number(String(formData.get("openingUsd") ?? "0").replace(",", ".")) || 0,
+      openingVes: Number(String(formData.get("openingVes") ?? "0").replace(",", ".")) || 0,
+      openedBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo abrir la caja.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Caja abierta"));
+}
+
+async function closeSessionAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    await closeCashSession({
+      sessionId: String(formData.get("sessionId") ?? ""),
+      countedUsd: Number(String(formData.get("countedUsd") ?? "0").replace(",", ".")) || 0,
+      countedVes: Number(String(formData.get("countedVes") ?? "0").replace(",", ".")) || 0,
+      closedBy: session.userId,
+      notes: String(formData.get("notes") ?? ""),
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo cerrar la caja.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Caja cerrada"));
+}
+
+async function registerReceivableAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    const method = String(formData.get("method") ?? "efectivo_usd") as CashMethod;
+    const methodInfo = CASH_METHODS.find((item) => item.value === method);
+    const currencyIn = methodInfo?.currency ?? "USD";
+    const rate = currencyIn === "VES" ? (await getTodayRate())?.bs_per_usd ?? null : null;
+
+    if (currencyIn === "VES" && !rate) {
+      throw new Error("Fija la tasa del día antes de registrar montos en Bs.");
+    }
+
+    await registerReceivablePayment({
+      orderId: String(formData.get("orderId") ?? ""),
+      method,
+      currencyIn,
+      amountIn: Number(String(formData.get("amount") ?? "").replace(",", ".")),
+      exchangeRate: rate,
+      branch: String(formData.get("branch") ?? "") || null,
+      createdBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo registrar el abono.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Abono registrado"));
+}
+
 type DashboardPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -985,6 +1166,8 @@ function getViewLabel(view: DashboardView) {
       return "Pedidos";
     case "pagos":
       return "Pagos";
+    case "finanzas":
+      return "Finanzas";
     case "inventario":
       return "Inventario";
     case "productos":
@@ -1112,6 +1295,38 @@ export default async function DashboardPage({
     resolveValue(params.view),
     session.role === "admin",
   );
+
+  // Finanzas: carga con try/catch PROPIO para que el dashboard siga vivo si
+  // las tablas nuevas aún no existen (correr setup.sql las crea).
+  let financeReady = true;
+  let todayRate: ExchangeRate | null = null;
+  let recentRates: ExchangeRate[] = [];
+  let todayMovements: CashMovement[] = [];
+  let financeOpenSessions: (CashSession | null)[] = [];
+  let recentSessions: CashSession[] = [];
+  let receivables: ReceivableRow[] = [];
+  const financeBranches: string[] = ["5 de julio", "las americas"];
+
+  if (activeView === "finanzas") {
+    try {
+      const sinceDate = new Date();
+      sinceDate.setHours(sinceDate.getHours() - 24);
+      [todayRate, recentRates, todayMovements, recentSessions, receivables] =
+        await Promise.all([
+          getTodayRate(),
+          listRecentRates(10),
+          listCashMovements({ sinceIso: sinceDate.toISOString(), limit: 200 }),
+          listRecentSessions(15),
+          listReceivables(),
+        ]);
+      financeOpenSessions = await Promise.all(
+        financeBranches.map((branch) => getOpenCashSession(branch)),
+      );
+    } catch {
+      financeReady = false;
+    }
+  }
+
   const activeOrders = orders.filter(
     (order) => order.status !== "entregado" && order.status !== "rechazado",
   );
@@ -2155,6 +2370,25 @@ export default async function DashboardPage({
             <PaymentsPanel
               payments={payments}
               reviewAction={reviewPaymentAction}
+            />
+          ) : null}
+
+          {activeView === "finanzas" ? (
+            <FinancePanel
+              ready={financeReady}
+              isAdmin={session.role === "admin"}
+              branches={financeBranches}
+              todayRate={todayRate}
+              recentRates={recentRates}
+              movements={todayMovements}
+              openSessions={financeOpenSessions}
+              recentSessions={recentSessions}
+              receivables={receivables}
+              onSetRate={setRateAction}
+              onCreateMovement={createMovementAction}
+              onOpenSession={openSessionAction}
+              onCloseSession={closeSessionAction}
+              onRegisterReceivable={registerReceivableAction}
             />
           ) : null}
 
