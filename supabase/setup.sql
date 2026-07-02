@@ -1220,3 +1220,56 @@ create index if not exists cash_movements_session_idx
 
 create index if not exists cash_movements_order_idx
   on public.cash_movements (order_id);
+
+-- ============================================================
+-- 13) Finanzas (fase 1b): presupuestos y facturas (IVA/IGTF)
+-- ============================================================
+
+create table if not exists public.quotes (
+  id uuid primary key default gen_random_uuid(),
+  quote_number bigint generated always as identity,
+  client_id uuid null references public.clients(id) on delete set null,
+  client_name text not null,
+  items jsonb not null default '[]'::jsonb,
+  subtotal_usd numeric(12,2) not null check (subtotal_usd >= 0),
+  valid_until date null,
+  status text not null default 'enviado' check (status in ('borrador', 'enviado', 'aceptado', 'rechazado', 'convertido')),
+  converted_order_id uuid null references public.orders(id) on delete set null,
+  notes text null,
+  created_by uuid null references public.app_users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.quotes enable row level security;
+
+create index if not exists quotes_created_at_idx on public.quotes (created_at desc);
+create index if not exists quotes_status_idx on public.quotes (status);
+
+create table if not exists public.invoices (
+  id uuid primary key default gen_random_uuid(),
+  invoice_number bigint generated always as identity,
+  order_id uuid null references public.orders(id) on delete set null,
+  client_id uuid null references public.clients(id) on delete set null,
+  client_name text not null,
+  client_document text null,
+  items jsonb not null default '[]'::jsonb,
+  subtotal_usd numeric(12,2) not null check (subtotal_usd > 0),
+  iva_rate numeric(6,4) not null default 0.16,
+  iva_usd numeric(12,2) not null default 0,
+  igtf_rate numeric(6,4) not null default 0.03,
+  igtf_usd numeric(12,2) not null default 0,
+  total_usd numeric(12,2) not null,
+  exchange_rate numeric(14,4) null,
+  status text not null default 'emitida' check (status in ('emitida', 'anulada')),
+  notes text null,
+  issued_by uuid null references public.app_users(id) on delete set null,
+  issued_at timestamptz not null default now(),
+  annulled_by uuid null references public.app_users(id) on delete set null,
+  annulled_at timestamptz null
+);
+
+alter table public.invoices enable row level security;
+
+create index if not exists invoices_issued_at_idx on public.invoices (issued_at desc);
+create index if not exists invoices_status_idx on public.invoices (status);
+create index if not exists invoices_order_idx on public.invoices (order_id);

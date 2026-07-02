@@ -67,22 +67,31 @@ import {
   type ClientFile,
 } from "@/lib/client-files";
 import { FinancePanel } from "@/app/dashboard/finance-panel";
-import { CASH_METHODS, type CashMethod } from "@/lib/finance-math";
+import { CASH_METHODS, type CashMethod, type QuoteItem } from "@/lib/finance-math";
 import {
+  annulInvoice,
   closeCashSession,
+  convertQuoteToOrder,
   createCashMovement,
+  createInvoiceFromOrder,
+  createQuote,
   getOpenCashSession,
   getTodayRate,
   listCashMovements,
+  listInvoices,
+  listQuotes,
   listRecentRates,
   listRecentSessions,
   listReceivables,
   openCashSession,
   registerReceivablePayment,
+  setQuoteStatus,
   setTodayRate,
   type CashMovement,
   type CashSession,
   type ExchangeRate,
+  type Invoice,
+  type Quote,
   type ReceivableRow,
 } from "@/lib/finance";
 import {
@@ -929,6 +938,144 @@ async function registerReceivableAction(formData: FormData) {
   redirect(buildDashboardUrl("finanzas", "Abono registrado"));
 }
 
+async function createQuoteAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    let items: QuoteItem[] = [];
+    try {
+      items = JSON.parse(String(formData.get("items") ?? "[]")) as QuoteItem[];
+    } catch {
+      throw new Error("Los ítems del presupuesto no son válidos.");
+    }
+
+    await createQuote({
+      clientId: String(formData.get("clientId") ?? "") || null,
+      clientName: String(formData.get("clientName") ?? ""),
+      items,
+      validUntil: String(formData.get("validUntil") ?? "") || null,
+      notes: String(formData.get("notes") ?? ""),
+      createdBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo crear el presupuesto.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Presupuesto creado"));
+}
+
+async function quoteStatusAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  const status = String(formData.get("status") ?? "enviado");
+
+  try {
+    await setQuoteStatus({
+      quoteId: String(formData.get("quoteId") ?? ""),
+      status: (["borrador", "enviado", "aceptado", "rechazado"].includes(status)
+        ? status
+        : "enviado") as "borrador" | "enviado" | "aceptado" | "rechazado",
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo actualizar el presupuesto.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Presupuesto actualizado"));
+}
+
+async function convertQuoteAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    await convertQuoteToOrder({
+      quoteId: String(formData.get("quoteId") ?? ""),
+      createdBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo convertir el presupuesto.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Presupuesto convertido en pedido"));
+}
+
+async function createInvoiceAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    await createInvoiceFromOrder({
+      orderId: String(formData.get("orderId") ?? ""),
+      applyIva: formData.get("applyIva") === "on",
+      foreignCurrencyPayment: formData.get("foreignCurrencyPayment") === "on",
+      notes: String(formData.get("notes") ?? ""),
+      issuedBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo emitir la factura.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Factura emitida"));
+}
+
+async function annulInvoiceAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  try {
+    await annulInvoice({
+      invoiceId: String(formData.get("invoiceId") ?? ""),
+      annulledBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo anular la factura.";
+    redirect(buildDashboardUrl("finanzas", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("finanzas", "Factura anulada"));
+}
+
 type DashboardPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -1305,19 +1452,23 @@ export default async function DashboardPage({
   let financeOpenSessions: (CashSession | null)[] = [];
   let recentSessions: CashSession[] = [];
   let receivables: ReceivableRow[] = [];
+  let financeQuotes: Quote[] = [];
+  let financeInvoices: Invoice[] = [];
   const financeBranches: string[] = ["5 de julio", "las americas"];
 
   if (activeView === "finanzas") {
     try {
       const sinceDate = new Date();
       sinceDate.setHours(sinceDate.getHours() - 24);
-      [todayRate, recentRates, todayMovements, recentSessions, receivables] =
+      [todayRate, recentRates, todayMovements, recentSessions, receivables, financeQuotes, financeInvoices] =
         await Promise.all([
           getTodayRate(),
           listRecentRates(10),
           listCashMovements({ sinceIso: sinceDate.toISOString(), limit: 200 }),
           listRecentSessions(15),
           listReceivables(),
+          listQuotes(30),
+          listInvoices(30),
         ]);
       financeOpenSessions = await Promise.all(
         financeBranches.map((branch) => getOpenCashSession(branch)),
@@ -1326,6 +1477,19 @@ export default async function DashboardPage({
       financeReady = false;
     }
   }
+
+  const financeQuoteClients = clients.map((client) => ({
+    id: client.id,
+    name: client.name,
+  }));
+  const financeInvoiceOrders = orders
+    .filter((order) => (order.total_amount ?? 0) > 0 && order.status !== "rechazado")
+    .map((order) => ({
+      id: order.id,
+      order_number: order.order_number,
+      client_name: order.client?.name ?? "Sin cliente",
+      total_amount: Number(order.total_amount ?? 0),
+    }));
 
   const activeOrders = orders.filter(
     (order) => order.status !== "entregado" && order.status !== "rechazado",
@@ -2384,11 +2548,20 @@ export default async function DashboardPage({
               openSessions={financeOpenSessions}
               recentSessions={recentSessions}
               receivables={receivables}
+              quotes={financeQuotes}
+              invoices={financeInvoices}
+              quoteClients={financeQuoteClients}
+              invoiceOrders={financeInvoiceOrders}
               onSetRate={setRateAction}
               onCreateMovement={createMovementAction}
               onOpenSession={openSessionAction}
               onCloseSession={closeSessionAction}
               onRegisterReceivable={registerReceivableAction}
+              onCreateQuote={createQuoteAction}
+              onQuoteStatus={quoteStatusAction}
+              onConvertQuote={convertQuoteAction}
+              onCreateInvoice={createInvoiceAction}
+              onAnnulInvoice={annulInvoiceAction}
             />
           ) : null}
 

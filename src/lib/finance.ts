@@ -1,11 +1,17 @@
+import { createOrder } from "@/lib/business";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   bsToUsd,
+  computeInvoiceTotals,
   computeSessionTotals,
+  IGTF_RATE,
+  IVA_RATE,
+  quoteSubtotal,
   round2,
   type CashMethod,
   type CurrencyIn,
   type MovementType,
+  type QuoteItem,
   type SessionMovement,
 } from "@/lib/finance-math";
 
@@ -321,6 +327,296 @@ export async function listReceivables(): Promise<ReceivableRow[]> {
       status: row.status as string,
     };
   });
+}
+
+// ── Presupuestos ────────────────────────────────────────────
+
+export type QuoteStatus = "borrador" | "enviado" | "aceptado" | "rechazado" | "convertido";
+
+export type Quote = {
+  id: string;
+  quote_number: number;
+  client_id: string | null;
+  client_name: string;
+  items: QuoteItem[];
+  subtotal_usd: number;
+  valid_until: string | null;
+  status: QuoteStatus;
+  converted_order_id: string | null;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+};
+
+function validateQuoteItems(items: QuoteItem[]) {
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("Agrega al menos un ítem al presupuesto.");
+  }
+  for (const item of items) {
+    if (!item.description?.trim()) {
+      throw new Error("Cada ítem necesita una descripción.");
+    }
+    if (!Number.isFinite(item.quantity) || item.quantity <= 0) {
+      throw new Error("Cada ítem necesita una cantidad mayor que cero.");
+    }
+    if (!Number.isFinite(item.unit_price_usd) || item.unit_price_usd < 0) {
+      throw new Error("Cada ítem necesita un precio válido.");
+    }
+  }
+}
+
+export async function listQuotes(limit = 30): Promise<Quote[]> {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("quotes")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as Quote[];
+}
+
+export async function createQuote(input: {
+  clientId: string | null;
+  clientName: string;
+  items: QuoteItem[];
+  validUntil: string | null;
+  notes?: string;
+  createdBy: string;
+}): Promise<Quote> {
+  const clientName = input.clientName.trim();
+  if (!clientName) {
+    throw new Error("Selecciona o escribe el cliente del presupuesto.");
+  }
+  validateQuoteItems(input.items);
+
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("quotes")
+    .insert({
+      client_id: input.clientId,
+      client_name: clientName,
+      items: input.items,
+      subtotal_usd: quoteSubtotal(input.items),
+      valid_until: input.validUntil,
+      status: "enviado",
+      notes: input.notes?.trim() || null,
+      created_by: input.createdBy,
+    })
+    .select("*")
+    .single<Quote>();
+  if (error) throw error;
+  return data;
+}
+
+export async function setQuoteStatus(input: {
+  quoteId: string;
+  status: Exclude<QuoteStatus, "convertido">;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const { data: quote, error: quoteError } = await supabase
+    .from("quotes")
+    .select("id, status")
+    .eq("id", input.quoteId)
+    .single<{ id: string; status: QuoteStatus }>();
+  if (quoteError) throw quoteError;
+  if (quote.status === "convertido") {
+    throw new Error("Este presupuesto ya se convirtió en pedido.");
+  }
+  const { error } = await supabase
+    .from("quotes")
+    .update({ status: input.status })
+    .eq("id", input.quoteId);
+  if (error) throw error;
+}
+
+// Convierte un presupuesto en pedido real (reusa el flujo de pedidos).
+export async function convertQuoteToOrder(input: {
+  quoteId: string;
+  createdBy: string;
+}): Promise<{ orderId: string }> {
+  const supabase = createSupabaseAdminClient();
+  const { data: quote, error: quoteError } = await supabase
+    .from("quotes")
+    .select("*")
+    .eq("id", input.quoteId)
+    .single<Quote>();
+  if (quoteError) throw quoteError;
+  if (quote.status === "convertido") {
+    throw new Error("Este presupuesto ya se convirtió en pedido.");
+  }
+  if (!quote.client_id) {
+    throw new Error("Asocia el presupuesto a un cliente registrado para convertirlo.");
+  }
+
+  const items = quote.items ?? [];
+  const totalUnits = items.reduce((sum, item) => sum + item.quantity, 0) || 1;
+  const description = items
+    .map((item) => `${item.description} x${item.quantity} ($${item.unit_price_usd})`)
+    .join("; ");
+
+  const order = await createOrder({
+    clientId: quote.client_id,
+    productType: `Presupuesto P-${String(quote.quote_number).padStart(4, "0")}`,
+    description,
+    quantity: String(totalUnits),
+    measurements: "",
+    material: "",
+    laminationFinish: "",
+    colorProfile: "",
+    includesDesign: false,
+    includesInstallation: false,
+    urgency: "normal",
+    branch: "",
+    quotedPrice: String(quote.subtotal_usd),
+    discountAmount: "",
+    totalAmount: String(quote.subtotal_usd),
+    depositAmount: "",
+    paymentMethod: "",
+    paymentStatus: "pendiente",
+    promisedDeliveryAt: "",
+    priority: "media",
+    currentOwner: "",
+    currentArea: "Ventas",
+    status: "recibido",
+    internalNotes: quote.notes ?? "",
+    createdBy: input.createdBy,
+  });
+
+  const { error } = await supabase
+    .from("quotes")
+    .update({ status: "convertido", converted_order_id: order.id })
+    .eq("id", quote.id);
+  if (error) throw error;
+
+  return { orderId: order.id };
+}
+
+// ── Facturas ────────────────────────────────────────────────
+
+export type Invoice = {
+  id: string;
+  invoice_number: number;
+  order_id: string | null;
+  client_id: string | null;
+  client_name: string;
+  client_document: string | null;
+  items: QuoteItem[];
+  subtotal_usd: number;
+  iva_rate: number;
+  iva_usd: number;
+  igtf_rate: number;
+  igtf_usd: number;
+  total_usd: number;
+  exchange_rate: number | null;
+  status: "emitida" | "anulada";
+  notes: string | null;
+  issued_by: string | null;
+  issued_at: string;
+  annulled_by: string | null;
+  annulled_at: string | null;
+};
+
+export async function listInvoices(limit = 30): Promise<Invoice[]> {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("*")
+    .order("issued_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as Invoice[];
+}
+
+// Emite una factura (control interno) desde un pedido con total.
+export async function createInvoiceFromOrder(input: {
+  orderId: string;
+  applyIva: boolean;
+  foreignCurrencyPayment: boolean;
+  notes?: string;
+  issuedBy: string;
+}): Promise<Invoice> {
+  const supabase = createSupabaseAdminClient();
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .select("id, order_number, client_id, product_type, description, quantity, total_amount, client:clients(id, name, document_id)")
+    .eq("id", input.orderId)
+    .single();
+  if (orderError) throw orderError;
+
+  const totalAmount = Number(order.total_amount ?? 0);
+  if (totalAmount <= 0) {
+    throw new Error("El pedido no tiene un total definido; cotízalo primero.");
+  }
+
+  const client = Array.isArray(order.client) ? order.client[0] : order.client;
+  const items: QuoteItem[] = [
+    {
+      description: `Pedido ${order.order_number} — ${order.product_type}${
+        order.quantity ? ` (x${order.quantity})` : ""
+      }`,
+      quantity: 1,
+      unit_price_usd: round2(totalAmount),
+    },
+  ];
+
+  const totals = computeInvoiceTotals({
+    subtotalUsd: totalAmount,
+    applyIva: input.applyIva,
+    foreignCurrencyPayment: input.foreignCurrencyPayment,
+  });
+
+  let exchangeRate: number | null = null;
+  try {
+    exchangeRate = (await getTodayRate())?.bs_per_usd ?? null;
+  } catch {
+    exchangeRate = null;
+  }
+
+  const { data, error } = await supabase
+    .from("invoices")
+    .insert({
+      order_id: order.id,
+      client_id: (order.client_id as string) ?? null,
+      client_name: (client?.name as string) ?? "Sin cliente",
+      client_document: (client?.document_id as string) ?? null,
+      items,
+      subtotal_usd: round2(totalAmount),
+      iva_rate: input.applyIva ? IVA_RATE : 0,
+      iva_usd: totals.ivaUsd,
+      igtf_rate: input.foreignCurrencyPayment ? IGTF_RATE : 0,
+      igtf_usd: totals.igtfUsd,
+      total_usd: totals.totalUsd,
+      exchange_rate: exchangeRate,
+      notes: input.notes?.trim() || null,
+      issued_by: input.issuedBy,
+    })
+    .select("*")
+    .single<Invoice>();
+  if (error) throw error;
+  return data;
+}
+
+export async function annulInvoice(input: { invoiceId: string; annulledBy: string }) {
+  const supabase = createSupabaseAdminClient();
+  const { data: invoice, error: invoiceError } = await supabase
+    .from("invoices")
+    .select("id, status")
+    .eq("id", input.invoiceId)
+    .single<{ id: string; status: string }>();
+  if (invoiceError) throw invoiceError;
+  if (invoice.status !== "emitida") {
+    throw new Error("Esta factura ya está anulada.");
+  }
+  const { error } = await supabase
+    .from("invoices")
+    .update({
+      status: "anulada",
+      annulled_by: input.annulledBy,
+      annulled_at: new Date().toISOString(),
+    })
+    .eq("id", input.invoiceId);
+  if (error) throw error;
 }
 
 // Registra un abono manual a un pedido con saldo: crea el movimiento de caja

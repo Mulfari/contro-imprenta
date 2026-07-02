@@ -3,9 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   agingBucket,
   bsToUsd,
+  computeInvoiceTotals,
   computeSessionTotals,
+  quoteSubtotal,
   round2,
   usdToBs,
+  type QuoteItem,
   type SessionMovement,
 } from "@/lib/finance-math";
 
@@ -41,6 +44,57 @@ describe("agingBucket", () => {
 
   it("31+ días", () => {
     expect(agingBucket("2026-05-01T00:00:00Z", now)).toBe("31+");
+  });
+});
+
+describe("quoteSubtotal", () => {
+  const items: QuoteItem[] = [
+    { description: "Tarjetas premium", quantity: 2, unit_price_usd: 18 },
+    { description: "Pendón 1x2m", quantity: 1, unit_price_usd: 25.5 },
+  ];
+
+  it("suma cantidad × precio unitario", () => {
+    expect(quoteSubtotal(items)).toBe(61.5);
+  });
+
+  it("lista vacía = 0", () => {
+    expect(quoteSubtotal([])).toBe(0);
+  });
+});
+
+describe("computeInvoiceTotals", () => {
+  it("con IVA y sin IGTF (pago en Bs)", () => {
+    const totals = computeInvoiceTotals({ subtotalUsd: 100, applyIva: true, foreignCurrencyPayment: false });
+    expect(totals.ivaUsd).toBe(16);
+    expect(totals.igtfUsd).toBe(0);
+    expect(totals.totalUsd).toBe(116);
+  });
+
+  it("con IVA e IGTF (pago en divisas): IGTF 3% sobre base+IVA", () => {
+    const totals = computeInvoiceTotals({ subtotalUsd: 100, applyIva: true, foreignCurrencyPayment: true });
+    expect(totals.ivaUsd).toBe(16);
+    expect(totals.igtfUsd).toBe(3.48); // 3% de 116
+    expect(totals.totalUsd).toBe(119.48);
+  });
+
+  it("sin IVA con IGTF", () => {
+    const totals = computeInvoiceTotals({ subtotalUsd: 50, applyIva: false, foreignCurrencyPayment: true });
+    expect(totals.ivaUsd).toBe(0);
+    expect(totals.igtfUsd).toBe(1.5);
+    expect(totals.totalUsd).toBe(51.5);
+  });
+
+  it("redondea a 2 decimales", () => {
+    const totals = computeInvoiceTotals({ subtotalUsd: 33.33, applyIva: true, foreignCurrencyPayment: true });
+    expect(totals.ivaUsd).toBe(5.33); // 33.33 * 0.16 = 5.3328
+    expect(totals.igtfUsd).toBe(1.16); // (33.33+5.33)*0.03 = 1.1598
+    expect(totals.totalUsd).toBe(39.82);
+  });
+
+  it("subtotal inválido lanza error", () => {
+    expect(() =>
+      computeInvoiceTotals({ subtotalUsd: 0, applyIva: true, foreignCurrencyPayment: false }),
+    ).toThrow();
   });
 });
 

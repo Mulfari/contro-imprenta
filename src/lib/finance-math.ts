@@ -63,6 +63,51 @@ export function agingBucket(sinceIso: string, now: Date = new Date()): AgingBuck
   return "31+";
 }
 
+// ── Presupuestos y facturas ─────────────────────────────────
+
+export type QuoteItem = {
+  description: string;
+  quantity: number;
+  unit_price_usd: number;
+};
+
+export function quoteSubtotal(items: QuoteItem[]): number {
+  return round2(
+    items.reduce((sum, item) => sum + item.quantity * item.unit_price_usd, 0),
+  );
+}
+
+export const IVA_RATE = 0.16;
+export const IGTF_RATE = 0.03;
+
+export type InvoiceTotals = {
+  ivaUsd: number;
+  igtfUsd: number;
+  totalUsd: number;
+};
+
+// IVA 16% sobre la base; IGTF 3% sobre (base + IVA) cuando el pago es en
+// divisas. Control interno, no certificación fiscal.
+export function computeInvoiceTotals(input: {
+  subtotalUsd: number;
+  applyIva: boolean;
+  foreignCurrencyPayment: boolean;
+}): InvoiceTotals {
+  if (!Number.isFinite(input.subtotalUsd) || input.subtotalUsd <= 0) {
+    throw new Error("El subtotal de la factura debe ser mayor que cero.");
+  }
+
+  const ivaUsd = input.applyIva ? round2(input.subtotalUsd * IVA_RATE) : 0;
+  const baseWithIva = round2(input.subtotalUsd + ivaUsd);
+  const igtfUsd = input.foreignCurrencyPayment ? round2(baseWithIva * IGTF_RATE) : 0;
+
+  return {
+    ivaUsd,
+    igtfUsd,
+    totalUsd: round2(baseWithIva + igtfUsd),
+  };
+}
+
 export type SessionMovement = {
   type: MovementType;
   method: CashMethod;

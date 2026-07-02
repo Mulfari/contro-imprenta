@@ -7,15 +7,19 @@ import {
   CASH_METHODS,
   EXPENSE_CATEGORIES,
   INCOME_CATEGORIES,
+  quoteSubtotal,
+  type QuoteItem,
 } from "@/lib/finance-math";
 import type {
   CashMovement,
   CashSession,
   ExchangeRate,
+  Invoice,
+  Quote,
   ReceivableRow,
 } from "@/lib/finance";
 
-type FinanceTab = "caja" | "gastos" | "cobrar" | "cierres" | "tasa";
+type FinanceTab = "caja" | "gastos" | "cobrar" | "presupuestos" | "facturas" | "cierres" | "tasa";
 
 interface FinancePanelProps {
   ready: boolean;
@@ -27,17 +31,28 @@ interface FinancePanelProps {
   openSessions: (CashSession | null)[];
   recentSessions: CashSession[];
   receivables: ReceivableRow[];
+  quotes: Quote[];
+  invoices: Invoice[];
+  quoteClients: { id: string; name: string }[];
+  invoiceOrders: { id: string; order_number: string; client_name: string; total_amount: number }[];
   onSetRate: (formData: FormData) => void;
   onCreateMovement: (formData: FormData) => void;
   onOpenSession: (formData: FormData) => void;
   onCloseSession: (formData: FormData) => void;
   onRegisterReceivable: (formData: FormData) => void;
+  onCreateQuote: (formData: FormData) => void;
+  onQuoteStatus: (formData: FormData) => void;
+  onConvertQuote: (formData: FormData) => void;
+  onCreateInvoice: (formData: FormData) => void;
+  onAnnulInvoice: (formData: FormData) => void;
 }
 
 const tabs: { id: FinanceTab; label: string }[] = [
   { id: "caja", label: "Caja" },
   { id: "gastos", label: "Gastos" },
   { id: "cobrar", label: "Por cobrar" },
+  { id: "presupuestos", label: "Presupuestos" },
+  { id: "facturas", label: "Facturas" },
   { id: "cierres", label: "Cierres" },
   { id: "tasa", label: "Tasa" },
 ];
@@ -71,6 +86,14 @@ function methodLabel(method: string) {
   return CASH_METHODS.find((item) => item.value === method)?.label ?? method;
 }
 
+const quoteStatusStyles: Record<string, string> = {
+  borrador: "border-slate-200 bg-slate-50 text-slate-500",
+  enviado: "border-blue-200 bg-blue-50 text-blue-700",
+  aceptado: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  rechazado: "border-rose-200 bg-rose-50 text-rose-700",
+  convertido: "border-violet-200 bg-violet-50 text-violet-700",
+};
+
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-300 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.12)]";
 const labelClass = "mb-1.5 block text-xs font-semibold text-slate-500";
@@ -83,6 +106,7 @@ const cardClass =
 // gastos, cuentas por cobrar con antigüedad, cierres y tasa del día.
 export function FinancePanel({
   ready,
+  isAdmin,
   branches,
   todayRate,
   recentRates,
@@ -90,11 +114,20 @@ export function FinancePanel({
   openSessions,
   recentSessions,
   receivables,
+  quotes,
+  invoices,
+  quoteClients,
+  invoiceOrders,
   onSetRate,
   onCreateMovement,
   onOpenSession,
   onCloseSession,
   onRegisterReceivable,
+  onCreateQuote,
+  onQuoteStatus,
+  onConvertQuote,
+  onCreateInvoice,
+  onAnnulInvoice,
 }: FinancePanelProps) {
   const [tab, setTab] = useState<FinanceTab>("caja");
 
@@ -520,6 +553,232 @@ export function FinancePanel({
         </article>
       ) : null}
 
+      {tab === "presupuestos" ? (
+        <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+          <article className={cardClass}>
+            <h3 className="text-lg font-semibold text-slate-950">Nuevo presupuesto</h3>
+            <p className="mb-4 mt-1 text-sm text-slate-500">
+              Cotización formal para el cliente; al aceptarla la conviertes en pedido con un clic.
+            </p>
+            <form action={onCreateQuote} className="grid gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Cliente registrado</label>
+                  <select name="clientId" className={inputClass} defaultValue="">
+                    <option value="">— Sin registrar (solo nombre) —</option>
+                    {quoteClients.map((client) => (
+                      <option key={client.id} value={client.id}>
+                        {client.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Nombre del cliente</label>
+                  <input name="clientName" type="text" required placeholder="Ej: Panadería La Espiga" className={inputClass} />
+                </div>
+              </div>
+              <QuoteItemsEditor />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Válido hasta (opcional)</label>
+                  <input name="validUntil" type="date" className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Notas (opcional)</label>
+                  <input name="notes" type="text" className={inputClass} />
+                </div>
+              </div>
+              <div>
+                <button type="submit" className={buttonClass}>
+                  Crear presupuesto
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <article className={cardClass}>
+            <h3 className="text-lg font-semibold text-slate-950">Presupuestos</h3>
+            <div className="mt-3 divide-y divide-slate-100">
+              {quotes.length === 0 ? (
+                <p className="py-6 text-sm text-slate-500">Todavía no hay presupuestos.</p>
+              ) : (
+                quotes.map((quote) => (
+                  <div key={quote.id} className="py-3.5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">
+                          P-{String(quote.quote_number).padStart(4, "0")}
+                          <span className="ml-2 font-normal text-slate-500">{quote.client_name}</span>
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {timeLabel(quote.created_at)}
+                          {quote.valid_until ? ` · válido hasta ${quote.valid_until}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${quoteStatusStyles[quote.status]}`}>
+                          {quote.status}
+                        </span>
+                        <p className="text-base font-semibold text-slate-950">{usd(Number(quote.subtotal_usd))}</p>
+                      </div>
+                    </div>
+                    <details className="mt-1.5">
+                      <summary className="cursor-pointer text-xs font-semibold text-blue-600">Ver ítems y acciones</summary>
+                      <div className="mt-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                        {(quote.items ?? []).map((item, index) => (
+                          <p key={index}>
+                            {item.description} — {item.quantity} × {usd(item.unit_price_usd)}
+                          </p>
+                        ))}
+                        {quote.notes ? <p className="mt-1 italic">{quote.notes}</p> : null}
+                      </div>
+                      {quote.status !== "convertido" ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {quote.status !== "aceptado" ? (
+                            <form action={onQuoteStatus}>
+                              <input type="hidden" name="quoteId" value={quote.id} />
+                              <input type="hidden" name="status" value="aceptado" />
+                              <button type="submit" className="cursor-pointer rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">
+                                Marcar aceptado
+                              </button>
+                            </form>
+                          ) : null}
+                          {quote.status !== "rechazado" ? (
+                            <form action={onQuoteStatus}>
+                              <input type="hidden" name="quoteId" value={quote.id} />
+                              <input type="hidden" name="status" value="rechazado" />
+                              <button type="submit" className="cursor-pointer rounded-full border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">
+                                Marcar rechazado
+                              </button>
+                            </form>
+                          ) : null}
+                          {quote.client_id ? (
+                            <form action={onConvertQuote}>
+                              <input type="hidden" name="quoteId" value={quote.id} />
+                              <button type="submit" className="cursor-pointer rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700">
+                                Convertir en pedido
+                              </button>
+                            </form>
+                          ) : (
+                            <span className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs text-slate-400">
+                              Para convertirlo, créalo con cliente registrado
+                            </span>
+                          )}
+                        </div>
+                      ) : null}
+                    </details>
+                  </div>
+                ))
+              )}
+            </div>
+          </article>
+        </div>
+      ) : null}
+
+      {tab === "facturas" ? (
+        <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+          <article className={cardClass}>
+            <h3 className="text-lg font-semibold text-slate-950">Emitir factura</h3>
+            <p className="mb-4 mt-1 text-sm text-slate-500">
+              Desde un pedido con total. Control interno con IVA 16% e IGTF 3% (pago en divisas); no sustituye la facturación fiscal certificada.
+            </p>
+            {invoiceOrders.length === 0 ? (
+              <p className="text-sm text-slate-500">No hay pedidos con total definido para facturar.</p>
+            ) : (
+              <form action={onCreateInvoice} className="grid gap-3">
+                <div>
+                  <label className={labelClass}>Pedido</label>
+                  <select name="orderId" required className={inputClass} defaultValue="">
+                    <option value="" disabled>
+                      Selecciona un pedido…
+                    </option>
+                    {invoiceOrders.map((order) => (
+                      <option key={order.id} value={order.id}>
+                        {order.order_number} · {order.client_name} · {usd(order.total_amount)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <label className="flex items-center gap-2.5 text-sm text-slate-700">
+                  <input type="checkbox" name="applyIva" defaultChecked className="h-4 w-4 accent-slate-900" />
+                  Aplicar IVA (16%)
+                </label>
+                <label className="flex items-center gap-2.5 text-sm text-slate-700">
+                  <input type="checkbox" name="foreignCurrencyPayment" className="h-4 w-4 accent-slate-900" />
+                  Pago en divisas → aplicar IGTF (3%)
+                </label>
+                <div>
+                  <label className={labelClass}>Notas (opcional)</label>
+                  <input name="notes" type="text" className={inputClass} />
+                </div>
+                <div>
+                  <button type="submit" className={buttonClass}>
+                    Emitir factura
+                  </button>
+                </div>
+              </form>
+            )}
+          </article>
+
+          <article className={cardClass}>
+            <h3 className="text-lg font-semibold text-slate-950">Facturas emitidas</h3>
+            <div className="mt-3 divide-y divide-slate-100">
+              {invoices.length === 0 ? (
+                <p className="py-6 text-sm text-slate-500">Todavía no hay facturas.</p>
+              ) : (
+                invoices.map((invoice) => (
+                  <div key={invoice.id} className="py-3.5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">
+                          F-{String(invoice.invoice_number).padStart(5, "0")}
+                          <span className="ml-2 font-normal text-slate-500">{invoice.client_name}</span>
+                          {invoice.status === "anulada" ? (
+                            <span className="ml-2 rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700">
+                              anulada
+                            </span>
+                          ) : null}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500">{timeLabel(invoice.issued_at)}</p>
+                      </div>
+                      <p className={`text-base font-semibold ${invoice.status === "anulada" ? "text-slate-400 line-through" : "text-slate-950"}`}>
+                        {usd(Number(invoice.total_usd))}
+                      </p>
+                    </div>
+                    <details className="mt-1.5">
+                      <summary className="cursor-pointer text-xs font-semibold text-blue-600">Ver desglose</summary>
+                      <div className="mt-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                        {(invoice.items ?? []).map((item, index) => (
+                          <p key={index}>{item.description}</p>
+                        ))}
+                        <p className="mt-1.5">Subtotal: {usd(Number(invoice.subtotal_usd))}</p>
+                        <p>IVA ({Math.round(Number(invoice.iva_rate) * 100)}%): {usd(Number(invoice.iva_usd))}</p>
+                        <p>IGTF ({Math.round(Number(invoice.igtf_rate) * 100)}%): {usd(Number(invoice.igtf_usd))}</p>
+                        <p className="font-semibold text-slate-900">Total: {usd(Number(invoice.total_usd))}</p>
+                        {invoice.exchange_rate ? (
+                          <p className="mt-1 text-slate-500">
+                            ≈ {ves(Number(invoice.total_usd) * Number(invoice.exchange_rate))} (tasa {vesFormatter.format(Number(invoice.exchange_rate))})
+                          </p>
+                        ) : null}
+                      </div>
+                      {invoice.status === "emitida" && isAdmin ? (
+                        <form action={onAnnulInvoice} className="mt-2">
+                          <input type="hidden" name="invoiceId" value={invoice.id} />
+                          <button type="submit" className="cursor-pointer rounded-full border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">
+                            Anular factura
+                          </button>
+                        </form>
+                      ) : null}
+                    </details>
+                  </div>
+                ))
+              )}
+            </div>
+          </article>
+        </div>
+      ) : null}
+
       {tab === "cierres" ? (
         <article className={cardClass}>
           <h3 className="text-lg font-semibold text-slate-950">Cierres de caja</h3>
@@ -635,5 +894,82 @@ export function FinancePanel({
         </div>
       ) : null}
     </section>
+  );
+}
+
+// Editor de ítems del presupuesto: filas descripción/cantidad/precio en estado
+// local, serializadas a un input oculto (JSON) que consume la server action.
+function QuoteItemsEditor() {
+  const [items, setItems] = useState<QuoteItem[]>([
+    { description: "", quantity: 1, unit_price_usd: 0 },
+  ]);
+
+  const update = (index: number, patch: Partial<QuoteItem>) => {
+    setItems((current) =>
+      current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    );
+  };
+
+  const validItems = items.filter(
+    (item) => item.description.trim() && item.quantity > 0 && item.unit_price_usd >= 0,
+  );
+
+  return (
+    <div>
+      <label className={labelClass}>Ítems</label>
+      <input type="hidden" name="items" value={JSON.stringify(validItems)} />
+      <div className="grid gap-2">
+        {items.map((item, index) => (
+          <div key={index} className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              value={item.description}
+              onChange={(event) => update(index, { description: event.target.value })}
+              placeholder="Descripción (ej: 500 tarjetas mate)"
+              className={`${inputClass} min-w-0 flex-1`}
+            />
+            <input
+              type="number"
+              min={1}
+              value={item.quantity}
+              onChange={(event) => update(index, { quantity: Math.max(1, Number(event.target.value) || 1) })}
+              aria-label="Cantidad"
+              className={`${inputClass} w-20`}
+            />
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={item.unit_price_usd}
+              onChange={(event) => update(index, { unit_price_usd: Math.max(0, Number(event.target.value) || 0) })}
+              aria-label="Precio unitario USD"
+              className={`${inputClass} w-28`}
+            />
+            {items.length > 1 ? (
+              <button
+                type="button"
+                onClick={() => setItems((current) => current.filter((_, i) => i !== index))}
+                aria-label="Quitar ítem"
+                className="cursor-pointer rounded-full border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500 transition hover:border-rose-200 hover:text-rose-600"
+              >
+                ×
+              </button>
+            ) : null}
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setItems((current) => [...current, { description: "", quantity: 1, unit_price_usd: 0 }])}
+          className="cursor-pointer text-xs font-semibold text-blue-600 transition hover:text-blue-800"
+        >
+          + Añadir ítem
+        </button>
+        <p className="text-sm font-semibold text-slate-900">
+          Subtotal: {usd(quoteSubtotal(validItems))}
+        </p>
+      </div>
+    </div>
   );
 }
