@@ -465,6 +465,35 @@ export async function createOrder(input: {
   return data;
 }
 
+export type OrderSheetClient = {
+  id: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  document_id: string | null;
+} | null;
+
+// Un pedido con los datos del cliente (para la hoja de trabajo imprimible).
+export async function getOrderWithClient(orderId: string) {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*, client:clients(id, name, phone, email, document_id)")
+    .eq("id", orderId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  const record = data as Order & { client: OrderSheetClient | OrderSheetClient[] };
+
+  return {
+    ...record,
+    client: Array.isArray(record.client) ? record.client[0] ?? null : record.client,
+  } as Order & { client: OrderSheetClient };
+}
+
 export async function updateOrderStatus(input: {
   orderId: string;
   status: OrderStatus;

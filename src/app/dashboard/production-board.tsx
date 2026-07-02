@@ -154,12 +154,22 @@ export function ProductionBoard({ orders, deliveredToday, onMove }: ProductionBo
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <Link
-                            href={`/dashboard?view=pedidos&orderQuery=${encodeURIComponent(order.order_number)}`}
-                            className="cursor-pointer font-mono text-xs font-bold text-slate-950 transition hover:text-blue-600"
-                          >
-                            {order.order_number}
-                          </Link>
+                          <div className="flex items-center gap-1.5">
+                            <Link
+                              href={`/dashboard?view=pedidos&orderQuery=${encodeURIComponent(order.order_number)}`}
+                              className="cursor-pointer font-mono text-xs font-bold text-slate-950 transition hover:text-blue-600"
+                            >
+                              {order.order_number}
+                            </Link>
+                            <Link
+                              href={`/dashboard/orden/${order.id}/hoja`}
+                              target="_blank"
+                              title="Hoja de trabajo imprimible"
+                              className="cursor-pointer rounded border border-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 transition hover:border-slate-300 hover:text-slate-700"
+                            >
+                              Hoja ↗
+                            </Link>
+                          </div>
                           <span
                             className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                               priorityStyles[order.priority] ?? priorityStyles.media
