@@ -1273,3 +1273,11 @@ alter table public.invoices enable row level security;
 create index if not exists invoices_issued_at_idx on public.invoices (issued_at desc);
 create index if not exists invoices_status_idx on public.invoices (status);
 create index if not exists invoices_order_idx on public.invoices (order_id);
+
+-- ============================================================
+-- 14) Producción (fase 2c): aprobación de arte online
+-- ============================================================
+
+alter table public.orders add column if not exists art_approval_status text not null default 'sin_arte';
+alter table public.orders add column if not exists art_approval_note text null;
+alter table public.orders add column if not exists art_approval_at timestamptz null;

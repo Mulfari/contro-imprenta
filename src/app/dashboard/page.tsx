@@ -41,6 +41,7 @@ import {
   type OrderUrgency,
   type PaymentStatus,
   rejectOrder,
+  requestArtApproval,
   setOrderQuotedTotal,
   updateClient,
   updateOrderStatus,
@@ -972,6 +973,30 @@ async function moveOrderProductionAction(formData: FormData) {
   redirect(buildDashboardUrl("produccion", "Pedido movido"));
 }
 
+async function requestArtApprovalAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  try {
+    await requestArtApproval({
+      orderId: String(formData.get("orderId") ?? ""),
+      changedBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo enviar el arte a aprobación.";
+    redirect(buildDashboardUrl("produccion", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("produccion", "Arte enviado a aprobación del cliente"));
+}
+
 async function createQuoteAction(formData: FormData) {
   "use server";
 
@@ -1759,6 +1784,7 @@ export default async function DashboardPage({
         overdue:
           order.status !== "entregado" &&
           Boolean(order.promised_delivery_at && order.promised_delivery_at < todayKey),
+        art_approval_status: order.art_approval_status ?? "sin_arte",
       };
     });
   const deliveredTodayCount = orders.filter(
@@ -2624,6 +2650,7 @@ export default async function DashboardPage({
               orders={boardOrders}
               deliveredToday={deliveredTodayCount}
               onMove={moveOrderProductionAction}
+              onRequestArt={requestArtApprovalAction}
             />
           ) : null}
 

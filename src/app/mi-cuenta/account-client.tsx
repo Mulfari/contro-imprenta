@@ -56,6 +56,8 @@ type CustomerOrder = {
   promised_delivery_at: string | null;
   rejected_at: string | null;
   rejection_reason: string | null;
+  art_approval_status: "sin_arte" | "pendiente" | "aprobado" | "cambios";
+  art_approval_note: string | null;
   created_at: string;
   files: CustomerOrderFile[];
   payments: CustomerPayment[];
@@ -844,6 +846,8 @@ function CustomerDashboard({
   const [accountProfile, setAccountProfile] = useState<CustomerProfile | null>(profile);
   const [orderView, setOrderView] = useState<CustomerOrderView>("active");
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [artChangeOpen, setArtChangeOpen] = useState(false);
+  const [artChangeNote, setArtChangeNote] = useState("");
 
   const loadOrders = async () => {
     setIsLoading(true);
@@ -933,6 +937,36 @@ function CustomerDashboard({
     } catch (error) {
       setActionTone("error");
       setActionMessage(error instanceof Error ? error.message : "No se pudo subir el arte.");
+    }
+  };
+
+  const respondArt = async (orderId: string, decision: "aprobado" | "cambios", note?: string) => {
+    try {
+      const response = await fetch("/api/storefront/art-approval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, decision, note }),
+      });
+      const payload = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error || "No se pudo registrar tu respuesta.");
+      }
+
+      setActionTone("success");
+      setActionMessage(
+        decision === "aprobado"
+          ? "¡Arte aprobado! Tu pedido pasa a producción."
+          : "Listo, le pasamos tus cambios al equipo de diseño.",
+      );
+      setArtChangeNote("");
+      setArtChangeOpen(false);
+      await loadOrders();
+    } catch (error) {
+      setActionTone("error");
+      setActionMessage(
+        error instanceof Error ? error.message : "No se pudo registrar tu respuesta.",
+      );
     }
   };
 
@@ -1326,6 +1360,68 @@ function CustomerDashboard({
                           </span>
                         </div>
                       </div>
+
+                      {selectedOrder.art_approval_status === "pendiente" ? (
+                        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
+                          <p className="text-sm font-black text-amber-900">
+                            Tu arte está listo para revisión
+                          </p>
+                          <p className="mt-1 text-sm leading-6 text-amber-800">
+                            Revisa el archivo en la sección &quot;Arte digital&quot; de abajo. Si todo está bien,
+                            apruébalo para que pase a impresión; si no, pídenos los cambios.
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void respondArt(selectedOrder.id, "aprobado")}
+                              className="cursor-pointer rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-emerald-700"
+                            >
+                              Aprobar arte ✓
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setArtChangeOpen((value) => !value)}
+                              className="cursor-pointer rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-black text-amber-800 transition hover:bg-amber-100"
+                            >
+                              Pedir cambios
+                            </button>
+                          </div>
+                          {artChangeOpen ? (
+                            <div className="mt-3 grid gap-2">
+                              <textarea
+                                value={artChangeNote}
+                                onChange={(event) => setArtChangeNote(event.target.value)}
+                                rows={3}
+                                placeholder="Cuéntanos qué quieres cambiar (colores, textos, tamaño…)"
+                                className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-amber-400"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => void respondArt(selectedOrder.id, "cambios", artChangeNote)}
+                                className="w-fit cursor-pointer rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-black text-white transition hover:bg-slate-700"
+                              >
+                                Enviar cambios
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+
+                      {selectedOrder.art_approval_status === "aprobado" ? (
+                        <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+                          ✓ Aprobaste el arte de este pedido.
+                        </div>
+                      ) : null}
+
+                      {selectedOrder.art_approval_status === "cambios" ? (
+                        <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-900">
+                          <span className="font-black">Pediste cambios en el arte:</span>{" "}
+                          {selectedOrder.art_approval_note}
+                          <span className="block text-xs text-blue-700">
+                            El equipo de diseño te enviará una nueva versión.
+                          </span>
+                        </div>
+                      ) : null}
 
                       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                         <AccountDetail label="Entrega" value={formatDate(selectedOrder.promised_delivery_at)} />

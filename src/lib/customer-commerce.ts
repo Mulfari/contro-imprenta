@@ -569,7 +569,7 @@ export async function getCustomerDashboard(userId: string) {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, client_id, customer_user_id, order_number, title, product_type, description, quantity, measurements, material, size, lamination_finish, color_profile, includes_design, includes_installation, urgency, branch, quoted_price, discount_amount, total_amount, deposit_amount, pending_amount, payment_method, payment_status, payment_review_status, confirmation_status, source, promised_delivery_at, priority, current_owner, current_area, due_date, status, rejected_by, rejected_at, rejection_reason, internal_notes, created_at, created_by",
+      "id, client_id, customer_user_id, order_number, title, product_type, description, quantity, measurements, material, size, lamination_finish, color_profile, includes_design, includes_installation, urgency, branch, quoted_price, discount_amount, total_amount, deposit_amount, pending_amount, payment_method, payment_status, payment_review_status, confirmation_status, source, promised_delivery_at, priority, current_owner, current_area, due_date, status, rejected_by, rejected_at, rejection_reason, internal_notes, art_approval_status, art_approval_note, art_approval_at, created_at, created_by",
     )
     .eq("customer_user_id", userId)
     .order("created_at", { ascending: false });
@@ -607,6 +607,67 @@ async function listPaymentsForOrders(orderIds: string[]) {
   }
 
   return (data ?? []) as OrderPayment[];
+}
+
+// El cliente responde a la aprobación de arte desde mi-cuenta.
+export async function respondArtApproval(input: {
+  userId: string;
+  orderId: string;
+  decision: "aprobado" | "cambios";
+  note?: string;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .select("id, order_number, customer_user_id, art_approval_status")
+    .eq("id", input.orderId)
+    .single<{
+      id: string;
+      order_number: string;
+      customer_user_id: string | null;
+      art_approval_status: string;
+    }>();
+
+  if (orderError) {
+    throw orderError;
+  }
+
+  if (order.customer_user_id !== input.userId) {
+    throw new Error("Este pedido no pertenece a tu cuenta.");
+  }
+
+  if (order.art_approval_status !== "pendiente") {
+    throw new Error("Este arte no está en revisión.");
+  }
+
+  const note = input.decision === "cambios" ? input.note?.trim() || "" : "";
+
+  if (input.decision === "cambios" && !note) {
+    throw new Error("Cuéntanos qué cambios necesitas en el arte.");
+  }
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      art_approval_status: input.decision,
+      art_approval_note: note || null,
+      art_approval_at: new Date().toISOString(),
+    })
+    .eq("id", order.id);
+
+  if (error) {
+    throw error;
+  }
+
+  await createOrderHistoryEntry({
+    orderId: order.id,
+    detail:
+      input.decision === "aprobado"
+        ? `El cliente aprobó el arte de ${order.order_number}.`
+        : `El cliente pidió cambios en el arte de ${order.order_number}: ${note}`,
+    eventType: "arte",
+    changedBy: null,
+  });
 }
 
 export async function uploadCustomerOrderFile(input: {

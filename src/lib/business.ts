@@ -87,9 +87,14 @@ export type Order = {
   rejected_at: string | null;
   rejection_reason: string | null;
   internal_notes: string | null;
+  art_approval_status: ArtApprovalStatus;
+  art_approval_note: string | null;
+  art_approval_at: string | null;
   created_at: string;
   created_by: string | null;
 };
+
+export type ArtApprovalStatus = "sin_arte" | "pendiente" | "aprobado" | "cambios";
 
 export type OrderWithClient = Order & {
   client: {
@@ -463,6 +468,40 @@ export async function createOrder(input: {
   });
 
   return data;
+}
+
+// El admin manda el arte a aprobación del cliente (lo responde en mi-cuenta).
+export async function requestArtApproval(input: { orderId: string; changedBy: string }) {
+  const supabase = createSupabaseAdminClient();
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .select("id, order_number")
+    .eq("id", input.orderId)
+    .single<{ id: string; order_number: string }>();
+
+  if (orderError) {
+    throw orderError;
+  }
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      art_approval_status: "pendiente",
+      art_approval_note: null,
+      art_approval_at: new Date().toISOString(),
+    })
+    .eq("id", input.orderId);
+
+  if (error) {
+    throw error;
+  }
+
+  await createOrderHistoryEntry({
+    orderId: input.orderId,
+    detail: `Arte enviado a aprobación del cliente (${order.order_number}).`,
+    eventType: "arte",
+    changedBy: input.changedBy,
+  });
 }
 
 export type OrderSheetClient = {

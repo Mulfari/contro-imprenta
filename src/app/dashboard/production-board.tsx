@@ -19,13 +19,21 @@ export type BoardOrder = {
   current_area: string | null;
   days_in_status: number;
   overdue: boolean;
+  art_approval_status: string;
 };
 
 interface ProductionBoardProps {
   orders: BoardOrder[];
   deliveredToday: number;
   onMove: (formData: FormData) => void;
+  onRequestArt: (formData: FormData) => void;
 }
+
+const artStyles: Record<string, { label: string; className: string }> = {
+  pendiente: { label: "Arte: esperando cliente", className: "bg-amber-50 text-amber-700" },
+  aprobado: { label: "Arte aprobado ✓", className: "bg-emerald-50 text-emerald-700" },
+  cambios: { label: "Cliente pidió cambios", className: "bg-rose-50 text-rose-700" },
+};
 
 const columns: { status: string; label: string; accent: string }[] = [
   { status: "recibido", label: "Recibido", accent: "bg-slate-400" },
@@ -58,7 +66,7 @@ function promisedLabel(value: string | null) {
   return new Intl.DateTimeFormat("es-VE", { day: "2-digit", month: "short" }).format(parsed);
 }
 
-export function ProductionBoard({ orders, deliveredToday, onMove }: ProductionBoardProps) {
+export function ProductionBoard({ orders, deliveredToday, onMove, onRequestArt }: ProductionBoardProps) {
   const active = orders.filter((order) => order.status !== "entregado");
   const overdueCount = active.filter((order) => order.overdue).length;
   const readyCount = active.filter((order) => order.status === "listo").length;
@@ -212,6 +220,30 @@ export function ProductionBoard({ orders, deliveredToday, onMove }: ProductionBo
                           <p className="mt-1.5 truncate text-[11px] text-slate-400">
                             Responsable: {order.current_owner}
                           </p>
+                        ) : null}
+
+                        {artStyles[order.art_approval_status] ? (
+                          <p
+                            className={`mt-1.5 w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+                              artStyles[order.art_approval_status].className
+                            }`}
+                          >
+                            {artStyles[order.art_approval_status].label}
+                          </p>
+                        ) : null}
+
+                        {(order.art_approval_status === "sin_arte" ||
+                          order.art_approval_status === "cambios") &&
+                        (order.status === "recibido" || order.status === "disenando") ? (
+                          <form action={onRequestArt} className="mt-1.5">
+                            <input type="hidden" name="orderId" value={order.id} />
+                            <button
+                              type="submit"
+                              className="cursor-pointer rounded-lg border border-violet-200 bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700 transition hover:bg-violet-100"
+                            >
+                              Pedir aprobación de arte al cliente
+                            </button>
+                          </form>
                         ) : null}
 
                         <div className="mt-2.5 flex items-center gap-1.5 border-t border-slate-100 pt-2.5">
