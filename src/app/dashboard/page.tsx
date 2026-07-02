@@ -67,8 +67,20 @@ import {
   listClientFiles,
   type ClientFile,
 } from "@/lib/client-files";
+import { usdToBs } from "@/lib/finance-math";
 import { FinancePanel } from "@/app/dashboard/finance-panel";
 import { ProductionBoard, type BoardOrder } from "@/app/dashboard/production-board";
+import {
+  createSupply,
+  deactivateSupply,
+  listRecentSupplyMovements,
+  listSupplies,
+  registerSupplyMovement,
+  updateSupply,
+  type Supply,
+  type SupplyMovement,
+  type SupplyMovementType,
+} from "@/lib/supplies";
 import { CASH_METHODS, type CashMethod, type QuoteItem } from "@/lib/finance-math";
 import {
   annulInvoice,
@@ -1135,6 +1147,168 @@ async function annulInvoiceAction(formData: FormData) {
   redirect(buildDashboardUrl("finanzas", "Factura anulada"));
 }
 
+async function createSupplyAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  try {
+    const costRaw = String(formData.get("costUsd") ?? "").replace(",", ".");
+    await createSupply({
+      name: String(formData.get("name") ?? ""),
+      category: String(formData.get("category") ?? "otros"),
+      unit: String(formData.get("unit") ?? "unidad"),
+      stock: Number(String(formData.get("stock") ?? "0").replace(",", ".")) || 0,
+      minStock: Number(String(formData.get("minStock") ?? "0").replace(",", ".")) || 0,
+      costUsd: costRaw ? Number(costRaw) || null : null,
+      supplier: String(formData.get("supplier") ?? ""),
+      notes: String(formData.get("notes") ?? ""),
+      createdBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo registrar el insumo.";
+    redirect(buildDashboardUrl("inventario", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("inventario", "Insumo registrado"));
+}
+
+async function updateSupplyAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  try {
+    const costRaw = String(formData.get("costUsd") ?? "").replace(",", ".");
+    await updateSupply({
+      supplyId: String(formData.get("supplyId") ?? ""),
+      name: String(formData.get("name") ?? ""),
+      category: String(formData.get("category") ?? "otros"),
+      unit: String(formData.get("unit") ?? "unidad"),
+      minStock: Number(String(formData.get("minStock") ?? "0").replace(",", ".")) || 0,
+      costUsd: costRaw ? Number(costRaw) || null : null,
+      supplier: String(formData.get("supplier") ?? ""),
+      notes: String(formData.get("notes") ?? ""),
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo actualizar el insumo.";
+    redirect(buildDashboardUrl("inventario", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("inventario", "Insumo actualizado"));
+}
+
+async function deactivateSupplyAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  try {
+    await deactivateSupply(String(formData.get("supplyId") ?? ""));
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo quitar el insumo.";
+    redirect(buildDashboardUrl("inventario", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("inventario", "Insumo quitado del inventario"));
+}
+
+async function supplyMovementAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session || session.role !== "admin") {
+    redirect("/login?message=Necesitas%20un%20usuario%20admin");
+  }
+
+  const type = String(formData.get("type") ?? "entrada") as SupplyMovementType;
+
+  try {
+    const costRaw = String(formData.get("costUsd") ?? "").replace(",", ".");
+    const costUsd = costRaw ? Number(costRaw) || null : null;
+    const quantity = Number(String(formData.get("quantity") ?? "").replace(",", "."));
+
+    const { supply } = await registerSupplyMovement({
+      supplyId: String(formData.get("supplyId") ?? ""),
+      type,
+      quantity,
+      orderId: String(formData.get("orderId") ?? "") || null,
+      costUsd,
+      description: String(formData.get("description") ?? ""),
+      createdBy: session.userId,
+    });
+
+    // Compra con gasto en caja (opcional): enlaza inventario con finanzas.
+    const expenseMethod = String(formData.get("expenseMethod") ?? "");
+    if (type === "entrada" && expenseMethod && costUsd && costUsd > 0) {
+      const methodInfo = CASH_METHODS.find((item) => item.value === expenseMethod);
+      if (methodInfo) {
+        const description = `Compra de insumo: ${supply.name} (${quantity} ${supply.unit})`;
+        if (methodInfo.currency === "USD") {
+          await createCashMovement({
+            type: "egreso",
+            method: methodInfo.value,
+            currencyIn: "USD",
+            amountIn: costUsd,
+            exchangeRate: null,
+            category: "insumos",
+            description,
+            createdBy: session.userId,
+          });
+        } else {
+          const rate = (await getTodayRate())?.bs_per_usd ?? null;
+          if (!rate) {
+            throw new Error(
+              "Entrada registrada, pero para el gasto en Bs falta la tasa del día (pestaña Finanzas → Tasa).",
+            );
+          }
+          await createCashMovement({
+            type: "egreso",
+            method: methodInfo.value,
+            currencyIn: "VES",
+            amountIn: usdToBs(costUsd, rate),
+            exchangeRate: rate,
+            category: "insumos",
+            description,
+            createdBy: session.userId,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo registrar el movimiento.";
+    redirect(buildDashboardUrl("inventario", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(
+    buildDashboardUrl(
+      "inventario",
+      type === "entrada" ? "Entrada registrada" : type === "salida" ? "Salida registrada" : "Stock ajustado",
+    ),
+  );
+}
+
 type DashboardPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -1546,6 +1720,22 @@ export default async function DashboardPage({
       );
     } catch {
       financeReady = false;
+    }
+  }
+
+  // Inventario: carga con try/catch propio (mismo patrón que finanzas).
+  let suppliesReady = true;
+  let supplies: Supply[] = [];
+  let supplyMovements: (SupplyMovement & { supply_name: string; supply_unit: string })[] = [];
+
+  if (activeView === "inventario" && session.role === "admin") {
+    try {
+      [supplies, supplyMovements] = await Promise.all([
+        listSupplies(),
+        listRecentSupplyMovements(30),
+      ]);
+    } catch {
+      suppliesReady = false;
     }
   }
 
@@ -2759,7 +2949,20 @@ export default async function DashboardPage({
           ) : null}
 
           {activeView === "inventario" && session.role === "admin" ? (
-            <InventoryPanel orders={orders} />
+            <InventoryPanel
+              ready={suppliesReady}
+              supplies={supplies}
+              movements={supplyMovements}
+              activeOrders={activeOrders.map((order) => ({
+                id: order.id,
+                order_number: order.order_number,
+                client_name: order.client?.name ?? "Sin cliente",
+              }))}
+              onCreateSupply={createSupplyAction}
+              onUpdateSupply={updateSupplyAction}
+              onDeactivateSupply={deactivateSupplyAction}
+              onMovement={supplyMovementAction}
+            />
           ) : null}
 
           {activeView === "productos" && session.role === "admin" ? (

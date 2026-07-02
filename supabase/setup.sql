@@ -1281,3 +1281,46 @@ create index if not exists invoices_order_idx on public.invoices (order_id);
 alter table public.orders add column if not exists art_approval_status text not null default 'sin_arte';
 alter table public.orders add column if not exists art_approval_note text null;
 alter table public.orders add column if not exists art_approval_at timestamptz null;
+
+-- ============================================================
+-- 15) Inventario (fase 3): insumos y movimientos de stock
+-- ============================================================
+
+create table if not exists public.supplies (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  category text not null default 'otros',
+  unit text not null default 'unidad',
+  stock numeric(14,2) not null default 0,
+  min_stock numeric(14,2) not null default 0,
+  cost_usd numeric(12,2) null,
+  supplier text null,
+  notes text null,
+  is_active boolean not null default true,
+  created_by uuid null references public.app_users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.supplies enable row level security;
+
+create index if not exists supplies_category_idx on public.supplies (category);
+create index if not exists supplies_is_active_idx on public.supplies (is_active);
+
+create table if not exists public.supply_movements (
+  id uuid primary key default gen_random_uuid(),
+  supply_id uuid not null references public.supplies(id) on delete cascade,
+  type text not null check (type in ('entrada', 'salida', 'ajuste')),
+  quantity numeric(14,2) not null,
+  stock_after numeric(14,2) not null,
+  order_id uuid null references public.orders(id) on delete set null,
+  cost_usd numeric(12,2) null,
+  description text null,
+  created_by uuid null references public.app_users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.supply_movements enable row level security;
+
+create index if not exists supply_movements_supply_idx on public.supply_movements (supply_id);
+create index if not exists supply_movements_created_at_idx on public.supply_movements (created_at desc);
