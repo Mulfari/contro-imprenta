@@ -68,6 +68,16 @@ import {
   type ClientFile,
 } from "@/lib/client-files";
 import { usdToBs } from "@/lib/finance-math";
+import { ReportsPanel } from "@/app/dashboard/reports-panel";
+import {
+  computePnl,
+  incomeByDay,
+  topClients,
+  topProducts,
+  totalsByMethod,
+  type ReportMovement,
+  type ReportOrder,
+} from "@/lib/reports";
 import { FinancePanel } from "@/app/dashboard/finance-panel";
 import { ProductionBoard, type BoardOrder } from "@/app/dashboard/production-board";
 import {
@@ -155,6 +165,7 @@ const dashboardViews = [
   "inventario",
   "productos",
   "equipo",
+  "reportes",
 ] as const;
 type DashboardView = (typeof dashboardViews)[number];
 
@@ -168,6 +179,7 @@ const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Inventario", view: "inventario" },
   { label: "Productos", view: "productos" },
   { label: "Equipo", view: "equipo" },
+  { label: "Reportes", view: "reportes" },
 ];
 
 const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "produccion", "pagos", "finanzas", "clientes"];
@@ -175,6 +187,7 @@ const adminSideNavViews: DashboardView[] = [
   "inventario",
   "productos",
   "equipo",
+  "reportes",
 ];
 const dashboardTimeZone = "America/Caracas";
 const activePresenceWindowMs = 5 * 60 * 1000;
@@ -1385,7 +1398,7 @@ function buildTeamEditUrl(userId: string, message?: string) {
 
 function resolveView(value: string, isAdmin: boolean): DashboardView {
   if (
-    ["inventario", "productos", "equipo"].includes(value) &&
+    ["inventario", "productos", "equipo", "reportes"].includes(value) &&
     !isAdmin
   ) {
     return "resumen";
@@ -1566,6 +1579,8 @@ function getViewLabel(view: DashboardView) {
       return "Productos";
     case "equipo":
       return "Equipo";
+    case "reportes":
+      return "Reportes";
     default:
       return "Resumen";
   }
@@ -1982,6 +1997,77 @@ export default async function DashboardPage({
       order.status === "entregado" &&
       getDateKey(statusChangedAt.get(order.id) ?? order.created_at) === todayKey,
   ).length;
+
+  // Reportes (admin): P&L de caja + tops del período elegido (?rp=7|30|90).
+  let reportsReady = true;
+  const rpParam = Number(resolveValue(params.rp));
+  const reportPeriod = [7, 30, 90].includes(rpParam) ? rpParam : 30;
+  let reportPnl = { incomeUsd: 0, expenseUsd: 0, netUsd: 0 };
+  let reportSeries: { day: string; income: number }[] = [];
+  let reportByMethod: { method: string; income: number }[] = [];
+  let reportProducts: ReturnType<typeof topProducts> = [];
+  let reportClients: ReturnType<typeof topClients> = [];
+  let reportProductivity: { name: string; moves: number }[] = [];
+  let reportOrdersCreated = 0;
+  let reportAvgTicket = 0;
+
+  if (activeView === "reportes" && session.role === "admin") {
+    try {
+      const sinceReport = new Date();
+      sinceReport.setDate(sinceReport.getDate() - reportPeriod);
+      const sinceMs = sinceReport.getTime();
+
+      const reportMovements = (await listCashMovements({
+        sinceIso: sinceReport.toISOString(),
+        limit: 2000,
+      })) as unknown as ReportMovement[];
+      reportPnl = computePnl(reportMovements);
+      reportSeries = incomeByDay(reportMovements, Math.min(reportPeriod, 30));
+      reportByMethod = totalsByMethod(reportMovements);
+
+      const periodOrders: ReportOrder[] = orders
+        .filter((order) => new Date(order.created_at).getTime() >= sinceMs)
+        .map((order) => ({
+          product_type: order.product_type,
+          quantity: Number(order.quantity ?? 0),
+          total_amount: order.total_amount,
+          client_name: order.client?.name ?? "Sin cliente",
+          created_at: order.created_at,
+          status: order.status,
+        }));
+      reportProducts = topProducts(periodOrders);
+      reportClients = topClients(periodOrders);
+
+      const billableOrders = periodOrders.filter((order) => order.status !== "rechazado");
+      reportOrdersCreated = billableOrders.length;
+      const withAmount = billableOrders.filter((order) => Number(order.total_amount ?? 0) > 0);
+      reportAvgTicket =
+        withAmount.length > 0
+          ? withAmount.reduce((sum, order) => sum + Number(order.total_amount ?? 0), 0) /
+            withAmount.length
+          : 0;
+
+      const movesByUser = new Map<string, number>();
+      for (const entry of orderHistory) {
+        if (
+          entry.event_type !== "estado" ||
+          !entry.changed_by ||
+          new Date(entry.created_at).getTime() < sinceMs
+        ) {
+          continue;
+        }
+        movesByUser.set(entry.changed_by, (movesByUser.get(entry.changed_by) ?? 0) + 1);
+      }
+      reportProductivity = [...movesByUser.entries()]
+        .map(([userId, moves]) => ({
+          name: usersById.get(userId)?.display_name ?? "Usuario",
+          moves,
+        }))
+        .sort((a, b) => b.moves - a.moves);
+    } catch {
+      reportsReady = false;
+    }
+  }
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
@@ -2962,6 +3048,21 @@ export default async function DashboardPage({
               onUpdateSupply={updateSupplyAction}
               onDeactivateSupply={deactivateSupplyAction}
               onMovement={supplyMovementAction}
+            />
+          ) : null}
+
+          {activeView === "reportes" && session.role === "admin" ? (
+            <ReportsPanel
+              ready={reportsReady}
+              periodDays={reportPeriod}
+              pnl={reportPnl}
+              ordersCreated={reportOrdersCreated}
+              avgTicket={reportAvgTicket}
+              series={reportSeries}
+              byMethod={reportByMethod}
+              products={reportProducts}
+              clientsTop={reportClients}
+              productivity={reportProductivity}
             />
           ) : null}
 
