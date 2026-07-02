@@ -67,6 +67,7 @@ import {
   type ClientFile,
 } from "@/lib/client-files";
 import { FinancePanel } from "@/app/dashboard/finance-panel";
+import { ProductionBoard, type BoardOrder } from "@/app/dashboard/production-board";
 import { CASH_METHODS, type CashMethod, type QuoteItem } from "@/lib/finance-math";
 import {
   annulInvoice,
@@ -135,6 +136,7 @@ const dashboardViews = [
   "resumen",
   "clientes",
   "pedidos",
+  "produccion",
   "pagos",
   "finanzas",
   "inventario",
@@ -146,6 +148,7 @@ type DashboardView = (typeof dashboardViews)[number];
 const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Resumen", view: "resumen" },
   { label: "Pedidos", view: "pedidos" },
+  { label: "Producción", view: "produccion" },
   { label: "Pagos", view: "pagos" },
   { label: "Finanzas", view: "finanzas" },
   { label: "Clientes", view: "clientes" },
@@ -154,7 +157,7 @@ const sideNavItems: { label: string; view: DashboardView }[] = [
   { label: "Equipo", view: "equipo" },
 ];
 
-const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "pagos", "finanzas", "clientes"];
+const userSideNavViews: DashboardView[] = ["resumen", "pedidos", "produccion", "pagos", "finanzas", "clientes"];
 const adminSideNavViews: DashboardView[] = [
   "inventario",
   "productos",
@@ -938,6 +941,37 @@ async function registerReceivableAction(formData: FormData) {
   redirect(buildDashboardUrl("finanzas", "Abono registrado"));
 }
 
+async function moveOrderProductionAction(formData: FormData) {
+  "use server";
+
+  const session = await getCurrentSession();
+
+  if (!session) {
+    redirect("/login?message=Inicia%20sesion%20para%20continuar");
+  }
+
+  const status = String(formData.get("status") ?? "") as OrderStatus;
+
+  try {
+    if (!productionOrderStatuses.includes(status)) {
+      throw new Error("Estado de producción inválido.");
+    }
+
+    await updateOrderStatus({
+      orderId: String(formData.get("orderId") ?? ""),
+      status,
+      changedBy: session.userId,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No se pudo mover el pedido.";
+    redirect(buildDashboardUrl("produccion", message));
+  }
+
+  revalidatePath("/dashboard");
+  redirect(buildDashboardUrl("produccion", "Pedido movido"));
+}
+
 async function createQuoteAction(formData: FormData) {
   "use server";
 
@@ -1232,6 +1266,16 @@ function formatSessionDuration(value: string) {
   return `${hours} h ${minutes} min`;
 }
 
+function daysSince(value: string) {
+  const started = new Date(value).getTime();
+
+  if (Number.isNaN(started)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.floor((Date.now() - started) / (1000 * 60 * 60 * 24)));
+}
+
 function getDateKey(value: string | Date) {
   const parsed = value instanceof Date ? value : new Date(value);
 
@@ -1311,6 +1355,8 @@ function getViewLabel(view: DashboardView) {
       return "Clientes";
     case "pedidos":
       return "Pedidos";
+    case "produccion":
+      return "Producción";
     case "pagos":
       return "Pagos";
     case "finanzas":
@@ -1684,6 +1730,42 @@ export default async function DashboardPage({
     current.push(historyEntry);
     orderHistoryByOrderId.set(historyEntry.order_id, current);
   }
+
+  // Producción: última fecha de cambio de estado por pedido (historial viene
+  // ordenado desc, el primer 'estado' encontrado es el más reciente).
+  const statusChangedAt = new Map<string, string>();
+  for (const entry of orderHistory) {
+    if (entry.event_type === "estado" && !statusChangedAt.has(entry.order_id)) {
+      statusChangedAt.set(entry.order_id, entry.created_at);
+    }
+  }
+  const boardOrders: BoardOrder[] = orders
+    .filter((order) => order.status !== "rechazado")
+    .map((order) => {
+      const since = statusChangedAt.get(order.id) ?? order.created_at;
+      return {
+        id: order.id,
+        order_number: order.order_number,
+        client_name: order.client?.name ?? "Sin cliente",
+        product_type: order.product_type,
+        quantity: Number(order.quantity ?? 1),
+        priority: order.priority ?? "media",
+        urgency: order.urgency ?? "normal",
+        status: order.status,
+        promised_delivery_at: order.promised_delivery_at,
+        current_owner: order.current_owner,
+        current_area: order.current_area,
+        days_in_status: daysSince(since),
+        overdue:
+          order.status !== "entregado" &&
+          Boolean(order.promised_delivery_at && order.promised_delivery_at < todayKey),
+      };
+    });
+  const deliveredTodayCount = orders.filter(
+    (order) =>
+      order.status === "entregado" &&
+      getDateKey(statusChangedAt.get(order.id) ?? order.created_at) === todayKey,
+  ).length;
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(245,245,247,0.92)_38%,_rgba(235,239,244,0.96)_100%)] text-slate-900">
@@ -2534,6 +2616,14 @@ export default async function DashboardPage({
             <PaymentsPanel
               payments={payments}
               reviewAction={reviewPaymentAction}
+            />
+          ) : null}
+
+          {activeView === "produccion" ? (
+            <ProductionBoard
+              orders={boardOrders}
+              deliveredToday={deliveredTodayCount}
+              onMove={moveOrderProductionAction}
             />
           ) : null}
 
