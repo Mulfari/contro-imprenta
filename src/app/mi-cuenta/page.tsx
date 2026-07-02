@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
+import { CustomerAuthScreen } from "@/app/mi-cuenta/customer-auth-screen";
 import { StorefrontAuthShell } from "@/app/storefront-auth-shell";
+import { getCurrentCustomer } from "@/lib/customer-auth";
 import { listStorefrontProducts } from "@/lib/catalog";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -31,6 +33,13 @@ export default async function CustomerAccountPage({
           | "success",
       }
     : null;
+
+  // Deslogueado → pantalla de acceso minimalista (sin el chrome de la tienda).
+  const user = await getCurrentCustomer();
+
+  if (!user) {
+    return <CustomerAuthScreen mode="login" notice={initialNotice} />;
+  }
 
   const products = await listStorefrontProducts();
 

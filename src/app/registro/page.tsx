@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { StorefrontAuthShell } from "@/app/storefront-auth-shell";
-import { listStorefrontProducts } from "@/lib/catalog";
-import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+import { CustomerAuthScreen } from "@/app/mi-cuenta/customer-auth-screen";
+import { getCurrentCustomer } from "@/lib/customer-auth";
 
 export const metadata: Metadata = {
   title: "Registro | Express Printer",
@@ -12,13 +12,11 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function CustomerRegisterPage() {
-  const products = await listStorefrontProducts();
+  const user = await getCurrentCustomer();
 
-  return (
-    <StorefrontAuthShell
-      hasPublicAuth={hasSupabasePublicConfig()}
-      initialMode="register"
-      products={products}
-    />
-  );
+  if (user) {
+    redirect("/mi-cuenta");
+  }
+
+  return <CustomerAuthScreen mode="register" />;
 }
